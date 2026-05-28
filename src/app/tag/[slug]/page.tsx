@@ -1,0 +1,77 @@
+import { client } from '@/lib/sanity'
+import { articlesByTagQuery, tagBySlugQuery } from '@/lib/queries'
+import type { Article, Tag } from '@/types'
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { relativeTime } from '@/lib/utils'
+import TagChip from '@/components/Tag'
+import { notFound } from 'next/navigation'
+
+export const revalidate = 60
+
+interface Props {
+  params: Promise<{ slug: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const tag = await client.fetch<Tag | null>(tagBySlugQuery, { slug })
+  if (!tag) return { title: 'Tag niet gevonden' }
+  return {
+    title: tag.name,
+    description: `Alle artikelen over ${tag.name} in Amersfoort`,
+  }
+}
+
+export default async function TagPage({ params }: Props) {
+  const { slug } = await params
+  const [tag, articles] = await Promise.all([
+    client.fetch<Tag | null>(tagBySlugQuery, { slug }, { next: { revalidate: 60 } }),
+    client.fetch<Article[]>(articlesByTagQuery, { tagSlug: slug }, { next: { revalidate: 60 } }),
+  ])
+
+  if (!tag) notFound()
+
+  return (
+    <div className="wrap page-in">
+      <div className="nbh-hdr">
+        <div className="crumb">
+          <Link href="/" className="crumb-link">Stadsgeest 033</Link>
+          <span>›</span>
+          <span>{tag.name}</span>
+        </div>
+        <h1 className="nbh-title">{tag.name}</h1>
+        <p className="nbh-sub">
+          Alle artikelen over {tag.name} — chronologisch, op basis van openbare bronnen.
+        </p>
+      </div>
+
+      <div className="sec-head mt24">
+        <span className="sec-label">
+          {articles.length} artikel{articles.length !== 1 ? 'en' : ''}
+        </span>
+      </div>
+
+      {articles.length > 0 ? (
+        <div className="art-list mt8">
+          {articles.map((a) => (
+            <Link key={a._id} href={`/artikel/${a.slug.current}`} className="art-list-item">
+              <div className="art-list-body">
+                <div className="art-list-title">{a.title}</div>
+                {a.lead && <div className="art-list-lead">{a.lead}</div>}
+                <div className="art-list-meta">
+                  <span>{relativeTime(a.publishedAt)}</span>
+                  {a.tags?.slice(0, 1).map((t) => (
+                    <TagChip key={t.slug.current} name={t.name} />
+                  ))}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <div className="empty-state mt8">Nog geen artikelen gevonden voor deze tag.</div>
+      )}
+    </div>
+  )
+}

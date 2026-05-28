@@ -1,0 +1,43 @@
+import { PortableText, type PortableTextComponents } from '@portabletext/react'
+
+const components: PortableTextComponents = {
+  block: {
+    h2: ({ children }) => <h2>{children}</h2>,
+    blockquote: ({ children }) => (
+      <blockquote className="art-quote">
+        <div className="art-quote-text">{children}</div>
+      </blockquote>
+    ),
+  },
+  marks: {
+    sourceRef: ({ value, children }) => (
+      <a
+        href={value?.source?.url || '#'}
+        className="source-link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {children}
+      </a>
+    ),
+    link: ({ value, children }) => (
+      <a
+        href={value?.href || '#'}
+        className="source-link"
+        target={value?.blank ? '_blank' : undefined}
+        rel="noopener noreferrer"
+      >
+        {children}
+      </a>
+    ),
+  },
+}
+
+interface Props {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value: any[]
+}
+
+export default function PortableTextRenderer({ value }: Props) {
+  return <PortableText value={value} components={components} />
+}
