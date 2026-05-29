@@ -304,8 +304,8 @@ body {
   background: var(--bg-raised); margin-bottom: 14px;
   position: relative;
 }
-.acard-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(100%); transition: transform .5s ease, filter .6s ease; }
-.acard:hover .acard-img-wrap img { transform: scale(1.04); filter: grayscale(0%); }
+.acard-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+.acard:hover .acard-img-wrap img { transform: scale(1.04); }
 
 /* ── AI highlight glass module ─────────────────────────── */
 .ai-module {
