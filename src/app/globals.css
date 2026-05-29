@@ -464,7 +464,7 @@ body {
 .site-footer {
   border-top: 1px solid var(--border);
   padding: 60px 0 40px;
-  margin-top: 80px;
+  margin-top: 48px;
   background: var(--bg-surface-low);
 }
 .footer-grid {
@@ -556,7 +556,7 @@ body {
 /* ── Article layout (body + sidebar) ──────────────────── */
 .art-layout {
   display: grid; gap: 48px;
-  padding-bottom: 60px;
+  padding-bottom: 32px;
 }
 @media (min-width: 900px) {
   .art-layout { grid-template-columns: 1fr 272px; }
