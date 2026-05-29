@@ -8,6 +8,7 @@ import { relativeTime, FORMAT_LABELS } from '@/lib/utils'
 import Tag from '@/components/Tag'
 import PortableTextRenderer from '@/components/PortableTextRenderer'
 import ReportButton from '@/components/ReportButton'
+import ShareButtons from '@/components/ShareButtons'
 import { notFound } from 'next/navigation'
 
 export const revalidate = 60
@@ -123,6 +124,11 @@ export default async function ArticlePage({ params }: Props) {
                 {readMins} min leestijd
               </span>
             </div>
+
+            <ShareButtons
+              title={article.title}
+              url={`https://stadsgeest.nl/artikel/${article.slug.current}`}
+            />
           </div>
 
           {/* Hero image */}
@@ -168,8 +174,8 @@ export default async function ArticlePage({ params }: Props) {
               {article.aiTransparency && (
                 <div className="ai-block">
                   <div className="ai-block-head">
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ color: 'var(--accent)' }}>
-                      <path d="M9 1.5 L10.5 6.5 L16 6.5 L11.5 9.8 L13.2 14.8 L9 11.5 L4.8 14.8 L6.5 9.8 L2 6.5 L7.5 6.5 Z" fill="currentColor" opacity="0.9" />
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ color: 'var(--accent)' }}>
+                      <path d="M7 1 L8.2 4.5 L12 4.5 L9 6.7 L10.2 10.2 L7 8 L3.8 10.2 L5 6.7 L2 4.5 L5.8 4.5 Z" fill="currentColor" opacity="0.7"/>
                     </svg>
                     Hoe dit artikel tot stand kwam
                   </div>
