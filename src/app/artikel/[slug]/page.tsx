@@ -54,6 +54,11 @@ export default async function ArticlePage({ params }: Props) {
   const fmtLabel = FORMAT_LABELS[article.format] || 'Nieuws'
   const isAnalyse = article.format === 'analyse'
 
+  const normalizeTag = (t: { name: string; slug: { current: string } }) => {
+    if (t.name.toLowerCase() === 'politie amersfoort') return { name: 'Politie', slug: { current: 'politie' } }
+    return t
+  }
+
   const allEntities = [
     ...(article.persons?.map((p) => ({ name: p.name, href: `/persoon/${p.slug.current}` })) || []),
     ...(article.organizations?.map((o) => ({ name: o.name, href: `/organisatie/${o.slug.current}` })) || []),
@@ -135,8 +140,8 @@ export default async function ArticlePage({ params }: Props) {
 
           {/* Hero image */}
           {article.mainImage && (
-            <figure style={{ marginBottom: 40 }}>
-              <div className="art-hero-img" style={{ borderRadius: 'var(--r-lg)', marginBottom: 10 }}>
+            <figure style={{ marginBottom: 40, marginTop: 24 }}>
+              <div className="art-hero-img" style={{ borderRadius: 'var(--r-lg)', position: 'relative' }}>
                 <Image
                   src={urlFor(article.mainImage).width(1200).height(630).url()}
                   alt={article.mainImage.alt || ''}
@@ -145,21 +150,22 @@ export default async function ArticlePage({ params }: Props) {
                   sizes="(max-width: 900px) 100vw, 900px"
                   priority
                 />
+                {article.mainImage.credit && (
+                  <span style={{
+                    position: 'absolute', bottom: 8, right: 10,
+                    fontFamily: 'var(--f-m)', fontSize: 10, letterSpacing: '0.05em',
+                    color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase',
+                    textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                  }}>
+                    {article.mainImage.credit}
+                  </span>
+                )}
               </div>
-              {(article.mainImage.caption || article.mainImage.credit) && (
-                <figcaption style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16,
-                }}>
-                  {article.mainImage.caption && (
-                    <p style={{ fontFamily: 'var(--f-d)', fontSize: 13, color: 'var(--t2)', fontStyle: 'italic' }}>
-                      {article.mainImage.caption}
-                    </p>
-                  )}
-                  {article.mainImage.credit && (
-                    <p style={{ fontFamily: 'var(--f-m)', fontSize: 11, color: 'var(--t3)', flexShrink: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                      FOTO: {article.mainImage.credit}
-                    </p>
-                  )}
+              {article.mainImage.caption && (
+                <figcaption style={{ marginTop: 8 }}>
+                  <p style={{ fontFamily: 'var(--f-d)', fontSize: 13, color: 'var(--t2)', fontStyle: 'italic' }}>
+                    {article.mainImage.caption}
+                  </p>
                 </figcaption>
               )}
             </figure>
@@ -174,7 +180,7 @@ export default async function ArticlePage({ params }: Props) {
 
               {/* AI transparency block + sources */}
               {(article.aiTransparency || (article.sources && article.sources.length > 0)) && (
-                <div className="ai-block">
+                <div className="ai-block" style={{ width: '85%', margin: '0 auto' }}>
                   <div className="ai-block-head">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ color: 'var(--accent)' }}>
                       <path d="M7 1 L8.2 4.5 L12 4.5 L9 6.7 L10.2 10.2 L7 8 L3.8 10.2 L5 6.7 L2 4.5 L5.8 4.5 Z" fill="currentColor" opacity="0.7"/>
@@ -208,11 +214,14 @@ export default async function ArticlePage({ params }: Props) {
               {(article.tags?.filter(t => t.slug.current !== 'amersfoort').length || allEntities.length) ? (
                 <div style={{ paddingTop: 24, marginTop: 24, borderTop: '1px solid var(--border)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontFamily: 'var(--f-d)', fontSize: 13, fontWeight: 500, color: 'var(--t2)', marginRight: 4 }}>Tags:</span>
-                  {article.tags?.filter(t => t.slug.current !== 'amersfoort').map((t) => (
-                    <Link key={t.slug.current} href={`/tag/${t.slug.current}`} className="ent-chip">
-                      {t.name}
-                    </Link>
-                  ))}
+                  {article.tags?.filter(t => t.slug.current !== 'amersfoort').map((t) => {
+                    const nt = normalizeTag(t)
+                    return (
+                      <Link key={t.slug.current} href={`/tag/${nt.slug.current}`} className="ent-chip">
+                        {nt.name}
+                      </Link>
+                    )
+                  })}
                   {allEntities.map((e, i) => (
                     <Link key={i} href={e.href} className="ent-chip">{e.name}</Link>
                   ))}
@@ -250,9 +259,10 @@ export default async function ArticlePage({ params }: Props) {
               <div className="sidebar-box">
                 <div className="sidebar-title">Onderwerpen</div>
                 <div className="sidebar-tags">
-                  {article.tags?.map((t) => (
-                    <Tag key={t.slug.current} name={t.name} slug={t.slug.current} />
-                  ))}
+                  {article.tags?.filter(t => t.slug.current !== 'amersfoort').map((t) => {
+                    const nt = normalizeTag(t)
+                    return <Tag key={t.slug.current} name={nt.name} slug={nt.slug.current} />
+                  })}
                   {article.locations?.map((l) => (
                     <span key={l.slug.current} className="ent-chip">{l.name}</span>
                   ))}
