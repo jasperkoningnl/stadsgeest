@@ -99,7 +99,7 @@ export default async function HomePage() {
           {/* Left: standard article (4 cols) */}
           {leftCard && (
             <div className="bento-4">
-              <ArticleCard article={leftCard} variant="standard" catColor="teal" />
+              <ArticleCard article={leftCard} variant="with-image" catColor="teal" />
             </div>
           )}
 
