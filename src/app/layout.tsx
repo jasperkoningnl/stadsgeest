@@ -1,21 +1,28 @@
 import type { Metadata } from 'next'
-import { Space_Grotesk, Lora } from 'next/font/google'
+import { Hanken_Grotesk, Source_Serif_4, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
-const spaceGrotesk = Space_Grotesk({
+const hankenGrotesk = Hanken_Grotesk({
   subsets: ['latin'],
-  variable: '--font-space-grotesk',
-  weight: ['400', '500', '600', '700'],
+  variable: '--font-hanken',
+  weight: ['400', '500', '600', '700', '800'],
   display: 'swap',
 })
 
-const lora = Lora({
+const sourceSerif = Source_Serif_4({
   subsets: ['latin'],
-  variable: '--font-lora',
+  variable: '--font-serif',
   style: ['normal', 'italic'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '600'],
+  display: 'swap',
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  weight: ['500'],
   display: 'swap',
 })
 
@@ -39,10 +46,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="nl"
       data-theme="dark"
       suppressHydrationWarning
-      className={`${spaceGrotesk.variable} ${lora.variable}`}
+      className={`${hankenGrotesk.variable} ${sourceSerif.variable} ${jetbrainsMono.variable}`}
     >
       <head>
-        {/* Anti-FOUC: apply saved theme before first paint */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,

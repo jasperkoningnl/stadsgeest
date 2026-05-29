@@ -1,27 +1,29 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { urlFor } from '@/lib/sanity'
-import { relativeTime, FORMAT_LABELS } from '@/lib/utils'
+import { relativeTime, FORMAT_LABELS, TAG_COLORS } from '@/lib/utils'
 import type { Article } from '@/types'
 import Tag from './Tag'
 
 interface Props {
   article: Article
-  variant?: 'standard' | 'feature' | '112'
+  variant?: 'standard' | 'feature' | '112' | 'with-image'
+  catColor?: 'teal' | 'amber' | 'default'
 }
 
-export default function ArticleCard({ article, variant = 'standard' }: Props) {
+export default function ArticleCard({ article, variant = 'standard', catColor = 'teal' }: Props) {
   const href = `/artikel/${article.slug.current}`
   const rt = relativeTime(article.publishedAt)
+  const catClass = catColor === 'amber' ? 'acard-cat-amber' : catColor === 'default' ? 'acard-cat-primary' : 'acard-cat'
 
   if (variant === '112') {
+    const isAmber = article.format === 'verkeer' || article.tags?.some(t => t.slug.current === 'verkeer')
     return (
-      <Link href={href} className="card-112">
-        <span className="badge-112">112</span>
-        <div className="card-112-body">
-          <div className="card-112-title">{article.title}</div>
-          <div className="card-112-meta">{rt}</div>
+      <Link href={href} className={`feed-112-item ${isAmber ? 'feed-112-item-amber' : 'feed-112-item-teal'}`}>
+        <div className={`feed-112-time ${isAmber ? '' : 'feed-112-time-teal'}`}>
+          {rt} · {article.tags?.[0]?.name?.toUpperCase() || '112'}
         </div>
+        <div className="feed-112-title">{article.title}</div>
       </Link>
     )
   }
@@ -29,7 +31,7 @@ export default function ArticleCard({ article, variant = 'standard' }: Props) {
   if (variant === 'feature') {
     return (
       <Link href={href} className="fcard">
-        <div className="fcard-img" style={{ position: 'relative' }}>
+        <div className="fcard-img">
           {article.mainImage ? (
             <Image
               src={urlFor(article.mainImage).width(900).height(450).url()}
@@ -50,21 +52,36 @@ export default function ArticleCard({ article, variant = 'standard' }: Props) {
     )
   }
 
+  if (variant === 'with-image') {
+    const catLabel = article.tags?.[0]?.name || FORMAT_LABELS[article.format] || 'Nieuws'
+    return (
+      <Link href={href} className="acard">
+        {article.mainImage && (
+          <div className="acard-img-wrap">
+            <Image
+              src={urlFor(article.mainImage).width(600).height(338).url()}
+              alt={article.mainImage.alt || ''}
+              fill
+              sizes="(max-width: 768px) 100vw, 33vw"
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
+        )}
+        <span className={catClass}>{catLabel}</span>
+        <h3 className="acard-title">{article.title}</h3>
+        <div className="acard-meta">{rt} · Redactie</div>
+      </Link>
+    )
+  }
+
+  // standard (no image)
+  const catLabel = article.tags?.filter(t => t.name !== '112')[0]?.name || FORMAT_LABELS[article.format] || 'Nieuws'
   return (
     <Link href={href} className="acard">
-      <div className="acard-tags">
-        {article.tags
-          ?.filter((t) => t.name !== '112')
-          .slice(0, 2)
-          .map((t) => (
-            <Tag key={t.slug.current} name={t.name} slug={t.slug.current} />
-          ))}
-      </div>
+      <span className={catClass}>{catLabel}</span>
       <h3 className="acard-title">{article.title}</h3>
       {article.lead && <p className="acard-lead">{article.lead}</p>}
-      <div className="acard-meta">
-        <span>{rt}</span>
-      </div>
+      <div className="acard-meta">{rt}</div>
     </Link>
   )
 }
