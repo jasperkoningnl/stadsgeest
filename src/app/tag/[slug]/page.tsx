@@ -25,12 +25,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function TagPage({ params }: Props) {
   const { slug } = await params
-  const [tag, articles] = await Promise.all([
+  const [tag, initialArticles] = await Promise.all([
     client.fetch<Tag | null>(tagBySlugQuery, { slug }, { next: { revalidate: 60 } }),
     client.fetch<Article[]>(articlesByTagQuery, { tagSlug: slug }, { next: { revalidate: 60 } }),
   ])
 
   if (!tag) notFound()
+
+  // For 112, also fetch brief-format articles as fallback when no tagged articles found
+  let articles = initialArticles
+  if (slug === '112' && articles.length === 0) {
+    articles = await client.fetch<Article[]>(
+      `*[_type == "article" && status == "published" && format == "brief"] | order(publishedAt desc) { _id, title, slug, lead, format, publishedAt, tags[]->{ name, slug } }`,
+      {},
+      { next: { revalidate: 60 } }
+    )
+  }
 
   return (
     <div className="wrap page-in">

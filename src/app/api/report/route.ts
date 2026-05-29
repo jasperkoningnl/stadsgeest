@@ -35,6 +35,9 @@ export async function POST(req: NextRequest) {
       .inc({ reportCount: 1 })
       .commit()
 
+    // TODO: Add email notification for new reports (Option B chosen for now).
+    // Meldingen zijn te bekijken in Sanity Studio onder "Melding" (report documenten).
+    // Consider integrating Resend (https://resend.com) for automated notifications.
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Report API error:', error)

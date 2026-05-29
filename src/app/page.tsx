@@ -181,6 +181,12 @@ export default async function HomePage() {
             </p>
           </div>
         )}
+
+        <div style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid var(--border)', textAlign: 'right' }}>
+          <Link href="/nieuws" style={{ fontFamily: 'var(--f-d)', fontSize: 14, fontWeight: 600, color: 'var(--accent)', textDecoration: 'none' }}>
+            Alle berichten →
+          </Link>
+        </div>
       </div>
     </div>
   )
