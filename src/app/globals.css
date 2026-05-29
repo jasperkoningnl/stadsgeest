@@ -730,7 +730,7 @@ body {
 .art-list-item:hover { background: var(--bg-raised); }
 .art-list-body { flex: 1; min-width: 0; }
 .art-list-thumb {
-  flex-shrink: 0; width: 80px; height: 54px;
+  flex-shrink: 0; width: 120px; height: 80px;
   border-radius: var(--r-lg); overflow: hidden;
   position: relative; background: var(--bg-raised);
 }
