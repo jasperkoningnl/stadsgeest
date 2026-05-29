@@ -226,7 +226,7 @@ export default async function ArticlePage({ params }: Props) {
                     <Link key={i} href={e.href} className="ent-chip">{e.name}</Link>
                   ))}
                   {article.locations?.map((l) => (
-                    <Link key={l.slug.current} href={`/wijk/${l.slug.current}`} className="ent-chip">{l.name}</Link>
+                    <span key={l.slug.current} className="ent-chip">{l.name}</span>
                   ))}
                 </div>
               ) : null}
@@ -263,7 +263,7 @@ export default async function ArticlePage({ params }: Props) {
                     <Tag key={t.slug.current} name={t.name} slug={t.slug.current} />
                   ))}
                   {article.locations?.map((l) => (
-                    <Link key={l.slug.current} href={`/wijk/${l.slug.current}`} className="ent-chip">{l.name}</Link>
+                    <span key={l.slug.current} className="ent-chip">{l.name}</span>
                   ))}
                 </div>
               </div>

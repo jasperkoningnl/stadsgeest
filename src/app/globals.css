@@ -36,15 +36,22 @@
 }
 
 [data-theme="light"] {
-  --bg:        #f5f5f7;
-  --bg-card:   #ffffff;
-  --bg-raised: #e8e8ea;
-  --bg-glass:  rgba(245,245,247,0.88);
-  --t1:        #1a1c1d;
-  --t2:        #45474b;
-  --t3:        #8f9195;
-  --border:    #c5c6cb;
-  --border-s:  #e2e2e4;
+  --bg:                 #f5f5f7;
+  --bg-card:            #ffffff;
+  --bg-raised:          #e8e8ea;
+  --bg-glass:           rgba(245,245,247,0.88);
+  --bg-surface-low:     #efefef;
+  --t1:                 #1a1c1d;
+  --t2:                 #45474b;
+  --t3:                 #6e7076;
+  --border:             #c5c6cb;
+  --border-s:           #e2e2e4;
+  --primary:            #414750;
+  --primary-container:  #dde3ee;
+  --surface-highest:    #d4d6da;
+  --surface-high:       #e0e0e2;
+  --accent-dim:         rgba(0,100,100,0.08);
+  --amber-dim:          rgba(160,90,0,0.07);
   color-scheme: light;
 }
 
@@ -96,17 +103,19 @@ body {
 .logo-wordmark {
   font-family: var(--f-d);
   font-weight: 800;
-  font-size: 20px;
-  letter-spacing: -0.02em;
+  font-size: 18px;
+  letter-spacing: 0.04em;
   line-height: 1;
   white-space: nowrap;
   color: var(--t1);
+  text-transform: uppercase;
 }
 .logo-wordmark em {
   font-style: normal;
   font-weight: 300;
-  opacity: 0.7;
-  margin-left: 4px;
+  opacity: 0.55;
+  margin-left: 5px;
+  letter-spacing: 0.02em;
 }
 .header-nav {
   display: none; align-items: center; gap: 4px;
