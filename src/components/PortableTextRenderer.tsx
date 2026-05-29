@@ -5,7 +5,7 @@ const components: PortableTextComponents = {
     h2: ({ children }) => <h2>{children}</h2>,
     blockquote: ({ children }) => (
       <blockquote className="art-quote">
-        <div className="art-quote-text">{children}</div>
+        <p className="art-quote-text">{children}</p>
       </blockquote>
     ),
   },
