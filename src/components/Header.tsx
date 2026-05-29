@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { label: 'Verkeer', slug: 'verkeer' },
   { label: 'Veiligheid', slug: 'veiligheid' },
   { label: 'Cultuur', slug: 'cultuur' },
-  { label: '112', slug: '112' },
+  { label: '112', slug: null, href: '/112' },
 ]
 
 const WIJKEN = ['Vathorst', 'Binnenstad', 'Soesterkwartier', 'Schothorst', 'Hoogland', 'Liendert']
@@ -71,7 +71,11 @@ export default function Header({ navTags }: { navTags?: NavTag[] }) {
   const navLinks = dynamicTags
     ? [
         { label: 'Nieuws', slug: null as string | null, href: '/nieuws' as string | null },
-        ...dynamicTags.map((t) => ({ label: t.name, slug: t.slug.current, href: null as string | null })),
+        ...dynamicTags.map((t) => ({
+          label: t.name.charAt(0).toUpperCase() + t.name.slice(1),
+          slug: t.slug.current,
+          href: t.slug.current === '112' ? '/112' : null as string | null,
+        })),
       ]
     : NAV_ITEMS.map((item) => ({
         label: item.label,
@@ -106,7 +110,7 @@ export default function Header({ navTags }: { navTags?: NavTag[] }) {
               <nav className="header-nav" aria-label="Hoofdnavigatie">
                 {navLinks.map((item) => {
                   const href = item.href ?? `/tag/${item.slug}`
-                  const is112 = item.slug === '112'
+                  const is112 = item.slug === '112' || href === '/112'
                   return (
                     <Link
                       key={item.label}
@@ -118,13 +122,14 @@ export default function Header({ navTags }: { navTags?: NavTag[] }) {
                     </Link>
                   )
                 })}
+                <Link href="/wijken" className="nav-pill">Wijken</Link>
                 <div className="nav-dropdown" ref={dropdownRef}>
                   <button
                     className="nav-dropdown-btn nav-pill"
                     onClick={() => setWijkenOpen((o) => !o)}
                     aria-expanded={wijkenOpen}
+                    style={{ paddingLeft: 6, paddingRight: 8, opacity: 0.6 }}
                   >
-                    Wijken
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                       <path d="M3 5 L7 9 L11 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
