@@ -8,7 +8,7 @@ export default function TrendingTags({ tags }: { tags: TrendingTag[] }) {
       <h4 className="trending-title">Populaire thema's</h4>
       <div className="trending-tags">
         {tags.map((t) => (
-          <Link key={t.slug} href={`/tag/${t.slug}`} className="trending-pill">
+          <Link key={t.slug.current} href={`/tag/${t.slug.current}`} className="trending-pill">
             #{t.name}
           </Link>
         ))}
