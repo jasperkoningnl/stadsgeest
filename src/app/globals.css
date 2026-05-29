@@ -741,6 +741,25 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Wijk card ──────────────────────────────────────────── */
+.wijk-card {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--bg-card);
+  transition: border-color .2s, background .2s;
+  height: 100%;
+}
+.wijk-card:hover {
+  border-color: var(--accent);
+  background: var(--bg-raised);
+}
+
+/* ── 112 feed card ──────────────────────────────────────── */
+.feed-card:hover {
+  border-color: rgba(70,234,237,0.3) !important;
+}
+
 /* ── Empty state ────────────────────────────────────────── */
 .empty-state {
   text-align: center; padding: 60px 20px;

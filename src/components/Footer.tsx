@@ -18,7 +18,7 @@ export default function Footer() {
               Stadsgeest 033
             </Link>
             <p className="footer-disc">
-              © Stadsgeest 033. AI-Enhanced Journalism for Amersfoort. Built on transparency and local rigor.
+              © Stadsgeest 033. AI-ondersteunde journalistiek voor Amersfoort. Transparant over herkomst en werkwijze.
             </p>
             <div className="footer-ai-note">
               <strong>AI Disclaimer:</strong> Stadsgeest 033 is een AI-gedreven nieuwssite. Artikelen worden geschreven door kunstmatige intelligentie op basis van openbare bronnen.
