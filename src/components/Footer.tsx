@@ -1,10 +1,8 @@
 import Link from 'next/link'
 
 const INFO_LINKS = [
-  { label: 'AI Disclaimer', href: '/disclaimer' },
   { label: 'Over Stadsgeest', href: '/over' },
   { label: 'Privacybeleid', href: '/privacy' },
-  { label: 'Bron-transparantie', href: '/bronnen' },
   { label: 'Archief', href: '/archief' },
 ]
 
@@ -18,11 +16,8 @@ export default function Footer() {
               Stadsgeest 033
             </Link>
             <p className="footer-disc">
-              © Stadsgeest 033. AI-ondersteunde journalistiek voor Amersfoort. Transparant over herkomst en werkwijze.
+              Stadsgeest 033 is een AI-gedreven nieuwssite voor Amersfoort. Artikelen worden samengesteld door kunstmatige intelligentie op basis van openbare bronnen. Altijd transparant over herkomst en werkwijze.
             </p>
-            <div className="footer-ai-note">
-              <strong>AI Disclaimer:</strong> Stadsgeest 033 is een AI-gedreven nieuwssite. Artikelen worden geschreven door kunstmatige intelligentie op basis van openbare bronnen.
-            </div>
           </div>
 
           <div className="footer-col">

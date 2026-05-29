@@ -1,6 +1,7 @@
-import { client } from '@/lib/sanity'
+import { client, urlFor } from '@/lib/sanity'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { FORMAT_LABELS } from '@/lib/utils'
 
 export const revalidate = 60
@@ -30,7 +31,7 @@ export default async function NieuwsPage({ searchParams }: Props) {
     ;[articles, total] = await Promise.all([
       client.fetch(
         `*[_type == "article" && status == "published"] | order(publishedAt desc) [$offset...$limit] {
-          _id, title, slug, lead, format, publishedAt, tags[]->{ name, slug }
+          _id, title, slug, lead, format, publishedAt, tags[]->{ name, slug }, mainImage { asset->, alt }
         }`,
         { offset, limit },
         { next: { revalidate: 60 } }
@@ -63,6 +64,17 @@ export default async function NieuwsPage({ searchParams }: Props) {
         <div className="art-list mt8">
           {articles.map((a) => (
             <Link key={a._id} href={`/artikel/${a.slug?.current}`} className="art-list-item">
+              {a.mainImage && (
+                <div className="art-list-thumb">
+                  <Image
+                    src={urlFor(a.mainImage).width(160).height(100).url()}
+                    alt={a.mainImage.alt || ''}
+                    fill
+                    sizes="80px"
+                    style={{ objectFit: 'cover' }}
+                  />
+                </div>
+              )}
               <div className="art-list-body">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                   <span style={{
