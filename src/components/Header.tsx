@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 
 const NAV_ITEMS = [
   { label: 'Nieuws', slug: null, href: '/nieuws' },
@@ -14,7 +14,6 @@ const NAV_ITEMS = [
   { label: '112', slug: null, href: '/112' },
 ]
 
-const WIJKEN = ['Vathorst', 'Binnenstad', 'Soesterkwartier', 'Schothorst', 'Hoogland', 'Liendert']
 
 interface NavTag {
   name: string
@@ -22,14 +21,11 @@ interface NavTag {
   count: number
 }
 
-function LogoIcon() {
+function LogoWordmark() {
   return (
-    <svg width="15" height="22" viewBox="0 0 15 22" fill="none" className="logo-icon" aria-hidden="true">
-      <circle cx="7.5" cy="1.8" r="1.4" fill="currentColor" />
-      <path d="M3 9 L7.5 3.2 L12 9" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" fill="none" />
-      <rect x="3" y="9" width="9" height="12" stroke="currentColor" strokeWidth="1.6" rx="1" fill="none" />
-      <path d="M5.5 21 L5.5 17.5 Q5.5 15.5 7.5 15.5 Q9.5 15.5 9.5 17.5 L9.5 21" stroke="currentColor" strokeWidth="1.3" fill="none" />
-    </svg>
+    <span className="logo-wordmark">
+      STADSGEEST<em>033</em>
+    </span>
   )
 }
 
@@ -38,22 +34,9 @@ export default function Header({ navTags }: { navTags?: NavTag[] }) {
   const router = useRouter()
   const isHome = pathname === '/'
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
-  const [wijkenOpen, setWijkenOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
   useEffect(() => {
     const t = document.documentElement.getAttribute('data-theme') || 'dark'
     setTheme(t as 'dark' | 'light')
-  }, [])
-
-  useEffect(() => {
-    function handleMousedown(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setWijkenOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleMousedown)
-    return () => document.removeEventListener('mousedown', handleMousedown)
   }, [])
 
   const toggleTheme = () => {
@@ -102,10 +85,7 @@ export default function Header({ navTags }: { navTags?: NavTag[] }) {
                 </button>
               )}
               <Link href="/" className="logo-btn" style={!isHome ? { marginLeft: 70 } : {}}>
-                <LogoIcon />
-                <span className="logo-text">
-                  Stadsgeest <em>033</em>
-                </span>
+                <LogoWordmark />
               </Link>
               <nav className="header-nav" aria-label="Hoofdnavigatie">
                 {navLinks.map((item) => {
@@ -122,31 +102,6 @@ export default function Header({ navTags }: { navTags?: NavTag[] }) {
                     </Link>
                   )
                 })}
-                <Link href="/wijken" className="nav-pill">Wijken</Link>
-                <div className="nav-dropdown" ref={dropdownRef}>
-                  <button
-                    className="nav-dropdown-btn nav-pill"
-                    onClick={() => setWijkenOpen((o) => !o)}
-                    aria-expanded={wijkenOpen}
-                    style={{ paddingLeft: 6, paddingRight: 8, opacity: 0.6 }}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M3 5 L7 9 L11 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-                  <div className="nav-dropdown-menu" style={{ display: wijkenOpen ? 'block' : 'none' }}>
-                    {WIJKEN.map((wijk) => (
-                      <Link
-                        key={wijk}
-                        href={`/wijk/${wijk.toLowerCase()}`}
-                        className="nav-dropdown-item"
-                        onClick={() => setWijkenOpen(false)}
-                      >
-                        {wijk}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
               </nav>
             </div>
             <div className="header-end">
