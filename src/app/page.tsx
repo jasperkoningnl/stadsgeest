@@ -143,7 +143,7 @@ export default async function HomePage() {
                   <ArticleCard key={a._id} article={a} variant="112" />
                 ))}
               </div>
-              <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+              <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: 'none' }}>
                 <Link href="/112" style={{ fontFamily: 'var(--f-d)', fontSize: 14, fontWeight: 600, color: 'var(--error)', textDecoration: 'none' }}>
                   Alle 112 meldingen →
                 </Link>
@@ -154,7 +154,7 @@ export default async function HomePage() {
           {/* Standard article with image (4 cols) */}
           {imageCard && (
             <div className="bento-4">
-              <ArticleCard article={imageCard} variant="with-image" catColor="default" />
+              <ArticleCard article={imageCard} variant="with-image" catColor="teal" />
             </div>
           )}
 
@@ -163,7 +163,7 @@ export default async function HomePage() {
             {teaserCard && (
               <ArticleCard article={teaserCard} variant="with-image" catColor="teal" />
             )}
-            <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+            <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: 'none' }}>
               <Link href="/nieuws" style={{ fontFamily: 'var(--f-d)', fontSize: 14, fontWeight: 600, color: 'var(--accent)', textDecoration: 'none' }}>
                 Alle berichten →
               </Link>
