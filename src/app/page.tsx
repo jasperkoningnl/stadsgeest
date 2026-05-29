@@ -1,24 +1,19 @@
 import { client } from '@/lib/sanity'
-import { allArticlesQuery, trendingTagsQuery } from '@/lib/queries'
-import type { Article, TrendingTag } from '@/types'
+import { allArticlesQuery } from '@/lib/queries'
+import type { Article } from '@/types'
 import Link from 'next/link'
 import Image from 'next/image'
 import { urlFor } from '@/lib/sanity'
 import { relativeTime, FORMAT_LABELS } from '@/lib/utils'
 import ArticleCard from '@/components/ArticleCard'
-import TrendingTags from '@/components/TrendingTags'
 
 export const revalidate = 60
 
 export default async function HomePage() {
   let articles: Article[] = []
-  let trendingTags: TrendingTag[] = []
 
   try {
-    ;[articles, trendingTags] = await Promise.all([
-      client.fetch<Article[]>(allArticlesQuery, {}, { next: { revalidate: 60 } }),
-      client.fetch<TrendingTag[]>(trendingTagsQuery, {}, { next: { revalidate: 60 } }),
-    ])
+    articles = await client.fetch<Article[]>(allArticlesQuery, {}, { next: { revalidate: 60 } })
   } catch {
     // Sanity not connected yet
   }
@@ -34,6 +29,7 @@ export default async function HomePage() {
   )
   const leftCard = normalCards[0]
   const imageCard = normalCards[1]
+  const teaserCard = normalCards[2]
 
   return (
     <div className="page-in">
@@ -137,7 +133,7 @@ export default async function HomePage() {
 
           {/* 112 & Actueel compact feed (4 cols) */}
           {kortCards.length > 0 && (
-            <div className="bento-4">
+            <div className="bento-4" style={{ display: 'flex', flexDirection: 'column' }}>
               <div className="sec-head" style={{ paddingTop: 0 }}>
                 <span className="sec-dot" />
                 <span className="sec-label">112 &amp; Actueel</span>
@@ -146,6 +142,11 @@ export default async function HomePage() {
                 {kortCards.slice(0, 4).map((a) => (
                   <ArticleCard key={a._id} article={a} variant="112" />
                 ))}
+              </div>
+              <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+                <Link href="/112" style={{ fontFamily: 'var(--f-d)', fontSize: 14, fontWeight: 600, color: 'var(--error)', textDecoration: 'none' }}>
+                  Alle 112 meldingen →
+                </Link>
               </div>
             </div>
           )}
@@ -157,9 +158,16 @@ export default async function HomePage() {
             </div>
           )}
 
-          {/* Trending tags (4 cols) */}
-          <div className="bento-4">
-            <TrendingTags tags={trendingTags} />
+          {/* Article teaser (4 cols) — replaces trending tags */}
+          <div className="bento-4" style={{ display: 'flex', flexDirection: 'column' }}>
+            {teaserCard && (
+              <ArticleCard article={teaserCard} variant="with-image" catColor="teal" />
+            )}
+            <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+              <Link href="/nieuws" style={{ fontFamily: 'var(--f-d)', fontSize: 14, fontWeight: 600, color: 'var(--accent)', textDecoration: 'none' }}>
+                Alle berichten →
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -175,12 +183,6 @@ export default async function HomePage() {
             </p>
           </div>
         )}
-
-        <div style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid var(--border)', textAlign: 'right' }}>
-          <Link href="/nieuws" style={{ fontFamily: 'var(--f-d)', fontSize: 14, fontWeight: 600, color: 'var(--accent)', textDecoration: 'none' }}>
-            Alle berichten →
-          </Link>
-        </div>
       </div>
     </div>
   )
