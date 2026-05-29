@@ -1,42 +1,64 @@
 import Link from 'next/link'
 
-function LogoIcon() {
-  return (
-    <svg width="15" height="22" viewBox="0 0 15 22" fill="none" className="logo-icon" aria-hidden="true">
-      <circle cx="7.5" cy="1.8" r="1.4" fill="currentColor" />
-      <path d="M3 9 L7.5 3.2 L12 9" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" fill="none" />
-      <rect x="3" y="9" width="9" height="12" stroke="currentColor" strokeWidth="1.6" rx="1" fill="none" />
-      <path d="M5.5 21 L5.5 17.5 Q5.5 15.5 7.5 15.5 Q9.5 15.5 9.5 17.5 L9.5 21" stroke="currentColor" strokeWidth="1.3" fill="none" />
-    </svg>
-  )
-}
-
-const FOOTER_LINKS = ['Over ons', 'Contact', 'Privacy', 'Bronbeleid', 'RSS']
+const INFO_LINKS = [
+  { label: 'AI Disclaimer', href: '/disclaimer' },
+  { label: 'Over Stadsgeest', href: '/over' },
+  { label: 'Privacybeleid', href: '/privacy' },
+  { label: 'Bron-transparantie', href: '/bronnen' },
+  { label: 'Archief', href: '/archief' },
+]
 
 export default function Footer() {
   return (
     <footer className="site-footer">
       <div className="wrap">
-        <div className="footer-row">
+        <div className="footer-grid">
           <div className="footer-brand">
-            <Link href="/" className="logo-btn" style={{ alignSelf: 'flex-start' }}>
-              <LogoIcon />
-              <span className="logo-text">
-                Stadsgeest <em>033</em>
-              </span>
+            <Link href="/" className="footer-title" style={{ textDecoration: 'none', color: 'inherit' }}>
+              Stadsgeest 033
             </Link>
             <p className="footer-disc">
-              Stadsgeest 033 is een AI-gedreven nieuwssite. Artikelen worden geschreven door
-              kunstmatige intelligentie op basis van openbare bronnen.
+              © Stadsgeest 033. AI-Enhanced Journalism for Amersfoort. Built on transparency and local rigor.
             </p>
-            <p className="footer-copy">© 2026 Stadsgeest 033 — Amersfoort</p>
+            <div className="footer-ai-note">
+              <strong>AI Disclaimer:</strong> Stadsgeest 033 is een AI-gedreven nieuwssite. Artikelen worden geschreven door kunstmatige intelligentie op basis van openbare bronnen.
+            </div>
           </div>
-          <div className="footer-links">
-            {FOOTER_LINKS.map((l) => (
-              <span key={l} className="footer-link">
-                {l}
-              </span>
+
+          <div className="footer-col">
+            <span className="footer-col-title">Informatie</span>
+            {INFO_LINKS.map((l) => (
+              <Link key={l.label} href={l.href} className="footer-link">
+                {l.label}
+              </Link>
             ))}
+          </div>
+
+          <div className="footer-col">
+            <span className="footer-col-title">Volg de Geest</span>
+            <div className="footer-social">
+              <button className="footer-social-btn" title="RSS" aria-label="RSS">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <circle cx="3" cy="13" r="1.5" fill="currentColor"/>
+                  <path d="M3 8.5A4.5 4.5 0 0 1 7.5 13" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+                  <path d="M3 4A9 9 0 0 1 12 13" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+                </svg>
+              </button>
+              <button className="footer-social-btn" title="Nieuwsbrief" aria-label="Nieuwsbrief">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="1.5" y="3.5" width="13" height="9" rx="1" stroke="currentColor" strokeWidth="1.4"/>
+                  <path d="M1.5 5 L8 9.5 L14.5 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+                </svg>
+              </button>
+              <button className="footer-social-btn" title="Deel" aria-label="Deel">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <circle cx="12" cy="3" r="1.5" stroke="currentColor" strokeWidth="1.3"/>
+                  <circle cx="4" cy="8" r="1.5" stroke="currentColor" strokeWidth="1.3"/>
+                  <circle cx="12" cy="13" r="1.5" stroke="currentColor" strokeWidth="1.3"/>
+                  <path d="M5.3 7.3 L10.7 4M5.3 8.7 L10.7 12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>

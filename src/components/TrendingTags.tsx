@@ -1,36 +1,20 @@
 import Link from 'next/link'
 import type { TrendingTag } from '@/types'
 
-interface Props {
-  tags: TrendingTag[]
-}
-
-export default function TrendingTags({ tags }: Props) {
-  if (!tags?.length) {
-    return (
-      <div className="trending-wrap">
-        <div className="trending-label">Trending deze week</div>
-        <p style={{ fontSize: 13, color: 'var(--t3)' }}>
-          Geen trending onderwerpen gevonden.
-        </p>
-      </div>
-    )
-  }
-
+export default function TrendingTags({ tags }: { tags: TrendingTag[] }) {
+  if (!tags.length) return null
   return (
-    <div className="trending-wrap">
-      <div className="trending-label">Trending deze week</div>
-      <div className="trending-list">
-        {tags.map((tag) => (
-          <Link
-            key={tag.slug.current}
-            href={`/tag/${tag.slug.current}`}
-            className="trending-item"
-          >
-            <span>{tag.name}</span>
-            <span className="trending-count">{tag.recentCount}</span>
+    <div className="trending-box">
+      <h4 className="trending-title">Populaire thema's</h4>
+      <div className="trending-tags">
+        {tags.map((t) => (
+          <Link key={t.slug} href={`/tag/${t.slug}`} className="trending-pill">
+            #{t.name}
           </Link>
         ))}
+      </div>
+      <div className="trending-ai-note">
+        "AI-analyse: trending onderwerpen worden automatisch bijgehouden op basis van publicatiefrequentie."
       </div>
     </div>
   )
