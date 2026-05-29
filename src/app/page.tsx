@@ -82,12 +82,6 @@ export default async function HomePage() {
                     </svg>
                     {Math.ceil((topArticle.lead?.split(' ').length || 100) / 200) + 3} min leestijd
                   </span>
-                  <span className="hero-meta-icon">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ color: 'var(--accent)' }}>
-                      <path d="M7 1.5 L8.3 5.2 L12.3 5.2 L9.1 7.5 L10.4 11.2 L7 8.9 L3.6 11.2 L4.9 7.5 L1.7 5.2 L5.7 5.2 Z" stroke="currentColor" strokeWidth="1.2" fill="none"/>
-                    </svg>
-                    AI-gegenereerd inzicht
-                  </span>
                 </div>
               </div>
             </div>

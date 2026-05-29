@@ -1,8 +1,9 @@
-import { client } from '@/lib/sanity'
+import { client, urlFor } from '@/lib/sanity'
 import { articlesByTagQuery, tagBySlugQuery } from '@/lib/queries'
 import type { Article, Tag } from '@/types'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { relativeTime } from '@/lib/utils'
 import TagChip from '@/components/Tag'
 import { notFound } from 'next/navigation'
@@ -66,12 +67,23 @@ export default async function TagPage({ params }: Props) {
         <div className="art-list mt8">
           {articles.map((a) => (
             <Link key={a._id} href={`/artikel/${a.slug.current}`} className="art-list-item">
+              {a.mainImage && (
+                <div className="art-list-thumb">
+                  <Image
+                    src={urlFor(a.mainImage).width(160).height(100).url()}
+                    alt={a.mainImage.alt || ''}
+                    fill
+                    sizes="80px"
+                    style={{ objectFit: 'cover' }}
+                  />
+                </div>
+              )}
               <div className="art-list-body">
                 <div className="art-list-title">{a.title}</div>
                 {a.lead && <div className="art-list-lead">{a.lead}</div>}
                 <div className="art-list-meta">
                   <span>{relativeTime(a.publishedAt)}</span>
-                  {a.tags?.slice(0, 1).map((t) => (
+                  {a.tags?.filter((t: { slug: { current: string } }) => t.slug.current !== 'amersfoort').slice(0, 1).map((t: { slug: { current: string }; name: string }) => (
                     <TagChip key={t.slug.current} name={t.name} />
                   ))}
                 </div>

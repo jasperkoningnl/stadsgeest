@@ -9,6 +9,7 @@ import Tag from '@/components/Tag'
 import PortableTextRenderer from '@/components/PortableTextRenderer'
 import ReportButton from '@/components/ReportButton'
 import ShareButtons from '@/components/ShareButtons'
+import BackButton from '@/components/BackButton'
 import { notFound } from 'next/navigation'
 
 export const revalidate = 60
@@ -84,7 +85,8 @@ export default async function ArticlePage({ params }: Props) {
       />
 
       <div className="wrap page-in">
-        <article style={{ paddingTop: 40, paddingBottom: 80 }}>
+        <article style={{ paddingTop: 24, paddingBottom: 80 }}>
+          <BackButton />
           <div style={{ maxWidth: 780 }}>
 
             {/* Category badge */}
@@ -170,8 +172,8 @@ export default async function ArticlePage({ params }: Props) {
                 <PortableTextRenderer value={article.body} />
               )}
 
-              {/* AI transparency block */}
-              {article.aiTransparency && (
+              {/* AI transparency block + sources */}
+              {(article.aiTransparency || (article.sources && article.sources.length > 0)) && (
                 <div className="ai-block">
                   <div className="ai-block-head">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ color: 'var(--accent)' }}>
@@ -179,45 +181,34 @@ export default async function ArticlePage({ params }: Props) {
                     </svg>
                     Hoe dit artikel tot stand kwam
                   </div>
-                  <p className="ai-block-text">{article.aiTransparency}</p>
-                  <div className="ai-block-grid">
-                    <div className="ai-block-item">
-                      <span className="ai-block-item-label">Data-aggregatie</span>
-                      <span className="ai-block-item-text">Extractie van feiten uit officiële gemeente-publicaties.</span>
+                  {article.aiTransparency && (
+                    <p className="ai-block-text">{article.aiTransparency}</p>
+                  )}
+                  {article.sources && article.sources.length > 0 && (
+                    <div style={{ marginTop: 16 }}>
+                      <div className="sources-head" style={{ marginBottom: 8 }}>Geraadpleegde bronnen</div>
+                      {article.sources.map((s, i) => (
+                        <div key={i} className="source-row">
+                          <a href={s.url} className="source-link" target="_blank" rel="noopener noreferrer">
+                            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style={{ flexShrink: 0 }}>
+                              <path d="M5 2.5H2.5A1 1 0 0 0 1.5 3.5v7A1 1 0 0 0 2.5 11.5h7A1 1 0 0 0 10.5 10.5V8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                              <path d="M7.5 1.5h4v4M11.5 1.5 L6 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            {s.name}
+                          </a>
+                          <span className="source-pub">{s.sourceType}</span>
+                        </div>
+                      ))}
                     </div>
-                    <div className="ai-block-item">
-                      <span className="ai-block-item-label ai-block-item-label-amber">Menselijke controle</span>
-                      <span className="ai-block-item-text">Eindredactie uitgevoerd door onze journalistieke toezichthouder.</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Sources */}
-              {article.sources && article.sources.length > 0 && (
-                <div className="mt32">
-                  <hr className="divider" />
-                  <div className="sources-head">Geraadpleegde bronnen</div>
-                  {article.sources.map((s, i) => (
-                    <div key={i} className="source-row">
-                      <a href={s.url} className="source-link" target="_blank" rel="noopener noreferrer">
-                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style={{ flexShrink: 0 }}>
-                          <path d="M5 2.5H2.5A1 1 0 0 0 1.5 3.5v7A1 1 0 0 0 2.5 11.5h7A1 1 0 0 0 10.5 10.5V8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                          <path d="M7.5 1.5h4v4M11.5 1.5 L6 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        {s.name}
-                      </a>
-                      <span className="source-pub">{s.sourceType}</span>
-                    </div>
-                  ))}
+                  )}
                 </div>
               )}
 
               {/* Tags & entities */}
-              {(article.tags?.length || allEntities.length) ? (
+              {(article.tags?.filter(t => t.slug.current !== 'amersfoort').length || allEntities.length) ? (
                 <div style={{ paddingTop: 24, marginTop: 24, borderTop: '1px solid var(--border)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontFamily: 'var(--f-d)', fontSize: 13, fontWeight: 500, color: 'var(--t2)', marginRight: 4 }}>Tags:</span>
-                  {article.tags?.map((t) => (
+                  {article.tags?.filter(t => t.slug.current !== 'amersfoort').map((t) => (
                     <Link key={t.slug.current} href={`/tag/${t.slug.current}`} className="ent-chip">
                       {t.name}
                     </Link>
@@ -268,12 +259,6 @@ export default async function ArticlePage({ params }: Props) {
                 </div>
               </div>
 
-              <div className="sidebar-box" style={{ background: 'var(--accent-dim)', borderColor: 'rgba(70,234,237,0.20)' }}>
-                <div className="sidebar-title" style={{ color: 'var(--accent)' }}>Over de AI-redactie</div>
-                <p style={{ fontFamily: 'var(--f-b)', fontSize: 14, color: 'var(--t2)', lineHeight: 1.65 }}>
-                  Stadsgeest 033 publiceert dagelijks lokaal nieuws, samengesteld door AI op basis van openbare bronnen. Altijd transparant over herkomst.
-                </p>
-              </div>
             </aside>
           </div>
 

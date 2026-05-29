@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 const NAV_ITEMS = [
@@ -31,7 +31,6 @@ function LogoWordmark() {
 
 export default function Header({ navTags }: { navTags?: NavTag[] }) {
   const pathname = usePathname()
-  const router = useRouter()
   const isHome = pathname === '/'
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
   useEffect(() => {
@@ -71,20 +70,8 @@ export default function Header({ navTags }: { navTags?: NavTag[] }) {
       <header className="site-header">
         <div className="wrap">
           <div className="header-row">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '24px', position: 'relative' }}>
-              {!isHome && (
-                <button
-                  className="back-btn"
-                  onClick={() => router.back()}
-                  style={{ position: 'absolute', left: 0, whiteSpace: 'nowrap' }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M9 2 L4 7 L9 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  Terug
-                </button>
-              )}
-              <Link href="/" className="logo-btn" style={!isHome ? { marginLeft: 70 } : {}}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+              <Link href="/" className="logo-btn">
                 <LogoWordmark />
               </Link>
               <nav className="header-nav" aria-label="Hoofdnavigatie">
