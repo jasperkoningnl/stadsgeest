@@ -65,7 +65,7 @@ export default async function NieuwsPage({ searchParams }: Props) {
           {articles.map((a) => (
             <Link key={a._id} href={`/artikel/${a.slug?.current}`} className="art-list-item">
               {a.mainImage && (
-                <div className="art-list-thumb">
+                <div className="art-list-thumb" style={{ marginTop: 22 }}>
                   <Image
                     src={urlFor(a.mainImage).width(240).height(160).url()}
                     alt={a.mainImage.alt || ''}
@@ -76,6 +76,18 @@ export default async function NieuwsPage({ searchParams }: Props) {
                 </div>
               )}
               <div className="art-list-body">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <span style={{
+                    fontFamily: 'var(--f-m)', fontSize: 10, letterSpacing: '0.06em',
+                    textTransform: 'uppercase', color: 'var(--accent)',
+                    padding: '2px 6px', borderRadius: 2, background: 'var(--accent-dim)',
+                  }}>
+                    {FORMAT_LABELS[a.format] || 'Nieuws'}
+                  </span>
+                  <span style={{ fontFamily: 'var(--f-d)', fontSize: 12, color: 'var(--t3)' }}>
+                    {new Date(a.publishedAt).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
+                </div>
                 <div className="art-list-title">{a.title}</div>
                 {a.lead && (
                   <div className="art-list-lead" style={{
@@ -85,19 +97,18 @@ export default async function NieuwsPage({ searchParams }: Props) {
                     {a.lead}
                   </div>
                 )}
-                <div className="art-list-meta">
-                  <span style={{
-                    fontFamily: 'var(--f-m)', fontSize: 10, letterSpacing: '0.06em',
-                    textTransform: 'uppercase', color: 'var(--accent)',
-                    padding: '2px 6px', borderRadius: 2, background: 'var(--accent-dim)',
-                  }}>
-                    {FORMAT_LABELS[a.format] || 'Nieuws'}
-                  </span>
-                  <span>{new Date(a.publishedAt).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                  {a.tags?.filter((t: { slug: { current: string } }) => t.slug?.current !== 'amersfoort').slice(0, 1).map((t: { name: string; slug: { current: string } }) => (
-                    <span key={t.slug?.current} style={{ color: 'var(--t3)' }}>{t.name}</span>
-                  ))}
-                </div>
+                {a.tags && a.tags.length > 0 && (
+                  <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+                    {a.tags.filter((t: { slug: { current: string } }) => t.slug?.current !== 'amersfoort').map((t: { name: string; slug: { current: string } }) => (
+                      <span key={t.slug?.current} style={{
+                        fontFamily: 'var(--f-d)', fontSize: 12, color: 'var(--t3)',
+                        padding: '1px 6px', borderRadius: 2, border: '1px solid var(--border-s)',
+                      }}>
+                        {t.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </Link>
           ))}
