@@ -67,10 +67,10 @@ export default async function NieuwsPage({ searchParams }: Props) {
               {a.mainImage && (
                 <div className="art-list-thumb">
                   <Image
-                    src={urlFor(a.mainImage).width(160).height(100).url()}
+                    src={urlFor(a.mainImage).width(240).height(160).url()}
                     alt={a.mainImage.alt || ''}
                     fill
-                    sizes="80px"
+                    sizes="120px"
                     style={{ objectFit: 'cover' }}
                   />
                 </div>
