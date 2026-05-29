@@ -90,7 +90,7 @@ export default async function ArticlePage({ params }: Props) {
       />
 
       <div className="wrap page-in">
-        <article style={{ paddingTop: 24, paddingBottom: 80 }}>
+        <article style={{ paddingTop: 24, paddingBottom: 40 }}>
           <BackButton />
           <div style={{ maxWidth: 780 }}>
 
@@ -141,7 +141,7 @@ export default async function ArticlePage({ params }: Props) {
           {/* Hero image */}
           {article.mainImage && (
             <figure style={{ marginBottom: 40, marginTop: 24 }}>
-              <div className="art-hero-img" style={{ borderRadius: 'var(--r-lg)', position: 'relative' }}>
+              <div className="art-hero-img" style={{ borderRadius: 'var(--r-lg)', position: 'relative', marginBottom: 0 }}>
                 <Image
                   src={urlFor(article.mainImage).width(1200).height(630).url()}
                   alt={article.mainImage.alt || ''}
@@ -162,7 +162,7 @@ export default async function ArticlePage({ params }: Props) {
                 )}
               </div>
               {article.mainImage.caption && (
-                <figcaption style={{ marginTop: 8 }}>
+                <figcaption style={{ marginTop: 4 }}>
                   <p style={{ fontFamily: 'var(--f-d)', fontSize: 13, color: 'var(--t2)', fontStyle: 'italic' }}>
                     {article.mainImage.caption}
                   </p>
