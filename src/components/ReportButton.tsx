@@ -24,11 +24,7 @@ export default function ReportButton({ articleId }: Props) {
       await fetch('/api/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          articleId,
-          message: text,
-          sessionHash: Math.random().toString(36).substring(2),
-        }),
+        body: JSON.stringify({ articleId, message: text }),
       })
     } catch {
       // proceed to success state even on network error
