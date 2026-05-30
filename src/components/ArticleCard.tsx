@@ -17,7 +17,7 @@ export default function ArticleCard({ article, variant = 'standard', catColor = 
   const catClass = catColor === 'amber' ? 'acard-cat-amber' : catColor === 'default' ? 'acard-cat-primary' : 'acard-cat'
 
   if (variant === '112') {
-    const isAmber = article.tags?.some(t => t.slug.current === 'verkeer')
+    const isAmber = article.tags?.some(t => t?.slug?.current === 'verkeer')
     return (
       <Link href={href} className={`feed-112-item ${isAmber ? 'feed-112-item-amber' : 'feed-112-item-teal'}`}>
         <div className={`feed-112-time ${isAmber ? '' : 'feed-112-time-teal'}`}>

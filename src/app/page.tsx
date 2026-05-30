@@ -57,7 +57,7 @@ export default async function HomePage() {
             <div className="hero-body">
               <div className="hero-inner">
                 <div className="hero-tags">
-                  {topArticle.tags?.slice(0, 1).map((t) => (
+                  {topArticle.tags?.filter(t => t?.slug?.current).slice(0, 1).map((t) => (
                     <span key={t.slug.current} className="hero-tag hero-tag-primary">
                       {t.name}
                     </span>
@@ -116,7 +116,7 @@ export default async function HomePage() {
                   )}
                   <span className="ai-module-btn">Lees de analyse</span>
                 </div>
-                {analyseCard.mainImage && (
+                {analyseCard.mainImage?.asset && (
                   <div className="ai-module-img">
                     <Image
                       src={urlFor(analyseCard.mainImage).width(440).height(440).url()}

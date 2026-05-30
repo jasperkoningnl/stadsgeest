@@ -83,7 +83,7 @@ export default async function ArchiefPage() {
                       {a.title}
                     </span>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-                      {a.tags?.filter(t => t.slug.current !== 'amersfoort').slice(0, 1).map(t => (
+                      {a.tags?.filter(t => t?.slug?.current && t.slug.current !== 'amersfoort').slice(0, 1).map(t => (
                         <span key={t.slug.current} style={{ fontFamily: 'var(--f-m)', fontSize: 10, color: 'var(--t3)', letterSpacing: '0.05em' }}>
                           {t.name}
                         </span>

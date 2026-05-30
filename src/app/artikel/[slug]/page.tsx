@@ -211,10 +211,10 @@ export default async function ArticlePage({ params }: Props) {
               )}
 
               {/* Tags & entities */}
-              {(article.tags?.filter(t => t.slug.current !== 'amersfoort').length || allEntities.length) ? (
+              {(article.tags?.filter(t => t?.slug?.current && t.slug.current !== 'amersfoort').length || allEntities.length) ? (
                 <div style={{ paddingTop: 24, marginTop: 24, borderTop: '1px solid var(--border)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontFamily: 'var(--f-d)', fontSize: 13, fontWeight: 500, color: 'var(--t2)', marginRight: 4 }}>Tags:</span>
-                  {article.tags?.filter(t => t.slug.current !== 'amersfoort').map((t) => {
+                  {article.tags?.filter(t => t?.slug?.current && t.slug.current !== 'amersfoort').map((t) => {
                     const nt = normalizeTag(t)
                     return (
                       <Link key={t.slug.current} href={`/tag/${nt.slug.current}`} className="ent-chip">
@@ -248,7 +248,7 @@ export default async function ArticlePage({ params }: Props) {
                         <div className="rel-title">{a.title}</div>
                         <div className="rel-meta">
                           <span>{a.publishedAt ? relativeTime(a.publishedAt) : ''}</span>
-                          {a.tags?.[0] && <Tag name={a.tags[0].name} slug={a.tags[0].slug.current} />}
+                          {a.tags?.[0]?.slug?.current && <Tag name={a.tags[0].name} slug={a.tags[0].slug.current} />}
                         </div>
                       </Link>
                     ) : null
@@ -259,7 +259,7 @@ export default async function ArticlePage({ params }: Props) {
               <div className="sidebar-box">
                 <div className="sidebar-title">Onderwerpen</div>
                 <div className="sidebar-tags">
-                  {article.tags?.filter(t => t.slug.current !== 'amersfoort').map((t) => {
+                  {article.tags?.filter(t => t?.slug?.current && t.slug.current !== 'amersfoort').map((t) => {
                     const nt = normalizeTag(t)
                     return <Tag key={t.slug.current} name={nt.name} slug={nt.slug.current} />
                   })}

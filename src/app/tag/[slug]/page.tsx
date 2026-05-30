@@ -83,7 +83,7 @@ export default async function TagPage({ params }: Props) {
                 {a.lead && <div className="art-list-lead">{a.lead}</div>}
                 <div className="art-list-meta">
                   <span>{relativeTime(a.publishedAt)}</span>
-                  {a.tags?.filter((t: { slug: { current: string } }) => t.slug.current !== 'amersfoort').slice(0, 1).map((t: { slug: { current: string }; name: string }) => (
+                  {a.tags?.filter((t: { slug: { current: string } | null }) => t?.slug?.current && t.slug.current !== 'amersfoort').slice(0, 1).map((t: { slug: { current: string }; name: string }) => (
                     <TagChip key={t.slug.current} name={t.name} />
                   ))}
                 </div>
