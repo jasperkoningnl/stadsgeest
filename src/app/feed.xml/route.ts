@@ -1,4 +1,5 @@
 import { client } from '@/lib/sanity'
+import { SITE_URL } from '@/lib/site'
 
 export const revalidate = 3600
 
@@ -28,7 +29,7 @@ export async function GET() {
 
   const items = articles.map((a) => {
     const slug = xmlEscape(a.slug?.current ?? '')
-    const url = `https://stadsgeest.nl/artikel/${slug}`
+    const url = `${SITE_URL}/artikel/${slug}`
     return `
     <item>
       <title><![CDATA[${cdataSafe(a.title ?? '')}]]></title>
@@ -44,10 +45,10 @@ export async function GET() {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
     <title>Stadsgeest 033</title>
-    <link>https://stadsgeest.nl</link>
+    <link>${SITE_URL}</link>
     <description>AI-gedreven lokaal nieuws voor Amersfoort</description>
     <language>nl</language>
-    <atom:link href="https://stadsgeest.nl/feed.xml" rel="self" type="application/rss+xml"/>
+    <atom:link href="${SITE_URL}/feed.xml" rel="self" type="application/rss+xml"/>
     ${items}
   </channel>
 </rss>`

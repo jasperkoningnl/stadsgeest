@@ -1,7 +1,8 @@
 import type { MetadataRoute } from 'next'
 import { client } from '@/lib/sanity'
+import { SITE_URL } from '@/lib/site'
 
-const BASE = 'https://stadsgeest.nl'
+const BASE = SITE_URL
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
