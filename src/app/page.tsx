@@ -28,7 +28,6 @@ export default async function HomePage() {
   }
 
   const { topArticle, kortCards, analyseCard, normalCards } = data
-  const [leftCard, imageCard, teaserCard] = normalCards
   const hasContent = topArticle || kortCards.length > 0 || analyseCard || normalCards.length > 0
 
   return (
@@ -89,18 +88,31 @@ export default async function HomePage() {
         )}
       </div>
 
-      {/* ── Main bento grid ── */}
+      {/* ── Rij 1: 112 + Analyse ── */}
       <div className="wrap mt56">
         <div className="bento">
-          {/* Left: standard article (4 cols) */}
-          {leftCard && (
-            <div className="bento-4">
-              <ArticleCard article={leftCard} variant="with-image" catColor="teal" />
+          {/* 112 & Actueel compact feed (4 cols) */}
+          {kortCards.length > 0 && (
+            <div className="bento-4" style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="sec-head" style={{ paddingTop: 0 }}>
+                <span className="sec-dot" />
+                <span className="sec-label">112 &amp; Actueel</span>
+              </div>
+              <div className="feed-112 mt8">
+                {kortCards.slice(0, 4).map((a) => (
+                  <ArticleCard key={a._id} article={a} variant="112" />
+                ))}
+              </div>
+              <div style={{ marginTop: 'auto', paddingTop: 16 }}>
+                <Link href="/112" style={{ fontFamily: 'var(--f-d)', fontSize: 14, fontWeight: 600, color: 'var(--error)', textDecoration: 'none' }}>
+                  Alle 112 meldingen →
+                </Link>
+              </div>
             </div>
           )}
 
-          {/* Right: AI highlight module (8 cols) */}
-          {analyseCard ? (
+          {/* Diepgaande analyse (8 cols) */}
+          {analyseCard && (
             <div className="bento-8">
               <Link href={`/artikel/${analyseCard.slug.current}`} className="ai-module">
                 <div className="ai-module-body">
@@ -129,54 +141,35 @@ export default async function HomePage() {
                 )}
               </Link>
             </div>
-          ) : leftCard ? null : null}
-
-          {/* 112 & Actueel compact feed (4 cols) */}
-          {kortCards.length > 0 && (
-            <div className="bento-4" style={{ display: 'flex', flexDirection: 'column' }}>
-              <div className="sec-head" style={{ paddingTop: 0 }}>
-                <span className="sec-dot" />
-                <span className="sec-label">112 &amp; Actueel</span>
-              </div>
-              <div className="feed-112 mt8">
-                {kortCards.slice(0, 4).map((a) => (
-                  <ArticleCard key={a._id} article={a} variant="112" />
-                ))}
-              </div>
-              <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: 'none' }}>
-                <Link href="/112" style={{ fontFamily: 'var(--f-d)', fontSize: 14, fontWeight: 600, color: 'var(--error)', textDecoration: 'none' }}>
-                  Alle 112 meldingen →
-                </Link>
-              </div>
-            </div>
           )}
+        </div>
+      </div>
 
-          {/* Standard article with image (4 cols) */}
-          {imageCard && (
-            <div className="bento-4">
-              <ArticleCard article={imageCard} variant="with-image" catColor="teal" />
-            </div>
-          )}
-
-          {/* Article teaser (4 cols) */}
-          <div className="bento-4" style={{ display: 'flex', flexDirection: 'column' }}>
-            {teaserCard && (
-              <ArticleCard article={teaserCard} variant="with-image" catColor="teal" />
-            )}
-            <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: 'none' }}>
-              <Link href="/nieuws" style={{ fontFamily: 'var(--f-d)', fontSize: 14, fontWeight: 600, color: 'var(--accent)', textDecoration: 'none' }}>
-                Alle berichten →
-              </Link>
-            </div>
+      {/* ── Rij 2: Nieuwsteasers ── */}
+      {normalCards.length > 0 && (
+        <div className="wrap mt56">
+          <div className="bento">
+            {normalCards.slice(0, 3).map((a) => (
+              <div key={a._id} className="bento-4">
+                <ArticleCard article={a} variant="with-image" catColor="teal" />
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 24, textAlign: 'right' }}>
+            <Link href="/nieuws" style={{ fontFamily: 'var(--f-d)', fontSize: 14, fontWeight: 600, color: 'var(--accent)', textDecoration: 'none' }}>
+              Alle berichten →
+            </Link>
           </div>
         </div>
+      )}
 
-        {!hasContent && (
+      {!hasContent && (
+        <div className="wrap">
           <div className="empty-state mt56">
             <p>Nog geen artikelen gepubliceerd.</p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
