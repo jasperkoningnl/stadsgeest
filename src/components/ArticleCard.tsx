@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { urlFor } from '@/lib/sanity'
-import { relativeTime, FORMAT_LABELS, TAG_COLORS } from '@/lib/utils'
+import { relativeTime, FORMAT_LABELS } from '@/lib/utils'
 import type { Article } from '@/types'
 import Tag from './Tag'
 

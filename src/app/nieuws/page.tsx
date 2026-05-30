@@ -19,7 +19,8 @@ interface Props {
 
 export default async function NieuwsPage({ searchParams }: Props) {
   const { page: pageParam } = await searchParams
-  const page = Math.max(1, parseInt(pageParam || '1', 10))
+  const parsed = parseInt(pageParam || '1', 10)
+  const page = Math.max(1, Number.isNaN(parsed) ? 1 : parsed)
   const offset = (page - 1) * PAGE_SIZE
   const limit = page * PAGE_SIZE
 

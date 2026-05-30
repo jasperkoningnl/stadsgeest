@@ -5,7 +5,7 @@ import Link from 'next/link'
 export const revalidate = 300
 
 export const metadata: Metadata = {
-  title: 'Archief — Stadsgeest 033',
+  title: 'Archief',
   description: 'Alle gepubliceerde artikelen van Stadsgeest 033 in chronologisch overzicht.',
 }
 

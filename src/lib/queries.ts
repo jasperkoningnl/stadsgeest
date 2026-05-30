@@ -22,7 +22,7 @@ export const allArticlesQuery = `
 `
 
 export const articleBySlugQuery = `
-  *[_type == "article" && slug.current == $slug][0] {
+  *[_type == "article" && status == "published" && slug.current == $slug][0] {
     _id,
     title,
     slug,

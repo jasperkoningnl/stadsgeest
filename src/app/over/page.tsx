@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Over Stadsgeest 033',
+  title: 'Over',
   description: 'Meer over Stadsgeest 033 — AI-ondersteunde journalistiek voor Amersfoort.',
 }
 
