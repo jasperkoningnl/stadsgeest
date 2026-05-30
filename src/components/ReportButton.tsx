@@ -88,6 +88,9 @@ export default function ReportButton({ articleId }: Props) {
                   onChange={(e) => setText(e.target.value)}
                   autoFocus
                 />
+                <p style={{ fontFamily: 'var(--f-d)', fontSize: 12, color: 'var(--t3)', marginTop: 6 }}>
+                  Deel geen persoonlijke gegevens van uzelf of anderen in uw melding.
+                </p>
                 {error && (
                   <div style={{ fontFamily: 'var(--f-d)', fontSize: 13, color: 'var(--error)', marginTop: 8 }}>
                     Verzenden mislukt. Probeer het opnieuw.

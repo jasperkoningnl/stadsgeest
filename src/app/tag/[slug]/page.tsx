@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { relativeTime } from '@/lib/utils'
 import TagChip from '@/components/Tag'
 import { notFound } from 'next/navigation'
+import { SITE_URL } from '@/lib/site'
 
 export const revalidate = 60
 
@@ -26,6 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: tag.name,
     description: `Alle artikelen over ${tag.name} in Amersfoort`,
+    alternates: { canonical: `${SITE_URL}/tag/${slug}` },
   }
 }
 
