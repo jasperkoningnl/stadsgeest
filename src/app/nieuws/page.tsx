@@ -99,7 +99,7 @@ export default async function NieuwsPage({ searchParams }: Props) {
                 )}
                 {a.tags && a.tags.length > 0 && (
                   <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-                    {a.tags.filter((t: { slug: { current: string } }) => t.slug?.current !== 'amersfoort').map((t: { name: string; slug: { current: string } }) => (
+                    {a.tags.filter((t: { slug: { current: string } | null } | null) => t?.slug?.current && t.slug.current !== 'amersfoort').map((t: { name: string; slug: { current: string } }) => (
                       <span key={t.slug?.current} style={{
                         fontFamily: 'var(--f-d)', fontSize: 12, color: 'var(--t3)',
                         padding: '1px 6px', borderRadius: 2, border: '1px solid var(--border-s)',

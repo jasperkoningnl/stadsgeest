@@ -19,18 +19,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return [
       { url: BASE, changeFrequency: 'hourly', priority: 1 },
-      ...articles.map((a) => ({
+      ...articles.filter((a) => a?.slug?.current).map((a) => ({
         url: `${BASE}/artikel/${a.slug.current}`,
         lastModified: new Date(a.publishedAt),
         changeFrequency: 'weekly' as const,
         priority: 0.8,
       })),
-      ...tags.map((t) => ({
+      ...tags.filter((t) => t?.slug?.current).map((t) => ({
         url: `${BASE}/tag/${t.slug.current}`,
         changeFrequency: 'daily' as const,
         priority: 0.5,
       })),
-      ...locations.map((l) => ({
+      ...locations.filter((l) => l?.slug?.current).map((l) => ({
         url: `${BASE}/wijk/${l.slug.current}`,
         changeFrequency: 'daily' as const,
         priority: 0.5,

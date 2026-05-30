@@ -53,7 +53,7 @@ export default function Header({ navTags }: { navTags?: NavTag[] }) {
   const navLinks = dynamicTags
     ? [
         { label: 'Nieuws', slug: null as string | null, href: '/nieuws' as string | null },
-        ...dynamicTags.map((t) => ({
+        ...dynamicTags.filter((t) => t?.slug?.current).map((t) => ({
           label: t.name.charAt(0).toUpperCase() + t.name.slice(1),
           slug: t.slug.current,
           href: t.slug.current === '112' ? '/112' : null as string | null,
