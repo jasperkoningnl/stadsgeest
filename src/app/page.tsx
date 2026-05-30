@@ -99,7 +99,7 @@ export default async function HomePage() {
                 <span className="sec-label">112 &amp; Actueel</span>
               </div>
               <div className="feed-112 mt8">
-                {kortCards.slice(0, 4).map((a) => (
+                {kortCards.slice(0, 2).map((a) => (
                   <ArticleCard key={a._id} article={a} variant="112" />
                 ))}
               </div>
