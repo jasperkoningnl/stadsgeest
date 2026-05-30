@@ -69,7 +69,7 @@ export default function ArticleCard({ article, variant = 'standard', catColor = 
         )}
         <span className={catClass}>{catLabel}</span>
         <h3 className="acard-title">{article.title}</h3>
-        <div className="acard-meta">{rt} · Redactie</div>
+        <div className="acard-meta">{rt}</div>
       </Link>
     )
   }
