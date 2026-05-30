@@ -13,7 +13,12 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const person = await client.fetch<Person | null>(personBySlugQuery, { slug })
+  let person: Person | null = null
+  try {
+    person = await client.fetch<Person | null>(personBySlugQuery, { slug })
+  } catch {
+    return { title: 'Persoon niet gevonden' }
+  }
   if (!person) return { title: 'Persoon niet gevonden' }
   return {
     title: `${person.name} — Stadsgeest 033`,
@@ -37,18 +42,25 @@ const TAG_COLORS: Record<string, string> = {
 
 export default async function PersoonPage({ params }: Props) {
   const { slug } = await params
-  const [person, articles] = await Promise.all([
-    client.fetch<(Person & { articleCount?: number; notes?: string }) | null>(
-      personBySlugQuery,
-      { slug },
-      { next: { revalidate: 60 } }
-    ),
-    client.fetch<Article[]>(
-      articlesByPersonQuery,
-      { personSlug: slug },
-      { next: { revalidate: 60 } }
-    ),
-  ])
+
+  let person: (Person & { articleCount?: number; notes?: string }) | null = null
+  let articles: Article[] = []
+  try {
+    ;[person, articles] = await Promise.all([
+      client.fetch<(Person & { articleCount?: number; notes?: string }) | null>(
+        personBySlugQuery,
+        { slug },
+        { next: { revalidate: 60 } }
+      ),
+      client.fetch<Article[]>(
+        articlesByPersonQuery,
+        { personSlug: slug },
+        { next: { revalidate: 60 } }
+      ),
+    ])
+  } catch {
+    // Sanity unavailable — person stays null, triggering notFound below
+  }
 
   if (!person) notFound()
 

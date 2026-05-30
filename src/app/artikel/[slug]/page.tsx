@@ -20,11 +20,16 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const article = await client.fetch<Article | null>(
-    articleBySlugQuery,
-    { slug },
-    { next: { revalidate: 60 } }
-  )
+  let article: Article | null = null
+  try {
+    article = await client.fetch<Article | null>(
+      articleBySlugQuery,
+      { slug },
+      { next: { revalidate: 60 } }
+    )
+  } catch {
+    return { title: 'Artikel niet gevonden' }
+  }
   if (!article) return { title: 'Artikel niet gevonden' }
   return {
     title: article.seoTitle || article.title,
@@ -44,11 +49,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params
-  const article = await client.fetch<Article | null>(
-    articleBySlugQuery,
-    { slug },
-    { next: { revalidate: 60 } }
-  )
+  let article: Article | null = null
+  try {
+    article = await client.fetch<Article | null>(
+      articleBySlugQuery,
+      { slug },
+      { next: { revalidate: 60 } }
+    )
+  } catch {
+    notFound()
+  }
   if (!article) notFound()
 
   const fmtLabel = FORMAT_LABELS[article.format] || 'Nieuws'
