@@ -21,6 +21,19 @@ export const allArticlesQuery = `
   }
 `
 
+const ARTICLE_FIELDS = `
+  _id, title, slug, lead, format, priority, publishedAt,
+  mainImage { asset->, alt },
+  tags[]-> { name, slug, color }
+`
+
+export const homepageQuery = `{
+  "topArticle": *[_type == "article" && status == "published" && priority == "top"] | order(publishedAt desc) [0] { ${ARTICLE_FIELDS} },
+  "kortCards": *[_type == "article" && status == "published" && (priority == "kort" || format == "112")] | order(publishedAt desc) [0...4] { ${ARTICLE_FIELDS} },
+  "analyseCard": *[_type == "article" && status == "published" && format == "analyse"] | order(publishedAt desc) [0] { ${ARTICLE_FIELDS} },
+  "normalCards": *[_type == "article" && status == "published" && priority == "normaal" && format != "analyse"] | order(publishedAt desc) [0...3] { ${ARTICLE_FIELDS} }
+}`
+
 export const articleBySlugQuery = `
   *[_type == "article" && status == "published" && slug.current == $slug][0] {
     _id,

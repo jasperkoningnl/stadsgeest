@@ -1,5 +1,5 @@
 import { client } from '@/lib/sanity'
-import { allArticlesQuery } from '@/lib/queries'
+import { homepageQuery } from '@/lib/queries'
 import type { Article } from '@/types'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -9,27 +9,27 @@ import ArticleCard from '@/components/ArticleCard'
 
 export const revalidate = 60
 
+interface HomepageData {
+  topArticle: Article | null
+  kortCards: Article[]
+  analyseCard: Article | null
+  normalCards: Article[]
+}
+
+const EMPTY: HomepageData = { topArticle: null, kortCards: [], analyseCard: null, normalCards: [] }
+
 export default async function HomePage() {
-  let articles: Article[] = []
+  let data: HomepageData = EMPTY
 
   try {
-    articles = await client.fetch<Article[]>(allArticlesQuery, {}, { next: { revalidate: 60 } })
+    data = await client.fetch<HomepageData>(homepageQuery, {}, { next: { revalidate: 60 } })
   } catch {
     // Sanity not connected yet
   }
 
-  const topArticle = articles.find((a) => a.priority === 'top')
-  const kortCards = articles.filter((a) => a.priority === 'kort' || a.format === '112')
-  const analyseCard = articles.find((a) => a.format === 'analyse')
-  const normalCards = articles.filter(
-    (a) =>
-      a.priority === 'normaal' &&
-      a.format !== 'analyse' &&
-      a._id !== topArticle?._id
-  )
-  const leftCard = normalCards[0]
-  const imageCard = normalCards[1]
-  const teaserCard = normalCards[2]
+  const { topArticle, kortCards, analyseCard, normalCards } = data
+  const [leftCard, imageCard, teaserCard] = normalCards
+  const hasContent = topArticle || kortCards.length > 0 || analyseCard || normalCards.length > 0
 
   return (
     <div className="page-in">
@@ -158,7 +158,7 @@ export default async function HomePage() {
             </div>
           )}
 
-          {/* Article teaser (4 cols) — replaces trending tags */}
+          {/* Article teaser (4 cols) */}
           <div className="bento-4" style={{ display: 'flex', flexDirection: 'column' }}>
             {teaserCard && (
               <ArticleCard article={teaserCard} variant="with-image" catColor="teal" />
@@ -171,7 +171,7 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {articles.length === 0 && (
+        {!hasContent && (
           <div className="empty-state mt56">
             <p>Nog geen artikelen gepubliceerd.</p>
           </div>
