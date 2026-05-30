@@ -293,7 +293,6 @@ body {
 }
 .acard-meta {
   margin-top: auto; padding-top: 12px;
-  border-top: 1px solid var(--border);
   font-size: 13px; font-weight: 500; color: var(--t3);
 }
 
