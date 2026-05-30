@@ -64,7 +64,7 @@ export default async function NieuwsPage({ searchParams }: Props) {
         <div className="art-list mt8">
           {articles.map((a) => (
             <Link key={a._id} href={`/artikel/${a.slug?.current}`} className="art-list-item">
-              {a.mainImage && (
+              {a.mainImage?.asset && (
                 <div className="art-list-thumb" style={{ marginTop: 22 }}>
                   <Image
                     src={urlFor(a.mainImage).width(240).height(160).url()}
