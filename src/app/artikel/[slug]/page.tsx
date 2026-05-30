@@ -11,6 +11,7 @@ import ReportButton from '@/components/ReportButton'
 import ShareButtons from '@/components/ShareButtons'
 import BackButton from '@/components/BackButton'
 import { notFound } from 'next/navigation'
+import { SITE_URL } from '@/lib/site'
 
 export const revalidate = 60
 
@@ -88,7 +89,7 @@ export default async function ArticlePage({ params }: Props) {
     datePublished: article.publishedAt,
     dateModified: article.updatedAt || article.publishedAt,
     author: { '@type': 'Organization', name: 'AI-redactie Stadsgeest 033' },
-    publisher: { '@type': 'Organization', name: 'Stadsgeest 033', url: 'https://stadsgeest.nl' },
+    publisher: { '@type': 'Organization', name: 'Stadsgeest 033', url: SITE_URL },
     image: article.mainImage ? urlFor(article.mainImage).width(1200).height(630).url() : undefined,
   }
 
@@ -144,7 +145,7 @@ export default async function ArticlePage({ params }: Props) {
 
             <ShareButtons
               title={article.title}
-              url={`https://stadsgeest.nl/artikel/${article.slug.current}`}
+              url={`${SITE_URL}/artikel/${article.slug.current}`}
             />
           </div>
 

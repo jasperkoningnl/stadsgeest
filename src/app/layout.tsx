@@ -4,6 +4,7 @@ import './globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { client } from '@/lib/sanity'
+import { SITE_URL } from '@/lib/site'
 
 const hankenGrotesk = Hanken_Grotesk({
   subsets: ['latin'],
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
     default: 'Stadsgeest 033 — Nieuws uit Amersfoort',
   },
   description: 'AI-gedreven lokaal nieuws voor Amersfoort. Altijd transparant over herkomst.',
-  metadataBase: new URL('https://stadsgeest.nl'),
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     siteName: 'Stadsgeest 033',
     locale: 'nl_NL',
