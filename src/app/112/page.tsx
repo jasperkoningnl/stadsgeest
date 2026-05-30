@@ -6,7 +6,7 @@ import Link from 'next/link'
 export const revalidate = 60
 
 export const metadata: Metadata = {
-  title: '112 & Actueel — Stadsgeest 033',
+  title: '112 & Actueel',
   description: 'Real-time incidentmeldingen en urgente stadsberichten uit de regio Amersfoort.',
 }
 

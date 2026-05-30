@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 const NAV_ITEMS = [
@@ -30,8 +29,6 @@ function LogoWordmark() {
 }
 
 export default function Header({ navTags }: { navTags?: NavTag[] }) {
-  const pathname = usePathname()
-  const isHome = pathname === '/'
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
   useEffect(() => {
     const t = document.documentElement.getAttribute('data-theme') || 'dark'
@@ -50,15 +47,21 @@ export default function Header({ navTags }: { navTags?: NavTag[] }) {
     ? navTags.filter((t) => t.count > 0)
     : null
 
+  const buildDynamicLinks = () => {
+    const links = [
+      { label: 'Nieuws', slug: null as string | null, href: '/nieuws' as string | null },
+      ...dynamicTags!.filter((t) => t?.slug?.current && t.slug.current !== '112').map((t) => ({
+        label: t.name.charAt(0).toUpperCase() + t.name.slice(1),
+        slug: t.slug.current,
+        href: null as string | null,
+      })),
+      { label: '112', slug: '112' as string | null, href: '/112' as string | null },
+    ]
+    return links
+  }
+
   const navLinks = dynamicTags
-    ? [
-        { label: 'Nieuws', slug: null as string | null, href: '/nieuws' as string | null },
-        ...dynamicTags.filter((t) => t?.slug?.current).map((t) => ({
-          label: t.name.charAt(0).toUpperCase() + t.name.slice(1),
-          slug: t.slug.current,
-          href: t.slug.current === '112' ? '/112' : null as string | null,
-        })),
-      ]
+    ? buildDynamicLinks()
     : NAV_ITEMS.map((item) => ({
         label: item.label,
         slug: item.slug as string | null ?? null,
@@ -109,8 +112,7 @@ export default function Header({ navTags }: { navTags?: NavTag[] }) {
         </div>
       </header>
 
-      {isHome && (
-        <div className="mobile-nav" role="navigation" aria-label="Mobiele navigatie">
+      <div className="mobile-nav" role="navigation" aria-label="Mobiele navigatie">
           {navLinks.map((item) => {
             const href = item.href ?? `/tag/${item.slug}`
             const is112 = item.slug === '112'
@@ -126,7 +128,6 @@ export default function Header({ navTags }: { navTags?: NavTag[] }) {
             )
           })}
         </div>
-      )}
     </>
   )
 }

@@ -174,13 +174,6 @@ export default async function HomePage() {
         {articles.length === 0 && (
           <div className="empty-state mt56">
             <p>Nog geen artikelen gepubliceerd.</p>
-            <p style={{ marginTop: 8 }}>
-              Maak een artikel aan in{' '}
-              <a href="http://localhost:3333" style={{ color: 'var(--accent)' }}>
-                Sanity Studio
-              </a>
-              .
-            </p>
           </div>
         )}
       </div>
