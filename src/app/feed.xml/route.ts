@@ -2,6 +2,17 @@ import { client } from '@/lib/sanity'
 
 export const revalidate = 3600
 
+function xmlEscape(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+function cdataSafe(str: string): string {
+  return str.replace(/]]>/g, ']]]]><![CDATA[>')
+}
+
 export async function GET() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let articles: any[] = []
@@ -15,19 +26,22 @@ export async function GET() {
     // Sanity unavailable
   }
 
-  const items = articles.map((a) => `
+  const items = articles.map((a) => {
+    const slug = xmlEscape(a.slug?.current ?? '')
+    const url = `https://stadsgeest.nl/artikel/${slug}`
+    return `
     <item>
-      <title><![CDATA[${a.title ?? ''}]]></title>
-      <link>https://stadsgeest.nl/artikel/${a.slug?.current ?? ''}</link>
-      <description><![CDATA[${a.lead ?? ''}]]></description>
+      <title><![CDATA[${cdataSafe(a.title ?? '')}]]></title>
+      <link>${url}</link>
+      <description><![CDATA[${cdataSafe(a.lead ?? '')}]]></description>
       <pubDate>${new Date(a.publishedAt).toUTCString()}</pubDate>
-      ${a.author ? `<author>${a.author}</author>` : ''}
-      <guid>https://stadsgeest.nl/artikel/${a.slug?.current ?? ''}</guid>
-    </item>
-  `).join('')
+      ${a.author ? `<dc:creator><![CDATA[${cdataSafe(a.author)}]]></dc:creator>` : ''}
+      <guid isPermaLink="true">${url}</guid>
+    </item>`
+  }).join('')
 
   const feed = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
     <title>Stadsgeest 033</title>
     <link>https://stadsgeest.nl</link>
