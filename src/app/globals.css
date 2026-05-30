@@ -292,9 +292,10 @@ body {
   -webkit-box-orient: vertical; overflow: hidden;
 }
 .acard-meta {
-  margin-top: auto; padding-top: 12px;
+  display: flex; align-items: center; gap: 6px;
   font-size: 13px; font-weight: 500; color: var(--t3);
 }
+.acard-meta-sep { color: var(--border); }
 
 /* ── Article card with image ───────────────────────────── */
 .acard-img-wrap {

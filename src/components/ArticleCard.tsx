@@ -67,9 +67,12 @@ export default function ArticleCard({ article, variant = 'standard', catColor = 
             />
           </div>
         )}
-        <span className={catClass}>{catLabel}</span>
+        <div className="acard-meta">
+          <span className={catClass}>{catLabel}</span>
+          <span className="acard-meta-sep">·</span>
+          <span>{rt}</span>
+        </div>
         <h3 className="acard-title">{article.title}</h3>
-        <div className="acard-meta">{rt}</div>
       </Link>
     )
   }
@@ -78,10 +81,13 @@ export default function ArticleCard({ article, variant = 'standard', catColor = 
   const catLabel = article.tags?.filter(t => t.name !== '112')[0]?.name || FORMAT_LABELS[article.format] || 'Nieuws'
   return (
     <Link href={href} className="acard">
-      <span className={catClass}>{catLabel}</span>
+      <div className="acard-meta">
+        <span className={catClass}>{catLabel}</span>
+        <span className="acard-meta-sep">·</span>
+        <span>{rt}</span>
+      </div>
       <h3 className="acard-title">{article.title}</h3>
       {article.lead && <p className="acard-lead">{article.lead}</p>}
-      <div className="acard-meta">{rt}</div>
     </Link>
   )
 }
