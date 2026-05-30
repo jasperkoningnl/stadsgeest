@@ -35,10 +35,8 @@ function formatDateShort(dateStr: string) {
 
 export default async function Page112() {
   const articles = await client.fetch<Article[]>(
-    `*[_type == "article" && status == "published" && (
-      "112" in tags[]->slug.current ||
-      format == "brief"
-    )] | order(publishedAt desc) [0...40] {
+    `*[_type == "article" && status == "published" && "112" in tags[]->slug.current
+    ] | order(publishedAt desc) [0...40] {
       _id, title, slug, lead, format, publishedAt,
       tags[]-> { name, slug },
       locations[]-> { name, slug }
