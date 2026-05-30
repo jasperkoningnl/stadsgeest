@@ -35,6 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: article.seoTitle || article.title,
     description: article.seoDescription || article.lead,
+    alternates: { canonical: `${SITE_URL}/artikel/${slug}` },
     openGraph: {
       title: article.seoTitle || article.title,
       description: article.seoDescription || article.lead || undefined,
@@ -89,7 +90,12 @@ export default async function ArticlePage({ params }: Props) {
     datePublished: article.publishedAt,
     dateModified: article.updatedAt || article.publishedAt,
     author: { '@type': 'Organization', name: 'AI-redactie Stadsgeest 033' },
-    publisher: { '@type': 'Organization', name: 'Stadsgeest 033', url: SITE_URL },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Stadsgeest 033',
+      url: SITE_URL,
+      logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` },
+    },
     image: article.mainImage ? urlFor(article.mainImage).width(1200).height(630).url() : undefined,
   }
 

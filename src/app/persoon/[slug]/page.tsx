@@ -4,6 +4,7 @@ import type { Article, Person } from '@/types'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { SITE_URL } from '@/lib/site'
 
 export const revalidate = 60
 
@@ -23,6 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${person.name} — Stadsgeest 033`,
     description: `Automatisch gegenereerd dossier voor ${person.name}${person.role ? `, ${person.role}` : ''}.`,
+    alternates: { canonical: `${SITE_URL}/persoon/${slug}` },
   }
 }
 
