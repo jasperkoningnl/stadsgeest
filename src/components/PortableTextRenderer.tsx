@@ -1,18 +1,31 @@
 import { PortableText, type PortableTextComponents } from '@portabletext/react'
 
+const SAFE_SCHEMES = ['http:', 'https:', 'mailto:']
+
+function sanitizeUrl(href: string | undefined): string {
+  if (!href) return '#'
+  try {
+    const url = new URL(href)
+    return SAFE_SCHEMES.includes(url.protocol) ? href : '#'
+  } catch {
+    // Relative URLs (no protocol) are allowed
+    return href.startsWith('/') || href.startsWith('#') ? href : '#'
+  }
+}
+
 const components: PortableTextComponents = {
   block: {
     h2: ({ children }) => <h2>{children}</h2>,
     blockquote: ({ children }) => (
       <blockquote className="art-quote">
-        <div className="art-quote-text">{children}</div>
+        <p className="art-quote-text">{children}</p>
       </blockquote>
     ),
   },
   marks: {
     sourceRef: ({ value, children }) => (
       <a
-        href={value?.source?.url || '#'}
+        href={sanitizeUrl(value?.source?.url)}
         className="source-link"
         target="_blank"
         rel="noopener noreferrer"
@@ -22,7 +35,7 @@ const components: PortableTextComponents = {
     ),
     link: ({ value, children }) => (
       <a
-        href={value?.href || '#'}
+        href={sanitizeUrl(value?.href)}
         className="source-link"
         target={value?.blank ? '_blank' : undefined}
         rel="noopener noreferrer"

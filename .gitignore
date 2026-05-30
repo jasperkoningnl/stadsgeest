@@ -43,3 +43,6 @@ next-env.d.ts
 .vercel
 
 studio/node_modules
+
+# Claude Code
+.claude/
