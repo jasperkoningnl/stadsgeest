@@ -74,6 +74,7 @@ export interface Article {
   sources?: Source[]
   relatedArticles?: Partial<Article>[]
   reportCount?: number
+  bodyWordCount?: number
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any[]
 }

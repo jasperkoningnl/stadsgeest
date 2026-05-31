@@ -30,7 +30,7 @@ const ARTICLE_FIELDS = `
 export const homepageQuery = `{
   "topArticle": *[_type == "article" && status == "published" && priority == "top"] | order(publishedAt desc) [0] { ${ARTICLE_FIELDS} },
   "kortCards": *[_type == "article" && status == "published" && "112" in tags[]->slug.current] | order(publishedAt desc) [0...2] { ${ARTICLE_FIELDS} },
-  "analyseCard": *[_type == "article" && status == "published" && format == "analyse"] | order(publishedAt desc) [0] { ${ARTICLE_FIELDS} },
+  "analyseCard": *[_type == "article" && status == "published" && format == "analyse"] | order(publishedAt desc) [0] { ${ARTICLE_FIELDS}, "bodyWordCount": length(string::split(pt::text(body), " ")) },
   "normalCards": *[_type == "article" && status == "published" && priority == "normaal" && format != "analyse"] | order(publishedAt desc) [0...3] { ${ARTICLE_FIELDS} }
 }`
 
