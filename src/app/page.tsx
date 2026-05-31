@@ -72,10 +72,10 @@ export default async function HomePage() {
                 <div className="hero-meta">
                   <span className="hero-meta-icon">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3"/>
-                      <path d="M7 4v3l2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                      <rect x="2" y="3" width="10" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
+                      <path d="M5 1.5V4M9 1.5V4M2 6h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
                     </svg>
-                    {Math.ceil((topArticle.lead?.split(' ').length || 100) / 200) + 3} min leestijd
+                    {relativeTime(topArticle.publishedAt)}
                   </span>
                 </div>
               </div>
@@ -126,7 +126,18 @@ export default async function HomePage() {
                   {analyseCard.lead && (
                     <p className="ai-module-quote">"{analyseCard.lead}"</p>
                   )}
-                  <span className="ai-module-btn">Lees de analyse</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span className="ai-module-btn">Lees de analyse</span>
+                    {(analyseCard.bodyWordCount || analyseCard.lead) && (
+                      <span style={{ fontSize: 13, color: 'var(--t3)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                          <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3"/>
+                          <path d="M7 4v3l2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                        </svg>
+                        {Math.max(1, Math.ceil(((analyseCard.bodyWordCount || 0) + (analyseCard.lead?.split(' ').length || 0)) / 200))} min leestijd
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {analyseCard.mainImage?.asset && (
                   <div className="ai-module-img">
