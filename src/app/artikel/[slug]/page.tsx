@@ -76,7 +76,7 @@ export default async function ArticlePage({ params }: Props) {
     ...(article.organizations?.map((o) => ({ name: o.name, href: `/organisatie/${o.slug.current}` })) || []),
   ]
 
-  const readMins = Math.max(3, Math.ceil(
+  const readMins = Math.max(1, Math.ceil(
     ((article.body?.reduce((acc: number, b: { children?: { text?: string }[] }) =>
       acc + (b.children?.map((c) => c.text || '').join('').split(' ').length || 0), 0) || 0) +
       (article.lead?.split(' ').length || 0)) / 200
