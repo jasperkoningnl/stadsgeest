@@ -71,11 +71,6 @@ export default async function ArticlePage({ params }: Props) {
     return t
   }
 
-  const allEntities = [
-    ...(article.persons?.map((p) => ({ name: p.name, href: `/persoon/${p.slug.current}` })) || []),
-    ...(article.organizations?.map((o) => ({ name: o.name, href: `/organisatie/${o.slug.current}` })) || []),
-  ]
-
   const readMins = Math.max(1, Math.ceil(
     ((article.body?.reduce((acc: number, b: { children?: { text?: string }[] }) =>
       acc + (b.children?.map((c) => c.text || '').join('').split(' ').length || 0), 0) || 0) +
@@ -227,11 +222,11 @@ export default async function ArticlePage({ params }: Props) {
                 </div>
               )}
 
-              {/* Tags & entities */}
-              {(article.tags?.filter(t => t?.slug?.current && t.slug.current !== 'amersfoort').length || allEntities.length) ? (
+              {/* Tags */}
+              {article.tags?.filter(t => t?.slug?.current && t.slug.current !== 'amersfoort').length ? (
                 <div style={{ paddingTop: 24, marginTop: 24, borderTop: '1px solid var(--border)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontFamily: 'var(--f-d)', fontSize: 13, fontWeight: 500, color: 'var(--t2)', marginRight: 4 }}>Tags:</span>
-                  {article.tags?.filter(t => t?.slug?.current && t.slug.current !== 'amersfoort').map((t) => {
+                  {article.tags?.filter(t => t?.slug?.current && t.slug.current !== 'amersfoort').slice(0, 5).map((t) => {
                     const nt = normalizeTag(t)
                     return (
                       <Link key={t.slug.current} href={`/tag/${nt.slug.current}`} className="ent-chip">
@@ -239,12 +234,6 @@ export default async function ArticlePage({ params }: Props) {
                       </Link>
                     )
                   })}
-                  {allEntities.map((e, i) => (
-                    <Link key={i} href={e.href} className="ent-chip">{e.name}</Link>
-                  ))}
-                  {article.locations?.map((l) => (
-                    <span key={l.slug.current} className="ent-chip">{l.name}</span>
-                  ))}
                 </div>
               ) : null}
 
@@ -276,13 +265,10 @@ export default async function ArticlePage({ params }: Props) {
               <div className="sidebar-box">
                 <div className="sidebar-title">Onderwerpen</div>
                 <div className="sidebar-tags">
-                  {article.tags?.filter(t => t?.slug?.current && t.slug.current !== 'amersfoort').map((t) => {
+                  {article.tags?.filter(t => t?.slug?.current && t.slug.current !== 'amersfoort').slice(0, 5).map((t) => {
                     const nt = normalizeTag(t)
                     return <Tag key={t.slug.current} name={nt.name} slug={nt.slug.current} />
                   })}
-                  {article.locations?.map((l) => (
-                    <span key={l.slug.current} className="ent-chip">{l.name}</span>
-                  ))}
                 </div>
               </div>
 
