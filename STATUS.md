@@ -36,6 +36,7 @@
 - **entities:** aanwezig (exacte count niet geverifieerd)
 - **Laatste scrape:** 2026-06-02 06:00:26 (Rechtspraak)
 - **Meest actief 2026-06-02:** Nextdoor (169), Rechtspraak (143), 112-nu (125), De Stad Amersfoort (81), RTV Utrecht (70)
+- **Personen/relaties-schema (aangemaakt 2026-06-02):** persons, organizations, roles, org_relations, person_relations, decisions, decision_persons, annual_reports
 
 ## Bronnen live
 
@@ -98,5 +99,5 @@
 
 ---
 
-*Cowork-update: 2026-06-02*
+*Cowork-update: 2026-06-02 — personen/relaties-schema aangemaakt in Turso*
 *Code-update: 2026-06-02 — eerste invulling Frontend-sectie*
