@@ -37,6 +37,7 @@
 - **Laatste scrape:** 2026-06-02 06:00:26 (Rechtspraak)
 - **Meest actief 2026-06-02:** Nextdoor (169), Rechtspraak (143), 112-nu (125), De Stad Amersfoort (81), RTV Utrecht (70)
 - **Personen/relaties-schema (aangemaakt 2026-06-02):** persons, organizations, roles, org_relations, person_relations, decisions, decision_persons, annual_reports
+- **Eerste vulling (2026-06-02):** 8 organisaties, 60 personen, 60 rollen — college B&W, gemeenteraad (39 leden na verkiezingen 18 mrt 2026), Meander RvB, De Alliantie directie, Waterschap Vallei en Veluwe dagelijks bestuur, Portaal RvB
 
 ## Bronnen live
 
@@ -99,5 +100,5 @@
 
 ---
 
-*Cowork-update: 2026-06-02 — personen/relaties-schema aangemaakt in Turso*
+*Cowork-update: 2026-06-02 — personen/relaties-schema aangemaakt + eerste vulling (60 personen)*
 *Code-update: 2026-06-02 — eerste invulling Frontend-sectie*
