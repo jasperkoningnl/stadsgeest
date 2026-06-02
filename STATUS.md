@@ -56,10 +56,39 @@
 
 ## Frontend — in te vullen door Code
 
-- **Status:** niet geverifieerd
-- **Actieve routes:** niet geverifieerd
-- **Sanity-inhoud:** niet geverifieerd
-- **Laatste deploy:** niet geverifieerd
+### Actieve routes en pagina's
+
+- `/` — Homepage (`src/app/page.tsx`) — hero + kortCards + analyseblok + normale artikelkaarten, revalidate 60s
+- `/artikel/[slug]` — Artikelpagina
+- `/nieuws` — Nieuwsoverzicht
+- `/archief` — Archief
+- `/112` — 112-nieuws
+- `/tag/[slug]` — Tag-overzichtspagina
+- `/persoon/[slug]` — Persoonsprofielpagina
+- `/over` — Over Stadsgeest
+- `/privacy` — Privacyverklaring
+- `/login` — Inlogpagina (wachtwoordbeveiliging via cookie-authenticatie, ingevoerd 2026-06-02)
+
+### API-routes
+
+- `POST /api/auth` — cookie-authenticatie (wachtwoordbeveiliging)
+- `POST /api/report` — meldingsfunctie
+- `GET /feed.xml` — RSS-feed
+- `GET /robots.txt` / `GET /sitemap.xml` — SEO
+
+### Sanity-integratie
+
+- **Client:** `next-sanity` via `src/lib/sanity.ts`
+- **Project ID:** `60u1z6xa`, dataset `production`, apiVersion `2026-05-28`
+- **CDN:** ingeschakeld (`useCdn: true`)
+- **Gebruik:** homepage haalt data op via `homepageQuery`; client ook in gebruik voor rapport-API (`src/app/api/report/route.ts`)
+- **Inhoud Sanity (artikelen etc.):** niet geverifieerd — site is wachtwoordbeveiligd
+
+### Laatste succesvolle Vercel deploy
+
+- Niet rechtstreeks geverifieerd (geen `gh` CLI / Vercel CLI beschikbaar in deze omgeving)
+- Laatste merge naar `main`: 2026-06-02 — PR #31 "Beveilig de site met wachtwoordbeveiliging via cookie-authenticatie"
+- Vercel deployt automatisch bij push naar `main`; verwachte deploy: 2026-06-02 ✓ (niet geverifieerd via Vercel dashboard)
 
 ## Niet geverifieerd
 
@@ -70,4 +99,4 @@
 ---
 
 *Cowork-update: 2026-06-02*
-*Code-update: niet geverifieerd*
+*Code-update: 2026-06-02 — eerste invulling Frontend-sectie*
