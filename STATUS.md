@@ -38,6 +38,7 @@
 - **Meest actief 2026-06-02:** Nextdoor (169), Rechtspraak (143), 112-nu (125), De Stad Amersfoort (81), RTV Utrecht (70)
 - **Personen/relaties-schema (aangemaakt 2026-06-02):** persons, organizations, roles, org_relations, person_relations, decisions, decision_persons, annual_reports
 - **Eerste vulling (2026-06-02):** 8 organisaties, 60 personen, 60 rollen — college B&W, gemeenteraad (39 leden na verkiezingen 18 mrt 2026), Meander RvB, De Alliantie directie, Waterschap Vallei en Veluwe dagelijks bestuur, Portaal RvB
+- **Sanity sync (2026-06-02):** alle 60 personen en 8 organisaties hebben sanity_id in Turso; documenten aanwezig in Sanity CMS
 
 ## Bronnen live
 
@@ -110,5 +111,5 @@
 
 ---
 
-*Cowork-update: 2026-06-02 — personen/relaties-schema aangemaakt + eerste vulling (60 personen) + Sanity schema uitgebreid (person + organization) + deploy naar stadsgeest033.sanity.studio*
+*Cowork-update: 2026-06-02 — personen/relaties-schema + eerste vulling (60 personen) + Sanity schema uitgebreid + deploy + Turso→Sanity sync volledig*
 *Code-update: 2026-06-02 — eerste invulling Frontend-sectie*
