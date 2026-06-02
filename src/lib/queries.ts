@@ -107,9 +107,19 @@ export const articlesByPersonQuery = `
 
 export const personBySlugQuery = `
   *[_type == "person" && slug.current == $slug][0] {
-    name, slug, role, notes,
+    name, slug, role, notes, party,
+    photo { asset->, alt },
     "orgName": organization->name,
-    "articleCount": count(*[_type == "article" && status == "published" && ^._id in persons[]._ref])
+    "totalMentions": count(*[_type == "article" && status == "published" && references(^._id)]),
+    "articles": *[_type == "article" && status == "published" && references(^._id)] | order(publishedAt desc) [0...10] {
+      _id,
+      title,
+      slug,
+      lead,
+      publishedAt,
+      format,
+      tags[]-> { name, slug }
+    }
   }
 `
 

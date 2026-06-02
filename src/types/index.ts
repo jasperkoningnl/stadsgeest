@@ -34,6 +34,9 @@ export interface Person {
   slug: SanitySlug
   role?: string
   orgName?: string
+  photo?: SanityImage
+  party?: string
+  notes?: string
 }
 
 export interface Organization {
