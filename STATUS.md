@@ -92,6 +92,16 @@
 - Laatste merge naar `main`: 2026-06-02 — PR #31 "Beveilig de site met wachtwoordbeveiliging via cookie-authenticatie"
 - Vercel deployt automatisch bij push naar `main`; verwachte deploy: 2026-06-02 ✓ (niet geverifieerd via Vercel dashboard)
 
+## Sanity Studio (geverifieerd 2026-06-02)
+
+- **Live URL:** https://stadsgeest033.sanity.studio
+- **Project ID:** `60uiz6xa`, dataset `production`
+- **Actief project (notebook):** `C:\Users\Jasper Koning\projects\amersfoort-lokaal` — heeft node_modules, is de deploy-bron
+- **Kopie (notebook):** `C:\Users\Jasper Koning\projects\stadsgeest033\studio` — zelfde schema's, geen aparte deploy
+- **Deploy commando:** `.\node_modules\.bin\sanity.cmd deploy --yes` vanuit `amersfoort-lokaal`
+- **AppId:** `khxzgwe6mplsxjjvnd5aorpq` (vastgelegd in sanity.cli.ts)
+- **Schema's uitgebreid 2026-06-02:** person (+birthYear, gender, photo, party, currentRoles, isPublicFigure), organization (+kvkNumber, logo, annualReportUrl, relatedOrganizations, housing/water types)
+
 ## Niet geverifieerd
 
 - Inhoud van Sanity (artikelen, publicaties)
