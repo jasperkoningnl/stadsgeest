@@ -111,5 +111,5 @@
 
 ---
 
-*Cowork-update: 2026-06-02 — personen/relaties-schema + eerste vulling (60 personen) + Sanity schema uitgebreid + deploy + Turso→Sanity sync volledig*
+*Cowork-update: 2026-06-02 — personen/relaties-schema + eerste vulling (60 personen) + Sanity schema uitgebreid + deploy + Turso→Sanity sync + schrijver-prompts bijgewerkt (geen zelfstandige person/org aanmaak meer)*
 *Code-update: 2026-06-02 — eerste invulling Frontend-sectie*
