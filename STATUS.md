@@ -100,5 +100,5 @@
 
 ---
 
-*Cowork-update: 2026-06-02 — personen/relaties-schema aangemaakt + eerste vulling (60 personen)*
+*Cowork-update: 2026-06-02 — personen/relaties-schema aangemaakt + eerste vulling (60 personen) + Sanity schema uitgebreid (person + organization) + deploy naar stadsgeest033.sanity.studio*
 *Code-update: 2026-06-02 — eerste invulling Frontend-sectie*
