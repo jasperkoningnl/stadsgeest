@@ -89,7 +89,7 @@
 ### Laatste succesvolle Vercel deploy
 
 - Niet rechtstreeks geverifieerd (geen `gh` CLI / Vercel CLI beschikbaar in deze omgeving)
-- Laatste merge naar `main`: 2026-06-02 — PR #31 "Beveilig de site met wachtwoordbeveiliging via cookie-authenticatie"
+- Laatste merge naar `main`: 2026-06-02 — PR #33 "feat: rebuild /persoon/[slug] page to match Stitch design"
 - Vercel deployt automatisch bij push naar `main`; verwachte deploy: 2026-06-02 ✓ (niet geverifieerd via Vercel dashboard)
 
 ## Niet geverifieerd
@@ -101,4 +101,4 @@
 ---
 
 *Cowork-update: 2026-06-02 — personen/relaties-schema aangemaakt + eerste vulling (60 personen)*
-*Code-update: 2026-06-02 — eerste invulling Frontend-sectie*
+*Code-update: 2026-06-02 — /persoon/[slug] herbouwd naar Stitch-design: foto met grayscale/hover, AI-dossier glassmorphism card, gerelateerde entiteiten chips, timeline met verticale lijn en bolletjes, 'Laad meer'-knop; personBySlugQuery uitgebreid met foto + embedded artikelen (PR #33)*
