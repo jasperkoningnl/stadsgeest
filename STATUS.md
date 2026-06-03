@@ -114,3 +114,4 @@
 
 *Cowork-update: 2026-06-03 — update-feature volledig geïmplementeerd: Sanity article schema + updates[] (date + text, deployed), analist markeert TYPE: update + slug, schrijver PATCHt bestaand artikel, designer bumpt bijgewerkte artikelen naar homepage bij significante update; alle zes relevante tasks bijgewerkt. Frontend-kant nog te doen door Code: updates[] tonen op artikelpagina + updatedAt in artikelkaarten.*
 *Code-update: 2026-06-02 — /persoon/[slug] herbouwd naar Stitch-design: foto met grayscale/hover, AI-dossier glassmorphism card, gerelateerde entiteiten chips, timeline met verticale lijn en bolletjes, 'Laad meer'-knop; personBySlugQuery uitgebreid met foto + embedded artikelen (PR #33)*
+*Code-update: 2026-06-03 — Personen-blok toegevoegd aan artikel-sidebar: persons[] waren al opgehaald via articleBySlugQuery maar niet getoond; sidebar toont nu naam, rol/org en link naar /persoon/[slug] voor alle gekoppelde personen (PR #36)*
