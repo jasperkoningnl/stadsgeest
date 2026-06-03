@@ -22,11 +22,11 @@
 
 ## Routines — wat ze doen
 
-- **stadsgeest-speurder** — Haalt signalen met status `new` of `watching` op, zoekt dwarsverbanden tussen entiteiten, controleert clustering (meerdere incidenten van hetzelfde type op één nacht/dag = zelf een verhaal), checkt Sanity-archief op eerdere berichtgeving over elk veelbelovend signaal, controleert of signalen trending zijn (≥3 items/24u). Selecteert max. 3 artikelkandidaten op basis van min. twee onafhankelijke bronnen, schrijft briefing in `summary`-veld, zet status op `researching`. Ruimt signalen op ouder dan 7-14 dagen zonder activiteit.
+- **stadsgeest-speurder** — Haalt signalen met status `new` of `watching` op, zoekt dwarsverbanden tussen entiteiten, controleert clustering (meerdere incidenten van hetzelfde type op één nacht/dag = zelf een verhaal), checkt Sanity-archief op eerdere berichtgeving over elk veelbelovend signaal, controleert of signalen trending zijn (≥3 items/24u). Selecteert max. 3 artikelkandidaten op basis van min. twee onafhankelijke bronnen, schrijft briefing in `summary`-veld, zet status op `researching`. Ruimt signalen op ouder dan 7-14 dagen zonder activiteit. Markeert signals die voortbouwen op een bestaand artikel als `TYPE: update` met slug van het doelartikel.
 - **stadsgeest-researcher** — Pakt signalen met status `researching`, verrijkt briefing met historische context via websearch, verdiept betrokken personen en organisaties, spoort lokale stemmen op via Nextdoor en Reddit. Voegt `RESEARCH-AANVULLING`-blok toe aan `summary`-veld zonder status te wijzigen.
-- **stadsgeest-schrijver** — Schrijft artikelen op basis van briefing + research-aanvulling, publiceert naar Sanity CMS.
+- **stadsgeest-schrijver** — Schrijft artikelen op basis van briefing + research-aanvulling, publiceert naar Sanity CMS. Bij `TYPE: update` in de briefing: PATCHt het bestaande Sanity-document (voegt entry toe aan `updates[]` en werkt `updatedAt` bij) in plaats van een nieuw artikel aan te maken.
 - **stadsgeest-designer** — Zoekt passende afbeeldingen, stelt homepage-indeling samen.
-- **stadsgeest-analist-middag** — Identieke logica als speurder, inclusief clustering-check en Sanity-archief check. Draait op werkdagen op basis van ochtendmateriaal. Max. 3 kandidaten, schrijft briefings, voert opruiming uit.
+- **stadsgeest-analist-middag** — Identieke logica als speurder, inclusief clustering-check, Sanity-archief check en update-detectie. Draait op werkdagen op basis van ochtendmateriaal. Max. 3 kandidaten, schrijft briefings, voert opruiming uit.
 
 ## Database Turso (geverifieerd 2026-06-02)
 
@@ -102,6 +102,7 @@
 - **Deploy commando:** `.\node_modules\.bin\sanity.cmd deploy --yes` vanuit `amersfoort-lokaal`
 - **AppId:** `khxzgwe6mplsxjjvnd5aorpq` (vastgelegd in sanity.cli.ts)
 - **Schema's uitgebreid 2026-06-02:** person (+birthYear, gender, photo, party, currentRoles, isPublicFigure), organization (+kvkNumber, logo, annualReportUrl, relatedOrganizations, housing/water types)
+- **Schema's uitgebreid 2026-06-03:** article + `updates[]` array (elk element: `date` datetime + `text` portable text). Deployed naar stadsgeest033.sanity.studio.
 
 ## Niet geverifieerd
 
@@ -111,5 +112,5 @@
 
 ---
 
-*Cowork-update: 2026-06-03 — analist-prompts uitgebreid met Stap 2b (clustering + Sanity-archief check verplicht); signaal 71 briefing herschreven met explosie-patrooncontext (3 incidenten in één nacht, verwijzing naar eerder gepubliceerd artikel "vier explosies in zes weken"); stadsgeest-speurder + stadsgeest-analist-middag bijgewerkt via scheduled tasks API*
+*Cowork-update: 2026-06-03 — analist-prompts uitgebreid met Stap 2b (clustering + Sanity-archief check verplicht); signaal 71 briefing herschreven met explosie-patrooncontext (3 incidenten in één nacht, verwijzing naar eerder gepubliceerd artikel "vier explosies in zes weken"); stadsgeest-speurder + stadsgeest-analist-middag bijgewerkt via scheduled tasks API; update-feature geïmplementeerd: Sanity article schema uitgebreid met updates[] (date + text), analist markeert TYPE: update + slug, schrijver PATCHt bestaand artikel in plaats van nieuw aan te maken; alle vier schrijver/analist-tasks bijgewerkt*
 *Code-update: 2026-06-02 — /persoon/[slug] herbouwd naar Stitch-design: foto met grayscale/hover, AI-dossier glassmorphism card, gerelateerde entiteiten chips, timeline met verticale lijn en bolletjes, 'Laad meer'-knop; personBySlugQuery uitgebreid met foto + embedded artikelen (PR #33)*
