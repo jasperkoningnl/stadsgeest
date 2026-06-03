@@ -22,11 +22,11 @@
 
 ## Routines — wat ze doen
 
-- **stadsgeest-speurder** — Haalt signalen met status `new` of `watching` op, zoekt dwarsverbanden tussen entiteiten, controleert of signalen trending zijn (≥3 items/24u). Selecteert max. 3 artikelkandidaten op basis van min. twee onafhankelijke bronnen, schrijft briefing in `summary`-veld, zet status op `researching`. Ruimt signalen op ouder dan 7-14 dagen zonder activiteit.
+- **stadsgeest-speurder** — Haalt signalen met status `new` of `watching` op, zoekt dwarsverbanden tussen entiteiten, controleert clustering (meerdere incidenten van hetzelfde type op één nacht/dag = zelf een verhaal), checkt Sanity-archief op eerdere berichtgeving over elk veelbelovend signaal, controleert of signalen trending zijn (≥3 items/24u). Selecteert max. 3 artikelkandidaten op basis van min. twee onafhankelijke bronnen, schrijft briefing in `summary`-veld, zet status op `researching`. Ruimt signalen op ouder dan 7-14 dagen zonder activiteit.
 - **stadsgeest-researcher** — Pakt signalen met status `researching`, verrijkt briefing met historische context via websearch, verdiept betrokken personen en organisaties, spoort lokale stemmen op via Nextdoor en Reddit. Voegt `RESEARCH-AANVULLING`-blok toe aan `summary`-veld zonder status te wijzigen.
 - **stadsgeest-schrijver** — Schrijft artikelen op basis van briefing + research-aanvulling, publiceert naar Sanity CMS.
 - **stadsgeest-designer** — Zoekt passende afbeeldingen, stelt homepage-indeling samen.
-- **stadsgeest-analist-middag** — Identieke logica als speurder, draait op werkdagen op basis van ochtendmateriaal. Max. 3 kandidaten, schrijft briefings, voert opruiming uit.
+- **stadsgeest-analist-middag** — Identieke logica als speurder, inclusief clustering-check en Sanity-archief check. Draait op werkdagen op basis van ochtendmateriaal. Max. 3 kandidaten, schrijft briefings, voert opruiming uit.
 
 ## Database Turso (geverifieerd 2026-06-02)
 
@@ -111,5 +111,5 @@
 
 ---
 
-*Cowork-update: 2026-06-02 — personen/relaties-schema + eerste vulling (60 personen) + Sanity schema uitgebreid + deploy + Turso→Sanity sync + schrijver-prompts bijgewerkt (geen zelfstandige person/org aanmaak meer)*
+*Cowork-update: 2026-06-03 — analist-prompts uitgebreid met Stap 2b (clustering + Sanity-archief check verplicht); signaal 71 briefing herschreven met explosie-patrooncontext (3 incidenten in één nacht, verwijzing naar eerder gepubliceerd artikel "vier explosies in zes weken"); stadsgeest-speurder + stadsgeest-analist-middag bijgewerkt via scheduled tasks API*
 *Code-update: 2026-06-02 — eerste invulling Frontend-sectie*
