@@ -15,6 +15,7 @@ export default function ArticleCard({ article, variant = 'standard', catColor = 
   const href = `/artikel/${article.slug.current}`
   const rt = relativeTime(article.publishedAt)
   const catClass = catColor === 'amber' ? 'acard-cat-amber' : catColor === 'default' ? 'acard-cat-primary' : 'acard-cat'
+  const isUpdated = article.updatedAt && new Date(article.updatedAt) > new Date(article.publishedAt)
 
   if (variant === '112') {
     const isAmber = article.tags?.some(t => t?.slug?.current === 'verkeer')
@@ -46,7 +47,10 @@ export default function ArticleCard({ article, variant = 'standard', catColor = 
           <span className="fcard-fmt">{FORMAT_LABELS[article.format] || 'Nieuws'}</span>
           <h3 className="fcard-title">{article.title}</h3>
           {article.lead && <p className="fcard-lead">{article.lead}</p>}
-          <div className="fcard-meta">{rt}</div>
+          <div className="fcard-meta">
+            {rt}
+            {isUpdated && <span style={{ fontFamily: 'var(--f-m)', fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--accent)', marginLeft: 6 }}>bijgewerkt</span>}
+          </div>
         </div>
       </Link>
     )
@@ -71,6 +75,7 @@ export default function ArticleCard({ article, variant = 'standard', catColor = 
           <span className={catClass}>{catLabel}</span>
           <span className="acard-meta-sep">·</span>
           <span>{rt}</span>
+          {isUpdated && <span style={{ fontFamily: 'var(--f-m)', fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--accent)', marginLeft: 2 }}>bijgewerkt</span>}
         </div>
         <h3 className="acard-title">{article.title}</h3>
       </Link>
@@ -85,6 +90,7 @@ export default function ArticleCard({ article, variant = 'standard', catColor = 
         <span className={catClass}>{catLabel}</span>
         <span className="acard-meta-sep">·</span>
         <span>{rt}</span>
+        {isUpdated && <span style={{ fontFamily: 'var(--f-m)', fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--accent)', marginLeft: 2 }}>bijgewerkt</span>}
       </div>
       <h3 className="acard-title">{article.title}</h3>
       {article.lead && <p className="acard-lead">{article.lead}</p>}

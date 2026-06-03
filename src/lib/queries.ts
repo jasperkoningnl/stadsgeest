@@ -22,7 +22,7 @@ export const allArticlesQuery = `
 `
 
 const ARTICLE_FIELDS = `
-  _id, title, slug, lead, format, priority, publishedAt,
+  _id, title, slug, lead, format, priority, publishedAt, updatedAt,
   mainImage { asset->, alt },
   tags[]-> { name, slug, color }
 `
@@ -54,6 +54,10 @@ export const articleBySlugQuery = `
     status,
     publishedAt,
     updatedAt,
+    updates[] {
+      date,
+      text
+    },
     author,
     editedBy,
     aiTransparency,
