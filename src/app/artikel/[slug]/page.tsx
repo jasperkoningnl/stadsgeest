@@ -278,6 +278,42 @@ export default async function ArticlePage({ params }: Props) {
                 </div>
               </div>
 
+              {article.persons && article.persons.length > 0 && (
+                <div className="sidebar-box">
+                  <div className="sidebar-title">Personen</div>
+                  {article.persons.map((p) => (
+                    <Link
+                      key={p.slug.current}
+                      href={`/persoon/${p.slug.current}`}
+                      className="rel-item"
+                      style={{ display: 'flex', alignItems: 'center', gap: 10 }}
+                    >
+                      <div style={{
+                        width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                        background: 'var(--bg-raised)', border: '1px solid var(--border)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ color: 'var(--t3)' }}>
+                          <circle cx="7" cy="4.5" r="2.5" stroke="currentColor" strokeWidth="1.2" />
+                          <path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                        </svg>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="rel-title" style={{ fontSize: 13 }}>{p.name}</div>
+                        {(p.role || p.orgName) && (
+                          <div style={{ fontFamily: 'var(--f-m)', fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>
+                            {p.role}{p.role && p.orgName ? ' · ' : ''}{p.orgName}
+                          </div>
+                        )}
+                      </div>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ color: 'var(--t3)', flexShrink: 0 }}>
+                        <path d="M4.5 2.5 L8 6 L4.5 9.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </Link>
+                  ))}
+                </div>
+              )}
+
             </aside>
           </div>
 
