@@ -14,12 +14,13 @@
 - **stadsgeest-designer-middag** — ma-vr 17:04 — designer tweede run — laatste run: 2026-06-01 15:04 ✓
 - **stadsgeest-weekreview** — zondag 09:00 — alle routine-rapportages analyseren, verbeterplan opstellen, STATUS.md kruischeck — aangemaakt 2026-06-03, eerste run: 2026-06-07
 
-## PM2 Scraper Jobs (geverifieerd 2026-06-02)
+## PM2 Scraper Jobs (geverifieerd 2026-06-03)
 
-- **scrape-browser** — cron 06:30 — Playwright scrapers — laatste run: 2026-06-02 06:30–06:33, exit 0 ✓
-- **scrape-dagelijks** — cron 07:00, 13:00, 19:00 — RSS/API scrapers — laatste run: 2026-06-02 07:00–07:01, exit 0 ✓
-- **scrape-wekelijks** — cron 08:00 — trage API's/HTML — laatste run: 2026-06-02 08:00–08:01, exit 0 ✓
-- **Auto-herstel:** Windows Task Scheduler voert `pm2 resurrect` uit bij inloggen (ingesteld 2026-06-02). Daemon-crashes binnen een sessie vereisen handmatig `pm2 start ecosystem.config.cjs`.
+- **scrape-browser** — cron 06:30 — Playwright scrapers — laatste run: 2026-06-03 06:30–06:33 ✓
+- **scrape-dagelijks** — cron 07:00, 13:00, 19:00 — RSS/API scrapers — laatste run: 2026-06-03 19:00–19:01 ✓
+- **scrape-wekelijks** — cron 08:00 — trage API's/HTML — laatste run: 2026-06-03 08:01 ✓
+- **scrape-nieuw** — cron ma 09:00 — 15 nieuwe primaire bronnen (Rekenkamer, RvS, OpenKvK, GR's, DUO, Huurcommissie, ACM, Monumenten, EP-online, Kadaster, Buurtbudgetten, EU-subsidies, COELO, GGD, Regio agenda) — aangemaakt 2026-06-03, eerste run: 2026-06-03 20:04 (1 item, 11 fouten — scrapers in debug-fase)
+- **Auto-herstel:** Windows Task Scheduler voert `pm2 resurrect` uit bij inloggen (ingesteld 2026-06-02). Scripts: `scraper/src/run-nieuw.js`, `lib.js`.
 
 ## Routines — wat ze doen
 
@@ -29,12 +30,13 @@
 - **stadsgeest-designer** — Zoekt passende afbeeldingen, stelt homepage-indeling samen. Beschouwt ook bijgewerkte artikelen (updatedAt binnen 48 uur) als kandidaat voor bump naar homepage of priority "top" — mits de update inhoudelijk significant is.
 - **stadsgeest-analist-middag** — Identieke logica als speurder, inclusief clustering-check, Sanity-archief check en update-detectie. Draait op werkdagen op basis van ochtendmateriaal. Max. 3 kandidaten, schrijft briefings, voert opruiming uit.
 
-## Database Turso (geverifieerd 2026-06-02)
+## Database Turso (geverifieerd 2026-06-03)
 
-- **raw_items:** 1.610 items — alle verwerkt (0 onverwerkt)
-- **signals:** 62 totaal — published: 26 / new: 11 / watching: 11 / discarded: 12 / researching: 2
-- **sources:** aanwezig (scrapers registreren zichzelf automatisch)
-- **entities:** aanwezig (exacte count niet geverifieerd)
+- **raw_items:** >1.610 items (niet opnieuw geverifieerd)
+- **signals:** niet opnieuw geverifieerd
+- **sources:** 93 bronnen — tier-kolom toegevoegd (tier 1: 30, tier 2: 42+, tier 3: 20) — 15 nieuwe primaire bronnen geregistreerd 2026-06-03
+- **entities:** entity_type kolom aanwezig
+- **entity_signals:** nieuwe koppeltabel aangemaakt 2026-06-03 (entity_id → signal_id, met indexes)
 - **Laatste scrape:** 2026-06-02 06:00:26 (Rechtspraak)
 - **Meest actief 2026-06-02:** Nextdoor (169), Rechtspraak (143), 112-nu (125), De Stad Amersfoort (81), RTV Utrecht (70)
 - **Personen/relaties-schema (aangemaakt 2026-06-02):** persons, organizations, roles, org_relations, person_relations, decisions, decision_persons, annual_reports
@@ -48,6 +50,13 @@
 **Browser dagelijks (run-browser.js):** nieuwsplein33, rtvutrecht, raadsinformatie, nextdoor, igj-nvwa, omthuis
 
 **Wekelijks (run-weekly.js):** pdok-bag, rechtspraak, ftm-amersfoort, alliantie, odu, prorail, regio-amersfoort, archiefeemland, subsidieregister, uwv-amersfoort, amersfoort-cijfers, financien-amersfoort, ibabs-woo, org-rss, bedrijven-amersfoort, erfgoed-natuur, onderwijs-cultuur, bw-besluiten, meander
+
+## Bronladder (ingevoerd 2026-06-03)
+
+- **Tier 1** (publicatiebronnen — zelfstandig artikelkandidaat): 30 bronnen — o.a. TenderNed, CBS StatLine, Rechtspraak, Raadsinformatie, IGJ/NVWA, PDOK BAG, Subsidieregister, B&W besluiten, iBabs, UWV, ODU, BIG-register, LRK, Insolventieregister + 15 nieuwe (Rekenkamer, RvS, OpenKvK, etc.)
+- **Tier 2** (corroboratiebronnen): 42+ bronnen — o.a. Gemeente Amersfoort, VRU, Eemland1, De Alliantie, Meander, Regio Amersfoort, Rijksoverheid, ProRail, NS
+- **Tier 3** (detectiebronnen — alleen trigger): 20 bronnen — o.a. De Stad Amersfoort, NOS, Politie, 112-nu, Nextdoor, Reddit, Bluesky, RTV Utrecht, Nieuwsplein33
+- **Novelty-score + artikeltype** actief in speurder en analist-middag (nov. 2026-06-03)
 
 ## Bronnen gepland (niet actief)
 
@@ -113,7 +122,7 @@
 
 ---
 
-*Cowork-update: 2026-06-03 — Nextdoor-quotes en foto's geactiveerd (experimenteel, site achter wachtwoord): researcher noteert letterlijke quotes + FOTO_URL uit Nextdoor-posts; schrijver verwerkt quotes als blockquote met attributie en uploadt Nextdoor-foto als mainImage naar Sanity. VERVOLGACTIE ALS DIT WERKT: toestemming-tussenstap inbouwen (routine vraagt automatisch toestemming aan poster), gepubliceerde Nextdoor-foto's zonder toestemming retroactief vervangen door gelicenseerd alternatief.*
+*Cowork-update: 2026-06-03 — Bronladder ingevoerd (tier 1/2/3 op alle 93 bronnen), novelty-score + artikeltype actief in speurder/analist, entity_signals koppeltabel aangemaakt, intake bijgewerkt met entity_type classificatie, schrijver bijgewerkt met artikellengte per type en doorverwijzing. 15 nieuwe primaire bronnen geregistreerd + scrape-nieuw PM2-job aangemaakt (maandag 09:00). Scrapers deels in debug-fase (11/15 fouten bij eerste run — HTTP-toegang vereist verfijning).*extdoor-foto als mainImage naar Sanity. VERVOLGACTIE ALS DIT WERKT: toestemming-tussenstap inbouwen (routine vraagt automatisch toestemming aan poster), gepubliceerde Nextdoor-foto's zonder toestemming retroactief vervangen door gelicenseerd alternatief.*
 *Cowork-update: 2026-06-03 — stadsgeest-weekreview scheduled task aangemaakt (zondag 09:00): leest transcripten van alle 10 routine-sessies, analyseert rapportages, kruischeckt met STATUS.md en schrijft verbeterplan naar weekreviews/weekreview-[datum].md*
 *Cowork-update: 2026-06-03 — UNSPLASH_ACCESS_KEY toegevoegd aan scraper/.env; beide designer tasks (ochtend + middag) bijgewerkt: geen zwart-wit/archiefbeelden tenzij artikel expliciet over historisch onderwerp gaat.*
 *Cowork-update: 2026-06-03 — update-feature volledig geïmplementeerd: Sanity article schema + updates[] (date + text, deployed), analist markeert TYPE: update + slug, schrijver PATCHt bestaand artikel, designer bumpt bijgewerkte artikelen naar homepage bij significante update; alle zes relevante tasks bijgewerkt. Frontend-kant nog te doen door Code: updates[] tonen op artikelpagina + updatedAt in artikelkaarten.*
