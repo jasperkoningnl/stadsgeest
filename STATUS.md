@@ -90,7 +90,7 @@
 ### Laatste succesvolle Vercel deploy
 
 - Niet rechtstreeks geverifieerd (geen `gh` CLI / Vercel CLI beschikbaar in deze omgeving)
-- Laatste merge naar `main`: 2026-06-02 — PR #31 "Beveilig de site met wachtwoordbeveiliging via cookie-authenticatie"
+- Laatste merge naar `main`: 2026-06-02 — PR #33 "feat: rebuild /persoon/[slug] page to match Stitch design"
 - Vercel deployt automatisch bij push naar `main`; verwachte deploy: 2026-06-02 ✓ (niet geverifieerd via Vercel dashboard)
 
 ## Sanity Studio (geverifieerd 2026-06-02)
@@ -112,4 +112,4 @@
 ---
 
 *Cowork-update: 2026-06-03 — analist-prompts uitgebreid met Stap 2b (clustering + Sanity-archief check verplicht); signaal 71 briefing herschreven met explosie-patrooncontext (3 incidenten in één nacht, verwijzing naar eerder gepubliceerd artikel "vier explosies in zes weken"); stadsgeest-speurder + stadsgeest-analist-middag bijgewerkt via scheduled tasks API*
-*Code-update: 2026-06-02 — eerste invulling Frontend-sectie*
+*Code-update: 2026-06-02 — /persoon/[slug] herbouwd naar Stitch-design: foto met grayscale/hover, AI-dossier glassmorphism card, gerelateerde entiteiten chips, timeline met verticale lijn en bolletjes, 'Laad meer'-knop; personBySlugQuery uitgebreid met foto + embedded artikelen (PR #33)*
