@@ -112,6 +112,7 @@
 
 ---
 
+*Cowork-update: 2026-06-03 — UNSPLASH_ACCESS_KEY toegevoegd aan scraper/.env; beide designer tasks (ochtend + middag) bijgewerkt: geen zwart-wit/archiefbeelden tenzij artikel expliciet over historisch onderwerp gaat.*
 *Cowork-update: 2026-06-03 — update-feature volledig geïmplementeerd: Sanity article schema + updates[] (date + text, deployed), analist markeert TYPE: update + slug, schrijver PATCHt bestaand artikel, designer bumpt bijgewerkte artikelen naar homepage bij significante update; alle zes relevante tasks bijgewerkt. Frontend-kant nog te doen door Code: updates[] tonen op artikelpagina + updatedAt in artikelkaarten.*
 *Code-update: 2026-06-03 — updates[] feature geïmplementeerd (PR #35): nieuw ArticleUpdates client-component toont updatebalk op artikelpagina (niet-inklapbaar bij één update, inklapbare geschiedenis bij meerdere); updates[] en updatedAt toegevoegd aan GROQ-queries; "bijgewerkt" label op ArticleCard wanneer updatedAt na publishedAt valt*
 *Code-update: 2026-06-02 — /persoon/[slug] herbouwd naar Stitch-design: foto met grayscale/hover, AI-dossier glassmorphism card, gerelateerde entiteiten chips, timeline met verticale lijn en bolletjes, 'Laad meer'-knop; personBySlugQuery uitgebreid met foto + embedded artikelen (PR #33)*
