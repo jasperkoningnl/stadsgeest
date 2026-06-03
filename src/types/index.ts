@@ -54,6 +54,12 @@ export interface Source {
   retrievedAt?: string
 }
 
+export interface ArticleUpdate {
+  date: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  text: any[]
+}
+
 export interface Article {
   _id: string
   title: string
@@ -64,6 +70,7 @@ export interface Article {
   status?: string
   publishedAt: string
   updatedAt?: string
+  updates?: ArticleUpdate[]
   author?: string
   editedBy?: string
   aiTransparency?: string

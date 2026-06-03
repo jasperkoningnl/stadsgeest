@@ -10,6 +10,7 @@ import PortableTextRenderer from '@/components/PortableTextRenderer'
 import ReportButton from '@/components/ReportButton'
 import ShareButtons from '@/components/ShareButtons'
 import BackButton from '@/components/BackButton'
+import ArticleUpdates from '@/components/ArticleUpdates'
 import { notFound } from 'next/navigation'
 import { SITE_URL } from '@/lib/site'
 
@@ -181,6 +182,11 @@ export default async function ArticlePage({ params }: Props) {
                 </figcaption>
               )}
             </figure>
+          )}
+
+          {/* Updates */}
+          {article.updates && article.updates.length > 0 && (
+            <ArticleUpdates updates={article.updates} />
           )}
 
           {/* Body + Sidebar */}
