@@ -780,12 +780,114 @@ async function backfillJaarverslagen() {
   return stats;
 }
 
+// ── 7. Raadsinformatie/Notubiz — Amersfoort ─────────────────────────────────────
+// Directe JSON API: api.notubiz.nl/events?organisation_id=867
+// Geen Playwright nodig — puur fetch
+
+async function backfillNotubizApi() {
+  console.log('\n[raadsinformatie] Start backfill via Notubiz API — 12 maanden');
+  const stats = { new: 0, skipped: 0, errors: 0 };
+
+  const sid = await ensureSource(db, {
+    name: 'raadsinformatie',
+    url: 'https://amersfoort.raadsinformatie.nl',
+    source_type: 'api',
+    reliability: 'primary',
+    category: 'government',
+    scrape_frequency: 'daily',
+    tier: 1,
+  });
+
+  const ORG_ID = 867;
+  const DATE_FROM = '2025-06-01 00:00:00';
+  const DATE_TO = '2026-06-05 00:00:00';
+  const PER_PAGE = 100;
+
+  let page = 1;
+  let totalPages = null;
+
+  while (true) {
+    const url = `https://api.notubiz.nl/events?version=3.62.0&lang=nl-nl&format=json` +
+      `&organisation_id=${ORG_ID}&date_from=${encodeURIComponent(DATE_FROM)}` +
+      `&date_to=${encodeURIComponent(DATE_TO)}&page=${page}&per_page=${PER_PAGE}` +
+      `&sort_field=start_date&sort_order=ASC&user_permission_group=&template=false`;
+
+    let data;
+    try {
+      const resp = await fetch(url, {
+        headers: { 'User-Agent': UA, 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(20000),
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      data = await resp.json();
+    } catch (e) {
+      console.error(`  [raadsinformatie] Fout bij pagina ${page}: ${e.message}`);
+      stats.errors++;
+      break;
+    }
+
+    const pagination = data.pagination ?? {};
+    if (totalPages === null) {
+      totalPages = pagination.total_pages ?? 1;
+      console.log(`  [raadsinformatie] Totaal: ${pagination.total_items} vergaderingen, ${totalPages} pagina's`);
+    }
+
+    const events = data.events ?? data.items ?? [];
+    if (events.length === 0) break;
+
+    for (const event of events) {
+      // Haal titel uit URL of attributes
+      const eventUrl = event.url ?? `https://amersfoort.raadsinformatie.nl/vergadering/${event.id}`;
+      const urlTitle = decodeURIComponent((eventUrl.split('/').pop() ?? '').replace(/\+/g, ' '));
+      const attrTitle = (event.attributes ?? []).find(a => typeof a.value === 'string' && a.value.length > 2 && !a.value.includes('http'))?.value;
+      const title = attrTitle || urlTitle || `Vergadering ${event.id}`;
+
+      const startDate = event.plannings?.[0]?.start_date ?? event.creation_date ?? '';
+      const dateStr = startDate.substring(0, 10);
+      const gremiumId = event.gremium?.id;
+
+      // Agenda-items als content
+      const agendaItems = (event.agenda_items ?? [])
+        .slice(0, 20)
+        .map(a => a.title ?? a.name ?? '')
+        .filter(Boolean);
+      const content = [
+        `Vergadering: ${title}`,
+        `Datum: ${startDate}`,
+        gremiumId ? `Gremium ID: ${gremiumId}` : '',
+        agendaItems.length ? `\nAgenda:\n${agendaItems.map(i => `- ${i}`).join('\n')}` : '',
+      ].filter(Boolean).join('\n').substring(0, 10000);
+
+      const r = await insertItem(db, {
+        source_id: sid,
+        title: title.substring(0, 490),
+        content,
+        summary: `Vergadering Amersfoort: ${title} (${dateStr})`,
+        external_url: eventUrl,
+        scraped_at: startDate ? `${dateStr}T00:00:00.000Z` : new Date().toISOString(),
+        is_historical: 1,
+      });
+      if (r === true) stats.new++;
+      else if (r === false) stats.skipped++;
+      else stats.errors++;
+    }
+
+    console.log(`  [raadsinformatie] Pagina ${page}/${totalPages}: ${events.length} vergaderingen (${stats.new} nieuw totaal)`);
+    if (page >= totalPages) break;
+    page++;
+    await sleep(300);
+  }
+
+  log('raadsinformatie-backfill', stats);
+  return stats;
+}
+
 // ── Hoofdprogramma ─────────────────────────────────────────────────────────────
 
 async function main() {
   const bron = process.argv[2] ?? 'all';
   const bronnen = bron === 'all'
-    ? ['rechtspraak', 'bekendmakingen', 'tenderned', 'subsidieregister', 'cbs', 'jaarverslagen']
+    ? ['rechtspraak', 'bekendmakingen', 'tenderned', 'subsidieregister', 'cbs', 'jaarverslagen', 'raadsinformatie']
     : [bron];
 
   console.log(`\n=== Stadsgeest Historische Backfill ===`);
@@ -807,9 +909,10 @@ async function main() {
         case 'subsidieregister': stats = await backfillSubsidieregister(); break;
         case 'cbs':             stats = await backfillCbs(); break;
         case 'jaarverslagen':   stats = await backfillJaarverslagen(); break;
+        case 'raadsinformatie': stats = await backfillNotubizApi(); break;
         default:
           console.error(`Onbekende bron: ${b}`);
-          console.log('Gebruik: node src/run-backfill.js [rechtspraak|bekendmakingen|tenderned|subsidieregister|cbs|jaarverslagen|all]');
+          console.log('Gebruik: node src/run-backfill.js [rechtspraak|bekendmakingen|tenderned|subsidieregister|cbs|jaarverslagen|raadsinformatie|all]');
           process.exit(1);
       }
     } catch (e) {
