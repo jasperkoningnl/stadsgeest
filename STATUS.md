@@ -19,7 +19,7 @@
 - **scrape-browser** — cron 06:30 — Playwright scrapers (run-browser.js) — laatste run: 2026-06-04 06:30 ✓
 - **scrape-dagelijks** — cron 07:00, 13:00, 19:00 — RSS/API scrapers (run-all.js) — laatste run: 2026-06-04 07:00 ✓
 - **scrape-wekelijks** — cron 08:00 — trage API's/HTML (run-weekly.js) — hersteld 2026-06-04 (scripts waren kwijtgeraakt uit git) — laatste run: 2026-06-04 08:00 ✓
-- **scrape-nieuw** — cron ma 09:00 — 15 nieuwe primaire bronnen (run-nieuw.js) — laatste run: 2026-06-03 20:04 (debug-fase)
+- **scrape-nieuw** — cron ma 09:00 — 15 nieuwe primaire bronnen (run-nieuw.js) — laatste run: 2026-06-03 20:04 — stabiel (10 van 15 actief; RvS/Huurcommissie/OpenKvK/EP-online/EU-subsidies uitgeschakeld wegens JS/auth)
 - **dwarsverbanden-nacht** — cron 00:45 — co-occurrence analyse via entity_signals, schrijft crossref_briefing naar signalen (dwarsverbanden.js) — toegevoegd 2026-06-04
 - **dwarsverbanden-middag** — cron 11:50 ma-vr — zelfde als nacht, tweede run — toegevoegd 2026-06-04
 - **Auto-herstel:** Windows Task Scheduler voert `pm2 resurrect` uit bij inloggen (ingesteld 2026-06-02).
@@ -121,7 +121,6 @@
 - Inhoud van Sanity (artikelen, publicaties)
 - Exacte count `entities` tabel na backfill-intake
 - Inhoud gepubliceerde artikelen (site wachtwoordbeveiligd)
-- scrape-nieuw stabiliteit: 11 van 15 scrapers faalden bij eerste run (JS/auth problemen), nog in debug-fase
 
 ---
 
@@ -136,4 +135,5 @@
 *Code-update: 2026-06-03 — updates[] feature geïmplementeerd (PR #35): nieuw ArticleUpdates client-component toont updatebalk op artikelpagina (niet-inklapbaar bij één update, inklapbare geschiedenis bij meerdere); updates[] en updatedAt toegevoegd aan GROQ-queries; "bijgewerkt" label op ArticleCard wanneer updatedAt na publishedAt valt*
 *Code-update: 2026-06-02 — /persoon/[slug] herbouwd naar Stitch-design: foto met grayscale/hover, AI-dossier glassmorphism card, gerelateerde entiteiten chips, timeline met verticale lijn en bolletjes, 'Laad meer'-knop; personBySlugQuery uitgebreid met foto + embedded artikelen (PR #33)*
 *Code-update: 2026-06-03 — Personen-blok toegevoegd aan artikel-sidebar: persons[] waren al opgehaald via articleBySlugQuery maar niet getoond; sidebar toont nu naam, rol/org en link naar /persoon/[slug] voor alle gekoppelde personen (PR #36)*
+*Cowork-update: 2026-06-04 — STATUS.md kruischeck: scrape-nieuw debug-fase verwijderd uit Niet geverifieerd (opgelost, 10/15 actief); weekreview-2026-06-03.md + cowork-prompt-dwarsverbanden-script.md toegevoegd aan repo.*
 
