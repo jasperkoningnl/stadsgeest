@@ -63,4 +63,5 @@ export async function insertItem(db, { source_id, title, content, summary, exter
 
 export function log(name, stats) {
   const ts = new Date().toISOString();
-  console.log(`[${ts}] ${name}: ${stats.new} nieuw, ${stats
+  console.log(`[${ts}] ${name}: ${stats.new} nieuw, ${stats.skipped} overgeslagen, ${stats.errors} fouten`);
+}
