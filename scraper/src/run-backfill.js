@@ -346,102 +346,80 @@ function parseSruXml(xml) {
 }
 
 // ── 3. TenderNed ─────────────────────────────────────────────────────────────
-// Opendata API: https://www.tenderned.nl/aankondigingen/api/v2/publicaties
-// Filter op aanbestedende dienst Amersfoort
+// TenderNed publieke API ondersteunt geen gemeente-filter of datumfilter.
+// De werkende aanpak: Atom RSS feed + keyword-filter (identiek aan de dagelijkse scraper).
+// Historische data (>25 items terug) is via de publieke API niet op te halen;
+// die is al gedekt door de dagelijkse scraper die continu heeft gedraaid.
 
 async function backfillTenderned() {
-  console.log('\n[tenderned] Start backfill — 12 maanden');
+  console.log('\n[tenderned] Start backfill via RSS feed (meest recente Amersfoort-publicaties)');
   const stats = { new: 0, skipped: 0, errors: 0 };
 
   const sid = await ensureSource(db, {
     name: 'tenderned',
     url: 'https://www.tenderned.nl',
-    source_type: 'api',
+    source_type: 'rss',
     reliability: 'primary',
     category: 'government',
     scrape_frequency: 'daily',
     tier: 1,
   });
 
-  const dateFrom = '2025-06-01';
-  const dateTo = '2026-06-04';
-  const PAGE_SIZE = 25;
-  let page = 0;
-  let total = null;
+  const KEYWORDS = ['amersfoort', 'gemeente amersfoort', 'regio amersfoort', 'amfors'];
+  const UA_RSS = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
 
-  // TenderNed heeft een opendata zoekpagina; de API-structuur wisselt per versie.
-  // We proberen de opensearch/JSON API; bij fout vallen we terug op de HTML-zoekpagina.
-  while (true) {
-    const url = `https://www.tenderned.nl/aankondigingen/api/v2/publicaties?` +
-      `zoekterm=Amersfoort&datumVanaf=${dateFrom}&datumTot=${dateTo}` +
-      `&pageSize=${PAGE_SIZE}&page=${page}&sort=datum_desc`;
-
-    let data;
-    try {
-      data = await fetchJson(url);
-    } catch (e) {
-      // Probeer alternatieve endpoint
-      try {
-        const altUrl = `https://www.tenderned.nl/papi/tenderned-rs-tns/v2/publicaties?` +
-          `q=Amersfoort&datumVanaf=${dateFrom}&datumTot=${dateTo}` +
-          `&rows=${PAGE_SIZE}&start=${page * PAGE_SIZE}`;
-        data = await fetchJson(altUrl);
-      } catch (e2) {
-        console.error(`  [tenderned] API niet bereikbaar: ${e2.message}`);
-        console.log('  [tenderned] Tip: draai dit later opnieuw of scrape handmatig via browser-variant');
-        stats.errors++;
-        break;
-      }
-    }
-
-    // Normaliseer response (TenderNed API wisselt structuur)
-    const items = data?.publicaties ?? data?.results ?? data?.aankondigingen ?? data?.items ?? [];
-    if (total === null) {
-      total = data?.totaal ?? data?.total ?? data?.numberOfResults ?? items.length;
-      console.log(`  [tenderned] Totaal gevonden: ${total}`);
-    }
-
-    if (items.length === 0) break;
-
-    for (const item of items) {
-      const title = item.titel ?? item.title ?? item.omschrijving ?? 'Aanbesteding';
-      const url = item.url ?? item.link ??
-        (item.publicatieId ? `https://www.tenderned.nl/aankondigingen/overzicht/aankondiging/${item.publicatieId}` : '');
-      const date = (item.publicatieDatum ?? item.datum ?? item.date ?? '').substring(0, 10);
-      const dienst = item.aanbestedendeDienst ?? item.organisatie ?? '';
-      const partij = item.gegundAan ?? item.winnaar ?? '';
-      const bedrag = item.opdrachtwaarde ?? item.waarde ?? '';
-      const type = item.type ?? item.procedureType ?? '';
-
-      const content = [
-        type ? `Type: ${type}` : '',
-        dienst ? `Aanbestedende dienst: ${dienst}` : '',
-        partij ? `Gegund aan: ${partij}` : '',
-        bedrag ? `Waarde: ${bedrag}` : '',
-        item.beschrijving ?? item.omschrijving ?? '',
-      ].filter(Boolean).join('\n').substring(0, 10000);
-
-      const r = await insertItem(db, {
-        source_id: sid,
-        title,
-        content,
-        summary: content.substring(0, 500),
-        external_url: url,
-        scraped_at: date || new Date().toISOString(),
-        is_historical: 1,
-      });
-      if (r === true) stats.new++;
-      else if (r === false) stats.skipped++;
-      else stats.errors++;
-    }
-
-    console.log(`  [tenderned] Pagina ${page}: ${items.length} items (${stats.new} nieuw totaal)`);
-    page++;
-
-    if (items.length < PAGE_SIZE) break;
-    if (total !== null && page * PAGE_SIZE >= total) break;
-    await sleep(500);
+  // Haal de Atom feed op
+  let xml;
+  try {
+    const resp = await fetch('https://www.tenderned.nl/tenderned-rss-web/rss/laatste-publicatie.rss', {
+      headers: { 'User-Agent': UA_RSS, 'Accept': 'application/atom+xml, application/xml, */*' },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    xml = await resp.text();
+  } catch (e) {
+    console.error(`  [tenderned] RSS feed niet bereikbaar: ${e.message}`);
+    stats.errors++;
+    log('tenderned-backfill', stats);
+    return stats;
   }
+
+  // Parse Atom entries
+  const blocks = xml.match(/<atom:entry>[\s\S]*?<\/atom:entry>/g) || [];
+  console.log(`  [tenderned] ${blocks.length} items in feed, filter op Amersfoort`);
+
+  const items = [];
+  for (const block of blocks) {
+    const title = stripHtml((block.match(/<atom:title>([^<]+)<\/atom:title>/) || [])[1] || '');
+    const link = (block.match(/<atom:link[^>]+href="([^"]+)"/) || [])[1] || '';
+    const summary = stripHtml((block.match(/<atom:summary[^>]*>([\s\S]*?)<\/atom:summary>/) || [])[1] || '');
+    const date = (block.match(/<atom:updated>([^<]+)<\/atom:updated>/) || [])[1] || '';
+    const text = (title + ' ' + summary).toLowerCase();
+    if (KEYWORDS.some(kw => text.includes(kw))) {
+      items.push({ title, link, summary, date: date.substring(0, 10) });
+    }
+  }
+
+  console.log(`  [tenderned] ${items.length} Amersfoort-items gevonden`);
+
+  // Verwerk de Amersfoort-items uit de RSS feed
+  for (const item of items) {
+    const r = await insertItem(db, {
+      source_id: sid,
+      title: item.title || 'Aanbesteding',
+      content: item.summary,
+      summary: item.summary.substring(0, 500),
+      external_url: item.link,
+      scraped_at: item.date || new Date().toISOString(),
+      is_historical: 1,
+    });
+    if (r === true) stats.new++;
+    else if (r === false) stats.skipped++;
+    else stats.errors++;
+  }
+
+  console.log(`  [tenderned] Opmerking: RSS feed geeft alleen meest recente publicaties.`);
+  console.log(`  [tenderned] Historische data (>25 items terug) is al gedekt door dagelijkse scraper (run-all.js).`);
 
   log('tenderned-backfill', stats);
   return stats;
