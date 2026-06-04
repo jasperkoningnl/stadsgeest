@@ -1,26 +1,27 @@
 # STATUS.md — Stadsgeest 033
 
-## Cowork Scheduled Tasks (geverifieerd 2026-06-02)
+## Cowork Scheduled Tasks (geverifieerd 2026-06-04)
 
-- **stadsgeest-intake** — dagelijks 00:10 — raw_items verwerken, signalen bijwerken — laatste run: 2026-06-01 22:10 ✓
-- **stadsgeest-speurder** (analist nacht) — dagelijks 01:01 — signalen analyseren, kandidaten selecteren — laatste run: 2026-06-01 23:01 ✓
-- **stadsgeest-researcher** — dagelijks 02:04 — achtergrondinfo verzamelen per kandidaat — laatste run: 2026-06-02 00:04 ✓
-- **stadsgeest-schrijver** — dagelijks 06:05 — artikelen schrijven en publiceren naar Sanity — laatste run: 2026-06-02 04:05 ✓
-- **stadsgeest-designer** — dagelijks 07:05 — afbeeldingen zoeken, homepage-indeling — laatste run: 2026-06-02 05:05 ✓
-- **stadsgeest-intake-middag** — ma-vr 11:36 — intake tweede run — laatste run: 2026-06-02 09:37 ✓
-- **stadsgeest-analist-middag** — ma-vr 12:02 — analyse tweede run — laatste run: 2026-06-02 10:02 ✓
-- **stadsgeest-researcher-middag** — ma-vr 12:34 — research tweede run — laatste run: 2026-06-02 10:35 ✓
-- **stadsgeest-schrijver-middag** — ma-vr 16:39 — schrijver tweede run — laatste run: 2026-06-01 14:39 ✓
-- **stadsgeest-designer-middag** — ma-vr 17:04 — designer tweede run — laatste run: 2026-06-01 15:04 ✓
-- **stadsgeest-weekreview** — zondag 09:00 — alle routine-rapportages analyseren, verbeterplan opstellen, STATUS.md kruischeck — aangemaakt 2026-06-03, eerste run: 2026-06-07
+- **stadsgeest-intake** — dagelijks 00:10 — raw_items verwerken, signalen bijwerken — laatste run: 2026-06-04 10:30 (handmatig getriggerd voor historische backfill-verwerking) ✓
+- **stadsgeest-speurder** (analist nacht) — dagelijks 01:01 — signalen analyseren, kandidaten selecteren — laatste run: 2026-06-03 23:00 ✓
+- **stadsgeest-researcher** — dagelijks 02:04 — achtergrondinfo verzamelen per kandidaat — laatste run: 2026-06-04 00:04 ✓
+- **stadsgeest-schrijver** — dagelijks 06:05 — artikelen schrijven en publiceren naar Sanity — laatste run: 2026-06-04 04:05 ✓
+- **stadsgeest-designer** — dagelijks 07:05 — afbeeldingen zoeken, homepage-indeling — laatste run: 2026-06-04 05:04 ✓
+- **stadsgeest-intake-middag** — ma-vr 11:36 — intake tweede run — laatste run: 2026-06-03 09:37 ✓ — bijgewerkt 2026-06-04: historische items → status 'watching'
+- **stadsgeest-analist-middag** — ma-vr 12:02 — analyse tweede run — laatste run: 2026-06-03 10:02 ✓
+- **stadsgeest-researcher-middag** — ma-vr 12:34 — research tweede run — laatste run: 2026-06-03 10:35 ✓
+- **stadsgeest-schrijver-middag** — ma-vr 16:39 — schrijver tweede run — laatste run: 2026-06-03 14:39 ✓
+- **stadsgeest-designer-middag** — ma-vr 17:04 — designer tweede run — laatste run: 2026-06-03 15:04 ✓
+- **stadsgeest-weekreview** — zondag 09:00 — alle routine-rapportages analyseren, verbeterplan opstellen, STATUS.md kruischeck — eerste run: 2026-06-07
 
-## PM2 Scraper Jobs (geverifieerd 2026-06-03)
+## PM2 Scraper Jobs (geverifieerd 2026-06-04)
 
-- **scrape-browser** — cron 06:30 — Playwright scrapers — laatste run: 2026-06-03 06:30–06:33 ✓
-- **scrape-dagelijks** — cron 07:00, 13:00, 19:00 — RSS/API scrapers — laatste run: 2026-06-03 19:00–19:01 ✓
-- **scrape-wekelijks** — cron 08:00 — trage API's/HTML — laatste run: 2026-06-03 08:01 ✓
-- **scrape-nieuw** — cron ma 09:00 — 15 nieuwe primaire bronnen (Rekenkamer, RvS, OpenKvK, GR's, DUO, Huurcommissie, ACM, Monumenten, EP-online, Kadaster, Buurtbudgetten, EU-subsidies, COELO, GGD, Regio agenda) — aangemaakt 2026-06-03, eerste run: 2026-06-03 20:04 (1 item, 11 fouten — scrapers in debug-fase)
-- **Auto-herstel:** Windows Task Scheduler voert `pm2 resurrect` uit bij inloggen (ingesteld 2026-06-02). Scripts: `scraper/src/run-nieuw.js`, `lib.js`.
+- **scrape-browser** — cron 06:30 — Playwright scrapers (run-browser.js) — laatste run: 2026-06-04 06:30 ✓
+- **scrape-dagelijks** — cron 07:00, 13:00, 19:00 — RSS/API scrapers (run-all.js) — laatste run: 2026-06-04 07:00 ✓
+- **scrape-wekelijks** — cron 08:00 — trage API's/HTML (run-weekly.js) — hersteld 2026-06-04 (scripts waren kwijtgeraakt uit git) — laatste run: 2026-06-04 08:00 ✓
+- **scrape-nieuw** — cron ma 09:00 — 15 nieuwe primaire bronnen (run-nieuw.js) — laatste run: 2026-06-03 20:04 (debug-fase)
+- **Auto-herstel:** Windows Task Scheduler voert `pm2 resurrect` uit bij inloggen (ingesteld 2026-06-02).
+- **Scripts hersteld 2026-06-04:** run-weekly.js, run-all.js, run-browser.js, db.js, utils.js, browser.js + 47 scrapers in scraper/src/scrapers/ — waren verloren als git untracked files in stash.
 
 ## Routines — wat ze doen
 
@@ -30,18 +31,17 @@
 - **stadsgeest-designer** — Zoekt passende afbeeldingen, stelt homepage-indeling samen. Beschouwt ook bijgewerkte artikelen (updatedAt binnen 48 uur) als kandidaat voor bump naar homepage of priority "top" — mits de update inhoudelijk significant is.
 - **stadsgeest-analist-middag** — Identieke logica als speurder, inclusief clustering-check, Sanity-archief check en update-detectie. Draait op werkdagen op basis van ochtendmateriaal. Max. 3 kandidaten, schrijft briefings, voert opruiming uit.
 
-## Database Turso (geverifieerd 2026-06-03)
+## Database Turso (geverifieerd 2026-06-04)
 
-- **raw_items:** >1.610 items (niet opnieuw geverifieerd)
-- **signals:** niet opnieuw geverifieerd
-- **sources:** 93 bronnen — tier-kolom toegevoegd (tier 1: 30, tier 2: 42+, tier 3: 20) — 15 nieuwe primaire bronnen geregistreerd 2026-06-03
-- **entities:** entity_type kolom aanwezig
-- **entity_signals:** nieuwe koppeltabel aangemaakt 2026-06-03 (entity_id → signal_id, met indexes)
-- **Laatste scrape:** 2026-06-02 06:00:26 (Rechtspraak)
-- **Meest actief 2026-06-02:** Nextdoor (169), Rechtspraak (143), 112-nu (125), De Stad Amersfoort (81), RTV Utrecht (70)
-- **Personen/relaties-schema (aangemaakt 2026-06-02):** persons, organizations, roles, org_relations, person_relations, decisions, decision_persons, annual_reports
-- **Eerste vulling (2026-06-02):** 8 organisaties, 60 personen, 60 rollen — college B&W, gemeenteraad (39 leden na verkiezingen 18 mrt 2026), Meander RvB, De Alliantie directie, Waterschap Vallei en Veluwe dagelijks bestuur, Portaal RvB
-- **Sanity sync (2026-06-02):** alle 60 personen en 8 organisaties hebben sanity_id in Turso; documenten aanwezig in Sanity CMS
+- **raw_items:** >2.000 items — waarvan 409 met is_historical=1 (historische backfill 2026-06-04)
+- **is_historical verdeling (geverifieerd 2026-06-04):** rechtspraak 267, bekendmakingen 71, raadsinformatie 58, jaarverslagen 10, cbs-statline 2, subsidieregister 1
+- **signals:** niet opnieuw geverifieerd — intake van 2026-06-04 10:30 verwerkt historische items naar status 'watching'
+- **sources:** 93+ bronnen — jaarverslag-bronnen (10x) + raadsinformatie-backfill toegevoegd 2026-06-04
+- **entities / entity_signals:** aanwezig, worden gevuld door intake bij verwerking historische items
+- **is_historical kolom:** toegevoegd aan raw_items 2026-06-04 (ALTER TABLE)
+- **Personen/relaties-schema:** persons, organizations, roles, org_relations, person_relations, decisions, decision_persons, annual_reports
+- **Personenvulling (2026-06-02):** 8 organisaties, 60 personen, 60 rollen (B&W, raad, Meander, De Alliantie, Waterschap, Portaal)
+- **Sanity sync (2026-06-02):** 60 personen + 8 organisaties hebben sanity_id
 
 ## Bronnen live
 
@@ -117,8 +117,10 @@
 ## Niet geverifieerd
 
 - Inhoud van Sanity (artikelen, publicaties)
-- Exacte count `entities` tabel
+- Exacte count `entities` tabel na backfill-intake
 - Inhoud gepubliceerde artikelen (site wachtwoordbeveiligd)
+- TenderNed backfill: API-endpoint veranderd, 0 historische items — backfill handmatig via browser of nieuwe endpoint zoeken
+- scrape-nieuw stabiliteit: 11 van 15 scrapers faalden bij eerste run (JS/auth problemen), nog in debug-fase
 
 ---
 
@@ -127,8 +129,7 @@
 *Cowork-update: 2026-06-03 — UNSPLASH_ACCESS_KEY toegevoegd aan scraper/.env; beide designer tasks (ochtend + middag) bijgewerkt: geen zwart-wit/archiefbeelden tenzij artikel expliciet over historisch onderwerp gaat.*
 *Cowork-update: 2026-06-04 — run-weekly.js + run-all.js + run-browser.js + alle 47 scrapers hersteld uit git stash (waren kwijtgeraakt). PM2 scrape-wekelijks draait nu opnieuw correct.*
 *Cowork-update: 2026-06-04 — stadsgeest-intake en stadsgeest-intake-middag bijgewerkt: historische items (is_historical=1) krijgen status 'watching' ipv 'new', [HISTORISCH] tag in summary, geen 48u-blokkade, tier-3 historische items worden overgeslagen. Entiteitsextractie geldt wel voor historische items.*
-*Cowork-update: 2026-06-04 — Historische backfill volledig: 409 raw_items met is_historical=1 in Turso. Verdeling: rechtspraak 267 (RBMNE:2025+2026+GHARL:2025+2026), bekendmakingen 71 (6mnd), raadsinformatie 58 (152 vergaderingen, 58 nieuw), jaarverslagen 10, CBS wijken 2, subsidieregister 1. TenderNed API onbereikbaar. Notubiz direct via API (geen Playwright). Raadsinformatie-backfill: nu ook in run-backfill.js als 'raadsinformatie' bron. Intake klaar voor historische verwerking (status 'watching').*
-*Cowork-update: 2026-06-04 — Historische backfill uitgevoerd: 409 historische raw_items. [SUPERCEDED door bovenstaande] Verdeling: rechtspraak ~250 (RBMNE 2025+2026+GHARL lopend), bekendmakingen 71, jaarverslagen 10 (Meander/Alliantie/Portaal/Amfors/Gemeente/PCBO/Meerkring/GGD/SWV/Onderwijsgroep), CBS 2 (kerncijfers wijken 2022+2023). TenderNed API onbereikbaar (API-endpoint veranderd). Raadsinformatie: nog te doen via run-backfill-browser.js (Playwright). lib.js + ensureSource bijgewerkt (URL-deduplicatie, is_historical). Backfill-scripts: scraper/src/run-backfill.js, run-backfill-browser.js.*
+*Cowork-update: 2026-06-04 — Historische backfill volledig: 409 raw_items (is_historical=1) in Turso. Rechtspraak 267 (RBMNE+GHARL 2025+2026), bekendmakingen 71, raadsinformatie 58 (Notubiz JSON API), jaarverslagen 10, CBS wijken 2, subsidieregister 1. TenderNed API onbereikbaar. lib.js bijgewerkt (is_historical param + ensureSource URL-deduplicatie). Intake getriggerd 10:30 voor verwerking naar watching-signalen.*
 *Cowork-update: 2026-06-03 — update-feature volledig geïmplementeerd: Sanity article schema + updates[] (date + text, deployed), analist markeert TYPE: update + slug, schrijver PATCHt bestaand artikel, designer bumpt bijgewerkte artikelen naar homepage bij significante update; alle zes relevante tasks bijgewerkt. Frontend-kant nog te doen door Code: updates[] tonen op artikelpagina + updatedAt in artikelkaarten.*
 *Code-update: 2026-06-03 — updates[] feature geïmplementeerd (PR #35): nieuw ArticleUpdates client-component toont updatebalk op artikelpagina (niet-inklapbaar bij één update, inklapbare geschiedenis bij meerdere); updates[] en updatedAt toegevoegd aan GROQ-queries; "bijgewerkt" label op ArticleCard wanneer updatedAt na publishedAt valt*
 *Code-update: 2026-06-02 — /persoon/[slug] herbouwd naar Stitch-design: foto met grayscale/hover, AI-dossier glassmorphism card, gerelateerde entiteiten chips, timeline met verticale lijn en bolletjes, 'Laad meer'-knop; personBySlugQuery uitgebreid met foto + embedded artikelen (PR #33)*
