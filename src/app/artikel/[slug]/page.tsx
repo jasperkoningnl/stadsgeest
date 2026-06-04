@@ -240,22 +240,40 @@ export default async function ArticlePage({ params }: Props) {
               {article.relatedArticles && article.relatedArticles.length > 0 && (
                 <div className="sidebar-box">
                   <div className="sidebar-title">Gerelateerde artikelen</div>
-                  {article.relatedArticles.slice(0, 4).map((a) =>
+                  {article.relatedArticles.slice(0, 4).map((a, i) =>
                     a.slug ? (
-                      <Link key={a._id} href={`/artikel/${a.slug.current}`} className="rel-item">
-                        <div className="rel-title">{a.title}</div>
-                        <div className="rel-meta">
-                          <span>{a.publishedAt ? relativeTime(a.publishedAt) : ''}</span>
-                          {a.tags?.[0]?.slug?.current && <Tag name={a.tags[0].name} slug={a.tags[0].slug.current} />}
-                        </div>
-                      </Link>
+                      i === 0 && a.mainImage ? (
+                        <Link key={a._id} href={`/artikel/${a.slug.current}`} className="rel-card">
+                          <div className="rel-card-img">
+                            <Image
+                              src={urlFor(a.mainImage).width(280).height(158).url()}
+                              alt={a.mainImage.alt || ''}
+                              fill
+                              sizes="280px"
+                              style={{ objectFit: 'cover' }}
+                            />
+                          </div>
+                          {a.tags?.[0] && (
+                            <span className="rel-card-cat">{a.tags[0].name}</span>
+                          )}
+                          <div className="rel-title">{a.title}</div>
+                        </Link>
+                      ) : (
+                        <Link key={a._id} href={`/artikel/${a.slug.current}`} className="rel-item">
+                          <div className="rel-title">{a.title}</div>
+                          <div className="rel-meta">
+                            <span>{a.publishedAt ? relativeTime(a.publishedAt) : ''}</span>
+                            {a.tags?.[0]?.slug?.current && <Tag name={a.tags[0].name} slug={a.tags[0].slug.current} />}
+                          </div>
+                        </Link>
+                      )
                     ) : null
                   )}
                 </div>
               )}
 
               <div className="sidebar-box">
-                <div className="sidebar-title">Onderwerpen</div>
+                <div className="sidebar-title">Gerelateerde onderwerpen</div>
                 <div className="sidebar-tags">
                   {article.tags?.filter(t => t?.slug?.current && t.slug.current !== 'amersfoort').slice(0, 5).map((t) => {
                     const nt = normalizeTag(t)
@@ -303,37 +321,6 @@ export default async function ArticlePage({ params }: Props) {
             </aside>
           </div>
 
-          {/* Related articles grid — below article */}
-          {article.relatedArticles && article.relatedArticles.length > 0 && (
-            <div style={{ marginTop: 64, paddingTop: 32, borderTop: '1px solid var(--border)' }}>
-              <h3 style={{ fontFamily: 'var(--f-d)', fontSize: 22, fontWeight: 600, marginBottom: 28, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
-                Gerelateerde artikelen
-              </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 32 }}>
-                {article.relatedArticles.slice(0, 3).map((a) =>
-                  a.slug ? (
-                    <Link key={a._id} href={`/artikel/${a.slug.current}`} className="acard">
-                      {a.mainImage && (
-                        <div className="acard-img-wrap">
-                          <Image
-                            src={urlFor(a.mainImage).width(400).height(225).url()}
-                            alt={a.mainImage.alt || ''}
-                            fill
-                            sizes="300px"
-                            style={{ objectFit: 'cover' }}
-                          />
-                        </div>
-                      )}
-                      {a.tags?.[0] && (
-                        <span className="acard-cat">{a.tags[0].name}</span>
-                      )}
-                      <h4 className="acard-title" style={{ fontSize: 18 }}>{a.title}</h4>
-                    </Link>
-                  ) : null
-                )}
-              </div>
-            </div>
-          )}
         </article>
       </div>
     </>
