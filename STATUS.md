@@ -102,7 +102,7 @@
 ### Laatste succesvolle Vercel deploy
 
 - Niet rechtstreeks geverifieerd (geen `gh` CLI / Vercel CLI beschikbaar in deze omgeving)
-- Laatste merge naar `main`: 2026-06-04 — PR #38 "Fix related articles layout and remove duplicate tags section"
+- Laatste merge naar `main`: 2026-06-04 — PR #39 "Redesign article sidebar: featured related card, rename labels, remove bottom grid"
 - Vercel deployt automatisch bij push naar `main`; verwachte deploy: 2026-06-04 ✓ (niet geverifieerd via Vercel dashboard)
 
 ## Sanity Studio (geverifieerd 2026-06-02)
@@ -133,6 +133,7 @@
 *Cowork-update: 2026-06-04 — Historische backfill volledig: 409 raw_items (is_historical=1) in Turso. Rechtspraak 267 (RBMNE+GHARL 2025+2026), bekendmakingen 71, raadsinformatie 58 (Notubiz JSON API), jaarverslagen 10, CBS wijken 2, subsidieregister 1. TenderNed: v2 API negeert alle filters, backfill gebruikt RSS feed (identiek aan dagelijkse scraper) — historische data al gedekt door dagelijkse scraper die continu draaide. lib.js bijgewerkt (is_historical param + ensureSource URL-deduplicatie). Intake getriggerd 10:30 voor verwerking naar watching-signalen.*
 *Cowork-update: 2026-06-03 — update-feature volledig geïmplementeerd: Sanity article schema + updates[] (date + text, deployed), analist markeert TYPE: update + slug, schrijver PATCHt bestaand artikel, designer bumpt bijgewerkte artikelen naar homepage bij significante update; alle zes relevante tasks bijgewerkt. Frontend-kant nog te doen door Code: updates[] tonen op artikelpagina + updatedAt in artikelkaarten.*
 *Code-update: 2026-06-04 — Artikelpagina (/artikel/[slug]): Tags-sectie verwijderd uit artikeltekst (alleen Onderwerpen-sidebar blijft); gerelateerde artikelen grid gebruikt nu CSS-klassen (acard/acard-img-wrap/acard-cat/acard-title) i.p.v. inline styles — hover-animatie op afbeelding en titelkleur nu correct; sectietitel hernoemd naar "Gerelateerde artikelen" (PR #38)*
+*Code-update: 2026-06-04 — Artikelpagina sidebar herontworpen (PR #39): eerste gerelateerd artikel toont als featured kaart met afbeelding (16/9), categorie-label en hover-animatie; overige items blijven compacte tekst-links; "Onderwerpen" hernoemd naar "Gerelateerde onderwerpen"; grid onderaan artikel verwijderd — sidebar is nu enige plek voor gerelateerde artikelen. Nieuwe CSS-klassen: .rel-card, .rel-card-img, .rel-card-cat*
 *Code-update: 2026-06-03 — updates[] feature geïmplementeerd (PR #35): nieuw ArticleUpdates client-component toont updatebalk op artikelpagina (niet-inklapbaar bij één update, inklapbare geschiedenis bij meerdere); updates[] en updatedAt toegevoegd aan GROQ-queries; "bijgewerkt" label op ArticleCard wanneer updatedAt na publishedAt valt*
 *Code-update: 2026-06-02 — /persoon/[slug] herbouwd naar Stitch-design: foto met grayscale/hover, AI-dossier glassmorphism card, gerelateerde entiteiten chips, timeline met verticale lijn en bolletjes, 'Laad meer'-knop; personBySlugQuery uitgebreid met foto + embedded artikelen (PR #33)*
 *Code-update: 2026-06-03 — Personen-blok toegevoegd aan artikel-sidebar: persons[] waren al opgehaald via articleBySlugQuery maar niet getoond; sidebar toont nu naam, rol/org en link naar /persoon/[slug] voor alle gekoppelde personen (PR #36)*
