@@ -26,12 +26,13 @@ export function createDb() {
 }
 
 export async function ensureSource(db, { name, url, source_type, reliability, category, scrape_frequency, tier }) {
+  // Zoek op naam of URL (voorkomt UNIQUE constraint-fout als URL al bestaat)
   const existing = await db.execute({
-    sql: 'SELECT id FROM sources WHERE name = ?',
-    args: [name],
+    sql: 'SELECT id FROM sources WHERE name = ? OR url = ?',
+    args: [name, url ?? ''],
   });
   if (existing.rows.length > 0) {
-    await db.execute({ sql: 'UPDATE sources SET last_scraped_at = datetime(\'now\'), tier = ? WHERE name = ?', args: [tier ?? 2, name] });
+    await db.execute({ sql: "UPDATE sources SET last_scraped_at = datetime('now'), tier = ? WHERE id = ?", args: [tier ?? 2, existing.rows[0].id] });
     return existing.rows[0].id;
   }
   const r = await db.execute({

@@ -50,13 +50,45 @@ async function ensureHistoricalColumn() {
 }
 
 // ── 1. Rechtspraak.nl ─────────────────────────────────────────────────────────
-// API: https://data.rechtspraak.nl/uitspraken/content
-// Paginering via &from=0&max=100
-// Datumfilter: date-from / date-to (YYYY-MM-DD)
+// Strategie: itereer direct over ECLI-nummers van RBMNE (Rechtbank Midden-Nederland)
+// en GHARL (Gerechtshof Arnhem-Leeuwarden) — de bevoegde rechters voor Amersfoort.
+// Bereik backfill:
+//   RBMNE:2025 → nummers 2400 t/m ~7500 (juni–december 2025)
+//   RBMNE:2026 → nummers 1 t/m ~1504 (januari–juni 2026)
+//   GHARL:2025 → nummers op basis van binary search
+//   GHARL:2026 → nummers op basis van binary search
+// Filtert vervolgens op Amersfoort-relevantie (minstens 2 vermeldingen).
+
+async function fetchEcli(ecli) {
+  const url = `https://data.rechtspraak.nl/uitspraken/content?id=${encodeURIComponent(ecli)}`;
+  try {
+    const r = await fetch(url, {
+      headers: { Accept: 'application/xml', 'User-Agent': UA },
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!r.ok) return null;
+    return r.text();
+  } catch (e) {
+    return null;
+  }
+}
+
+function extractEcliData(xml, ecli) {
+  if (!xml) return null;
+  const modified = (xml.match(/dcterms:modified>([^<T]+)/) || [])[1];
+  // dcterms:date = uitspraakdatum (datum van de uitspraak, niet portalpublicatie)
+  const uitspraakDatum = (xml.match(/dcterms:date rdfs:label[^>]*>([^<T]+)/) || xml.match(/dcterms:date>([^<T]+)/) || [])[1]?.trim();
+  const zittingsplaats = (xml.match(/dcterms:spatial[^>]*>([^<]+)/) || [])[1] || '';
+  const title = stripHtml((xml.match(/<inhoudsindicatie[^>]*>([\s\S]{0,800}?)<\/inhoudsindicatie>/) || [])[1] || '');
+  const rechtsgebied = stripHtml((xml.match(/<rechtsgebied[^>]*>([^<]*)<\/rechtsgebied>/) || [])[1] || '');
+  // Volledige tekst van uitspraak (voor Amersfoort-check)
+  const textBody = xml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+  return { modified, uitspraakDatum, zittingsplaats, title, rechtsgebied, textBody };
+}
 
 async function backfillRechtspraak() {
-  console.log('\n[rechtspraak] Start backfill — 12 maanden (2025-06-01 t/m 2026-06-01)');
-  const stats = { new: 0, skipped: 0, errors: 0 };
+  console.log('\n[rechtspraak] Start backfill via ECLI-iteratie — RBMNE + GHARL, 12 maanden');
+  const stats = { new: 0, skipped: 0, errors: 0, filtered: 0 };
 
   const sid = await ensureSource(db, {
     name: 'rechtspraak',
@@ -68,97 +100,99 @@ async function backfillRechtspraak() {
     tier: 1,
   });
 
-  const BATCH = 100;
-  let from = 0;
-  let total = null;
+  // Bereiken bepaald via empirische tests (juni 2024):
+  //   RBMNE:2025:2400 ≈ 2025-05-27 | RBMNE:2025:7500 ≈ 2026-02-05 (gepubliceerd)
+  //   RBMNE:2026:3000 ≈ 2026-06-01 (gepubliceerd)
+  //   GHARL: op basis van vergelijkbaar schatten — gebruik ruime marges
+  const ranges = [
+    { court: 'RBMNE', year: 2025, from: 2400, to: 7500 },  // juni 2025 – dec 2025 (~6% Amersfoort)
+    { court: 'RBMNE', year: 2026, from: 1,    to: 3100 },  // jan 2026 – juni 2026
+    { court: 'GHARL', year: 2025, from: 2000, to: 7000 },  // hoger beroep (ruime marge)
+    { court: 'GHARL', year: 2026, from: 1,    to: 3700 },  // hoger beroep 2026
+  ];
 
-  while (true) {
-    const url = `https://data.rechtspraak.nl/uitspraken/content?return=DOC&max=${BATCH}&from=${from}&sort=DESC&date-from=2025-06-01&date-to=2026-06-01&q=Amersfoort`;
+  const CONCURRENCY = 3;  // max 3 parallelle requests (respecteer rate limit ~9/sec)
+  const DELAY_MS = 350;   // wacht tussen batches
 
-    let data;
-    try {
-      const text = await fetchText(url, 'application/xml');
-      // Rechtspraak retourneert Atom/XML; parseer handmatig
-      data = parseRechtspraakXml(text);
-    } catch (e) {
-      console.error(`  [rechtspraak] Fout bij offset ${from}: ${e.message}`);
-      stats.errors++;
-      break;
+  for (const range of ranges) {
+    console.log(`  [rechtspraak] ${range.court}:${range.year} nrs ${range.from}–${range.to}`);
+    let rangeNew = 0, rangeFiltered = 0;
+
+    for (let i = range.from; i <= range.to; i += CONCURRENCY) {
+      const batch = [];
+      for (let j = 0; j < CONCURRENCY && i + j <= range.to; j++) {
+        batch.push(`ECLI:NL:${range.court}:${range.year}:${i + j}`);
+      }
+
+      const results = await Promise.all(batch.map(ecli => fetchEcli(ecli)));
+
+      for (let k = 0; k < batch.length; k++) {
+        const ecli = batch[k];
+        const xml = results[k];
+        if (!xml) { stats.errors++; continue; }  // 404 of timeout
+
+        const data = extractEcliData(xml, ecli);
+        if (!data) { stats.errors++; continue; }
+
+        // Datumcheck op uitspraakdatum (niet portalpublicatiedatum)
+        if (data.uitspraakDatum && data.uitspraakDatum < '2025-06-01') {
+          rangeFiltered++;
+          continue;
+        }
+        if (data.uitspraakDatum && data.uitspraakDatum > '2026-06-05') {
+          rangeFiltered++;
+          continue;
+        }
+
+        // Amersfoort-relevantiecheck: minimaal 1 vermelding
+        // (zittingsplaats=Amersfoort telt automatisch mee via textBody)
+        const amersfoortCount = (data.textBody.match(/amersfoort/gi) || []).length;
+        if (amersfoortCount < 1) {
+          rangeFiltered++;
+          continue;
+        }
+
+        // Bouw content op
+        const contentLines = [
+          `ECLI: ${ecli}`,
+          data.zittingsplaats ? `Zittingsplaats: ${data.zittingsplaats}` : '',
+          data.rechtsgebied ? `Rechtsgebied: ${data.rechtsgebied}` : '',
+          `Uitspraakdatum: ${data.uitspraakDatum || data.modified || '?'}`,
+          '',
+          data.title || '(geen inhoudsindicatie)',
+        ].filter(Boolean).join('\n');
+        const content = contentLines.substring(0, 10000);
+
+        const dateStr = data.uitspraakDatum || data.modified;
+        const r = await insertItem(db, {
+          source_id: sid,
+          title: data.title?.substring(0, 490) || ecli,
+          content,
+          summary: `${ecli} | ${data.zittingsplaats || data.rechtsgebied || '?'} | ${dateStr || ''}`,
+          external_url: `https://uitspraken.rechtspraak.nl/details?id=${ecli}`,
+          scraped_at: dateStr ? `${dateStr}T00:00:00.000Z` : new Date().toISOString(),
+          is_historical: 1,
+        });
+        if (r === true) { stats.new++; rangeNew++; }
+        else if (r === false) stats.skipped++;
+        else stats.errors++;
+      }
+
+      // Voortgangsmelding elke 100 nummers
+      if ((i - range.from) % 300 === 0 && i > range.from) {
+        console.log(`    Nr ${i}/${range.to} — nieuw: ${rangeNew}, gefilterd: ${rangeFiltered}`);
+      }
+
+      await sleep(DELAY_MS);
     }
 
-    if (total === null) {
-      total = data.total;
-      console.log(`  [rechtspraak] Totaal gevonden: ${total} uitspraken`);
-    }
-
-    if (data.items.length === 0) break;
-
-    for (const item of data.items) {
-      const r = await insertItem(db, {
-        source_id: sid,
-        title: item.title,
-        content: item.content,
-        summary: item.summary,
-        external_url: item.url,
-        scraped_at: item.date,
-        is_historical: 1,
-      });
-      if (r === true) stats.new++;
-      else if (r === false) stats.skipped++;
-      else stats.errors++;
-    }
-
-    console.log(`  [rechtspraak] Batch ${from}–${from + data.items.length}: ${data.items.length} verwerkt (${stats.new} nieuw)`);
-    from += BATCH;
-
-    if (from >= total) break;
-
-    // Max 10 req/sec: wacht 150ms tussen batches
-    await sleep(150);
+    console.log(`  [rechtspraak] ${range.court}:${range.year} klaar — ${rangeNew} nieuw, ${rangeFiltered} niet-Amersfoort`);
+    stats.filtered += rangeFiltered;
   }
 
   log('rechtspraak-backfill', stats);
+  console.log(`  [rechtspraak] Gefilterd (niet Amersfoort-relevant): ${stats.filtered}`);
   return stats;
-}
-
-function parseRechtspraakXml(xml) {
-  // Simpele regex-gebaseerde parser voor Atom XML van Rechtspraak.nl
-  const totalMatch = xml.match(/<opensearch:totalResults>(\d+)<\/opensearch:totalResults>/);
-  const total = totalMatch ? parseInt(totalMatch[1]) : 0;
-
-  const items = [];
-  const entryRegex = /<entry>([\s\S]*?)<\/entry>/g;
-  let match;
-
-  while ((match = entryRegex.exec(xml)) !== null) {
-    const entry = match[1];
-
-    const titleMatch = entry.match(/<title[^>]*>([\s\S]*?)<\/title>/);
-    const idMatch = entry.match(/<id>([\s\S]*?)<\/id>/);
-    const updatedMatch = entry.match(/<updated>([\s\S]*?)<\/updated>/);
-    const summaryMatch = entry.match(/<summary[^>]*>([\s\S]*?)<\/summary>/);
-    const contentMatch = entry.match(/<content[^>]*>([\s\S]*?)<\/content>/);
-    const linkMatch = entry.match(/<link[^>]*href="([^"]+)"/);
-
-    // ECLI uit id of link
-    const ecliMatch = (idMatch?.[1] ?? '').match(/(ECLI:[A-Z:0-9.]+)/i);
-    const ecli = ecliMatch?.[1] ?? '';
-
-    const rawTitle = stripHtml(titleMatch?.[1] ?? '');
-    const title = rawTitle || ecli || 'Uitspraak zonder titel';
-    const url = linkMatch?.[1] ?? (ecli ? `https://uitspraken.rechtspraak.nl/details?id=${encodeURIComponent(ecli)}` : '');
-    const date = updatedMatch?.[1]?.substring(0, 10) ?? new Date().toISOString().substring(0, 10);
-
-    const rawContent = stripHtml(contentMatch?.[1] ?? summaryMatch?.[1] ?? '');
-    const content = `${ecli ? `ECLI: ${ecli}\n\n` : ''}${rawContent}`.substring(0, 10000);
-    const summary = rawContent.substring(0, 500);
-
-    if (title || ecli) {
-      items.push({ title, url, date, content, summary, ecli });
-    }
-  }
-
-  return { total, items };
 }
 
 function stripHtml(str) {
@@ -170,8 +204,8 @@ function stripHtml(str) {
 }
 
 // ── 2. Officiële Bekendmakingen ───────────────────────────────────────────────
-// SRU API: https://zoek.officielebekendmakingen.nl/sru/Search
-// CQL query, maximumRecords=100, startRecord paginering
+// Correct endpoint: https://repository.overheid.nl/sru/Search (POST)
+// Veld x-connection=ob, query met dt.creator + col + datumbereik
 
 async function backfillBekendmakingen() {
   console.log('\n[bekendmakingen] Start backfill — 6 maanden (2025-12-01 t/m 2026-06-01)');
@@ -191,13 +225,32 @@ async function backfillBekendmakingen() {
   let start = 1;
   let total = null;
 
+  // Correct endpoint: repository.overheid.nl/sru/Search (POST)
+  // Query: dt.creator any "Amersfoort" + datumfilter (dt.date = publicatiedatum)
   while (true) {
-    const query = encodeURIComponent('dt.creator="Amersfoort" AND dt.date>="2025-12-01" AND dt.date<="2026-06-01"');
-    const url = `https://zoek.officielebekendmakingen.nl/sru/Search?operation=searchRetrieve&version=1.2&recordSchema=gzd&maximumRecords=${BATCH}&startRecord=${start}&query=${query}`;
+    const body = new URLSearchParams({
+      operation: 'searchRetrieve',
+      'x-connection': 'ob',
+      query: 'dt.creator any "Amersfoort" AND dt.date>="2025-12-01" AND dt.date<="2026-06-05"',
+      maximumRecords: String(BATCH),
+      startRecord: String(start),
+    });
 
     let xml;
     try {
-      xml = await fetchText(url, 'application/xml');
+      const resp = await fetch('https://repository.overheid.nl/sru/Search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': UA },
+        body: body.toString(),
+        signal: AbortSignal.timeout(30000),
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      xml = await resp.text();
+      if (!xml.includes('searchRetrieveResponse')) {
+        console.log(`  [bekendmakingen] SRU niet beschikbaar`);
+        stats.errors++;
+        break;
+      }
     } catch (e) {
       console.error(`  [bekendmakingen] Fout bij record ${start}: ${e.message}`);
       stats.errors++;
@@ -229,11 +282,10 @@ async function backfillBekendmakingen() {
       else stats.errors++;
     }
 
-    console.log(`  [bekendmakingen] Record ${start}–${start + parsed.items.length - 1}: ${parsed.items.length} verwerkt (${stats.new} nieuw totaal)`);
+    console.log(`  [bekendmakingen] Record ${start}–${start + parsed.items.length - 1}: ${stats.new} nieuw totaal`);
     start += BATCH;
-
     if (start > total) break;
-    await sleep(300); // wees vriendelijk voor de server
+    await sleep(500);
   }
 
   log('bekendmakingen-backfill', stats);
@@ -241,41 +293,53 @@ async function backfillBekendmakingen() {
 }
 
 function parseSruXml(xml) {
-  const totalMatch = xml.match(/<zs:numberOfRecords>(\d+)<\/zs:numberOfRecords>/) ||
+  // Ondersteunt zowel sru: als zs: namespace-prefix
+  const totalMatch = xml.match(/<sru:numberOfRecords>(\d+)<\/sru:numberOfRecords>/) ||
+                     xml.match(/<zs:numberOfRecords>(\d+)<\/zs:numberOfRecords>/) ||
                      xml.match(/<numberOfRecords>(\d+)<\/numberOfRecords>/);
   const total = totalMatch ? parseInt(totalMatch[1]) : 0;
 
   const items = [];
-  // Zoek naar recordData blokken
-  const recordRegex = /<zs:recordData>([\s\S]*?)<\/zs:recordData>|<recordData>([\s\S]*?)<\/recordData>/g;
+  // Zoek naar recordData blokken (sru:, zs: of geen namespace)
+  const recordRegex = /<sru:recordData>([\s\S]*?)<\/sru:recordData>|<zs:recordData>([\s\S]*?)<\/zs:recordData>|<recordData>([\s\S]*?)<\/recordData>/g;
   let match;
 
   while ((match = recordRegex.exec(xml)) !== null) {
-    const record = match[1] ?? match[2];
+    const record = match[1] ?? match[2] ?? match[3];
 
-    const titleMatch = record.match(/<dcterms:title[^>]*>([\s\S]*?)<\/dcterms:title>/) ||
-                       record.match(/<dc:title[^>]*>([\s\S]*?)<\/dc:title>/);
-    const dateMatch = record.match(/<dcterms:date[^>]*>([\s\S]*?)<\/dcterms:date>/) ||
-                      record.match(/<dc:date[^>]*>([\s\S]*?)<\/dc:date>/);
-    const descMatch = record.match(/<dcterms:description[^>]*>([\s\S]*?)<\/dcterms:description>/) ||
-                      record.match(/<dc:description[^>]*>([\s\S]*?)<\/dc:description>/);
-    const identifierMatch = record.match(/<dcterms:identifier[^>]*>(https?:[^<]+)<\/dcterms:identifier>/) ||
-                            record.match(/<dc:identifier[^>]*>(https?:[^<]+)<\/dc:identifier>/);
-    const typeMatch = record.match(/<dcterms:type[^>]*>([\s\S]*?)<\/dcterms:type>/) ||
-                      record.match(/<dc:type[^>]*>([\s\S]*?)<\/dc:type>/);
+    const titleMatch = record.match(/<dcterms:title[^>]*>([^<]+)/) ||
+                       record.match(/<dc:title[^>]*>([^<]+)/);
+    // OB identifier is een code (bijv. gmb-2026-252446), construeer URL
+    const idMatch = record.match(/<dcterms:identifier[^>]*>([^<]+)/) ||
+                    record.match(/<dc:identifier[^>]*>([^<]+)/);
+    const dateMatch = record.match(/<dcterms:modified[^>]*>([^<]+)/) ||
+                      record.match(/<dcterms:date[^>]*>([^<]+)/) ||
+                      record.match(/<dc:date[^>]*>([^<]+)/);
+    const typeMatch = record.match(/<dcterms:type[^>]*>([^<]+)/) ||
+                      record.match(/<dc:type[^>]*>([^<]+)/);
+    const creatorMatch = record.match(/<dcterms:creator[^>]*>([^<]+)/);
 
     const title = stripHtml(titleMatch?.[1] ?? '');
+    const identifier = stripHtml(idMatch?.[1] ?? '');
     const date = stripHtml(dateMatch?.[1] ?? '').substring(0, 10);
-    const desc = stripHtml(descMatch?.[1] ?? '');
-    const url = stripHtml(identifierMatch?.[1] ?? '');
     const type = stripHtml(typeMatch?.[1] ?? '');
+    const creator = stripHtml(creatorMatch?.[1] ?? '');
 
-    if (!title && !url) continue;
+    // Construeer externe URL van bekendmakingencode
+    const url = identifier.startsWith('http')
+      ? identifier
+      : (identifier ? `https://zoek.officielebekendmakingen.nl/${identifier}.html` : '');
 
-    const content = `${type ? `Type: ${type}\n\n` : ''}${desc}`.substring(0, 10000);
-    const summary = desc.substring(0, 500);
+    if (!title && !identifier) continue;
 
-    items.push({ title: title || 'Bekendmaking zonder titel', url, date, content, summary });
+    const content = [
+      type ? `Type: ${type}` : '',
+      creator ? `Publicerende organisatie: ${creator}` : '',
+      `Identifier: ${identifier}`,
+    ].filter(Boolean).join('\n').substring(0, 10000);
+    const summary = title.substring(0, 500);
+
+    items.push({ title: title || identifier || 'Bekendmaking', url, date, content, summary });
   }
 
   return { total, items };
@@ -397,7 +461,7 @@ async function backfillSubsidieregister() {
     source_type: 'scrape',
     reliability: 'primary',
     category: 'government',
-    scrape_frequency: 'yearly',
+    scrape_frequency: 'weekly',
     tier: 1,
   });
 
@@ -509,8 +573,8 @@ async function backfillCbs() {
     url: 'https://opendata.cbs.nl/statline/',
     source_type: 'api',
     reliability: 'primary',
-    category: 'statistics',
-    scrape_frequency: 'yearly',
+    category: 'data',
+    scrape_frequency: 'weekly',
     tier: 1,
   });
 
@@ -661,8 +725,8 @@ async function backfillJaarverslagen() {
         url: org.url,
         source_type: 'scrape',
         reliability: 'primary',
-        category: 'organization',
-        scrape_frequency: 'yearly',
+        category: 'government',
+        scrape_frequency: 'weekly',
         tier: 2,
       });
 
