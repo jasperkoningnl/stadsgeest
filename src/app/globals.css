@@ -692,8 +692,7 @@ body {
 /* Sidebar featured card (first related article, with image) */
 .rel-card {
   display: block; text-decoration: none; color: inherit; cursor: pointer;
-  padding-bottom: 14px; margin-bottom: 14px;
-  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
 }
 .rel-card-img {
   width: 100%; aspect-ratio: 16/9;
