@@ -12,7 +12,8 @@ const scrapers = [
   // Groep C — dagelijkse browser-scrapers
   'nieuwsplein33.js',           // C1: Nieuwsplein33 Amersfoort
   'rtvutrecht.js',              // C2: RTV Utrecht (filter Amersfoort) — fix 2026-05-28
-  'raadsinformatie.js',         // C3: Raadsinformatie Amersfoort (Notubiz)
+  'raadsinformatie.js',         // C3: Raadsinformatie Amersfoort (Notubiz) — brede scraper, blijft als fallback
+  'raadsinformatie-types.js',   // C3b: Raadsinformatie gesplitst per type (motie, schriftelijke vragen, etc.)
   'nextdoor.js',                // Nextdoor buurtberichten Amersfoort (login vereist)
   'igj-nvwa.js',                // IGJ + NVWA inspectieresultaten (zoek op Amersfoort)
   'omthuis.js',                 // Omthuis woningcorporatie nieuwsberichten

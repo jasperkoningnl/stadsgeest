@@ -20,7 +20,8 @@ const scrapers = [
   // Groep A — dagelijkse/uurlijkse scrapers
   'politie-amersfoort.js',        // A1: Politie RSS (daily)
   '112nu-amersfoort.js',          // A3: 112-nu P2000 RSS (hourly)
-  'officielebekendmakingen.js',   // A4: Officiële Bekendmakingen (daily, SRU intermittent)
+  'officielebekendmakingen.js',   // A4: Officiële Bekendmakingen (BROKEN — col-filter unsupported, zie officielebekendmakingen-split.js)
+  'officielebekendmakingen-split.js', // A4b: OB gesplitst per type (Omgevingsvergunning, Verkeersbesluit, overig)
   'ns-verstoringen.js',           // NS verstoringen en werkzaamheden Amersfoort (AMF + AMR)
   'bluesky.js',                   // Bluesky zoekfeed + Amersfoortse accounts (daily)
   // pdok-bag.js en rechtspraak.js draaien wekelijks → run-weekly.js (aangemaakt in Groep B)

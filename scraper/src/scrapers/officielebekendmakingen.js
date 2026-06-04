@@ -1,10 +1,16 @@
-// Officiële Bekendmakingen — gemeente Amersfoort
-// Gebruikt de KOOP SRU-interface (POST) voor Gemeenteblad bekendmakingen.
-// SRU endpoint: https://repository.overheid.nl/sru/Search
-// Documentatie: https://data.overheid.nl/dataset/officiele-bekendmakingen
+// officielebekendmakingen.js — DEPRECATED / BROKEN
 //
-// LET OP: de SRU dienst heeft regelmatig onderhoud (503). Het script
-// rapporteert dan 0 items — dit is normaal gedrag.
+// STATUS 2026-06-04: deze scraper geeft altijd 0 items.
+// Reden: de query gebruikt 'col = "Gemeenteblad"' maar de 'col'-index is
+// UNSUPPORTED in SRU 2.0 (repository.overheid.nl geeft diagnostic 1/16).
+//
+// Vervanger: officielebekendmakingen-split.js
+//   - ob-omgevingsvergunningen (33 items/run)
+//   - ob-verkeersbesluiten (25 items/run)
+//   - ob-gemeenteblad-overig (brede spatial query)
+//
+// Deze scraper blijft actief als fallback totdat de split volledig geverifieerd is.
+// Zodra de split stabiel draait (7+ dagen), kan deze worden verwijderd uit run-all.js.
 
 import * as cheerio from 'cheerio';
 import db from '../db.js';

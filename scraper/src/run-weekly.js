@@ -26,6 +26,7 @@ const scrapers = [
 
   // Groep C — server-rendered (geen Playwright nodig)
   'ibabs-woo.js',                 // C7: Bestuurlijke informatie iBabs (Woo-verzoeken, klachten, convenanten)
+  'officielebekendmakingen-wekelijks.js', // OB wekelijkse subtypen (gem.regelingen, prov.blad, waterschapsblad)
 
   // Groep D — organisatie-scrapers (RSS)
   'org-rss.js',                   // D1: Railcenter, Mondriaan, KAdE, Kamp, Natuurmonumenten,

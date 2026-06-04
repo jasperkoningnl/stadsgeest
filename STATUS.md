@@ -38,7 +38,7 @@
 - **raw_items:** >2.000 items — waarvan 409 met is_historical=1 (historische backfill 2026-06-04)
 - **is_historical verdeling (geverifieerd 2026-06-04):** rechtspraak 267, bekendmakingen 71, raadsinformatie 58, jaarverslagen 10, cbs-statline 2, subsidieregister 1
 - **signals:** niet opnieuw geverifieerd — intake van 2026-06-04 10:30 verwerkt historische items naar status 'watching'
-- **sources:** 93+ bronnen — jaarverslag-bronnen (10x) + raadsinformatie-backfill toegevoegd 2026-06-04
+- **sources:** 105+ bronnen — split-bronnen toegevoegd 2026-06-04 (ids 109–120): 3x OB dagelijks, 3x OB wekelijks, 6x raadsinformatie per type
 - **entities / entity_signals:** aanwezig, worden gevuld door intake bij verwerking historische items
 - **is_historical kolom:** toegevoegd aan raw_items 2026-06-04 (ALTER TABLE)
 - **Personen/relaties-schema:** persons, organizations, roles, org_relations, person_relations, decisions, decision_persons, annual_reports
@@ -47,11 +47,11 @@
 
 ## Bronnen live
 
-**Dagelijks (run-all.js):** gemeente-amersfoort, vru, de-stad-amersfoort, eemland1, nos-amersfoort, rijksoverheid, tenderned, cbs-statline, reddit-amersfoort, amersfoort-nieuws, waterschap, politie-amersfoort, 112nu-amersfoort, officielebekendmakingen, ns-verstoringen, bluesky
+**Dagelijks (run-all.js):** gemeente-amersfoort, vru, de-stad-amersfoort, eemland1, nos-amersfoort, rijksoverheid, tenderned, cbs-statline, reddit-amersfoort, amersfoort-nieuws, waterschap, politie-amersfoort, 112nu-amersfoort, officielebekendmakingen (BROKEN — fallback), **officielebekendmakingen-split** (Omgevingsvergunning/Verkeersbesluit/overig), ns-verstoringen, bluesky
 
-**Browser dagelijks (run-browser.js):** nieuwsplein33, rtvutrecht, raadsinformatie, nextdoor, igj-nvwa, omthuis
+**Browser dagelijks (run-browser.js):** nieuwsplein33, rtvutrecht, raadsinformatie (fallback), **raadsinformatie-types** (gesplitst per type), nextdoor, igj-nvwa, omthuis
 
-**Wekelijks (run-weekly.js):** pdok-bag, rechtspraak, ftm-amersfoort, alliantie, odu, prorail, regio-amersfoort, archiefeemland, subsidieregister, uwv-amersfoort, amersfoort-cijfers, financien-amersfoort, ibabs-woo, org-rss, bedrijven-amersfoort, erfgoed-natuur, onderwijs-cultuur, bw-besluiten, meander
+**Wekelijks (run-weekly.js):** pdok-bag, rechtspraak, ftm-amersfoort, alliantie, odu, prorail, regio-amersfoort, archiefeemland, subsidieregister, uwv-amersfoort, amersfoort-cijfers, financien-amersfoort, ibabs-woo, org-rss, bedrijven-amersfoort, erfgoed-natuur, onderwijs-cultuur, bw-besluiten, meander, **officielebekendmakingen-wekelijks** (gem.regelingen/prov.blad/waterschapsblad)
 
 ## Bronladder (ingevoerd 2026-06-03)
 
@@ -135,5 +135,6 @@
 *Code-update: 2026-06-03 — updates[] feature geïmplementeerd (PR #35): nieuw ArticleUpdates client-component toont updatebalk op artikelpagina (niet-inklapbaar bij één update, inklapbare geschiedenis bij meerdere); updates[] en updatedAt toegevoegd aan GROQ-queries; "bijgewerkt" label op ArticleCard wanneer updatedAt na publishedAt valt*
 *Code-update: 2026-06-02 — /persoon/[slug] herbouwd naar Stitch-design: foto met grayscale/hover, AI-dossier glassmorphism card, gerelateerde entiteiten chips, timeline met verticale lijn en bolletjes, 'Laad meer'-knop; personBySlugQuery uitgebreid met foto + embedded artikelen (PR #33)*
 *Code-update: 2026-06-03 — Personen-blok toegevoegd aan artikel-sidebar: persons[] waren al opgehaald via articleBySlugQuery maar niet getoond; sidebar toont nu naam, rol/org en link naar /persoon/[slug] voor alle gekoppelde personen (PR #36)*
+*Cowork-update: 2026-06-04 — Scrapers opsplitst per documenttype. OB-split: officielebekendmakingen-split.js gebouwd met GET-endpoint (zoek.officielebekendmakingen.nl). Bevestigd werkend: ob-omgevingsvergunningen (24 items), ob-verkeersbesluiten (25 items), ob-gemeenteblad-overig (23 items). Wekelijks: ob-gemeenschappelijke-regelingen / ob-provinciaal-blad / ob-waterschapsblad geregistreerd (0 items — dcterms.type filter geeft geen resultaten voor deze types, toekomstige monitoring). Bestaande officielebekendmakingen.js gemarkeerd BROKEN (col-filter unsupported in SRU 2.0, gaf al jaren 0 items). Raadsinformatie: raadsinformatie-types.js gebouwd met type-detectie op titels. ORI API volledig offline (404). Notubiz feeds geblokkeerd (Cloudflare). Huidige run: 5 items naar raad-vergaderingen catch-all — type-classificatie (moties, schriftelijke vragen, etc.) actief zodra documenten met die titels verschijnen. 12 nieuwe bronnen in sources-tabel (ids 109–120), 77 raw_items klaar voor intake.*
 *Cowork-update: 2026-06-04 — STATUS.md kruischeck: scrape-nieuw debug-fase verwijderd uit Niet geverifieerd (opgelost, 10/15 actief); weekreview-2026-06-03.md + cowork-prompt-dwarsverbanden-script.md toegevoegd aan repo.*
 
