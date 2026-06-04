@@ -1,6 +1,6 @@
 // officielebekendmakingen.js — DEPRECATED / BROKEN
 //
-// STATUS 2026-06-04: deze scraper geeft altijd 0 items.
+// STATUS 2026-06-04: deze scraper geeft altijd 0 items. Kan worden verwijderd zodra ob-split stabiel is.
 // Reden: de query gebruikt 'col = "Gemeenteblad"' maar de 'col'-index is
 // UNSUPPORTED in SRU 2.0 (repository.overheid.nl geeft diagnostic 1/16).
 //

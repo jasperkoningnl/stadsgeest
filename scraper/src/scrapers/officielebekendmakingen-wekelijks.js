@@ -1,8 +1,12 @@
 // officielebekendmakingen-wekelijks.js — wekelijkse OB-subtypen
 //
-// Momenteel geven alle drie typen 0 resultaten via dcterms.type filter.
-// Scraper draait wekelijks en rapporteert — zodra types beschikbaar zijn,
-// worden ze automatisch opgepikt.
+// Test 2026-06-04: dcterms.type filter werkt niet op zoek.officielebekendmakingen.nl
+// voor Waterschapsblad/Provinciaal blad/BGR.
+// Oplossing: creator-gebaseerde queries zonder type-filter, neem 25 recentste items.
+//
+// Waterschapsblad: dcterms.creator any "Vallei en Veluwe" (waterschap van Amersfoort)
+// Provinciaal blad: dcterms.creator any "Utrecht" (provincie Utrecht)
+// BGR: geeft 0 ook zonder filters op dit endpoint — weggelaten
 
 import { createDb, ensureSource, insertItem, log } from '../lib.js';
 
@@ -17,21 +21,24 @@ const WEEKLY_SOURCES = [
     name: 'Officiële Bekendmakingen — Gemeenschappelijke regelingen',
     tier: 1,
     frequency: 'weekly',
-    query: `dcterms.spatial any "Amersfoort" AND dcterms.type="Blad gemeenschappelijke regeling"`,
+    // BGR geeft 0 via alle queries op dit endpoint — bewaard als registratie
+    query: `dcterms.creator any "Regio Amersfoort"`,
   },
   {
     sourceId: 'ob-provinciaal-blad',
     name: 'Officiële Bekendmakingen — Provinciaal blad',
     tier: 2,
     frequency: 'weekly',
-    query: `dcterms.spatial any "Amersfoort" AND dcterms.type="Provinciaal blad"`,
+    // dcterms.type="Provinciaal blad" werkt niet — creator-query zonder type
+    query: `dcterms.creator any "provincie Utrecht"`,
   },
   {
     sourceId: 'ob-waterschapsblad',
     name: 'Officiële Bekendmakingen — Waterschapsblad',
     tier: 1,
     frequency: 'weekly',
-    query: `dcterms.spatial any "Amersfoort" AND dcterms.type="Waterschapsblad"`,
+    // Waterschap Vallei en Veluwe is het waterschap voor de regio Amersfoort
+    query: `dcterms.creator any "Vallei en Veluwe"`,
   },
 ];
 
