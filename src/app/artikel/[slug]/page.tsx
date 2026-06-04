@@ -228,20 +228,6 @@ export default async function ArticlePage({ params }: Props) {
                 </div>
               )}
 
-              {/* Tags */}
-              {article.tags?.filter(t => t?.slug?.current && t.slug.current !== 'amersfoort').length ? (
-                <div style={{ paddingTop: 24, marginTop: 24, borderTop: '1px solid var(--border)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontFamily: 'var(--f-d)', fontSize: 13, fontWeight: 500, color: 'var(--t2)', marginRight: 4 }}>Tags:</span>
-                  {article.tags?.filter(t => t?.slug?.current && t.slug.current !== 'amersfoort').slice(0, 5).map((t) => {
-                    const nt = normalizeTag(t)
-                    return (
-                      <Link key={t.slug.current} href={`/tag/${nt.slug.current}`} className="ent-chip">
-                        {nt.name}
-                      </Link>
-                    )
-                  })}
-                </div>
-              ) : null}
 
               {/* Report button */}
               <div style={{ marginTop: 32, display: 'flex', justifyContent: 'center' }}>
@@ -320,15 +306,15 @@ export default async function ArticlePage({ params }: Props) {
           {/* Related articles grid — below article */}
           {article.relatedArticles && article.relatedArticles.length > 0 && (
             <div style={{ marginTop: 64, paddingTop: 32, borderTop: '1px solid var(--border)' }}>
-              <h3 style={{ fontFamily: 'var(--f-d)', fontSize: 22, fontWeight: 600, marginBottom: 28 }}>
-                Gerelateerde analyses
+              <h3 style={{ fontFamily: 'var(--f-d)', fontSize: 22, fontWeight: 600, marginBottom: 28, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
+                Gerelateerde artikelen
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 32 }}>
                 {article.relatedArticles.slice(0, 3).map((a) =>
                   a.slug ? (
-                    <Link key={a._id} href={`/artikel/${a.slug.current}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', gap: 10, cursor: 'pointer' }}>
+                    <Link key={a._id} href={`/artikel/${a.slug.current}`} className="acard">
                       {a.mainImage && (
-                        <div style={{ width: '100%', aspectRatio: '16/9', borderRadius: 'var(--r-lg)', overflow: 'hidden', background: 'var(--bg-raised)', position: 'relative' }}>
+                        <div className="acard-img-wrap">
                           <Image
                             src={urlFor(a.mainImage).width(400).height(225).url()}
                             alt={a.mainImage.alt || ''}
@@ -339,11 +325,9 @@ export default async function ArticlePage({ params }: Props) {
                         </div>
                       )}
                       {a.tags?.[0] && (
-                        <span style={{ fontFamily: 'var(--f-m)', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--accent)' }}>
-                          {a.tags[0].name}
-                        </span>
+                        <span className="acard-cat">{a.tags[0].name}</span>
                       )}
-                      <h4 style={{ fontFamily: 'var(--f-d)', fontSize: 18, fontWeight: 600, lineHeight: 1.3, letterSpacing: '-0.01em' }}>{a.title}</h4>
+                      <h4 className="acard-title" style={{ fontSize: 18 }}>{a.title}</h4>
                     </Link>
                   ) : null
                 )}
