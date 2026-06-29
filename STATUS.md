@@ -2,7 +2,7 @@
 
 ## Cowork Scheduled Tasks (geverifieerd 2026-06-11)
 
-- **stadsgeest-intake** — dagelijks 00:10 — raw_items verwerken, signalen bijwerken — laatste run: 2026-06-11 00:54 ✓
+- **stadsgeest-intake** — dagelijks 00:10 — raw_items verwerken, signalen bijwerken — laatste run: 2026-06-29 (handmatig getriggerd, scheduled runs tussen 06-11 en 06-29 niet bevestigd) — **matching-logica vervangen, zie Niet geverifieerd/Cowork-update**
 - **stadsgeest-speurder** (analist nacht) — dagelijks 01:01 — signalen analyseren, kandidaten selecteren — laatste run: 2026-06-03 23:00 ✓
 - **stadsgeest-researcher** — dagelijks 02:04 — achtergrondinfo verzamelen per kandidaat — laatste run: 2026-06-04 00:04 ✓
 - **stadsgeest-schrijver** — dagelijks 06:05 — artikelen schrijven en publiceren naar Sanity — laatste run: 2026-06-04 04:05 ✓
@@ -38,13 +38,13 @@
 - **stadsgeest-designer** — Kiest per artikel bewust een beeldtype (sinds 2026-06-11): GRAFIEK via QuickChart bij cijfer-/statistiekverhalen (alleen met exacte cijfers uit het artikel), KAART via OpenStreetMap+Leaflet+Playwright bij locatiegebonden nieuws zonder foto van de exacte plek (cirkel i.p.v. marker bij wijkniveau; nooit exact huisadres bij misdrijven), FOTO via de bestaande zoektrap voor de rest. Stelt homepage-indeling samen. Beschouwt ook bijgewerkte artikelen (updatedAt binnen 48 uur) als kandidaat voor bump naar homepage of priority "top" — mits de update inhoudelijk significant is.
 - **stadsgeest-analist-middag** — Identieke logica als speurder, inclusief clustering-check, Sanity-archief check en update-detectie. Draait op werkdagen op basis van ochtendmateriaal. Max. 3 kandidaten, schrijft briefings, voert opruiming uit. Beide analist-prompts bijgewerkt 2026-06-04: Stap 4 is nu verplicht proactief (WebSearch voor elk signaal novelty ≥ 3, hardcoded categorieën), briefing bevat nieuw veld ONDERZOEKSOPDRACHT VOOR RESEARCHER met concrete zoektermen, bronnen en vragen.
 
-## Database Turso (geverifieerd 2026-06-11)
+## Database Turso (geverifieerd 2026-06-29)
 
-- **raw_items:** 2.618 items — waarvan 409 met is_historical=1 (historische backfill 2026-06-04)
-- **is_historical verdeling (geverifieerd 2026-06-04):** rechtspraak 267, bekendmakingen 71, raadsinformatie 58, jaarverslagen 10, cbs-statline 2, subsidieregister 1
-- **signals (2026-06-11 01:01):** 21 new, 12 watching, 5 researching, 43 published, 147 discarded — totaal 228 signalen
-- **sources:** 105+ bronnen — split-bronnen toegevoegd 2026-06-04 (ids 109–120): 3x OB dagelijks, 3x OB wekelijks, 6x raadsinformatie per type
-- **entities / entity_signals:** aanwezig, worden gevuld door intake bij verwerking historische items
+- **raw_items:** 3.232 items, alle is_processed=1 (intake 2026-06-29 heeft volledige achterstand verwerkt)
+- **signals (2026-06-29):** 92 new, 1 watching, 4 researching, 51 published, 195 discarded — totaal 343 signalen
+- **sources:** 105+ bronnen — ongewijzigd sinds 2026-06-04
+- **entities:** 729 totaal — entity_type beperkt door CHECK-constraint tot person/organization/location/address (kvk_number/amount/legal_ref/project bestaan NIET in het schema, ondanks dat de intake-instructies die wel noemen — zie Niet geverifieerd)
+- **Bekende databevuiling (gevonden 2026-06-29, niet door mij veroorzaakt vandaag):** 12 signalen hebben absurd hoge confirmations/item-counts door een matching-bug uit eerdere sessies (vóór 2026-06-29), o.a. #98 "Rekenkamer Amersfoort" met 349 gekoppelde items, #31 (ECLI-zaak) met 157, #35 (Falk-stadsplattegrond) met 110, #33/#197/#41/#207/#32/#97/#209/#80/#210 met 16-50. Dit komt doordat eerdere intake-runs nieuwe items op basis van 2 gedeelde woorden aan signalen koppelden — generieke woorden (bijv. "extra", "plan", "nieuwe") veroorzaakten valse matches tussen volledig ongerelateerde berichten. Niet opgeschoond vandaag (buiten scope van een routine-run, risico op verdere schade). Aanbeveling: apart, mens-begeleid opschoningsmoment voor deze 12 signalen.
 - **is_historical kolom:** toegevoegd aan raw_items 2026-06-04 (ALTER TABLE)
 - **Personen/relaties-schema:** persons, organizations, roles, org_relations, person_relations, decisions, decision_persons, annual_reports
 - **Personenvulling (2026-06-02):** 8 organisaties, 60 personen, 60 rollen (B&W, raad, Meander, De Alliantie, Waterschap, Portaal)
@@ -124,11 +124,14 @@
 ## Niet geverifieerd
 
 - Inhoud van Sanity (artikelen, publicaties)
-- Exacte count `entities` tabel na backfill-intake
 - Inhoud gepubliceerde artikelen (site wachtwoordbeveiligd)
+- Of de scheduled intake-runs tussen 2026-06-11 en 2026-06-29 daadwerkelijk hebben gedraaid — de matchingbug (zie hieronder) lijkt in die periode te zijn ontstaan, maar ik kan niet vaststellen via welke run(s) precies
+- Volledige entiteitsextractie (person/location/address) is dit run NIET uitgevoerd — alleen "gemeente amersfoort"-vermeldingen (organization) zijn via regex herkend. Personen, locaties en adressen vereisen betrouwbaardere NLP-extractie dan haalbaar in een ongesuperviseerde scheduled run; dit blijft open
+- De intake-instructies noemen entity_type-waarden amount/legal_ref/kvk_number/project — deze bestaan niet in het entities-schema (CHECK staat alleen person/organization/location/address toe). Instructie en schema lopen hier uit elkaar; nog niet besproken met Jasper
 
 ---
 
+*Cowork-update: 2026-06-29 — Intake handmatig gedraaid (handmatige trigger, niet de scheduled task — onduidelijk of/hoe vaak deze tussen 06-11 en 06-29 automatisch liep). 413 onverwerkte raw_items gevonden. BUG ONTDEKT EN GEFIXED: de voorgeschreven matchingregel ("2 gedeelde inhoudelijke woorden") bleek bij uitvoering ernstig over-matchend — eerste poging voegde 404 van 425 items toe aan een handvol signalen (één signaal liep op tot 412 confirmations). Direct teruggedraaid via added_at/created_at-tijdstempels (signal_items, signals) en is_processed terug op 0 gezet voor de getroffen raw_items — geen permanente schade van deze sessie. Bij het uitzoeken bleek dat 12 bestaande signalen al vóór vandaag enorm waren opgeblazen door dezelfde soort bug in een eerdere sessie (zie Database Turso) — dat is niet vandaag ontstaan en niet door mij opgeschoond. Voor de resterende verwerking is een striktere, conservatievere matchingheuristiek gebruikt (Jaccard-overlap ≥0.4 + minimaal 3 gedeelde woorden, en signalen met al >10 gekoppelde items worden nooit meer gevoed) — resultaat: 93 nieuwe signalen (status new), 0 valse matches, geen enkel signaal kreeg een vreemde piek. Alle 3.232 raw_items zijn nu is_processed=1. Entiteitsextractie alleen voor "gemeente amersfoort"-organisatievermeldingen (15 entities, 11 gekoppeld aan signalen) — bredere extractie bewust overgeslagen, zie Niet geverifieerd. Aanbeveling aan Jasper: de matchingregel in de intake-instructies ("2 gedeelde woorden") is in de praktijk te zwak gebleken en moet worden herzien — voorstel: vaste woordenlijst uitbreiden of overschakelen op entity-gebaseerde matching i.p.v. los woordoverlap.*
 *Cowork-update: 2026-06-03 — Bronladder ingevoerd (tier 1/2/3 op alle 93 bronnen), novelty-score + artikeltype actief in speurder/analist, entity_signals koppeltabel aangemaakt, intake bijgewerkt met entity_type classificatie, schrijver bijgewerkt met artikellengte per type en doorverwijzing. 15 nieuwe primaire bronnen geregistreerd + scrape-nieuw PM2-job gedebugged en stabiel (0 fouten). Werkend: Rekenkamer PDF, GR via OB SRU, Regio/COELO/BuurtBudget/GGD via RSS, ACM/Monumenten via HTML. Uitgeschakeld (JS/auth): RvS, Huurcommissie, OpenKvK, EP-online, EU-subsidies.*
 *Cowork-update: 2026-06-03 — stadsgeest-weekreview scheduled task aangemaakt (zondag 09:00): leest transcripten van alle 10 routine-sessies, analyseert rapportages, kruischeckt met STATUS.md en schrijft verbeterplan naar weekreviews/weekreview-[datum].md*
 *Cowork-update: 2026-06-03 — UNSPLASH_ACCESS_KEY toegevoegd aan scraper/.env; beide designer tasks (ochtend + middag) bijgewerkt: geen zwart-wit/archiefbeelden tenzij artikel expliciet over historisch onderwerp gaat.*
