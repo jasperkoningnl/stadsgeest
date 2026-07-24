@@ -32,10 +32,10 @@ function matchScore(item, signal) {
     ...tokenize(item.summary || ''),
     ...tokenize((item.content || '').substring(0, 300))
   ]);
-  const sigTokens = new Set([
-    ...tokenize(signal.title),
-    ...tokenize(signal.summary || '')
-  ]);
+  // Match alleen op signaal-TITEL, niet op summary.
+  // Summary kan heel lang zijn (bijv. research-rapporten) waardoor
+  // bijna elk item 2+ woorden deelt en foutief matcht.
+  const sigTokens = new Set(tokenize(signal.title));
   let common = 0;
   for (const t of itemTokens) {
     if (sigTokens.has(t)) common++;
@@ -43,9 +43,23 @@ function matchScore(item, signal) {
   return common;
 }
 
-function extractEntities(item) {
+function extractEntities(item, personIndex = []) {
   const text = `${item.title || ''} ${item.summary || ''} ${(item.content || '').substring(0, 500)}`;
   const entities = [];
+
+  // Bekende personen (college, raad, bestuurders) — matcht op volledige naam
+  // (regex zonder 'g'-vlag: match() geeft dan gewoon de eerste treffer + index terug)
+  for (const p of personIndex) {
+    const match = text.match(p.regex);
+    if (match) {
+      entities.push({
+        type: 'person',
+        name: p.name,
+        normalized: p.name.toLowerCase(),
+        context: text.substring(Math.max(0, match.index - 30), match.index + p.name.length + 30),
+      });
+    }
+  }
 
   // Bedragen
   const bedragRe = /€\s*([\d.,]+(?:\s*(?:miljoen|duizend|mln))?)/gi;
@@ -97,8 +111,23 @@ function extractEntities(item) {
   });
 }
 
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+async function loadPersonIndex() {
+  const res = await db.execute('SELECT name FROM persons');
+  return res.rows.map(p => ({
+    name: p.name,
+    regex: new RegExp(`\\b${escapeRegex(p.name)}\\b`, 'i'),
+  }));
+}
+
 async function run() {
   console.log(`\n=== Stadsgeest Intake: ${new Date().toISOString()} ===\n`);
+
+  const personIndex = await loadPersonIndex();
+  console.log(`${personIndex.length} bekende personen geladen voor entiteitsherkenning`);
 
   const itemsResult = await db.execute(`
     SELECT r.id, r.title, r.content, r.summary, r.external_url, r.scraped_at, r.is_historical,
@@ -209,7 +238,7 @@ async function run() {
   // Entiteiten (primary/secondary)
   const entItems = items.filter(it => (it.reliability === 'primary' || it.reliability === 'secondary') && stats.ids.includes(it.id));
   for (const item of entItems) {
-    const ents = extractEntities(item);
+    const ents = extractEntities(item, personIndex);
     const sl = await db.execute({ sql: `SELECT signal_id FROM signal_items WHERE raw_item_id = ? LIMIT 1`, args: [item.id] });
     const sigId = sl.rows[0]?.signal_id;
     for (const ent of ents) {
