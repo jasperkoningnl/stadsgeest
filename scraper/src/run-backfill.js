@@ -190,7 +190,7 @@ async function backfillRechtspraak() {
     stats.filtered += rangeFiltered;
   }
 
-  log('rechtspraak-backfill', stats);
+  await log(db, sid, 'rechtspraak-backfill', stats);
   console.log(`  [rechtspraak] Gefilterd (niet Amersfoort-relevant): ${stats.filtered}`);
   return stats;
 }
@@ -288,7 +288,7 @@ async function backfillBekendmakingen() {
     await sleep(500);
   }
 
-  log('bekendmakingen-backfill', stats);
+  await log(db, sid, 'bekendmakingen-backfill', stats);
   return stats;
 }
 
@@ -380,7 +380,7 @@ async function backfillTenderned() {
   } catch (e) {
     console.error(`  [tenderned] RSS feed niet bereikbaar: ${e.message}`);
     stats.errors++;
-    log('tenderned-backfill', stats);
+    await log(db, sid, 'tenderned-backfill', stats);
     return stats;
   }
 
@@ -421,7 +421,7 @@ async function backfillTenderned() {
   console.log(`  [tenderned] Opmerking: RSS feed geeft alleen meest recente publicaties.`);
   console.log(`  [tenderned] Historische data (>25 items terug) is al gedekt door dagelijkse scraper (run-all.js).`);
 
-  log('tenderned-backfill', stats);
+  await log(db, sid, 'tenderned-backfill', stats);
   return stats;
 }
 
@@ -534,7 +534,7 @@ async function backfillSubsidieregister() {
     }
   }
 
-  log('subsidieregister-backfill', stats);
+  await log(db, sid, 'subsidieregister-backfill', stats);
   return stats;
 }
 
@@ -610,7 +610,7 @@ async function backfillCbs() {
     await sleep(1000);
   }
 
-  log('cbs-backfill', stats);
+  await log(db, sid, 'cbs-backfill', stats);
   return stats;
 }
 
@@ -754,7 +754,7 @@ async function backfillJaarverslagen() {
     await sleep(1500); // vriendelijk voor servers
   }
 
-  log('jaarverslagen-backfill', stats);
+  await log(db, null, 'jaarverslagen-backfill', stats);
   return stats;
 }
 
@@ -856,7 +856,7 @@ async function backfillNotubizApi() {
     await sleep(300);
   }
 
-  log('raadsinformatie-backfill', stats);
+  await log(db, sid, 'raadsinformatie-backfill', stats);
   return stats;
 }
 

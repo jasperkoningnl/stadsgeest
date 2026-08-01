@@ -64,7 +64,7 @@ async function scrapeDiabetesfonds() {
       } catch (e) { errors++; }
     }
   } catch (e) { console.error('Diabetesfonds fout:', e.message); errors++; }
-  logResult('Diabetesfonds', saved, skipped, errors);
+  await logResult(db, sourceId, 'Diabetesfonds', saved, skipped, errors);
 }
 
 // ─── MBO Amersfoort ───────────────────────────────────────────────────────
@@ -96,7 +96,7 @@ async function scrapeMboAmersfoort() {
       } catch (e) { errors++; }
     }
   } catch (e) { console.error('MBO Amersfoort fout:', e.message); errors++; }
-  logResult('MBO Amersfoort', saved, skipped, errors);
+  await logResult(db, sourceId, 'MBO Amersfoort', saved, skipped, errors);
 }
 
 // ─── CliniClowns ──────────────────────────────────────────────────────────
@@ -128,7 +128,7 @@ async function scrapeCliniClowns() {
       } catch (e) { errors++; }
     }
   } catch (e) { console.error('CliniClowns fout:', e.message); errors++; }
-  logResult('CliniClowns', saved, skipped, errors);
+  await logResult(db, sourceId, 'CliniClowns', saved, skipped, errors);
 }
 
 // ─── Museum Flehite ────────────────────────────────────────────────────────
@@ -174,7 +174,7 @@ async function scrapeFlehite() {
       } catch (e) { errors++; }
     }
   } catch (e) { console.error('Museum Flehite fout:', e.message); errors++; }
-  logResult('Museum Flehite', saved, skipped, errors);
+  await logResult(db, sourceId, 'Museum Flehite', saved, skipped, errors);
 }
 
 // ─── Hogeschool Utrecht ───────────────────────────────────────────────────
@@ -209,7 +209,7 @@ async function scrapeHU() {
       } catch (e) { errors++; }
     }
   } catch (e) { console.error('HU fout:', e.message); errors++; }
-  logResult('Hogeschool Utrecht', saved, skipped, errors);
+  await logResult(db, sourceId, 'Hogeschool Utrecht', saved, skipped, errors);
 }
 
 // ─── Musiom — UITGESCHAKELD ───────────────────────────────────────────────

@@ -63,7 +63,23 @@ export async function insertItem(db, { source_id, title, content, summary, exter
   }
 }
 
-export function log(name, stats) {
+// Laag B: schrijft het resultaat van één scraper (bron) naar scrape_runs.
+// job_name komt uit SCRAPE_JOB_NAME (door de aanroepende runner gezet); bij een
+// handmatige/losse run van een scraper-bestand is die env var niet gezet.
+export async function log(db, sourceId, name, stats, itemsFound) {
   const ts = new Date().toISOString();
   console.log(`[${ts}] ${name}: ${stats.new} nieuw, ${stats.skipped} overgeslagen, ${stats.errors} fouten`);
+
+  const found = itemsFound ?? (stats.new + stats.skipped);
+  const status = found === 0 ? 'empty' : 'ok';
+
+  try {
+    await db.execute({
+      sql: `INSERT INTO scrape_runs (job_name, source_id, source_name, items_found, items_new, items_duplicate, items_error, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [process.env.SCRAPE_JOB_NAME || null, sourceId ?? null, name, found, stats.new, stats.skipped, stats.errors, status],
+    });
+  } catch (e) {
+    console.error(`Kon scrape_runs niet bijwerken voor ${name}:`, e.message);
+  }
 }

@@ -64,7 +64,7 @@ async function scrape() {
     }
   }
 
-  logResult('Bestuurlijke informatie Amersfoort (iBabs)', saved, skipped, errors);
+  await logResult(db, sourceId, 'Bestuurlijke informatie Amersfoort (iBabs)', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

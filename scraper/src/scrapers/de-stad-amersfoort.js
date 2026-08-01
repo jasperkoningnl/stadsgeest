@@ -34,7 +34,7 @@ async function scrape() {
     }
   }
 
-  logResult('De Stad Amersfoort', saved, skipped, errors);
+  await logResult(db, sourceId, 'De Stad Amersfoort', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

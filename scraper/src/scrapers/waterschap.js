@@ -49,7 +49,7 @@ async function scrape() {
     }
   }
 
-  logResult('Waterschap Vallei en Veluwe', saved, skipped, errors);
+  await logResult(db, sourceId, 'Waterschap Vallei en Veluwe', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

@@ -88,7 +88,7 @@ async function scrape() {
     }
   }
 
-  logResult('Raadsinformatie gemeente Amersfoort', saved, skipped, errors);
+  await logResult(db, sourceId, 'Raadsinformatie gemeente Amersfoort', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

@@ -196,7 +196,7 @@ async function scrape() {
     }
   }
 
-  logResult('Nextdoor — Amersfoort buurtberichten', saved, skipped, errors);
+  await logResult(db, sourceId, 'Nextdoor — Amersfoort buurtberichten', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

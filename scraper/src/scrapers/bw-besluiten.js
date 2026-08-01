@@ -104,7 +104,7 @@ async function scrape() {
     }
   }
 
-  logResult('B&W besluitenlijsten gemeente Amersfoort', saved, skipped, errors);
+  await logResult(db, sourceId, 'B&W besluitenlijsten gemeente Amersfoort', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

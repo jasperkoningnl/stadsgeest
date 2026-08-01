@@ -62,7 +62,7 @@ async function scrape() {
       }
     }
 
-    logResult(`Reddit ${sub.name}`, saved, skipped, errors);
+    await logResult(db, sourceId, `Reddit ${sub.name}`, saved, skipped, errors);
 
     // Rate limit: wacht 2 seconden tussen subreddits
     await new Promise(r => setTimeout(r, 2000));

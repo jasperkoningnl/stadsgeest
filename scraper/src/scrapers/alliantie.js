@@ -66,7 +66,7 @@ async function scrape() {
     }
   }
 
-  logResult('De Alliantie', saved, skipped, errors);
+  await logResult(db, sourceId, 'De Alliantie', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

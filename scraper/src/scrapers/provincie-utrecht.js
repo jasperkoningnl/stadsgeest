@@ -12,7 +12,7 @@ import { getOrCreateSource, logResult } from '../utils.js';
 const SOURCE_URL = 'https://www.provincie-utrecht.nl/actueel/nieuws';
 
 async function scrape() {
-  await getOrCreateSource(db, {
+  const sourceId = await getOrCreateSource(db, {
     name: 'Provincie Utrecht — nieuws Amersfoort',
     url: SOURCE_URL,
     sourceType: 'scrape',
@@ -20,7 +20,7 @@ async function scrape() {
     category: 'government',
     scrapeFrequency: 'weekly',
   });
-  logResult('Provincie Utrecht — nieuws Amersfoort (uitgeschakeld)', 0, 0, 0);
+  await logResult(db, sourceId, 'Provincie Utrecht — nieuws Amersfoort (uitgeschakeld)', 0, 0, 0);
 }
 
 scrape().catch(console.error);

@@ -58,7 +58,7 @@ async function scrapeQbuzz() {
       } catch (e) { errors++; }
     }
   } catch (e) { console.error('Qbuzz fout:', e.message); errors++; }
-  logResult('Qbuzz', saved, skipped, errors);
+  await logResult(db, sourceId, 'Qbuzz', saved, skipped, errors);
 }
 
 // ─── Noordhoff — /pers ────────────────────────────────────────────────────
@@ -102,7 +102,7 @@ async function scrapeNoordhoff() {
       } catch (e) { errors++; }
     }
   } catch (e) { console.error('Noordhoff fout:', e.message); errors++; }
-  logResult('Noordhoff', saved, skipped, errors);
+  await logResult(db, sourceId, 'Noordhoff', saved, skipped, errors);
 }
 
 // ─── FrieslandCampina — UITGESCHAKELD ────────────────────────────────────
@@ -144,7 +144,7 @@ async function scrapeFrieslandCampina() {
     // (stub: pagina laadt niet zonder JS)
     skipped = 0;
   } catch (e) { /* stub */ }
-  logResult('FrieslandCampina', saved, skipped, errors);
+  await logResult(db, sourceId, 'FrieslandCampina', saved, skipped, errors);
 }
 
 // ─── RHDHV — UITGESCHAKELD ────────────────────────────────────────────────

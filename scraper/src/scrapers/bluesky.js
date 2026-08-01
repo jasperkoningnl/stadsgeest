@@ -60,7 +60,7 @@ async function scrape() {
         if (r.saved) saved++; else skipped++;
       } catch (e) { totalErrors++; }
     }
-    logResult('Bluesky zoek', saved, skipped, 0);
+    await logResult(db, searchSourceId, 'Bluesky zoek', saved, skipped, 0);
     totalSaved += saved; totalSkipped += skipped;
   } catch (e) {
     console.error('Bluesky zoekfeed fout:', e.message);
@@ -97,14 +97,15 @@ async function scrape() {
           if (r.saved) saved++; else skipped++;
         } catch (e) { totalErrors++; }
       }
-      logResult(`Bluesky @${handle.split('.')[0]}`, saved, skipped, 0);
+      await logResult(db, sourceId, `Bluesky @${handle.split('.')[0]}`, saved, skipped, 0);
       totalSaved += saved; totalSkipped += skipped;
     } catch (e) {
       console.error(`Bluesky ${handle} fout:`, e.message);
     }
   }
 
-  logResult('Bluesky totaal', totalSaved, totalSkipped, totalErrors);
+  // Samenvatting over alle Bluesky-bronnen heen — niet aan één source_id te koppelen.
+  await logResult(db, null, 'Bluesky totaal', totalSaved, totalSkipped, totalErrors);
 }
 
 scrape().catch(console.error);

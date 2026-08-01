@@ -83,7 +83,7 @@ async function scrape() {
     }
   }
 
-  logResult('NS Verstoringen', saved, skipped, errors);
+  await logResult(db, sourceId, 'NS Verstoringen', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

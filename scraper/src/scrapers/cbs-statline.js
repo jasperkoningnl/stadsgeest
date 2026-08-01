@@ -44,7 +44,7 @@ async function scrape() {
     console.warn('CBS: geen data ontvangen (controleer RegioS-filter)');
   }
 
-  logResult('CBS StatLine', saved, skipped, errors);
+  await logResult(db, sourceId, 'CBS StatLine', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

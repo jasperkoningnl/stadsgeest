@@ -73,7 +73,7 @@ async function scrape() {
     }
   }
 
-  logResult('Meander Medisch Centrum nieuws', saved, skipped, errors);
+  await logResult(db, sourceId, 'Meander Medisch Centrum nieuws', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

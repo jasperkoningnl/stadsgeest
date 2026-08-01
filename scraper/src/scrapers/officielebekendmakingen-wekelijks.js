@@ -101,7 +101,7 @@ async function scrape() {
       console.warn(`[OB-WEKELIJKS] ${s.sourceId}: ${err.message}`);
     }
 
-    log(s.name, stats);
+    await log(db, sourceId, s.name, stats);
   }
 }
 
