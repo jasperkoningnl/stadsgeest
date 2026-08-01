@@ -26,7 +26,7 @@ function SourceProof({ source, defaultOpen }: { source: SourceRow; defaultOpen: 
   if (source.topSignals.length === 0) return null
   return (
     <tr>
-      <td colSpan={6} style={{ padding: 0, borderBottom: '1px solid var(--border-s)' }}>
+      <td colSpan={7} style={{ padding: 0, borderBottom: '1px solid var(--border-s)' }}>
         <details open={defaultOpen} style={{ padding: '0 14px 12px' }}>
           <summary style={{ cursor: 'pointer', fontSize: 12.5, color: 'var(--t3)', padding: '4px 0' }}>
             Laatste signalen uit deze bron
@@ -74,6 +74,7 @@ function TierSection({ tier, aggregate, sources }: { tier: number; aggregate: { 
                 <th>Items totaal</th>
                 <th>Signalen</th>
                 <th>Gepubliceerd</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -91,6 +92,15 @@ function TierSection({ tier, aggregate, sources }: { tier: number; aggregate: { 
                     <td>{s.itemsTotal}</td>
                     <td>{s.signalCount}</td>
                     <td>{s.publishedCount}</td>
+                    <td style={{ maxWidth: 260, fontSize: 12.5 }}>
+                      {s.lastErrorStatus === 'error' || s.lastErrorStatus === 'timeout' ? (
+                        <span style={{ color: 'var(--red, #c0392b)' }}>
+                          {s.lastErrorMessage || `laatste run: ${s.lastErrorStatus}`}
+                        </span>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
                   </tr>
                   <SourceProof source={s} defaultOpen={i < 3} />
                 </Fragment>

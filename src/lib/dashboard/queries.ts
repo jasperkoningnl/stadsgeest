@@ -37,7 +37,7 @@ export interface AttentionPoint {
 }
 
 // Verwachte tijd (in dagen) tussen twee items van een bron, per scrape-ritme.
-const FREQUENCY_DAYS: Record<string, number> = { hourly: 1, daily: 1, weekly: 7, monthly: 30 }
+const FREQUENCY_DAYS: Record<string, number> = { hourly: 1 / 24, daily: 1, weekly: 7, monthly: 30 }
 const FREQUENCY_LABEL: Record<string, string> = { hourly: 'ieder uur ververste', daily: 'dagelijkse', weekly: 'wekelijkse', monthly: 'maandelijkse' }
 
 /**
@@ -89,7 +89,7 @@ export async function getAttentionPoints(): Promise<AttentionPoint[]> {
     points.push({
       label: `${failed.length} scraper${failed.length === 1 ? '' : 's'} gaf een fout bij de laatste run`,
       detail: failed.slice(0, 3).map((f: any) => f.scraper_file).join(', '),
-      href: '/dashboard/bronnen?health=red',
+      href: '/dashboard/bronnen',
     })
   }
 
