@@ -102,7 +102,7 @@ async function scrape() {
     }
   }
 
-  logResult('TenderNed', saved, skipped, errors);
+  await logResult(db, sourceId, 'TenderNed', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

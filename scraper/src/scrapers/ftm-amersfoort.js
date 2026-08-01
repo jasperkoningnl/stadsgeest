@@ -49,7 +49,7 @@ async function scrape() {
     }
   }
 
-  logResult('Follow the Money', saved, skipped, errors);
+  await logResult(db, sourceId, 'Follow the Money', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

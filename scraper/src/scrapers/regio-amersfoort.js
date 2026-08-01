@@ -46,7 +46,7 @@ async function scrape() {
     }
   }
 
-  logResult('Bureau Regio Amersfoort', saved, skipped, errors);
+  await logResult(db, sourceId, 'Bureau Regio Amersfoort', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

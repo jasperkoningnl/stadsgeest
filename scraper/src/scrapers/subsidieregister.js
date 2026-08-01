@@ -64,7 +64,7 @@ async function scrape() {
     }
   }
 
-  logResult('Subsidieregister gemeente Amersfoort', saved, skipped, errors);
+  await logResult(db, sourceId, 'Subsidieregister gemeente Amersfoort', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

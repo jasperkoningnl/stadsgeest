@@ -187,7 +187,7 @@ async function runTypedSource(sourceDef) {
     console.warn(`[OB-SPLIT] ${sourceDef.sourceId} niet beschikbaar: ${err.message}`);
   }
 
-  log(sourceDef.name, stats);
+  await log(db, sourceId, sourceDef.name, stats);
   return stats;
 }
 
@@ -241,7 +241,7 @@ async function runOverig() {
     console.warn(`[OB-OVERIG] niet beschikbaar: ${err.message}`);
   }
 
-  log(sourceDef.name, stats);
+  await log(db, sourceId, sourceDef.name, stats);
   return stats;
 }
 

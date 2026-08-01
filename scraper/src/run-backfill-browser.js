@@ -52,7 +52,7 @@ async function backfillNotubiz() {
   // Probeer eerst Notubiz opendata API
   const apiGeluk = await tryNotubizApi(sid, vanafStr, stats);
   if (apiGeluk) {
-    log('raadsinformatie-backfill', stats);
+    await log(db, sid, 'raadsinformatie-backfill', stats);
     return stats;
   }
 
@@ -60,7 +60,7 @@ async function backfillNotubiz() {
   console.log('  [raadsinformatie] API niet beschikbaar — gebruik Playwright');
   await tryNotubizBrowser(sid, vanafStr, stats);
 
-  log('raadsinformatie-backfill', stats);
+  await log(db, sid, 'raadsinformatie-backfill', stats);
   return stats;
 }
 

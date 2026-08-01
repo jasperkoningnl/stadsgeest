@@ -10,7 +10,7 @@ import { getOrCreateSource, logResult } from '../utils.js';
 const SOURCE_URL = 'https://www.ggdregioutrecht.nl/nieuws';
 
 async function scrape() {
-  await getOrCreateSource(db, {
+  const sourceId = await getOrCreateSource(db, {
     name: 'GGD regio Utrecht nieuws',
     url: SOURCE_URL,
     sourceType: 'scrape',
@@ -18,7 +18,7 @@ async function scrape() {
     category: 'community',
     scrapeFrequency: 'weekly',
   });
-  logResult('GGD regio Utrecht nieuws (uitgeschakeld)', 0, 0, 0);
+  await logResult(db, sourceId, 'GGD regio Utrecht nieuws (uitgeschakeld)', 0, 0, 0);
 }
 
 scrape().catch(console.error);

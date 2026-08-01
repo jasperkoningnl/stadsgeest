@@ -9,8 +9,8 @@ import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
 
 async function scrape() {
-  // Uitgeschakeld — niets doen
-  logResult('Officiële Bekendmakingen — Amersfoort (uitgeschakeld)', 0, 0, 0);
+  // Uitgeschakeld — niets doen, ook geen bron geregistreerd
+  await logResult(db, null, 'Officiële Bekendmakingen — Amersfoort (uitgeschakeld)', 0, 0, 0);
 }
 
 scrape().catch(console.error);

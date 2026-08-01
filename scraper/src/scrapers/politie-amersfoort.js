@@ -72,7 +72,7 @@ async function scrape() {
     }
   }
 
-  logResult('Politie Amersfoort', saved, skipped, errors);
+  await logResult(db, sourceId, 'Politie Amersfoort', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

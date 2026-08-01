@@ -34,7 +34,7 @@ async function scrape() {
     }
   }
 
-  logResult('VRU', saved, skipped, errors);
+  await logResult(db, sourceId, 'VRU', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

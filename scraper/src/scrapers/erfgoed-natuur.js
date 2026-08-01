@@ -71,7 +71,7 @@ async function scrapeStaatsbosbeheer() {
     // Geen Amersfoort-hits op deze run? Sla dan de paginatitel met datum op als signaal.
     // (geen actie — het is normaal dat nationale bronnen soms niks opleveren)
   } catch (e) { console.error('Staatsbosbeheer fout:', e.message); errors++; }
-  logResult('Staatsbosbeheer', saved, skipped, errors);
+  await logResult(db, sourceId, 'Staatsbosbeheer', saved, skipped, errors);
 }
 
 // ─── Restauratiefonds ─────────────────────────────────────────────────────
@@ -102,7 +102,7 @@ async function scrapeRestauratiefonds() {
       } catch (e) { errors++; }
     }
   } catch (e) { console.error('Restauratiefonds fout:', e.message); errors++; }
-  logResult('Restauratiefonds', saved, skipped, errors);
+  await logResult(db, sourceId, 'Restauratiefonds', saved, skipped, errors);
 }
 
 // ─── Vereniging Eigen Huis ────────────────────────────────────────────────
@@ -133,7 +133,7 @@ async function scrapeEigenHuis() {
       } catch (e) { errors++; }
     }
   } catch (e) { console.error('Eigen Huis fout:', e.message); errors++; }
-  logResult('Vereniging Eigen Huis', saved, skipped, errors);
+  await logResult(db, sourceId, 'Vereniging Eigen Huis', saved, skipped, errors);
 }
 
 // ─── Rijksdienst voor het Cultureel Erfgoed ───────────────────────────────
@@ -165,7 +165,7 @@ async function scrapeRCE() {
       } catch (e) { errors++; }
     }
   } catch (e) { console.error('RCE fout:', e.message); errors++; }
-  logResult('RCE', saved, skipped, errors);
+  await logResult(db, sourceId, 'RCE', saved, skipped, errors);
 }
 
 // ─── Ministerie van Defensie ──────────────────────────────────────────────
@@ -197,7 +197,7 @@ async function scrapeDefensie() {
       } catch (e) { errors++; }
     }
   } catch (e) { console.error('Defensie fout:', e.message); errors++; }
-  logResult('Defensie', saved, skipped, errors);
+  await logResult(db, sourceId, 'Defensie', saved, skipped, errors);
 }
 
 async function scrape() {

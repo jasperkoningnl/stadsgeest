@@ -79,7 +79,7 @@ async function scrape() {
     if (browser) await browser.close();
   }
 
-  logResult('Omthuis', saved, skipped, errors);
+  await logResult(db, sourceId, 'Omthuis', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

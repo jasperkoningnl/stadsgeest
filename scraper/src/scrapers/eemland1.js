@@ -34,7 +34,7 @@ async function scrape() {
     }
   }
 
-  logResult('Eemland1', saved, skipped, errors);
+  await logResult(db, sourceId, 'Eemland1', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

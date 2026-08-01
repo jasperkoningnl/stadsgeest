@@ -117,7 +117,7 @@ async function scrapeSource(page, db, source) {
     }
   }
 
-  logResult(source.name.split(' ')[0], saved, skipped, errors);
+  await logResult(db, sourceId, source.name.split(' ')[0], saved, skipped, errors);
 }
 
 async function scrape() {

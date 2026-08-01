@@ -1,8 +1,12 @@
 // run-nieuw.js — Nieuwe primaire bronnen Stadsgeest 033
 // Draait wekelijks via PM2 cron (maandag 09:00)
 import { createDb, ensureSource, insertItem, log } from './lib.js';
+import { recordScrapeRun } from './runner-log.js';
 import * as cheerio from 'cheerio';
 import RSSParser from 'rss-parser';
+
+const JOB_NAME = 'run-nieuw';
+process.env.SCRAPE_JOB_NAME = process.env.SCRAPE_JOB_NAME || JOB_NAME;
 
 const db = createDb();
 const rssParser = new RSSParser({ timeout: 12000 });
@@ -43,7 +47,7 @@ async function scrapeRSS(sourceDef, feedUrl, filterFn = null) {
     stats.errors++;
     console.error(`  [${sourceDef.name}] ${e.message.substring(0, 120)}`);
   }
-  log(sourceDef.name, stats);
+  await log(db, sid, sourceDef.name, stats);
   return stats;
 }
 
@@ -89,7 +93,7 @@ async function scrapeRekenkamer() {
     stats.errors++;
     console.error(`  [${name}] ${e.message.substring(0, 120)}`);
   }
-  log(name, stats);
+  await log(db, sid, name, stats);
   return stats;
 }
 
@@ -126,7 +130,7 @@ async function scrapeRaadVanState() {
     stats.errors++;
     console.error(`  [${name}] ${e.message.substring(0, 120)}`);
   }
-  log(name, stats);
+  await log(db, sid, name, stats);
   return stats;
 }
 
@@ -139,12 +143,12 @@ async function scrapeOpenKvK() {
   // overheid.io OpenKvK API vereist een gratis API-key. Registreer op overheid.io.
   // Voeg toe aan scraper/.env: OVERHEID_IO_KEY=<jouw-key>
   // Daarna: GET https://api.overheid.io/openkvk?filters[]=gemeente:Amersfoort&ovio-api-key=<key>
-  await ensureSource(db, {
+  const sid = await ensureSource(db, {
     name, url: 'https://api.overheid.io/openkvk',
     source_type: 'api', reliability: 'primary', category: 'registry',
     scrape_frequency: 'daily', tier: 1,
-  }).catch(() => {});
-  log(name, stats);
+  }).catch(() => undefined);
+  await log(db, sid, name, stats);
   return stats;
 }
 
@@ -190,7 +194,7 @@ async function scrapeGemeenschappelijkeRegelingen() {
     stats.errors++;
     console.error(`  [${name}] ${e.message.substring(0, 120)}`);
   }
-  log(name, stats);
+  await log(db, sid, name, stats);
   return stats;
 }
 
@@ -238,7 +242,7 @@ async function scrapeDUO() {
     stats.errors++;
     console.error(`  [${name}] ${e.message.substring(0, 120)}`);
   }
-  log(name, stats);
+  await log(db, sid, name, stats);
   return stats;
 }
 
@@ -250,12 +254,12 @@ async function scrapeHuurcommissie() {
   const stats = { new: 0, skipped: 1, errors: 0 };
   // Huurcommissie-site is volledig JS-rendered (Next.js). Geen toegankelijke API.
   // Alternatief: zoek op huurcommissie.nl via de zoekfunctie in een browser-scraper.
-  await ensureSource(db, {
+  const sid = await ensureSource(db, {
     name, url: 'https://www.huurcommissie.nl/uitspraken',
     source_type: 'browser', reliability: 'primary', category: 'registry',
     scrape_frequency: 'weekly', tier: 1,
-  }).catch(() => {});
-  log(name, stats);
+  }).catch(() => undefined);
+  await log(db, sid, name, stats);
   return stats;
 }
 
@@ -305,7 +309,7 @@ async function scrapeACM() {
     stats.errors++;
     console.error(`  [${name}] ${e.message.substring(0, 120)}`);
   }
-  log(name, stats);
+  await log(db, sid, name, stats);
   return stats;
 }
 
@@ -330,12 +334,12 @@ async function scrapeEPOnline() {
   // en verwerk met een apart script. Voorlopig uitgeschakeld.
   const name = 'EP-online Energielabels Amersfoort';
   const stats = { new: 0, skipped: 1, errors: 0 };
-  await ensureSource(db, {
+  const sid = await ensureSource(db, {
     name, url: 'https://www.ep-online.nl/',
     source_type: 'api', reliability: 'primary', category: 'data',
     scrape_frequency: 'weekly', tier: 1,
-  }).catch(() => {});
-  log(name, stats);
+  }).catch(() => undefined);
+  await log(db, sid, name, stats);
   return stats;
 }
 
@@ -376,7 +380,7 @@ async function scrapeKadaster() {
     stats.errors++;
     console.error(`  [${name}] ${e.message.substring(0, 120)}`);
   }
-  log(name, stats);
+  await log(db, sid, name, stats);
   return stats;
 }
 
@@ -425,7 +429,7 @@ async function scrapeMonumentenregister() {
     stats.errors++;
     console.error(`  [${name}] ${e.message.substring(0, 120)}`);
   }
-  log(name, stats);
+  await log(db, sid, name, stats);
   return stats;
 }
 
@@ -480,7 +484,7 @@ async function scrapeBuurtbudgetten() {
   } catch (e) {
     stats.errors++;
   }
-  log(name, stats);
+  await log(db, sid, name, stats);
   return stats;
 }
 
@@ -493,12 +497,12 @@ async function scrapeEUSubsidies() {
   // en update de apiUrl hieronder.
   const name = 'Europese subsidies — Amersfoort';
   const stats = { new: 0, skipped: 1, errors: 0 };
-  await ensureSource(db, {
+  const sid = await ensureSource(db, {
     name, url: 'https://cohesiondata.ec.europa.eu/',
     source_type: 'api', reliability: 'primary', category: 'registry',
     scrape_frequency: 'weekly', tier: 1,
-  }).catch(() => {});
-  log(name, stats);
+  }).catch(() => undefined);
+  await log(db, sid, name, stats);
   return stats;
   // Uitgeschakeld totdat juiste dataset-ID is vastgesteld
   const dummy = { new: 0, skipped: 0, errors: 0 };
@@ -535,7 +539,7 @@ async function scrapeEUSubsidies() {
     stats.errors++;
     console.error(`  [${name}] ${e.message.substring(0, 120)}`);
   }
-  log(name, stats);
+  await log(db, sid, name, stats);
   return stats;
 }
 
@@ -577,14 +581,31 @@ async function main() {
 
   let totalNew = 0, totalSkipped = 0, totalErrors = 0;
   for (const scraper of scrapers) {
+    const startedAt = new Date();
     try {
       const stats = await scraper();
       totalNew += stats?.new ?? 0;
       totalSkipped += stats?.skipped ?? 0;
       totalErrors += stats?.errors ?? 0;
     } catch (e) {
+      // Vangnet: dit vuurt alleen als een scraper-functie crasht vóórdat hij zelf
+      // via log() naar scrape_runs kon schrijven (elke functie hierboven doet dat
+      // normaal al zelf in zijn eigen try/catch).
       console.error('Scraper fout:', e.message);
       totalErrors++;
+      try {
+        await recordScrapeRun(db, {
+          jobName: JOB_NAME,
+          scraperFile: null,
+          sourceName: scraper.name,
+          startedAt,
+          finishedAt: new Date(),
+          status: 'error',
+          errorMessage: e.message,
+        });
+      } catch (logErr) {
+        console.error('Kon scrape_runs niet bijwerken:', logErr.message);
+      }
     }
     await new Promise(r => setTimeout(r, 800));
   }

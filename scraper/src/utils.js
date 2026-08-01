@@ -48,8 +48,23 @@ export async function getOrCreateSource(db, { name, url, sourceType, reliability
   return Number(result.lastInsertRowid);
 }
 
-// Log resultaat van een scrape-run
-export function logResult(sourceName, saved, skipped, errors) {
+// Log resultaat van een scrape-run (Laag B: schrijft ook naar scrape_runs)
+// job_name komt uit SCRAPE_JOB_NAME (door de aanroepende runner gezet); bij een
+// handmatige/losse run van een scraper-bestand is die env var niet gezet.
+export async function logResult(db, sourceId, sourceName, saved, skipped, errors, itemsFound) {
   const timestamp = new Date().toISOString();
   console.log(`[${timestamp}] ${sourceName}: ${saved} nieuw, ${skipped} overgeslagen, ${errors} fouten`);
+
+  const found = itemsFound ?? (saved + skipped);
+  const status = found === 0 ? 'empty' : 'ok';
+
+  try {
+    await db.execute({
+      sql: `INSERT INTO scrape_runs (job_name, source_id, source_name, items_found, items_new, items_duplicate, items_error, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [process.env.SCRAPE_JOB_NAME || null, sourceId ?? null, sourceName, found, saved, skipped, errors, status],
+    });
+  } catch (e) {
+    console.error(`Kon scrape_runs niet bijwerken voor ${sourceName}:`, e.message);
+  }
 }

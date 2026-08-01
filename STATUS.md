@@ -15,6 +15,31 @@
 - **stadsgeest-designer-middag** — ma-vr 17:04 — designer tweede run — laatste run: 2026-07-01 ✓ (geen artikelen zonder mainImage, geen homepage-wijziging nodig — zie Cowork-update)
 - **stadsgeest-weekreview** — zondag 09:00 — alle routine-rapportages analyseren, verbeterplan opstellen, STATUS.md kruischeck — eerste run: 2026-06-07
 
+## Dashboard-migratie stap 1 — procesgeheugen (Code-sessie 2026-08-01)
+
+*Code-sessie 2026-08-01 — eerste stap van drie voor het redactionele dashboard op `/dashboard` (nog geen UI, alleen opslag). Gebouwd op branch `claude/dashboard-migration-logging-r22kyy`:*
+
+- **`scraper/migrate-dashboard.mjs`** (nieuw) — idempotente migratie: `scrape_runs`, `intake_runs`, `intake_decisions`, `signal_events`, `job_requests`, `job_logs`, `press_releases` + kolommen `novelty_score`/`tier`/`category`/`decision_reason`/`editor_flag` op `signals`. Gebruikt `CREATE TABLE IF NOT EXISTS` en `PRAGMA table_info`-checks vóór elke `ALTER TABLE`; raakt geen bestaande data aan.
+- **`scraper/intake-run.mjs`** — schrijft nu een `intake_runs`-rij per run (trigger als CLI-arg, standaard `pm2`) en een `intake_decisions`-rij per verwerkt item met de Nederlandse reden (leeg item, rechtspraak zonder tekst, historisch tier 3, ouder dan 48u, dubbele titel, tier 3 zonder nieuwswaarde, match, nieuw/historisch signaal). `signal_events` bij aanmaken (`created`), koppelen (`confirmed`) en drempel bereikt (`status_change`). Beslislogica (filters/matchscore/drempels/entiteitsextractie) is ongewijzigd — alleen logging toegevoegd. Inserts gaan in batches van 50 via `db.batch()`. Bij een fout sluit het script netjes af met een `error`-rij in `intake_runs` i.p.v. halverwege te stoppen.
+- **Scraper-logging (Laag A + B):**
+  - Laag A (vangnet): `run-all.js`, `run-browser.js`, `run-weekly.js` schrijven nu per aangeroepen scraper-bestand een `scrape_runs`-rij (`job_name`/`scraper_file`/`status: ok|timeout|error`/laatste 500 tekens stderr), via nieuw gedeeld `src/runner-log.js`.
+  - Laag B (scraper zelf): **afwijking van de aanname** dat alle scrapers `lib.js`'s `log()` gebruiken — in werkelijkheid gebruiken maar 4 scraper-bestanden (`officielebekendmakingen-split.js`, `officielebekendmakingen-wekelijks.js`, `raadsinformatie-api.js`, `raadsinformatie-types.js`) + `run-nieuw.js` die module. De overige ~40 scrapers gebruiken een volledig los duo `saveRawItem`/`getOrCreateSource`/`logResult` uit `src/utils.js`. Beide functies (`lib.js log()` en `utils.js logResult()`) zijn nu async gemaakt en schrijven naar `scrape_runs` (`source_id`, `source_name`, `status: empty|ok`); alle ~55 aanroepen in `src/scrapers/*.js` zijn bijgewerkt naar `await`. Ook `run-backfill.js`/`run-backfill-browser.js` (eenmalige historische inhaalscripts, gebruiken ook `lib.js log()`) zijn meegenomen zodat ze niet stuk gaan door de signatuurwijziging. Onderweg twee scoping-bugs gevonden en gefixt in `bluesky.js` (logResult verwees naar een `sourceId` die buiten scope viel) en `run-backfill.js` (`jaarverslagen-backfill`-log stond buiten de loop waar `sid` gedeclareerd was) — beide nu `null`/juiste variabele voor niet-één-bron-samenvattingen.
+  - **`run-nieuw.js` past niet op het Laag A-vangnetmodel** — het roept 15 scraper-functies inline aan in één proces (geen losse bestanden via `execSync`), dus er is geen "scraper_file" om een rij aan op te hangen. Elke functie schrijft zelf al via `log()` (Laag B). Als vangnet is een `scrape_runs`-rij toegevoegd in `main()`'s catch-blok (job_name `run-nieuw`, `source_name` = functienaam) voor het zeldzame geval dat een functie toch crasht vóór zijn eigen `log()`-call.
+  - Er bestaat geen aparte "OB-runner" — `ob-playwright.js` (uitgeschakeld) draait al binnen `run-browser.js`.
+- **Niet uitgevoerd / geblokkeerd — deze sandbox heeft geen toegang tot de productie-scraperomgeving:** geen `scraper/.env`, geen `node_modules` voor `scraper/` (geen `@libsql/client`/`dotenv`/etc. geïnstalleerd — er is geen `scraper/package.json` met dependencies), geen `pm2`-binary, geen `dump.pm2`. Alle bestanden zijn met `node --check` op syntax gevalideerd, maar **niets is tegen de echte Turso-database of PM2-daemon gedraaid.** Op de notebook (waar de scrapers echt draaien) moet nog:
+  1. `cd scraper && npm install` (indien nog niet gebeurd) en `node migrate-dashboard.mjs` draaien — rapporteert welke tabellen/kolommen zijn aangemaakt vs. al bestonden.
+  2. Intake van Cowork naar PM2 registreren (3x daags, kort na de scrape-runs op 07:00/13:00/19:00):
+     ```
+     pm2 start intake-run.mjs --name intake-ochtend --cron-restart "30 7 * * *" --no-autorestart -- pm2
+     pm2 start intake-run.mjs --name intake-middag  --cron-restart "30 13 * * *" --no-autorestart -- pm2
+     pm2 start intake-run.mjs --name intake-avond   --cron-restart "30 19 * * *" --no-autorestart -- pm2
+     pm2 list
+     pm2 save
+     ```
+     Daarna expliciet controleren dat de 3 nieuwe jobs in `dump.pm2` staan (STATUS.md meldt eerder dat `dump.pm2` onvolledig was) en de bijbehorende Cowork-scheduled-task voor intake uitschakelen zodat intake niet dubbel draait.
+  3. Eén keer handmatig `node intake-run.mjs handmatig` draaien en verifiëren wat er in `intake_runs`/`intake_decisions` terechtkomt.
+  4. `node run-all.js` één keer volledig draaien om te bevestigen dat de scrapers na de `async`-wijziging in `log()`/`logResult()` nog gewoon werken.
+
 ## PM2 Scraper Jobs (geverifieerd 2026-07-24)
 
 - **PM2-daemon was volledig gecrasht** — bij aanvang van deze sessie stond `pm2 list` helemaal leeg (daemon net opnieuw gespawned, 0 processen). Laatste succesvolle scrape-run vóór het herstel: 2026-07-05 06:01 (scrape-dagelijks) / 2026-07-05 06:01 (scrape-wekelijks) / 2026-07-05 04:33 (scrape-browser) / 2026-07-04 13:55 (scrape-nieuw) — dus **19 dagen geen nieuwe scrape-data**. `pm2 resurrect` uitgevoerd → alle 8 jobs hersteld uit `dump.pm2` (ecosystem.config.cjs bestaat niet op de verwachte locatie, herstel ging via de dump). Daarna handmatig `node run-all.js` gedraaid ter verificatie én inhaalslag: succesvol, 125 nieuwe raw_items (o.a. 50 De Stad Amersfoort, 15 amersfoort.nieuws.nl, 33 Bluesky) — scraper-logica zelf is dus intact, alleen de daemon lag eruit.

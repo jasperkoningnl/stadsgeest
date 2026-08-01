@@ -13,7 +13,7 @@ import { getOrCreateSource, logResult } from '../utils.js';
 const SOURCE_URL = 'https://toezichtresultaten.onderwijsinspectie.nl/zoek?sector=PO&q=Amersfoort';
 
 async function scrape() {
-  await getOrCreateSource(db, {
+  const sourceId = await getOrCreateSource(db, {
     name: 'Onderwijsinspectie — toezichtresultaten Amersfoort',
     url: SOURCE_URL,
     sourceType: 'scrape',
@@ -21,7 +21,7 @@ async function scrape() {
     category: 'community',
     scrapeFrequency: 'weekly',
   });
-  logResult('Onderwijsinspectie — toezichtresultaten Amersfoort (uitgeschakeld)', 0, 0, 0);
+  await logResult(db, sourceId, 'Onderwijsinspectie — toezichtresultaten Amersfoort (uitgeschakeld)', 0, 0, 0);
 }
 
 scrape().catch(console.error);

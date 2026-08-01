@@ -65,7 +65,7 @@ async function scrape() {
     }
   }
 
-  logResult('Gemeente Amersfoort', saved, skipped, errors);
+  await logResult(db, sourceId, 'Gemeente Amersfoort', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

@@ -38,7 +38,7 @@ async function scrape() {
     }
   }
 
-  logResult('Rijksoverheid', saved, skipped, errors);
+  await logResult(db, sourceId, 'Rijksoverheid', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

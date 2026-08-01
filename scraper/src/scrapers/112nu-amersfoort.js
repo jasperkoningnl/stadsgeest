@@ -84,7 +84,7 @@ async function scrape() {
     }
   }
 
-  logResult('112-nu Amersfoort', saved, skipped, errors);
+  await logResult(db, sourceId, '112-nu Amersfoort', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

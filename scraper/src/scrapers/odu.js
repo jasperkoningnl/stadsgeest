@@ -73,7 +73,7 @@ async function scrape() {
     }
   }
 
-  logResult('Omgevingsdienst regio Utrecht', saved, skipped, errors);
+  await logResult(db, sourceId, 'Omgevingsdienst regio Utrecht', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

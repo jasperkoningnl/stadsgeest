@@ -51,7 +51,7 @@ async function scrape() {
     }
   }
 
-  logResult('Amersfoort in Cijfers', saved, skipped, errors);
+  await logResult(db, sourceId, 'Amersfoort in Cijfers', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

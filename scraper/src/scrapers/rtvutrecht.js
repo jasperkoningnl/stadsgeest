@@ -68,7 +68,7 @@ async function scrape() {
     }
   }
 
-  logResult('RTV Utrecht — Amersfoort', saved, skipped, errors);
+  await logResult(db, sourceId, 'RTV Utrecht — Amersfoort', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

@@ -12,7 +12,7 @@ import { getOrCreateSource, logResult } from '../utils.js';
 const SOURCE_URL = 'https://waaroverheid.nl/gemeente/amersfoort';
 
 async function scrape() {
-  await getOrCreateSource(db, {
+  const sourceId = await getOrCreateSource(db, {
     name: 'WaarOverheid — gemeente Amersfoort',
     url: SOURCE_URL,
     sourceType: 'scrape',
@@ -20,7 +20,7 @@ async function scrape() {
     category: 'government',
     scrapeFrequency: 'weekly',
   });
-  logResult('WaarOverheid — gemeente Amersfoort (uitgeschakeld)', 0, 0, 0);
+  await logResult(db, sourceId, 'WaarOverheid — gemeente Amersfoort (uitgeschakeld)', 0, 0, 0);
 }
 
 scrape().catch(console.error);

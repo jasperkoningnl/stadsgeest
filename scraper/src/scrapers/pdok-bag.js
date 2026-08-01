@@ -84,7 +84,7 @@ async function scrape() {
     console.error('Fout bij ophalen PDOK BAG:', err.message);
   }
 
-  logResult('PDOK BAG Amersfoort', saved, skipped, errors);
+  await logResult(db, sourceId, 'PDOK BAG Amersfoort', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

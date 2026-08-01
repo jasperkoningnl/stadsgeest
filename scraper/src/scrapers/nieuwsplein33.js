@@ -71,7 +71,7 @@ async function scrape() {
     }
   }
 
-  logResult('Nieuwsplein33 Amersfoort', saved, skipped, errors);
+  await logResult(db, sourceId, 'Nieuwsplein33 Amersfoort', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

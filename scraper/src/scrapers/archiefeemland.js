@@ -60,7 +60,7 @@ async function scrape() {
     }
   }
 
-  logResult('Archief Eemland', saved, skipped, errors);
+  await logResult(db, sourceId, 'Archief Eemland', saved, skipped, errors);
 }
 
 scrape().catch(console.error);
