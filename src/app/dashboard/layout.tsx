@@ -11,7 +11,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="wrap page-in" style={{ paddingBottom: 80 }}>
       <div className="dash-hdr">
         <div className="dash-title">Redactioneel dashboard</div>
-        <div className="dash-sub">Inzicht in wat Stadsgeest afgraast, oppikt en laat liggen — geen bedieningspaneel.</div>
+        <div className="dash-sub">Van scraper tot publiceerbaar nieuws — het volledige proces, open en controleerbaar.</div>
       </div>
       <DashboardNav />
       {children}

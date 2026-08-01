@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { q, qOne } from '@/lib/turso'
-import { daysSince } from './format'
+import { daysSince, formatDate } from './format'
 
 // ── Vandaag ───────────────────────────────────────────────
 
@@ -30,86 +30,31 @@ export async function getFunnel24h(): Promise<FunnelStats> {
   }
 }
 
-export interface RunEntry {
-  kind: 'scrape' | 'intake'
-  id: number | string
+export interface AttentionPoint {
   label: string
-  startedAt: string
-  durationMs: number | null
-  outcome: string
+  detail: string
+  href?: string
 }
 
-export async function getLatestRuns(limit = 8): Promise<RunEntry[]> {
-  const [scrapeBatches, intakeRuns] = await Promise.all([
+// Verwachte tijd (in dagen) tussen twee items van een bron, per scrape-ritme.
+const FREQUENCY_DAYS: Record<string, number> = { hourly: 1, daily: 1, weekly: 7, monthly: 30 }
+const FREQUENCY_LABEL: Record<string, string> = { hourly: 'ieder uur ververste', daily: 'dagelijkse', weekly: 'wekelijkse', monthly: 'maandelijkse' }
+
+/**
+ * Aandachtspunten die er echt toe doen: bronnen die, gegeven hun eigen scrape-ritme,
+ * ongebruikelijk lang niets hebben opgeleverd (>5x hun verwachte interval, en niet langer
+ * dan 120 dagen geleden voor het laatst actief — anders is het geen actuele storing meer
+ * maar een verouderde eenmalige scrape), en scrapers die bij hun laatste run faalden.
+ * Maximaal 3, alleen als ze echt afwijken.
+ */
+export async function getAttentionPoints(): Promise<AttentionPoint[]> {
+  const [staleRows, failed] = await Promise.all([
     q<any>(`
-      SELECT
-        job_name,
-        strftime('%Y-%m-%d %H:%M', started_at) as batch_key,
-        MIN(started_at) as started_at,
-        COUNT(*) as file_count,
-        SUM(CASE WHEN status = 'ok' THEN 1 ELSE 0 END) as ok_count,
-        SUM(CASE WHEN status = 'error' THEN 1 ELSE 0 END) as error_count,
-        SUM(CASE WHEN status = 'timeout' THEN 1 ELSE 0 END) as timeout_count,
-        SUM(COALESCE(duration_ms, 0)) as total_duration_ms
-      FROM scrape_runs
-      WHERE scraper_file IS NOT NULL
-      GROUP BY job_name, batch_key
-      ORDER BY started_at DESC
-      LIMIT ?
-    `, [limit]),
-    q<any>(`
-      SELECT id, trigger, started_at, duration_ms, items_in, items_filtered, signals_created, status
-      FROM intake_runs ORDER BY started_at DESC LIMIT ?
-    `, [limit]),
-  ])
-
-  const entries: RunEntry[] = []
-
-  for (const b of scrapeBatches) {
-    const problems = (b.error_count || 0) + (b.timeout_count || 0)
-    entries.push({
-      kind: 'scrape',
-      id: `${b.job_name}-${b.batch_key}`,
-      label: `${b.job_name} — ${b.file_count} scrapers`,
-      startedAt: b.started_at,
-      durationMs: b.total_duration_ms ?? null,
-      outcome: problems > 0 ? `${b.ok_count} ok, ${problems} met fout` : `${b.ok_count} ok`,
-    })
-  }
-
-  for (const r of intakeRuns) {
-    entries.push({
-      kind: 'intake',
-      id: r.id,
-      label: `Intake (${r.trigger || 'onbekend'})`,
-      startedAt: r.started_at,
-      durationMs: r.duration_ms ?? null,
-      outcome:
-        r.status === 'error'
-          ? 'fout'
-          : `${r.items_in ?? 0} items, ${r.signals_created ?? 0} nieuwe signalen`,
-    })
-  }
-
-  entries.sort((a, b) => (a.startedAt < b.startedAt ? 1 : a.startedAt > b.startedAt ? -1 : 0))
-  return entries.slice(0, limit)
-}
-
-export interface AttentionItems {
-  staleSourceCount: number
-  failedScrapers: { scraperFile: string; errorMessage: string | null; startedAt: string }[]
-  unprocessedCount: number
-}
-
-export async function getAttentionItems(): Promise<AttentionItems> {
-  const [stale, failed, unprocessed] = await Promise.all([
-    qOne<{ c: number }>(`
-      SELECT COUNT(*) c FROM (
-        SELECT s.id, MAX(r.scraped_at) as last_at
-        FROM sources s JOIN raw_items r ON r.source_id = s.id
-        GROUP BY s.id
-        HAVING julianday('now') - julianday(MAX(r.scraped_at)) > 14
-      )
+      SELECT s.name, s.tier, s.scrape_frequency, MAX(r.scraped_at) as last_at,
+             julianday('now') - julianday(MAX(r.scraped_at)) as days_ago
+      FROM sources s JOIN raw_items r ON r.source_id = s.id
+      GROUP BY s.id
+      HAVING COUNT(r.id) >= 2
     `),
     q<any>(`
       SELECT scraper_file, error_message, started_at
@@ -121,19 +66,119 @@ export async function getAttentionItems(): Promise<AttentionItems> {
         )
       ORDER BY started_at DESC
     `),
-    qOne<{ c: number }>(`SELECT COUNT(*) c FROM raw_items WHERE is_processed = 0`),
   ])
 
+  const stale = staleRows
+    .map((r: any) => ({ ...r, ratio: r.days_ago / (FREQUENCY_DAYS[r.scrape_frequency] ?? 7) }))
+    .filter((r: any) => r.ratio > 5 && r.days_ago <= 120)
+    .sort((a: any, b: any) => (a.tier ?? 99) - (b.tier ?? 99) || b.ratio - a.ratio)
+
+  const points: AttentionPoint[] = []
+
+  for (const s of stale) {
+    if (points.length >= 3) break
+    const freqLabel = FREQUENCY_LABEL[s.scrape_frequency] ?? s.scrape_frequency
+    points.push({
+      label: `${s.name} is stil`,
+      detail: `Laatste item op ${formatDate(s.last_at)} (${Math.round(s.days_ago)} dagen geleden) — ongebruikelijk voor een ${freqLabel} bron.`,
+      href: '/dashboard/bronnen',
+    })
+  }
+
+  if (points.length < 3 && failed.length > 0) {
+    points.push({
+      label: `${failed.length} scraper${failed.length === 1 ? '' : 's'} gaf een fout bij de laatste run`,
+      detail: failed.slice(0, 3).map((f: any) => f.scraper_file).join(', '),
+      href: '/dashboard/bronnen?health=red',
+    })
+  }
+
+  return points.slice(0, 3)
+}
+
+// ── Opbrengst ─────────────────────────────────────────────
+
+export interface OpbrengstTotals {
+  totalSignals: number
+  tier1Signals: number
+  totalPublished: number
+  tier1Published: number
+}
+
+export async function getOpbrengstTotals(): Promise<OpbrengstTotals> {
+  const [totalSignals, tier1Signals, totalPublished, tier1Published] = await Promise.all([
+    qOne<{ c: number }>(`SELECT COUNT(*) c FROM signals`),
+    qOne<{ c: number }>(`
+      SELECT COUNT(DISTINCT si.signal_id) c FROM raw_items r
+      JOIN signal_items si ON si.raw_item_id = r.id
+      JOIN sources s ON s.id = r.source_id
+      WHERE s.tier = 1
+    `),
+    qOne<{ c: number }>(`SELECT COUNT(*) c FROM signals WHERE status = 'published'`),
+    qOne<{ c: number }>(`
+      SELECT COUNT(DISTINCT sig.id) c FROM signals sig
+      JOIN signal_items si ON si.signal_id = sig.id
+      JOIN raw_items r ON r.id = si.raw_item_id
+      JOIN sources s ON s.id = r.source_id
+      WHERE sig.status = 'published' AND s.tier = 1
+    `),
+  ])
   return {
-    staleSourceCount: stale?.c ?? 0,
-    failedScrapers: failed.map((f) => ({ scraperFile: f.scraper_file, errorMessage: f.error_message, startedAt: f.started_at })),
-    unprocessedCount: unprocessed?.c ?? 0,
+    totalSignals: totalSignals?.c ?? 0,
+    tier1Signals: tier1Signals?.c ?? 0,
+    totalPublished: totalPublished?.c ?? 0,
+    tier1Published: tier1Published?.c ?? 0,
   }
 }
 
-export async function getSignalStatusBreakdown(): Promise<{ status: string; count: number }[]> {
-  const rows = await q<{ status: string; count: number }>(`SELECT status, COUNT(*) as count FROM signals GROUP BY status ORDER BY count DESC`)
-  return rows
+export interface LatestSignal {
+  id: number
+  title: string
+  status: string
+  sourceName: string | null
+  lastSeenAt: string
+}
+
+export async function getLatestSignals(limit = 6): Promise<LatestSignal[]> {
+  const rows = await q<any>(`
+    SELECT sig.id, sig.title, sig.status, sig.last_seen_at, eff.source_name
+    FROM signals sig
+    LEFT JOIN (
+      SELECT signal_id, source_name FROM (
+        SELECT si.signal_id, s.name as source_name,
+               ROW_NUMBER() OVER (PARTITION BY si.signal_id ORDER BY s.tier ASC, s.id ASC) as rn
+        FROM signal_items si JOIN raw_items r ON r.id = si.raw_item_id JOIN sources s ON s.id = r.source_id
+      ) ranked WHERE rn = 1
+    ) eff ON eff.signal_id = sig.id
+    ORDER BY sig.last_seen_at DESC
+    LIMIT ?
+  `, [limit])
+  return rows.map((r) => ({ id: r.id, title: r.title, status: r.status, sourceName: r.source_name, lastSeenAt: r.last_seen_at }))
+}
+
+export interface LatestArticle {
+  id: number
+  title: string
+  publishedAt: string | null
+  sourceName: string | null
+}
+
+export async function getLatestPublishedArticles(limit = 6): Promise<LatestArticle[]> {
+  const rows = await q<any>(`
+    SELECT art.id, art.title, art.published_at, eff.source_name
+    FROM articles art
+    LEFT JOIN signals sig ON sig.sanity_signal_id = art.sanity_document_id
+    LEFT JOIN (
+      SELECT signal_id, source_name FROM (
+        SELECT si.signal_id, s.name as source_name,
+               ROW_NUMBER() OVER (PARTITION BY si.signal_id ORDER BY s.tier ASC, s.id ASC) as rn
+        FROM signal_items si JOIN raw_items r ON r.id = si.raw_item_id JOIN sources s ON s.id = r.source_id
+      ) ranked WHERE rn = 1
+    ) eff ON eff.signal_id = sig.id
+    ORDER BY art.published_at DESC
+    LIMIT ?
+  `, [limit])
+  return rows.map((r) => ({ id: r.id, title: r.title, publishedAt: r.published_at, sourceName: r.source_name }))
 }
 
 // ── Bronnenmonitor ────────────────────────────────────────
@@ -149,14 +194,58 @@ export interface SourceRow {
   items30d: number
   itemsTotal: number
   signalCount: number
+  publishedCount: number
+  topSignals: { id: number; title: string }[]
   lastErrorStatus: string | null
   lastErrorMessage: string | null
   daysSinceLast: number | null
   healthStatus: 'green' | 'grey' | 'red'
 }
 
+export interface TierAggregate {
+  tier: number
+  sourceCount: number
+  items: number
+  signals: number
+  published: number
+}
+
+export async function getTierAggregates(): Promise<TierAggregate[]> {
+  const [sourceCounts, items, signals, published] = await Promise.all([
+    q<any>(`SELECT tier, COUNT(*) c FROM sources WHERE tier IS NOT NULL GROUP BY tier`),
+    q<any>(`SELECT s.tier, COUNT(r.id) c FROM sources s LEFT JOIN raw_items r ON r.source_id = s.id WHERE s.tier IS NOT NULL GROUP BY s.tier`),
+    q<any>(`
+      SELECT s.tier, COUNT(DISTINCT si.signal_id) c
+      FROM sources s JOIN raw_items r ON r.source_id = s.id JOIN signal_items si ON si.raw_item_id = r.id
+      WHERE s.tier IS NOT NULL GROUP BY s.tier
+    `),
+    q<any>(`
+      SELECT s.tier, COUNT(DISTINCT sig.id) c
+      FROM sources s
+      JOIN raw_items r ON r.source_id = s.id
+      JOIN signal_items si ON si.raw_item_id = r.id
+      JOIN signals sig ON sig.id = si.signal_id
+      WHERE s.tier IS NOT NULL AND sig.status = 'published'
+      GROUP BY s.tier
+    `),
+  ])
+
+  const bySourceCount = new Map(sourceCounts.map((r: any) => [r.tier, r.c]))
+  const byItems = new Map(items.map((r: any) => [r.tier, r.c]))
+  const bySignals = new Map(signals.map((r: any) => [r.tier, r.c]))
+  const byPublished = new Map(published.map((r: any) => [r.tier, r.c]))
+
+  return [1, 2, 3].map((tier) => ({
+    tier,
+    sourceCount: (bySourceCount.get(tier) as number) ?? 0,
+    items: (byItems.get(tier) as number) ?? 0,
+    signals: (bySignals.get(tier) as number) ?? 0,
+    published: (byPublished.get(tier) as number) ?? 0,
+  }))
+}
+
 export async function getSourcesOverview(): Promise<SourceRow[]> {
-  const [sources, errorsBySource] = await Promise.all([
+  const [sources, errorsBySource, publishedBySource, topSignalRows] = await Promise.all([
     q<any>(`
       SELECT
         s.id, s.name, s.url, s.tier, s.source_type,
@@ -177,11 +266,39 @@ export async function getSourcesOverview(): Promise<SourceRow[]> {
       WHERE source_id IS NOT NULL
       ORDER BY started_at DESC
     `),
+    q<any>(`
+      SELECT r.source_id, COUNT(DISTINCT sig.id) c
+      FROM raw_items r
+      JOIN signal_items si ON si.raw_item_id = r.id
+      JOIN signals sig ON sig.id = si.signal_id
+      WHERE sig.status = 'published'
+      GROUP BY r.source_id
+    `),
+    q<any>(`
+      SELECT source_id, signal_id, title FROM (
+        SELECT source_id, signal_id, title, last_seen_at,
+               ROW_NUMBER() OVER (PARTITION BY source_id ORDER BY last_seen_at DESC) as rn
+        FROM (
+          SELECT DISTINCT r.source_id as source_id, sig.id as signal_id, sig.title, sig.last_seen_at
+          FROM raw_items r
+          JOIN signal_items si ON si.raw_item_id = r.id
+          JOIN signals sig ON sig.id = si.signal_id
+        )
+      ) WHERE rn <= 3
+    `),
   ])
 
   const latestBySource = new Map<number, any>()
   for (const e of errorsBySource) {
     if (!latestBySource.has(e.source_id)) latestBySource.set(e.source_id, e)
+  }
+
+  const publishedCountBySource = new Map<number, number>(publishedBySource.map((p: any) => [p.source_id, p.c]))
+
+  const topSignalsBySource = new Map<number, { id: number; title: string }[]>()
+  for (const r of topSignalRows) {
+    if (!topSignalsBySource.has(r.source_id)) topSignalsBySource.set(r.source_id, [])
+    topSignalsBySource.get(r.source_id)!.push({ id: r.signal_id, title: r.title })
   }
 
   return sources.map((s): SourceRow => {
@@ -204,6 +321,8 @@ export async function getSourcesOverview(): Promise<SourceRow[]> {
       items30d: s.items_30d ?? 0,
       itemsTotal: s.items_total ?? 0,
       signalCount: s.signal_count ?? 0,
+      publishedCount: publishedCountBySource.get(s.id) ?? 0,
+      topSignals: topSignalsBySource.get(s.id) ?? [],
       lastErrorStatus: latest?.status ?? null,
       lastErrorMessage: latest?.error_message ?? null,
       daysSinceLast: daysAgo,
