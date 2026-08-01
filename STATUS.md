@@ -123,6 +123,15 @@
 - `/over` — Over Stadsgeest
 - `/privacy` — Privacyverklaring
 - `/login` — Inlogpagina (wachtwoordbeveiliging via cookie-authenticatie, ingevoerd 2026-06-02)
+- `/dashboard` — Redactioneel dashboard "Vandaag": 24u-trechter (gescraped → intake → nieuwe signalen → kandidaten researching), laatste scrape-/intake-runs, aandachtspunten (stille bronnen, scraperfouten, onverwerkte raw_items), signalen per status. Nieuw, stap 2 (2026-08-01).
+- `/dashboard/bronnen` — Bronnenmonitor: alle bronnen uit Turso met tier, type, laatste item, items 7d/30d, signalen, status (groen/grijs/rood) en laatste fout. Sorteerbaar (klik op kolomkop), filters op "levert niets op" en status rood/grijs. Standaard gesorteerd op status (problemen bovenaan).
+- `/dashboard/intake` + `/dashboard/intake/[runId]` — Intake-runoverzicht en detailpagina per run (beslissing per raw_item, filterredenen-uitsplitsing, filter op beslissing).
+- `/dashboard/signalen` — Signalenarchief met filters (status, tier, bron, periode, vrije tekst) via URL-searchparams, paginering per 50.
+- `/dashboard/signaal/[id]` — Signaaldossier: briefing (geparsed uit `summary`, met herkenning van `[TIER: n]`, `ONDERZOEKSOPDRACHT VOOR RESEARCHER`, `RESEARCH-AANVULLING`, `LABEL: WEEKANALYSE`, `TYPE: update`), bronitems, entiteiten, tijdlijn uit `signal_events` (met eerlijke fallback-melding als die leeg is), link naar gepubliceerd artikel. Laat ruimte open voor actieknoppen (stap 3), bouwt zelf nog geen schrijffuncties.
+  - Alles server-rendered, `revalidate = 30`, filters via searchparams (geen client-state). Achter dezelfde `sg_auth`-cookiebescherming als de rest van de site (proxy.ts-matcher dekte `/dashboard` al, geen aparte login nodig).
+  - **Afwijking van de aanname in de opdracht:** er zijn nu **123 bronnen** in Turso, niet 105 (36 daarvan leverden nog nooit een item op — dat aantal klopt wel). De pagina's tellen live uit de database, dus dit heeft geen code-consequenties gehad, maar meld ik omdat de opdracht uitging van 105.
+  - `signals.tier`/`category`/`decision_reason`/`novelty_score` staan zoals verwacht nog leeg voor alle 496 signalen; tier en bron op de bronnen-/signalen-pagina's zijn afgeleid via `signal_items → raw_items → sources` (laagste tier van de gekoppelde bronnen). Sommige (met name WEEKANALYSE-)signalen hebben geen eigen `signal_items` (ze verwijzen alleen tekstueel naar "onderliggende signalen") — tier/bron tonen dan terecht leeg (—), niet gegokt.
+  - Koppeling signaal → artikel loopt via `signals.sanity_signal_id == articles.sanity_document_id`; de artikel-slug voor de link naar de live pagina wordt er apart bij opgehaald uit Sanity (`*[_id == $id][0]{slug}`). In deze sandbox is de Sanity-dataset niet bereikbaar (`Dataset not found` — zelfde beperking als eerder gemeld, sandbox heeft geen Sanity-toegang), dus dat deel kon ik niet end-to-end verifiëren; de rest van de dossierpagina (Turso-data) is wel met echte data getest.
 
 ### API-routes
 
@@ -136,14 +145,24 @@
 - **Client:** `next-sanity` via `src/lib/sanity.ts`
 - **Project ID:** `60u1z6xa`, dataset `production`, apiVersion `2026-05-28`
 - **CDN:** ingeschakeld (`useCdn: true`)
-- **Gebruik:** homepage haalt data op via `homepageQuery`; client ook in gebruik voor rapport-API (`src/app/api/report/route.ts`)
-- **Inhoud Sanity (artikelen etc.):** niet geverifieerd — site is wachtwoordbeveiligd
+- **Gebruik:** homepage haalt data op via `homepageQuery`; client ook in gebruik voor rapport-API (`src/app/api/report/route.ts`) en nu ook voor de artikel-link op de signaaldossierpagina
+- **Inhoud Sanity (artikelen etc.):** niet geverifieerd — site is wachtwoordbeveiligd, en in deze sandbox is de Sanity-dataset sowieso niet bereikbaar (zie dashboard-sectie hierboven)
+
+### Turso-integratie (nieuw, 2026-08-01)
+
+- **Client:** `@libsql/client` via `src/lib/turso.ts` — leest `process.env.TURSO_URL` / `TURSO_AUTH_TOKEN`, en blijft `null` als die ontbreken (geen crash). Alle dashboardpagina's checken `hasTurso()` en tonen een duidelijke "geen databaseverbinding"-melding i.p.v. te crashen — geverifieerd door een volledige `npm run build` te draaien mét én zonder deze env-vars.
+- **Queries:** gebundeld in `src/lib/dashboard/queries.ts`, getest tegen de echte productie-Turso-database (123 bronnen, 4.264 raw_items, 496 signalen, 73 artikelen — cijfers kloppen met de opgave, op het bronnenaantal na, zie hierboven).
+- **Belangrijk voor Jasper:** `TURSO_URL` en `TURSO_AUTH_TOKEN` staan nu alleen in `.env.local` (niet gecommit, `.env*` staat in `.gitignore`). Zet ze zelf ook in de Vercel-projectinstellingen (Environment Variables) — dat heb ik expliciet niet zelf gedaan.
 
 ### Laatste succesvolle Vercel deploy
 
 - Niet rechtstreeks geverifieerd (geen `gh` CLI / Vercel CLI beschikbaar in deze omgeving)
 - Laatste merge naar `main`: 2026-06-04 — PR #39 "Redesign article sidebar: featured related card, rename labels, remove bottom grid"
 - Vercel deployt automatisch bij push naar `main`; verwachte deploy: 2026-06-04 ✓ (niet geverifieerd via Vercel dashboard)
+
+### Code-update: 2026-08-01 — Redactioneel dashboard (stap 2 van drie)
+
+Gebouwd op branch `claude/stadsgeest-editorial-dashboard-8gpkw0`, bovenop de dashboard-migratie (stap 1, gemerged): `/dashboard`, `/dashboard/bronnen`, `/dashboard/intake` (+ `[runId]`), `/dashboard/signalen`, `/dashboard/signaal/[id]`. Puur inzicht, geen actieknoppen (dat is stap 3) — zie details in de "Frontend"-sectie hierboven. Lokaal getest tegen de echte Turso-database via de dev-server (ingelogd via `/api/auth`) en met Playwright-screenshots; build getest zowel met als zonder Turso-omgevingsvariabelen.
 
 ## Sanity Studio (geverifieerd 2026-06-02)
 
