@@ -100,7 +100,11 @@ const FIELD_LINE_RE = /^(TYPE|FORMAT|LABEL|PRIORITEIT|UPDATE-DOELARTIKEL)\s*:\s*
 function classifyBracket(inner: string): BriefingTag | null {
   const t = inner.trim()
   let m: RegExpExecArray | null
-  if ((m = /^TIER\s*:\s*(.+)$/i.exec(t))) return { key: `tier:${m[1]}`, label: `Tier ${m[1].trim()}`, emphasis: true }
+  // [TIER: n] uit de briefing is de tier zoals de intake die bij aanmaak zag — niet meer
+  // getoond als los label, want de effectieve tier (sterkste bevestigende bron, elders
+  // getoond) is de actuele waarheid en kan afwijken als het signaal later is bevestigd
+  // door een sterkere bron.
+  if (/^TIER\s*:/i.test(t)) return null
   if ((m = /^NOVELTY\s*:\s*(.+)$/i.exec(t))) return { key: `novelty:${m[1]}`, label: `Novelty ${m[1].trim()}` }
   if ((m = /^TYPE\s*:\s*(.+)$/i.exec(t))) {
     const val = m[1].trim()
@@ -204,4 +208,23 @@ export function parseBriefing(raw: string | null | undefined): ParsedBriefing {
     tags: dedupeTags(tags),
     sections: sections.filter((s) => s.paragraphs.length > 0),
   }
+}
+
+// ── Statusverantwoording ──────────────────────────────────
+
+const SPEURDER_RE = /\[SPEURDER\s+(\d{1,2})-(\d{1,2})\]/i
+const NL_MONTHS = [
+  'januari', 'februari', 'maart', 'april', 'mei', 'juni',
+  'juli', 'augustus', 'september', 'oktober', 'november', 'december',
+]
+
+/** Herkent `[SPEURDER dd-mm]` in de briefingtekst en zet het om in leesbare vorm. */
+export function parseSpeurderNote(raw: string | null | undefined): string | null {
+  if (!raw) return null
+  const m = SPEURDER_RE.exec(raw)
+  if (!m) return null
+  const day = parseInt(m[1], 10)
+  const month = parseInt(m[2], 10)
+  if (month < 1 || month > 12) return null
+  return `beoordeeld door de speurder op ${day} ${NL_MONTHS[month - 1]}`
 }

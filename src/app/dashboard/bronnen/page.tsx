@@ -1,150 +1,181 @@
+import { Fragment } from 'react'
 import Link from 'next/link'
 import { hasTurso } from '@/lib/turso'
-import { getSourcesOverview, type SourceRow } from '@/lib/dashboard/queries'
-import { formatDate, TIER_META } from '@/lib/dashboard/format'
+import { getSourcesOverview, getTierAggregates, type SourceRow } from '@/lib/dashboard/queries'
+import { formatDate } from '@/lib/dashboard/format'
 import NoDatabase from '../NoDatabase'
 
 export const revalidate = 30
 
-type SortKey = 'status' | 'name' | 'tier' | 'type' | 'last_item' | 'items_7d' | 'items_30d' | 'signals'
-
-interface Props {
-  searchParams: Promise<{ sort?: string; dir?: string; filter?: string; health?: string }>
+const TIER_INTRO: Record<number, { title: string; body: string }> = {
+  1: {
+    title: 'Tier 1 — publicatiebronnen',
+    body: 'Officiële documenten en registers: rechtspraakuitspraken, bekendmakingen, raadsstukken, inspectierapporten, aanbestedingen, subsidieregisters. Hier staat nieuws in dat nog nergens is gepubliceerd. Eén item uit zo’n bron is genoeg om een verhaal op te bouwen.',
+  },
+  2: {
+    title: 'Tier 2 — corroboratiebronnen',
+    body: 'Organisaties die over zichzelf publiceren: de gemeente, woningcorporaties, het ziekenhuis, de veiligheidsregio, het waterschap. Betrouwbaar, maar met een eigen belang. Ze bevestigen en verrijken wat elders is gevonden.',
+  },
+  3: {
+    title: 'Tier 3 — detectiebronnen',
+    body: 'Lokale media, 112-meldingen, buurtberichten, sociale media. Deze signaleren dát er iets speelt. Nooit op zichzelf een verhaal, wel vaak de snelste tip.',
+  },
 }
 
-const HEALTH_RANK: Record<SourceRow['healthStatus'], number> = { red: 0, grey: 1, green: 2 }
-
-function sortSources(rows: SourceRow[], sort: SortKey, dir: 'asc' | 'desc'): SourceRow[] {
-  const factor = dir === 'asc' ? 1 : -1
-  const sorted = [...rows].sort((a, b) => {
-    switch (sort) {
-      case 'name':
-        return a.name.localeCompare(b.name) * factor
-      case 'tier':
-        return ((a.tier ?? 99) - (b.tier ?? 99)) * factor
-      case 'type':
-        return (a.sourceType || '').localeCompare(b.sourceType || '') * factor
-      case 'last_item':
-        return ((a.lastItemAt ? new Date(a.lastItemAt.replace(' ', 'T')).getTime() : 0) - (b.lastItemAt ? new Date(b.lastItemAt.replace(' ', 'T')).getTime() : 0)) * factor
-      case 'items_7d':
-        return (a.items7d - b.items7d) * factor
-      case 'items_30d':
-        return (a.items30d - b.items30d) * factor
-      case 'signals':
-        return (a.signalCount - b.signalCount) * factor
-      case 'status':
-      default:
-        return (HEALTH_RANK[a.healthStatus] - HEALTH_RANK[b.healthStatus]) * factor
-    }
-  })
-  return sorted
-}
-
-function SortHeader({ label, sortKey, currentSort, currentDir }: { label: string; sortKey: SortKey; currentSort: string; currentDir: string }) {
-  const isActive = currentSort === sortKey
-  const nextDir = isActive && currentDir === 'asc' ? 'desc' : 'asc'
+function SourceProof({ source, defaultOpen }: { source: SourceRow; defaultOpen: boolean }) {
+  if (source.topSignals.length === 0) return null
   return (
-    <th>
-      <Link href={`?sort=${sortKey}&dir=${nextDir}`}>
-        {label}{isActive ? (currentDir === 'asc' ? ' ↑' : ' ↓') : ''}
-      </Link>
-    </th>
+    <tr>
+      <td colSpan={7} style={{ padding: 0, borderBottom: '1px solid var(--border-s)' }}>
+        <details open={defaultOpen} style={{ padding: '0 14px 12px' }}>
+          <summary style={{ cursor: 'pointer', fontSize: 12.5, color: 'var(--t3)', padding: '4px 0' }}>
+            Laatste signalen uit deze bron
+          </summary>
+          <ul style={{ listStyle: 'none', margin: '4px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {source.topSignals.map((sig) => (
+              <li key={sig.id}>
+                <Link href={`/dashboard/signaal/${sig.id}`} style={{ fontSize: 13.5, color: 'var(--accent)' }}>
+                  {sig.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </details>
+      </td>
+    </tr>
   )
 }
 
-export default async function BronnenPage({ searchParams }: Props) {
+function TierSection({ tier, aggregate, sources }: { tier: number; aggregate: { sourceCount: number; items: number; signals: number; published: number }; sources: SourceRow[] }) {
+  const intro = TIER_INTRO[tier]
+  return (
+    <section className="mt24">
+      <h2 style={{ fontFamily: 'var(--f-d)', fontWeight: 800, fontSize: 20, letterSpacing: '-0.01em', marginBottom: 6 }}>
+        {intro.title}
+      </h2>
+      <p className="dash-sub" style={{ maxWidth: 760, marginBottom: 12 }}>{intro.body}</p>
+      <p style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 16 }}>
+        <strong style={{ color: 'var(--t1)' }}>{aggregate.sourceCount}</strong> bronnen ·{' '}
+        <strong style={{ color: 'var(--t1)' }}>{aggregate.items.toLocaleString('nl-NL')}</strong> items ·{' '}
+        <strong style={{ color: 'var(--t1)' }}>{aggregate.signals}</strong> signalen ·{' '}
+        <strong style={{ color: 'var(--t1)' }}>{aggregate.published}</strong> gepubliceerde artikelen
+      </p>
+
+      {sources.length === 0 ? (
+        <p style={{ fontSize: 14, color: 'var(--t3)' }}>Nog geen bron in deze tier met opbrengst.</p>
+      ) : (
+        <div className="dash-table-wrap">
+          <table className="dash-table">
+            <thead>
+              <tr>
+                <th>Bron</th>
+                <th>Type</th>
+                <th>Items 30d</th>
+                <th>Items totaal</th>
+                <th>Signalen</th>
+                <th>Gepubliceerd</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sources.map((s, i) => (
+                <Fragment key={s.id}>
+                  <tr>
+                    <td>
+                      <div style={{ fontWeight: 500 }}>{s.name}</div>
+                      <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'var(--accent)' }}>
+                        {s.url.length > 50 ? s.url.slice(0, 50) + '…' : s.url}
+                      </a>
+                    </td>
+                    <td>{s.sourceType || '—'}</td>
+                    <td>{s.items30d}</td>
+                    <td>{s.itemsTotal}</td>
+                    <td>{s.signalCount}</td>
+                    <td>{s.publishedCount}</td>
+                    <td style={{ maxWidth: 260, fontSize: 12.5 }}>
+                      {s.lastErrorStatus === 'error' || s.lastErrorStatus === 'timeout' ? (
+                        <span style={{ color: 'var(--red, #c0392b)' }}>
+                          {s.lastErrorMessage || `laatste run: ${s.lastErrorStatus}`}
+                        </span>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                  </tr>
+                  <SourceProof source={s} defaultOpen={i < 3} />
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  )
+}
+
+export default async function BronnenPage() {
   if (!hasTurso()) return <NoDatabase />
 
-  const params = await searchParams
-  const sort = (params.sort as SortKey) || 'status'
-  const effectiveDir: 'asc' | 'desc' = params.dir === 'desc' ? 'desc' : 'asc'
-  const filterNever = params.filter === 'never'
-  const filterHealth = params.health as SourceRow['healthStatus'] | undefined
+  const [allSources, aggregates] = await Promise.all([getSourcesOverview(), getTierAggregates()])
 
-  const allSources = await getSourcesOverview()
-  const neverCount = allSources.filter((s) => s.itemsTotal === 0).length
+  const producing = allSources.filter((s) => s.signalCount > 0)
+  const noYield = allSources
+    .filter((s) => s.signalCount === 0)
+    .sort((a, b) => (a.tier ?? 99) - (b.tier ?? 99) || a.name.localeCompare(b.name))
 
-  let visible = allSources
-  if (filterNever) visible = visible.filter((s) => s.itemsTotal === 0)
-  if (filterHealth) visible = visible.filter((s) => s.healthStatus === filterHealth)
-
-  const sorted = sortSources(visible, sort, effectiveDir)
+  const aggByTier = new Map(aggregates.map((a) => [a.tier, a]))
 
   return (
     <div>
       <p className="dash-sub mt8" style={{ maxWidth: 760 }}>
-        {allSources.length} bronnen actief. {neverCount} hebben nog nooit een item opgeleverd — meestal omdat de bron
-        JavaScript of authenticatie vereist, of omdat het endpoint is veranderd. De precieze oorzaak staat er alleen bij
-        als die uit de scraperlogs blijkt.
+        {allSources.length} bronnen actief, verdeeld over drie tiers naar bewijskracht. {producing.length} daarvan hebben
+        minstens één signaal opgeleverd.
       </p>
 
-      <div className="dash-filters mt24">
-        <Link href="/dashboard/bronnen" className={`dash-filter-chip${!filterNever && !filterHealth ? ' dash-filter-chip-active' : ''}`}>
-          Alle ({allSources.length})
-        </Link>
-        <Link href="/dashboard/bronnen?filter=never" className={`dash-filter-chip${filterNever ? ' dash-filter-chip-active' : ''}`}>
-          Levert niets op ({neverCount})
-        </Link>
-        <Link href="/dashboard/bronnen?health=red" className={`dash-filter-chip${filterHealth === 'red' ? ' dash-filter-chip-active' : ''}`}>
-          Rood ({allSources.filter((s) => s.healthStatus === 'red').length})
-        </Link>
-        <Link href="/dashboard/bronnen?health=grey" className={`dash-filter-chip${filterHealth === 'grey' ? ' dash-filter-chip-active' : ''}`}>
-          Stil ≥14 dagen ({allSources.filter((s) => s.healthStatus === 'grey').length})
-        </Link>
-      </div>
+      {[1, 2, 3].map((tier) => {
+        const sources = producing
+          .filter((s) => s.tier === tier)
+          .sort((a, b) => b.signalCount - a.signalCount || a.name.localeCompare(b.name))
+        const aggregate = aggByTier.get(tier) ?? { sourceCount: 0, items: 0, signals: 0, published: 0 }
+        return <TierSection key={tier} tier={tier} aggregate={aggregate} sources={sources} />
+      })}
 
-      <div className="dash-table-wrap mt16">
-        <table className="dash-table">
-          <thead>
-            <tr>
-              <SortHeader label="Status" sortKey="status" currentSort={sort} currentDir={effectiveDir} />
-              <SortHeader label="Bron" sortKey="name" currentSort={sort} currentDir={effectiveDir} />
-              <SortHeader label="Tier" sortKey="tier" currentSort={sort} currentDir={effectiveDir} />
-              <SortHeader label="Type" sortKey="type" currentSort={sort} currentDir={effectiveDir} />
-              <SortHeader label="Laatste item" sortKey="last_item" currentSort={sort} currentDir={effectiveDir} />
-              <SortHeader label="Items 7d" sortKey="items_7d" currentSort={sort} currentDir={effectiveDir} />
-              <SortHeader label="Items 30d" sortKey="items_30d" currentSort={sort} currentDir={effectiveDir} />
-              <SortHeader label="Signalen" sortKey="signals" currentSort={sort} currentDir={effectiveDir} />
-              <th>Laatste fout</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((s) => (
-              <tr key={s.id}>
-                <td><span className={`dash-health-dot dash-health-${s.healthStatus}`} title={s.healthStatus === 'red' ? 'rood' : s.healthStatus === 'grey' ? 'stil' : 'actief'} /></td>
-                <td>
-                  <div style={{ fontWeight: 500 }}>{s.name}</div>
-                  <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'var(--accent)' }}>
-                    {s.url.length > 50 ? s.url.slice(0, 50) + '…' : s.url}
-                  </a>
-                </td>
-                <td>
-                  <span className="dash-tier-pill" title={s.tier ? TIER_META[s.tier]?.desc : ''}>
-                    {s.tier ? `T${s.tier}` : '—'}
-                  </span>
-                </td>
-                <td>{s.sourceType || '—'}</td>
-                <td>{s.lastItemAt ? formatDate(s.lastItemAt) : 'nooit'}</td>
-                <td>{s.items7d}</td>
-                <td>{s.items30d}</td>
-                <td>{s.signalCount}</td>
-                <td style={{ maxWidth: 260, fontSize: 12.5, color: 'var(--t2)' }}>{s.lastErrorMessage || '—'}</td>
+      <details className="mt24">
+        <summary style={{ cursor: 'pointer', fontSize: 14, fontWeight: 500, color: 'var(--t2)', padding: '8px 0' }}>
+          {noYield.length} bronnen leverden nog geen signaal op
+        </summary>
+        <div className="dash-table-wrap mt16">
+          <table className="dash-table">
+            <thead>
+              <tr>
+                <th>Bron</th>
+                <th>Tier</th>
+                <th>Type</th>
+                <th>Items totaal</th>
+                <th>Laatste item</th>
+                <th>Reden (voor zover bekend)</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="dash-legend mt24">
-        <div className="dash-legend-item"><strong>Tier 1</strong> — publicatiebron: zelfstandig artikelkandidaat</div>
-        <div className="dash-legend-item"><strong>Tier 2</strong> — corroboratiebron</div>
-        <div className="dash-legend-item"><strong>Tier 3</strong> — detectiebron, alleen trigger</div>
-        <div className="dash-legend-item" style={{ marginTop: 6 }}>
-          <span className="dash-health-dot dash-health-green" style={{ display: 'inline-block', marginRight: 6 }} /> recent actief ·
-          <span className="dash-health-dot dash-health-grey" style={{ display: 'inline-block', margin: '0 6px 0 10px' }} /> actief maar ≥14 dagen stil ·
-          <span className="dash-health-dot dash-health-red" style={{ display: 'inline-block', margin: '0 6px 0 10px' }} /> nooit iets opgeleverd of laatste run gaf een fout
+            </thead>
+            <tbody>
+              {noYield.map((s) => (
+                <tr key={s.id}>
+                  <td>
+                    <div style={{ fontWeight: 500 }}>{s.name}</div>
+                    <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'var(--accent)' }}>
+                      {s.url.length > 50 ? s.url.slice(0, 50) + '…' : s.url}
+                    </a>
+                  </td>
+                  <td>{s.tier ? `T${s.tier}` : '—'}</td>
+                  <td>{s.sourceType || '—'}</td>
+                  <td>{s.itemsTotal}</td>
+                  <td>{s.lastItemAt ? formatDate(s.lastItemAt) : 'nooit'}</td>
+                  <td style={{ maxWidth: 300, fontSize: 12.5, color: 'var(--t2)' }}>{s.lastErrorMessage || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </div>
+      </details>
     </div>
   )
 }

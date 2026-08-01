@@ -1,7 +1,13 @@
 import Link from 'next/link'
 import { hasTurso } from '@/lib/turso'
-import { getFunnel24h, getLatestRuns, getAttentionItems, getSignalStatusBreakdown } from '@/lib/dashboard/queries'
-import { formatDateTime, formatDuration, formatRelative, SIGNAL_STATUS_META } from '@/lib/dashboard/format'
+import {
+  getFunnel24h,
+  getOpbrengstTotals,
+  getLatestSignals,
+  getLatestPublishedArticles,
+  getAttentionPoints,
+} from '@/lib/dashboard/queries'
+import { formatDate, formatRelative, SIGNAL_STATUS_META } from '@/lib/dashboard/format'
 import NoDatabase from './NoDatabase'
 
 export const revalidate = 30
@@ -11,14 +17,13 @@ export default async function DashboardVandaagPage() {
     return <NoDatabase />
   }
 
-  const [funnel, runs, attention, statusBreakdown] = await Promise.all([
+  const [funnel, opbrengst, latestSignals, latestArticles, attentionPoints] = await Promise.all([
     getFunnel24h(),
-    getLatestRuns(10),
-    getAttentionItems(),
-    getSignalStatusBreakdown(),
+    getOpbrengstTotals(),
+    getLatestSignals(6),
+    getLatestPublishedArticles(6),
+    getAttentionPoints(),
   ])
-
-  const totalSignals = statusBreakdown.reduce((sum, s) => sum + s.count, 0)
 
   return (
     <div>
@@ -44,72 +49,57 @@ export default async function DashboardVandaagPage() {
         </div>
       </div>
 
+      <div className="dash-funnel mt16">
+        <div className="dash-funnel-step">
+          <div className="dash-funnel-num">{opbrengst.totalSignals}</div>
+          <div className="dash-funnel-label">Signalen tot nu toe</div>
+        </div>
+        <div className="dash-funnel-step">
+          <div className="dash-funnel-num">{opbrengst.tier1Signals}</div>
+          <div className="dash-funnel-label">Waarvan uit tier 1</div>
+        </div>
+        <div className="dash-funnel-step">
+          <div className="dash-funnel-num">{opbrengst.totalPublished}</div>
+          <div className="dash-funnel-label">Gepubliceerde artikelen</div>
+        </div>
+        <div className="dash-funnel-step">
+          <div className="dash-funnel-num">{opbrengst.tier1Published}</div>
+          <div className="dash-funnel-label">Waarvan uit tier 1</div>
+        </div>
+      </div>
+
       <div className="dash-grid mt24">
         <div className="dash-card">
-          <div className="dash-card-title">Laatste runs</div>
-          {runs.length === 0 ? (
-            <div style={{ color: 'var(--t3)', fontSize: 14 }}>Nog geen runs gelogd.</div>
+          <div className="dash-card-title">Laatste signalen</div>
+          {latestSignals.length === 0 ? (
+            <div style={{ color: 'var(--t3)', fontSize: 14 }}>Nog geen signalen.</div>
           ) : (
             <div>
-              {runs.map((r) =>
-                r.kind === 'intake' ? (
-                  <Link key={`${r.kind}-${r.id}`} href={`/dashboard/intake/${r.id}`} className="dash-run-row">
-                    <span className={`dash-run-kind dash-run-kind-${r.kind}`}>{r.kind}</span>
-                    <span className="dash-run-main">
-                      <span className="dash-run-label">{r.label}</span>
-                      <span className="dash-run-meta">{formatDateTime(r.startedAt)} · {formatDuration(r.durationMs)}</span>
-                    </span>
-                    <span className="dash-run-outcome">{r.outcome}</span>
-                  </Link>
-                ) : (
-                  <div key={`${r.kind}-${r.id}`} className="dash-run-row">
-                    <span className={`dash-run-kind dash-run-kind-${r.kind}`}>{r.kind}</span>
-                    <span className="dash-run-main">
-                      <span className="dash-run-label">{r.label}</span>
-                      <span className="dash-run-meta">{formatDateTime(r.startedAt)} · {formatDuration(r.durationMs)}</span>
-                    </span>
-                    <span className="dash-run-outcome">{r.outcome}</span>
-                  </div>
-                )
-              )}
+              {latestSignals.map((s) => (
+                <Link key={s.id} href={`/dashboard/signaal/${s.id}`} className="dash-run-row">
+                  <span className="dash-run-main">
+                    <span className="dash-run-label">{s.title}</span>
+                    <span className="dash-run-meta">{s.sourceName || 'onbekende bron'} · {formatRelative(s.lastSeenAt)}</span>
+                  </span>
+                  <span className="dash-run-outcome">{SIGNAL_STATUS_META[s.status]?.label || s.status}</span>
+                </Link>
+              ))}
             </div>
           )}
         </div>
 
         <div className="dash-card">
-          <div className="dash-card-title">Aandachtspunten</div>
-          <div>
-            <div className="dash-attn-row">
-              <span className="dash-attn-label">Bronnen die &gt;14 dagen niets opleverden</span>
-              {attention.staleSourceCount > 0 ? (
-                <Link href="/dashboard/bronnen?health=grey" className="dash-attn-count">{attention.staleSourceCount}</Link>
-              ) : (
-                <span className="dash-attn-ok">0</span>
-              )}
-            </div>
-            <div className="dash-attn-row">
-              <span className="dash-attn-label">Scrapers met fout bij laatste run</span>
-              {attention.failedScrapers.length > 0 ? (
-                <Link href="/dashboard/bronnen?health=red" className="dash-attn-count">{attention.failedScrapers.length}</Link>
-              ) : (
-                <span className="dash-attn-ok">0</span>
-              )}
-            </div>
-            <div className="dash-attn-row">
-              <span className="dash-attn-label">Onverwerkte raw_items</span>
-              {attention.unprocessedCount > 50 ? (
-                <span className="dash-attn-count">{attention.unprocessedCount}</span>
-              ) : (
-                <span className="dash-attn-ok">{attention.unprocessedCount}</span>
-              )}
-            </div>
-          </div>
-          {attention.failedScrapers.length > 0 && (
-            <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border-s)' }}>
-              {attention.failedScrapers.slice(0, 5).map((f) => (
-                <div key={f.scraperFile} style={{ fontSize: 12.5, color: 'var(--t2)', marginBottom: 6 }}>
-                  <strong style={{ color: 'var(--t1)' }}>{f.scraperFile}</strong> — {f.errorMessage || 'onbekende fout'}
-                  <span style={{ color: 'var(--t3)' }}> ({formatRelative(f.startedAt)})</span>
+          <div className="dash-card-title">Laatste artikelen</div>
+          {latestArticles.length === 0 ? (
+            <div style={{ color: 'var(--t3)', fontSize: 14 }}>Nog geen artikelen gepubliceerd.</div>
+          ) : (
+            <div>
+              {latestArticles.map((a) => (
+                <div key={a.id} className="dash-run-row">
+                  <span className="dash-run-main">
+                    <span className="dash-run-label">{a.title}</span>
+                    <span className="dash-run-meta">{a.sourceName || 'onbekende bron'} · {formatDate(a.publishedAt)}</span>
+                  </span>
                 </div>
               ))}
             </div>
@@ -117,28 +107,21 @@ export default async function DashboardVandaagPage() {
         </div>
       </div>
 
-      <div className="dash-card mt24">
-        <div className="dash-card-title">Signalen per status</div>
-        <div className="dash-status-bar">
-          {statusBreakdown.map((s) => (
-            <div
-              key={s.status}
-              style={{
-                width: `${totalSignals > 0 ? (s.count / totalSignals) * 100 : 0}%`,
-                background: SIGNAL_STATUS_META[s.status]?.color || 'var(--t3)',
-              }}
-            />
-          ))}
+      {attentionPoints.length > 0 && (
+        <div className="dash-card mt24">
+          <div className="dash-card-title">Aandachtspunten</div>
+          <div>
+            {attentionPoints.map((p) => (
+              <div key={p.label} className="dash-attn-row">
+                <span className="dash-attn-label">
+                  {p.href ? <Link href={p.href} style={{ color: 'inherit' }}>{p.label}</Link> : p.label}
+                  <span style={{ display: 'block', fontSize: 12.5, color: 'var(--t3)', marginTop: 2 }}>{p.detail}</span>
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="dash-status-legend">
-          {statusBreakdown.map((s) => (
-            <div key={s.status} className="dash-status-legend-item">
-              <span className="dash-status-dot" style={{ background: SIGNAL_STATUS_META[s.status]?.color || 'var(--t3)' }} />
-              {SIGNAL_STATUS_META[s.status]?.label || s.status}: <strong style={{ color: 'var(--t1)' }}>{s.count}</strong>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   )
 }

@@ -8,6 +8,7 @@ import {
   formatDate,
   formatDateTime,
   parseBriefing,
+  parseSpeurderNote,
   NO_HISTORY_MESSAGE,
   SIGNAL_STATUS_META,
   TIER_META,
@@ -48,6 +49,23 @@ export default async function SignaalDossierPage({ params }: Props) {
   }
 
   const statusMeta = SIGNAL_STATUS_META[signal.status]
+
+  const distinctSourceCount = new Set(rawItems.map((it: any) => it.source_name)).size
+  const speurderNote = parseSpeurderNote(signal.summary)
+  const statusJustifications: string[] = []
+  if (signal.threshold != null && signal.confirmations != null) {
+    const reached = signal.confirmations >= signal.threshold
+    statusJustifications.push(
+      `${signal.confirmations} bevestiging${signal.confirmations === 1 ? '' : 'en'} uit ${distinctSourceCount} bron${distinctSourceCount === 1 ? '' : 'nen'}, drempel van ${signal.threshold} ${reached ? 'bereikt' : 'nog niet bereikt'}`
+    )
+  }
+  if (speurderNote) statusJustifications.push(speurderNote)
+  if (events.length > 0) {
+    const lastEvent = events[events.length - 1]
+    statusJustifications.push(
+      `Laatste wijziging: ${lastEvent.reason || `${lastEvent.status_from ?? '?'} → ${lastEvent.status_to ?? '?'}`} (${formatDate(lastEvent.created_at)})`
+    )
+  }
 
   return (
     <div>
@@ -157,7 +175,15 @@ export default async function SignaalDossierPage({ params }: Props) {
               <span className="dash-pill" style={{ background: `${statusMeta?.color || 'var(--t3)'}22`, color: statusMeta?.color || 'var(--t3)' }}>
                 {statusMeta?.label || signal.status}
               </span>
-              <p style={{ fontSize: 12.5, color: 'var(--t3)', marginTop: 6 }}>{statusMeta?.desc}</p>
+              {statusJustifications.length > 0 ? (
+                <ul style={{ margin: '8px 0 0', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  {statusJustifications.map((j, i) => (
+                    <li key={i} style={{ fontSize: 12.5, color: 'var(--t2)' }}>{j}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p style={{ fontSize: 12, color: 'var(--t3)', marginTop: 6, fontStyle: 'italic' }}>{NO_HISTORY_MESSAGE}</p>
+              )}
             </div>
 
             <div className="sidebar-box">
@@ -183,8 +209,6 @@ export default async function SignaalDossierPage({ params }: Props) {
                 )}
               </div>
             )}
-
-            <div className="dash-actions-slot">Acties (zoals doorzetten naar research, discarden, feedback) komen in stap 3.</div>
           </div>
       </div>
     </div>
