@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { q, qOne } from '@/lib/turso'
+import { q, qOne, turso } from '@/lib/turso'
 import { daysSince, formatDate } from './format'
 
 // ── Vandaag ───────────────────────────────────────────────
@@ -50,8 +50,9 @@ const FREQUENCY_LABEL: Record<string, string> = { hourly: 'ieder uur ververste',
 export async function getAttentionPoints(): Promise<AttentionPoint[]> {
   const [staleRows, failed] = await Promise.all([
     q<any>(`
-      SELECT s.name, s.tier, s.scrape_frequency, MAX(r.scraped_at) as last_at,
-             julianday('now') - julianday(MAX(r.scraped_at)) as days_ago
+      SELECT s.name, s.tier, s.scrape_frequency,
+             MAX(REPLACE(REPLACE(r.scraped_at,'T',' '),'Z','')) as last_at,
+             julianday('now') - julianday(MAX(REPLACE(REPLACE(r.scraped_at,'T',' '),'Z',''))) as days_ago
       FROM sources s JOIN raw_items r ON r.source_id = s.id
       GROUP BY s.id
       HAVING COUNT(r.id) >= 2
@@ -249,7 +250,7 @@ export async function getSourcesOverview(): Promise<SourceRow[]> {
     q<any>(`
       SELECT
         s.id, s.name, s.url, s.tier, s.source_type,
-        MAX(r.scraped_at) as last_item_at,
+        MAX(REPLACE(REPLACE(r.scraped_at,'T',' '),'Z','')) as last_item_at,
         COUNT(DISTINCT CASE WHEN julianday(r.scraped_at) >= julianday('now','-7 days') THEN r.id END) as items_7d,
         COUNT(DISTINCT CASE WHEN julianday(r.scraped_at) >= julianday('now','-30 days') THEN r.id END) as items_30d,
         COUNT(DISTINCT r.id) as items_total,
@@ -443,7 +444,7 @@ export async function getSignalDossier(id: number) {
     q<any>(
       `SELECT r.id, r.title, r.external_url, r.scraped_at, s.name as source_name, s.tier
        FROM signal_items si JOIN raw_items r ON r.id = si.raw_item_id JOIN sources s ON s.id = r.source_id
-       WHERE si.signal_id = ? ORDER BY r.scraped_at DESC`,
+       WHERE si.signal_id = ? ORDER BY REPLACE(REPLACE(r.scraped_at,'T',' '),'Z','') DESC`,
       [id]
     ),
     q<any>(
@@ -484,4 +485,115 @@ export async function getSignalDossier(id: number) {
     decisions,
     article,
   }
+}
+
+// ── Persberichtqueue ──────────────────────────────────────
+//
+// job_requests is de wachtrij tussen dashboard en de redactieassistent (Cowork-agent
+// op de notebook, draait elk half uur): het dashboard schrijft 'queued', de assistent
+// zet 'm op 'running' en logt naar job_logs, en levert af in press_releases.
+
+export interface JobRequestRow {
+  id: number
+  type: string
+  signal_id: number
+  params: string | null
+  status: 'queued' | 'running' | 'done' | 'error' | string
+  requested_by: string | null
+  requested_at: string
+  started_at: string | null
+  finished_at: string | null
+  result_id: number | null
+  error_message: string | null
+}
+
+export interface JobLogRow {
+  id: number
+  job_id: number
+  ts: string
+  level: string | null
+  message: string
+}
+
+export interface PressReleaseRow {
+  id: number
+  signal_id: number
+  job_id: number | null
+  headline: string | null
+  lead: string | null
+  body: string | null
+  facts: string | null
+  open_questions: string | null
+  sources: string | null
+  status: string | null
+  created_at: string
+}
+
+/** Meest recente job van dit type voor een signaal, ongeacht status. */
+export async function getLatestJobForSignal(signalId: number, type = 'persbericht'): Promise<JobRequestRow | null> {
+  return qOne<JobRequestRow>(
+    `SELECT * FROM job_requests WHERE signal_id = ? AND type = ? ORDER BY requested_at DESC, id DESC LIMIT 1`,
+    [signalId, type]
+  )
+}
+
+/** Openstaande (queued/running) job van dit type voor een signaal — gebruikt om dubbele aanvragen te voorkomen. */
+export async function getOpenJobForSignal(signalId: number, type = 'persbericht'): Promise<JobRequestRow | null> {
+  return qOne<JobRequestRow>(
+    `SELECT * FROM job_requests WHERE signal_id = ? AND type = ? AND status IN ('queued','running')
+     ORDER BY requested_at DESC, id DESC LIMIT 1`,
+    [signalId, type]
+  )
+}
+
+export async function createJobRequest(signalId: number, type: string, requestedBy: string): Promise<JobRequestRow> {
+  if (!turso) throw new Error('Geen databaseverbinding')
+  const res = await turso.execute({
+    sql: `INSERT INTO job_requests (type, signal_id, status, requested_by) VALUES (?, ?, 'queued', ?)`,
+    args: [type, signalId, requestedBy],
+  })
+  const id = Number(res.lastInsertRowid)
+  const job = await qOne<JobRequestRow>(`SELECT * FROM job_requests WHERE id = ?`, [id])
+  if (!job) throw new Error('Job kon niet worden aangemaakt')
+  return job
+}
+
+export async function getJob(id: number): Promise<JobRequestRow | null> {
+  return qOne<JobRequestRow>(`SELECT * FROM job_requests WHERE id = ?`, [id])
+}
+
+export async function getJobLogs(jobId: number): Promise<JobLogRow[]> {
+  return q<JobLogRow>(`SELECT * FROM job_logs WHERE job_id = ? ORDER BY ts ASC, id ASC`, [jobId])
+}
+
+export async function getPressReleaseForJob(job: Pick<JobRequestRow, 'id' | 'result_id'>): Promise<PressReleaseRow | null> {
+  if (job.result_id) {
+    const byResult = await qOne<PressReleaseRow>(`SELECT * FROM press_releases WHERE id = ?`, [job.result_id])
+    if (byResult) return byResult
+  }
+  return qOne<PressReleaseRow>(`SELECT * FROM press_releases WHERE job_id = ? ORDER BY id DESC LIMIT 1`, [job.id])
+}
+
+export interface RecentJobRow {
+  id: number
+  signal_id: number
+  signal_title: string
+  status: string
+  requested_at: string
+  finished_at: string | null
+  result_id: number | null
+}
+
+/** Openstaande jobs plus recent afgeronde (laatste 48u), voor het "Aanvragen"-blok op /dashboard. */
+export async function getRecentJobs(limit = 20): Promise<RecentJobRow[]> {
+  return q<RecentJobRow>(
+    `SELECT jr.id, jr.signal_id, sig.title as signal_title, jr.status, jr.requested_at, jr.finished_at, jr.result_id
+     FROM job_requests jr
+     JOIN signals sig ON sig.id = jr.signal_id
+     WHERE jr.status IN ('queued','running')
+        OR (jr.finished_at IS NOT NULL AND julianday('now') - julianday(REPLACE(REPLACE(jr.finished_at,'T',' '),'Z','')) <= 2)
+     ORDER BY jr.requested_at DESC
+     LIMIT ?`,
+    [limit]
+  )
 }

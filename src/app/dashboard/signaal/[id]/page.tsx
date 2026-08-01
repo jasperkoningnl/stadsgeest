@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { hasTurso } from '@/lib/turso'
 import { client } from '@/lib/sanity'
-import { getSignalDossier } from '@/lib/dashboard/queries'
+import { getSignalDossier, getLatestJobForSignal, getJobLogs, getPressReleaseForJob } from '@/lib/dashboard/queries'
 import {
   formatDate,
   formatDateTime,
@@ -14,6 +14,7 @@ import {
   TIER_META,
 } from '@/lib/dashboard/format'
 import NoDatabase from '../../NoDatabase'
+import PersberichtQueue from '@/components/dashboard/PersberichtQueue'
 
 export const revalidate = 30
 
@@ -39,6 +40,12 @@ export default async function SignaalDossierPage({ params }: Props) {
 
   const { signal, effectiveTier, effectiveSource, rawItems, entitiesByType, events, article } = dossier
   const briefing = parseBriefing(signal.summary)
+
+  const job = await getLatestJobForSignal(id)
+  const [jobLogs, pressRelease] = await Promise.all([
+    job && (job.status === 'queued' || job.status === 'running') ? getJobLogs(job.id) : Promise.resolve([]),
+    job && job.status === 'done' ? getPressReleaseForJob(job) : Promise.resolve(null),
+  ])
 
   let articleSlug: string | null = null
   if (article) {
@@ -90,6 +97,16 @@ export default async function SignaalDossierPage({ params }: Props) {
             )}
 
             <div className="dash-card">
+              <div className="dash-card-title">Persbericht</div>
+              <PersberichtQueue
+                signalId={signal.id}
+                initialJob={job}
+                initialLogs={jobLogs}
+                initialPressRelease={pressRelease}
+              />
+            </div>
+
+            <div className="dash-card mt24">
               <div className="dash-card-title">Briefing</div>
               {briefing.sections.length === 0 ? (
                 <p style={{ color: 'var(--t2)', fontFamily: 'var(--f-b)' }}>Geen briefingtekst beschikbaar.</p>

@@ -1,17 +1,27 @@
 // Formatting- en parsing-helpers voor het redactionele dashboard.
+//
+// Alle timestamps in de database staan in UTC (SQLite's datetime('now') en de
+// scrapers schrijven beide UTC weg). Weergave gebeurt altijd via deze helpers,
+// die expliciet naar Europe/Amsterdam converteren — dit is het ene punt dat
+// dat doet, gebruik het overal in plaats van zelf met Date te rekenen.
+const DASHBOARD_TIME_ZONE = 'Europe/Amsterdam'
 
 export function formatDateTime(iso: string | null | undefined): string {
-  if (!iso) return '—'
-  const d = new Date(iso.includes('T') || iso.endsWith('Z') ? iso : iso.replace(' ', 'T') + 'Z')
-  if (Number.isNaN(d.getTime())) return '—'
-  return d.toLocaleString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  const d = parseDbDate(iso)
+  if (!d) return '—'
+  return d.toLocaleString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: DASHBOARD_TIME_ZONE })
 }
 
 export function formatDate(iso: string | null | undefined): string {
-  if (!iso) return '—'
-  const d = new Date(iso.includes('T') || iso.endsWith('Z') ? iso : iso.replace(' ', 'T') + 'Z')
-  if (Number.isNaN(d.getTime())) return '—'
-  return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
+  const d = parseDbDate(iso)
+  if (!d) return '—'
+  return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric', timeZone: DASHBOARD_TIME_ZONE })
+}
+
+export function formatTime(iso: string | null | undefined): string {
+  const d = parseDbDate(iso)
+  if (!d) return '—'
+  return d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', timeZone: DASHBOARD_TIME_ZONE })
 }
 
 export function parseDbDate(iso: string | null | undefined): Date | null {
@@ -227,4 +237,95 @@ export function parseSpeurderNote(raw: string | null | undefined): string | null
   const month = parseInt(m[2], 10)
   if (month < 1 || month > 12) return null
   return `beoordeeld door de speurder op ${day} ${NL_MONTHS[month - 1]}`
+}
+
+// ── Persberichtqueue ──────────────────────────────────────
+
+export const JOB_STATUS_META: Record<string, { label: string; color: string }> = {
+  queued: { label: 'In wachtrij', color: 'var(--t3)' },
+  running: { label: 'Wordt uitgewerkt', color: 'var(--amber)' },
+  done: { label: 'Klaar', color: '#5fd97a' },
+  error: { label: 'Mislukt', color: 'var(--error)' },
+}
+
+/**
+ * Parseert JSON die door de redactieassistent is weggeschreven (facts, open_questions,
+ * sources op press_releases). De agent schrijft dit veld, dus bij onparsebare of
+ * onverwachte inhoud geven we `null` terug in plaats van de pagina te laten crashen —
+ * de aanroeper toont dan de ruwe waarde.
+ */
+export function safeParseJson<T>(raw: string | null | undefined): T | null {
+  if (!raw || !raw.trim()) return null
+  try {
+    return JSON.parse(raw) as T
+  } catch {
+    return null
+  }
+}
+
+/** Zoals safeParseJson, maar geeft alleen iets terug als het resultaat ook echt een array is. */
+export function safeParseJsonArray<T>(raw: string | null | undefined): T[] | null {
+  const parsed = safeParseJson<unknown>(raw)
+  return Array.isArray(parsed) ? (parsed as T[]) : null
+}
+
+export interface PressReleaseFact {
+  feit: string
+  bron_naam?: string
+  bron_url?: string
+}
+
+export interface PressReleaseSource {
+  naam: string
+  url?: string
+  tier?: number
+}
+
+interface PressReleaseTextFields {
+  headline: string | null
+  lead: string | null
+  body: string | null
+  facts: string | null
+  open_questions: string | null
+  sources: string | null
+}
+
+/**
+ * Bouwt de platte-tekstversie voor de kopieerknop: kop, lead, body, dan feiten met
+ * bronnen, open vragen en de bronnenlijst — leesbaar buiten de browser, in een
+ * tekstverwerker of mail. Bij onparsebare JSON valt dit terug op de ruwe waarde,
+ * zodat kopiëren nooit vastloopt op wat de agent heeft weggeschreven.
+ */
+export function buildPressReleaseClipboardText(pr: PressReleaseTextFields): string {
+  const parts: string[] = []
+  if (pr.headline) parts.push(pr.headline)
+  if (pr.lead) parts.push(pr.lead)
+  if (pr.body) parts.push(pr.body)
+
+  const facts = safeParseJsonArray<PressReleaseFact>(pr.facts)
+  if (facts && facts.length > 0) {
+    parts.push(
+      ['FEITEN EN BRONNEN', ...facts.map((f) => `- ${f.feit}${f.bron_naam ? ` — bron: ${f.bron_naam}` : ''}${f.bron_url ? ` (${f.bron_url})` : ''}`)].join('\n')
+    )
+  } else if (pr.facts && pr.facts.trim()) {
+    parts.push(`FEITEN EN BRONNEN\n${pr.facts}`)
+  }
+
+  const questions = safeParseJsonArray<string>(pr.open_questions)
+  if (questions && questions.length > 0) {
+    parts.push(['OPEN VRAGEN VOOR DE REDACTIE', ...questions.map((q) => `- ${q}`)].join('\n'))
+  } else if (pr.open_questions && pr.open_questions.trim()) {
+    parts.push(`OPEN VRAGEN VOOR DE REDACTIE\n${pr.open_questions}`)
+  }
+
+  const sources = safeParseJsonArray<PressReleaseSource>(pr.sources)
+  if (sources && sources.length > 0) {
+    parts.push(
+      ['BRONNEN', ...sources.map((s) => `- ${s.naam}${s.tier ? ` (T${s.tier})` : ''}${s.url ? ` — ${s.url}` : ''}`)].join('\n')
+    )
+  } else if (pr.sources && pr.sources.trim()) {
+    parts.push(`BRONNEN\n${pr.sources}`)
+  }
+
+  return parts.join('\n\n')
 }

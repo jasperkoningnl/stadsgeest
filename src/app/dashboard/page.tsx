@@ -6,8 +6,9 @@ import {
   getLatestSignals,
   getLatestPublishedArticles,
   getAttentionPoints,
+  getRecentJobs,
 } from '@/lib/dashboard/queries'
-import { formatDate, formatRelative, SIGNAL_STATUS_META } from '@/lib/dashboard/format'
+import { formatDate, formatRelative, formatTime, SIGNAL_STATUS_META, JOB_STATUS_META } from '@/lib/dashboard/format'
 import NoDatabase from './NoDatabase'
 
 export const revalidate = 30
@@ -17,12 +18,13 @@ export default async function DashboardVandaagPage() {
     return <NoDatabase />
   }
 
-  const [funnel, opbrengst, latestSignals, latestArticles, attentionPoints] = await Promise.all([
+  const [funnel, opbrengst, latestSignals, latestArticles, attentionPoints, recentJobs] = await Promise.all([
     getFunnel24h(),
     getOpbrengstTotals(),
     getLatestSignals(6),
     getLatestPublishedArticles(6),
     getAttentionPoints(),
+    getRecentJobs(),
   ])
 
   return (
@@ -116,6 +118,33 @@ export default async function DashboardVandaagPage() {
                 <span className="dash-attn-label">
                   {p.href ? <Link href={p.href} style={{ color: 'inherit' }}>{p.label}</Link> : p.label}
                   <span style={{ display: 'block', fontSize: 12.5, color: 'var(--t3)', marginTop: 2 }}>{p.detail}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {recentJobs.length > 0 && (
+        <div className="dash-card mt24">
+          <div className="dash-card-title">Aanvragen</div>
+          <div>
+            {recentJobs.map((j) => (
+              <div key={j.id} className="dash-run-row">
+                <span className="dash-run-main">
+                  <Link href={`/dashboard/signaal/${j.signal_id}`} className="dash-run-label" style={{ color: 'inherit' }}>
+                    {j.signal_title}
+                  </Link>
+                  <span className="dash-run-meta">Aangevraagd om {formatTime(j.requested_at)}</span>
+                </span>
+                <span className="dash-run-outcome">
+                  {j.status === 'done' ? (
+                    <Link href={`/dashboard/signaal/${j.signal_id}`} style={{ color: 'var(--accent)' }}>
+                      {JOB_STATUS_META.done.label} →
+                    </Link>
+                  ) : (
+                    JOB_STATUS_META[j.status]?.label || j.status
+                  )}
                 </span>
               </div>
             ))}

@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-
-const AUTH_COOKIE = 'sg_auth'
-// SHA-256 hash of 'bolsiusisdeburgervader'
-const VALID_TOKEN = 'f28d5b97fc847044a60e7d675cf6dfd83e329c4b52224825ce9d1142b62f6252'
+import { AUTH_COOKIE, AUTH_TOKEN } from '@/lib/dashboardAuth'
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -14,7 +11,7 @@ export function proxy(request: NextRequest) {
 
   const token = request.cookies.get(AUTH_COOKIE)?.value
 
-  if (token !== VALID_TOKEN) {
+  if (token !== AUTH_TOKEN) {
     const loginUrl = new URL('/login', request.url)
     if (pathname !== '/') {
       loginUrl.searchParams.set('from', pathname)
