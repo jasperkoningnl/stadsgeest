@@ -19,14 +19,20 @@ const scrapers = [
   'prorail.js',                   // B6: ProRail nieuws (filter Amersfoort)
   'regio-amersfoort.js',          // B7: Bureau Regio Amersfoort RSS
   'archiefeemland.js',            // B8: Archief Eemland nieuws
-  'subsidieregister.js',          // B14: Subsidieregister gemeente (jaarlijks, wekelijks gecheckt)
+  // B14: subsidieregister.js UITGESCHAKELD 24-07-2026 — sloeg alleen een link naar de PDF op
+  //      als één raw_item van 205 tekens. Vervangen door subsidieregister-records.js, die de
+  //      PDF-tabel uitpakt naar losse records in de tabel `subsidies`. Draait als eigen
+  //      PM2-job (scrape-subsidies, zondag 09:30) omdat het parsen minuten duurt en
+  //      deze runner een timeout per scraper hanteert.
   'uwv-amersfoort.js',            // B16: UWV ArbeidsmarktInZicht Amersfoort
   'amersfoort-cijfers.js',        // B17: Amersfoort in Cijfers RSS
   'financien-amersfoort.js',      // B19: Financiën gemeente (jaarlijks, wekelijks gecheckt)
 
   // Groep C — server-rendered (geen Playwright nodig)
   'ibabs-woo.js',                 // C7: Bestuurlijke informatie iBabs (Woo-verzoeken, klachten, convenanten)
-  'officielebekendmakingen-wekelijks.js', // OB wekelijkse subtypen (gem.regelingen, prov.blad, waterschapsblad)
+  // officielebekendmakingen-wekelijks.js UITGESCHAKELD 24-07-2026: de creator-queries
+  // stonden op 'Vallei en Veluwe' en 'provincie Utrecht' en haalden landelijke items binnen
+  // (Heerhugowaard, Bergambacht, Roelofarendsveen). Vervangen door officielebekendmakingen-repo.js.
 
   // Groep D — organisatie-scrapers (RSS)
   'org-rss.js',                   // D1: Railcenter, Mondriaan, KAdE, Kamp, Natuurmonumenten,

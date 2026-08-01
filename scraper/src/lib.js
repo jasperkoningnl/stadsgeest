@@ -43,7 +43,7 @@ export async function ensureSource(db, { name, url, source_type, reliability, ca
   return r.lastInsertRowid;
 }
 
-export async function insertItem(db, { source_id, title, content, summary, external_url, scraped_at, is_historical = 0 }) {
+export async function insertItem(db, { source_id, title, content, summary, external_url, scraped_at, is_historical = 0, full_text = null }) {
   try {
     const existing = await db.execute({
       sql: 'SELECT id FROM raw_items WHERE external_url = ? OR (title = ? AND source_id = ?)',
@@ -52,12 +52,13 @@ export async function insertItem(db, { source_id, title, content, summary, exter
     if (existing.rows.length > 0) return false; // skip duplicate
 
     await db.execute({
-      sql: `INSERT INTO raw_items (source_id, title, content, summary, external_url, scraped_at, is_processed, is_historical)
-            VALUES (?, ?, ?, ?, ?, ?, 0, ?)`,
-      args: [source_id, title?.substring(0, 500) ?? '', content?.substring(0, 10000) ?? '', summary?.substring(0, 1000) ?? '', external_url ?? '', scraped_at ?? new Date().toISOString(), is_historical],
+      sql: `INSERT INTO raw_items (source_id, title, content, summary, external_url, scraped_at, is_processed, is_historical, full_text, fulltext_fetched_at)
+            VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
+      args: [source_id, title?.substring(0, 500) ?? '', content?.substring(0, 10000) ?? '', summary?.substring(0, 1000) ?? '', external_url ?? '', scraped_at ?? new Date().toISOString(), is_historical, full_text ? full_text.substring(0, 200000) : null, full_text ? new Date().toISOString() : null],
     });
     return true;
   } catch (e) {
+    console.error(`[insertItem] ${title?.substring(0, 60)}: ${e.message}`);
     return null; // error
   }
 }

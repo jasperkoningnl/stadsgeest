@@ -20,8 +20,12 @@ const scrapers = [
   // Groep A — dagelijkse/uurlijkse scrapers
   'politie-amersfoort.js',        // A1: Politie RSS (daily)
   '112nu-amersfoort.js',          // A3: 112-nu P2000 RSS (hourly)
-  'officielebekendmakingen.js',   // A4: Officiële Bekendmakingen (BROKEN — col-filter unsupported, zie officielebekendmakingen-split.js)
-  'officielebekendmakingen-split.js', // A4b: OB gesplitst per type (Omgevingsvergunning, Verkeersbesluit, overig)
+  // A4/A4b: officielebekendmakingen.js en -split.js UITGESCHAKELD 24-07-2026.
+  // Het endpoint zoek.officielebekendmakingen.nl/sru/Search geeft HTTP 500 op elke query;
+  // beide draaiden sinds 4 juni leeg. Vervangen door officielebekendmakingen-repo.js,
+  // die via repository.overheid.nl draait en volledige documenttekst ophaalt.
+  // Draait als eigen PM2-job (scrape-ob) omdat de fulltext-fetch langer duurt dan
+  // de 60s-timeout van deze runner.
   'ns-verstoringen.js',           // NS verstoringen en werkzaamheden Amersfoort (AMF + AMR)
   'bluesky.js',                   // Bluesky zoekfeed + Amersfoortse accounts (daily)
   // pdok-bag.js en rechtspraak.js draaien wekelijks → run-weekly.js (aangemaakt in Groep B)
