@@ -103,7 +103,7 @@ async function scrape() {
       errors++;
     }
 
-    logResult(src.name, saved, skipped, errors);
+    await logResult(db, sourceId, src.name, saved, skipped, errors);
   }
 }
 

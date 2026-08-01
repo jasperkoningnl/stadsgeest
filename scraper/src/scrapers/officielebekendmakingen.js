@@ -161,7 +161,7 @@ async function scrape() {
     console.warn(`[OB] Niet beschikbaar: ${err.message}`);
   }
 
-  logResult('Officiële Bekendmakingen Amersfoort', saved, skipped, errors);
+  await logResult(db, sourceId, 'Officiële Bekendmakingen Amersfoort', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

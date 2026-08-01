@@ -38,7 +38,7 @@ async function scrape() {
     }
   }
 
-  logResult('NOS (Amersfoort)', saved, skipped, errors);
+  await logResult(db, sourceId, 'NOS (Amersfoort)', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

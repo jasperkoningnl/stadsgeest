@@ -48,7 +48,7 @@ async function scrape() {
     }
   }
 
-  logResult('amersfoort.nieuws.nl', saved, skipped, errors);
+  await logResult(db, sourceId, 'amersfoort.nieuws.nl', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

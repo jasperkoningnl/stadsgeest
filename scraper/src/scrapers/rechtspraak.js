@@ -159,7 +159,7 @@ async function scrape() {
     }
   }
 
-  logResult(`Rechtspraak — Amersfoort (gefilterd: ${filtered})`, saved, skipped, errors);
+  await logResult(db, sourceId, `Rechtspraak — Amersfoort (gefilterd: ${filtered})`, saved, skipped, errors);
 }
 
 scrape().catch(console.error);

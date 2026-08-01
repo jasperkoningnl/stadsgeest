@@ -134,11 +134,11 @@ async function scrapeModule(mod, sourceId) {
       }
     }
 
-    log(mod.name, stats);
+    await log(db, sourceId, mod.name, stats);
     return stats;
   } catch (err) {
     console.error(`[RAAD-API] Browser-fout bij ${mod.key}: ${err.message.substring(0, 80)}`);
-    log(mod.name, { new: 0, skipped: 0, errors: 1 });
+    await log(db, sourceId, mod.name, { new: 0, skipped: 0, errors: 1 });
     return { new: 0, skipped: 0, errors: 1 };
   }
 }

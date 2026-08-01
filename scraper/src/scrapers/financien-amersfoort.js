@@ -59,7 +59,7 @@ async function scrape() {
     }
   }
 
-  logResult('Financiën gemeente Amersfoort', saved, skipped, errors);
+  await logResult(db, sourceId, 'Financiën gemeente Amersfoort', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

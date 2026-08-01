@@ -63,7 +63,7 @@ async function scrape() {
     }
   }
 
-  logResult('ProRail nieuws', saved, skipped, errors);
+  await logResult(db, sourceId, 'ProRail nieuws', saved, skipped, errors);
 }
 
 scrape().catch(console.error);

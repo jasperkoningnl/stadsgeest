@@ -181,7 +181,7 @@ async function scrape() {
 
   // Log per type
   for (const t of [...TYPES, CATCH_ALL]) {
-    log(t.name, stats[t.key]);
+    await log(db, sourceMap[t.key], t.name, stats[t.key]);
   }
 }
 
