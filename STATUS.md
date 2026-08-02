@@ -11,7 +11,7 @@ De scheduled tasks en scrapers liggen bewust regelmatig stil om tokens te bespar
 - **stadsgeest-speurder** (analist nacht) — dagelijks 01:01 — signalen analyseren, kandidaten selecteren — laatste run: 2026-08-02 ✓ (249 open signalen doorgenomen, 3 kandidaten geselecteerd (#516, #578, #589), 4 gediscard, 9 gereviewd, opruiming 138 signalen — zie Cowork-update 2026-08-02)
 - **stadsgeest-researcher** — dagelijks 02:04 — achtergrondinfo verzamelen per kandidaat — laatste run: 2026-08-02 ✓ (2e run van de dag: 3 kandidaten opgepakt (#516, #578, #589), 2 verrijkt, 1 gediscard als verouderd (#578) — zie Cowork-update 2026-08-02, tweede researcher-run)
 - **stadsgeest-schrijver** — dagelijks 06:05 — artikelen schrijven en publiceren naar Sanity — laatste run: 2026-07-24 ✓ (4 signalen verwerkt: 3 nieuwe artikelen + 1 update, zie Cowork-update)
-- **stadsgeest-designer** — dagelijks 07:05 — afbeeldingen zoeken, homepage-indeling — laatste run: 2026-08-01 ✓ (2 artikelen kregen mainImage, verouderd top-artikel (8 dagen oud) gedowngraded en vervangen — zie Cowork-update 2026-08-01)
+- **stadsgeest-designer** — dagelijks 07:05 — afbeeldingen zoeken, homepage-indeling — laatste run: 2026-08-02 06:51 ✓ (1 artikel van beeld voorzien via kaart Vathorst/OpenStreetMap; top-artikel vers 5h, geen vervanging nodig — zie Cowork-update 2026-08-02)
 - **stadsgeest-intake-middag** — ma-vr 11:36 — intake tweede run — laatste run: 2026-06-03 09:37 ✓ — bijgewerkt 2026-06-04: historische items → status 'watching'
 - **stadsgeest-analist-middag** — ma-vr 12:02 — analyse tweede run — laatste run: 2026-06-03 10:02 ✓
 - **stadsgeest-researcher-middag** — ma-vr 12:34 — research tweede run — laatste run: 2026-06-03 10:35 ✓
@@ -380,6 +380,9 @@ Status van beide signalen ongewijzigd op 'researching' gelaten — schrijver pak
 **Opruiming:** 138 watching-signalen ouder dan 7 dagen automatisch gediscard (vrijwel allemaal rechtspraak-uitspraken en agendaregels), telkens met event en reden.
 
 **Events weggeschreven:** 154 totaal — 142 discarded (4 handmatig + 138 opruiming), 9 reviewed, 3 selected. Komt overeen met het aantal beoordeelde signalen.
+
+**Designer-run 2026-08-02 06:51 UTC:**
+Artikel "Grondexploitaties slaan om naar 6,8 miljoen verlies" voorzien van kaart Vathorst (OpenStreetMap + Leaflet + Playwright render). Alternatieve beeldzoeken (AI-illustratie, Wikimedia JPEG download) zijn gefaald; kaart is informatief en relevant. Top-artikel "Rechter houdt boete voor illegale verhuur" is 5 uur oud (vers genoeg, geen vervanging nodig). Homepage correct. [1/5 werklasten verwerkt deze run]
 
 Cowork-update: 2026-08-02
 
