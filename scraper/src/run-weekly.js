@@ -14,6 +14,7 @@ const scrapers = [
   // Groep A — wekelijkse API-scrapers
   'pdok-bag.js',                  // A7: PDOK BAG adressen en gebouwen
   'rechtspraak.js',               // A8: Rechtspraak uitspraken
+  'rvs-uitspraken.js',            // Raad van State — Amersfoort (heringeschakeld 2026-08-02, zoekpagina server-rendered)
 
   // Groep B — HTML-scrapers en wekelijkse bronnen
   'ftm-amersfoort.js',            // B1: Follow the Money (filter Amersfoort)

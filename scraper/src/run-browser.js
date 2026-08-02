@@ -17,7 +17,7 @@ const scrapers = [
   'rtvutrecht.js',              // C2: RTV Utrecht (filter Amersfoort) — fix 2026-05-28
   'raadsinformatie.js',         // C3: Raadsinformatie Amersfoort (Notubiz) — brede scraper, blijft als fallback
   'raadsinformatie-types.js',   // C3b: Raadsinformatie type-detectie op titel (vergaderingen + catch-all)
-  'raadsinformatie-api.js',    // C3c: Raadsinformatie Notubiz module-paginas per type (schriftelijke vragen, moties, RIB, ingekomen stukken)
+  // 'raadsinformatie-api.js', // UITGESCHAKELD 2026-08-02: Notubiz-modulepagina's achter Cloudflare Turnstile; vervangen door raadsinformatie-ori.js in run-all.js (ORI API)
   'nextdoor.js',                // Nextdoor buurtberichten Amersfoort (login vereist)
   'igj-nvwa.js',                // IGJ + NVWA inspectieresultaten (zoek op Amersfoort)
   'omthuis.js',                 // Omthuis woningcorporatie nieuwsberichten

@@ -31,6 +31,7 @@ const scrapers = [
   // de 60s-timeout van deze runner.
   'ns-verstoringen.js',           // NS verstoringen en werkzaamheden Amersfoort (AMF + AMR)
   'bluesky.js',                   // Bluesky zoekfeed + Amersfoortse accounts (daily)
+'raadsinformatie-ori.js',       // Raadsinformatie via Open Raadsinformatie API (2026-08-02, vervangt Notubiz-Playwright — Cloudflare)
   // pdok-bag.js en rechtspraak.js draaien wekelijks → run-weekly.js (aangemaakt in Groep B)
 ];
 
