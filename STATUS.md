@@ -1,5 +1,9 @@
 # STATUS.md — Stadsgeest 033
 
+## Meetprincipe brongezondheid (toegevoegd 2026-08-02)
+
+De scheduled tasks en scrapers liggen bewust regelmatig stil om tokens te besparen; Jasper zet ze incidenteel handmatig aan. Dagen of weken zonder nieuwe raw_items zijn dus GEEN indicatie van een kapotte bron of pipeline. Een bron geldt pas als inactief wanneer hij tijdens een actieve scrape-run 0 items oplevert terwijl vergelijkbare bronnen in diezelfde run wél leveren. Alle monitoring en analyses (bronnenwacht, heartbeat, weekreview, intake-rapportages) moeten brongezondheid daarom meten in runs, niet in kalendertijd.
+
 ## Cowork Scheduled Tasks (geverifieerd 2026-07-24)
 
 - **BELANGRIJK — alle 10 stadsgeest scheduled tasks staan op `enabled: false`** (geverifieerd via `mcp__scheduled-tasks__list_scheduled_tasks`, 2026-07-24). Deze intake-run vandaag is dus een handmatige/systeem-trigger geweest, geen automatische cron-fire — morgen om 00:40 gaat hij NIET vanzelf weer draaien tenzij Jasper de tasks heractiveert. Al sinds minstens 2026-07-13 zo (zie eerdere Cowork-update) — niet door mij aangepast, productiebeslissing.
