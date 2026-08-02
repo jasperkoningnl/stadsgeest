@@ -4,6 +4,7 @@ import { useState } from 'react'
 import {
   safeParseJsonArray,
   buildPressReleaseClipboardText,
+  BETROUWBAARHEID_META,
   type PressReleaseFact,
   type PressReleaseSource,
 } from '@/lib/dashboard/format'
@@ -19,6 +20,8 @@ export default function PersberichtView({ pressRelease: pr }: Props) {
   const facts = safeParseJsonArray<PressReleaseFact>(pr.facts)
   const questions = safeParseJsonArray<string>(pr.open_questions)
   const sources = safeParseJsonArray<PressReleaseSource>(pr.sources)
+  const isTip = pr.type === 'tip'
+  const betrouwbaarheid = pr.betrouwbaarheid ? BETROUWBAARHEID_META[pr.betrouwbaarheid] : null
 
   const handleCopy = async () => {
     try {
@@ -32,8 +35,19 @@ export default function PersberichtView({ pressRelease: pr }: Props) {
 
   return (
     <div className="dash-pr">
+      {isTip && (
+        <div className="dash-tip-banner">
+          <span>Tip voor de redactie — halfharde vondst, geen persbureaubericht</span>
+          {betrouwbaarheid && (
+            <span className="dash-pill" style={{ background: `${betrouwbaarheid.color}22`, color: betrouwbaarheid.color }}>
+              Betrouwbaarheid: {betrouwbaarheid.label}
+            </span>
+          )}
+        </div>
+      )}
+
       <button className="btn btn-primary dash-pr-copy" onClick={handleCopy} type="button">
-        {copied ? 'Gekopieerd' : 'Kopieer als platte tekst'}
+        {copied ? 'Gekopieerd' : isTip ? 'Kopieer tip als platte tekst' : 'Kopieer als platte tekst'}
       </button>
 
       {pr.headline && <h3 className="dash-pr-headline">{pr.headline}</h3>}

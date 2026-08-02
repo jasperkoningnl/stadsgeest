@@ -75,6 +75,19 @@ export const TIER_META: Record<number, { label: string; desc: string }> = {
   3: { label: 'Tier 3', desc: 'detectiebron — alleen trigger' },
 }
 
+export const SOURCE_HEALTH_META: Record<string, { label: string; color: string; desc: string }> = {
+  ok: { label: 'OK', color: '#5fd97a', desc: 'levert in lijn met verwachting' },
+  verdacht: { label: 'Verdacht', color: 'var(--amber)', desc: 'blijft leeg of faalt vaker dan gebruikelijk voor deze bron' },
+  dood: { label: 'Dood', color: 'var(--red, #c0392b)', desc: 'meerdere runs op rij leeg of foutief — waarschijnlijk gestopt of gewijzigd' },
+  uitgeschakeld: { label: 'Uitgeschakeld', color: 'var(--t3)', desc: 'bewust uitgezet, wordt niet meer gecontroleerd' },
+}
+
+export const BETROUWBAARHEID_META: Record<string, { label: string; color: string }> = {
+  hoog: { label: 'Hoog', color: '#5fd97a' },
+  middel: { label: 'Middel', color: 'var(--amber)' },
+  laag: { label: 'Laag', color: 'var(--t3)' },
+}
+
 export const DECISION_META: Record<string, { label: string; color: string }> = {
   new_signal: { label: 'Nieuw signaal', color: 'var(--accent)' },
   historical_signal: { label: 'Historisch signaal', color: 'var(--t3)' },

@@ -56,6 +56,8 @@ export default async function PersberichtDetailPage({ params }: Props) {
             sources: pressRelease.sources,
             status: pressRelease.status,
             created_at: pressRelease.created_at,
+            type: pressRelease.type,
+            betrouwbaarheid: pressRelease.betrouwbaarheid,
           }}
         />
       </div>
