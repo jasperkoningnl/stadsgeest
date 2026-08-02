@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { q, qOne, turso } from '@/lib/turso'
+import { q, qOne } from '@/lib/turso'
 import { daysSince, formatDate } from './format'
 
 // ── Vandaag ───────────────────────────────────────────────
@@ -487,33 +487,12 @@ export async function getSignalDossier(id: number) {
   }
 }
 
-// ── Persberichtqueue ──────────────────────────────────────
+// ── Persberichten ─────────────────────────────────────────
 //
-// job_requests is de wachtrij tussen dashboard en de redactieassistent (Cowork-agent
-// op de notebook, draait elk half uur): het dashboard schrijft 'queued', de assistent
-// zet 'm op 'running' en logt naar job_logs, en levert af in press_releases.
-
-export interface JobRequestRow {
-  id: number
-  type: string
-  signal_id: number
-  params: string | null
-  status: 'queued' | 'running' | 'done' | 'error' | string
-  requested_by: string | null
-  requested_at: string
-  started_at: string | null
-  finished_at: string | null
-  result_id: number | null
-  error_message: string | null
-}
-
-export interface JobLogRow {
-  id: number
-  job_id: number
-  ts: string
-  level: string | null
-  message: string
-}
+// press_releases wordt eenmaal per dag (13:00) gevuld door de redactieassistent
+// (Cowork-agent op de notebook), die maximaal drie signalen uitwerkt tot een
+// persbureaubericht. Dit dashboard is puur lezend voor deze tabel — geen knoppen,
+// geen wachtrij, geen schrijvende route.
 
 export interface PressReleaseRow {
   id: number
@@ -529,71 +508,64 @@ export interface PressReleaseRow {
   created_at: string
 }
 
-/** Meest recente job van dit type voor een signaal, ongeacht status. */
-export async function getLatestJobForSignal(signalId: number, type = 'persbericht'): Promise<JobRequestRow | null> {
-  return qOne<JobRequestRow>(
-    `SELECT * FROM job_requests WHERE signal_id = ? AND type = ? ORDER BY requested_at DESC, id DESC LIMIT 1`,
-    [signalId, type]
-  )
-}
+const EFFECTIVE_TIER_JOIN = `
+  LEFT JOIN (
+    SELECT signal_id, tier FROM (
+      SELECT si.signal_id, s.tier,
+             ROW_NUMBER() OVER (PARTITION BY si.signal_id ORDER BY s.tier ASC, s.id ASC) as rn
+      FROM signal_items si JOIN raw_items r ON r.id = si.raw_item_id JOIN sources s ON s.id = r.source_id
+    ) ranked WHERE rn = 1
+  ) eff ON eff.signal_id = pr.signal_id
+`
 
-/** Openstaande (queued/running) job van dit type voor een signaal — gebruikt om dubbele aanvragen te voorkomen. */
-export async function getOpenJobForSignal(signalId: number, type = 'persbericht'): Promise<JobRequestRow | null> {
-  return qOne<JobRequestRow>(
-    `SELECT * FROM job_requests WHERE signal_id = ? AND type = ? AND status IN ('queued','running')
-     ORDER BY requested_at DESC, id DESC LIMIT 1`,
-    [signalId, type]
-  )
-}
-
-export async function createJobRequest(signalId: number, type: string, requestedBy: string): Promise<JobRequestRow> {
-  if (!turso) throw new Error('Geen databaseverbinding')
-  const res = await turso.execute({
-    sql: `INSERT INTO job_requests (type, signal_id, status, requested_by) VALUES (?, ?, 'queued', ?)`,
-    args: [type, signalId, requestedBy],
-  })
-  const id = Number(res.lastInsertRowid)
-  const job = await qOne<JobRequestRow>(`SELECT * FROM job_requests WHERE id = ?`, [id])
-  if (!job) throw new Error('Job kon niet worden aangemaakt')
-  return job
-}
-
-export async function getJob(id: number): Promise<JobRequestRow | null> {
-  return qOne<JobRequestRow>(`SELECT * FROM job_requests WHERE id = ?`, [id])
-}
-
-export async function getJobLogs(jobId: number): Promise<JobLogRow[]> {
-  return q<JobLogRow>(`SELECT * FROM job_logs WHERE job_id = ? ORDER BY ts ASC, id ASC`, [jobId])
-}
-
-export async function getPressReleaseForJob(job: Pick<JobRequestRow, 'id' | 'result_id'>): Promise<PressReleaseRow | null> {
-  if (job.result_id) {
-    const byResult = await qOne<PressReleaseRow>(`SELECT * FROM press_releases WHERE id = ?`, [job.result_id])
-    if (byResult) return byResult
-  }
-  return qOne<PressReleaseRow>(`SELECT * FROM press_releases WHERE job_id = ? ORDER BY id DESC LIMIT 1`, [job.id])
-}
-
-export interface RecentJobRow {
-  id: number
-  signal_id: number
+export interface PressReleaseListRow extends PressReleaseRow {
   signal_title: string
-  status: string
-  requested_at: string
-  finished_at: string | null
-  result_id: number | null
+  signal_category: string | null
+  eff_tier: number | null
 }
 
-/** Openstaande jobs plus recent afgeronde (laatste 48u), voor het "Aanvragen"-blok op /dashboard. */
-export async function getRecentJobs(limit = 20): Promise<RecentJobRow[]> {
-  return q<RecentJobRow>(
-    `SELECT jr.id, jr.signal_id, sig.title as signal_title, jr.status, jr.requested_at, jr.finished_at, jr.result_id
-     FROM job_requests jr
-     JOIN signals sig ON sig.id = jr.signal_id
-     WHERE jr.status IN ('queued','running')
-        OR (jr.finished_at IS NOT NULL AND julianday('now') - julianday(REPLACE(REPLACE(jr.finished_at,'T',' '),'Z','')) <= 2)
-     ORDER BY jr.requested_at DESC
-     LIMIT ?`,
-    [limit]
+/** Alle persberichten, nieuwste eerst — voor /dashboard/persberichten. */
+export async function getPressReleasesOverview(): Promise<PressReleaseListRow[]> {
+  return q<PressReleaseListRow>(`
+    SELECT pr.*, sig.title as signal_title, sig.category as signal_category, eff.tier as eff_tier
+    FROM press_releases pr
+    JOIN signals sig ON sig.id = pr.signal_id
+    ${EFFECTIVE_TIER_JOIN}
+    ORDER BY pr.created_at DESC
+  `)
+}
+
+/** Eén persbericht met signaalcontext, voor /dashboard/persbericht/[id]. */
+export async function getPressRelease(id: number): Promise<PressReleaseListRow | null> {
+  return qOne<PressReleaseListRow>(
+    `SELECT pr.*, sig.title as signal_title, sig.category as signal_category, eff.tier as eff_tier
+     FROM press_releases pr
+     JOIN signals sig ON sig.id = pr.signal_id
+     ${EFFECTIVE_TIER_JOIN}
+     WHERE pr.id = ?`,
+    [id]
   )
+}
+
+/** Meest recente persbericht voor een signaal, indien aanwezig — voor de link op het signaaldossier. */
+export async function getLatestPressReleaseForSignal(signalId: number): Promise<{ id: number } | null> {
+  return qOne<{ id: number }>(
+    `SELECT id FROM press_releases WHERE signal_id = ? ORDER BY created_at DESC LIMIT 1`,
+    [signalId]
+  )
+}
+
+/**
+ * Persberichten van de afgelopen 24 uur, voor het blok op /dashboard — zelfde
+ * rollende-24u-definitie van "vandaag" als de rest van deze pagina (zie getFunnel24h).
+ */
+export async function getTodaysPressReleases(): Promise<PressReleaseListRow[]> {
+  return q<PressReleaseListRow>(`
+    SELECT pr.*, sig.title as signal_title, sig.category as signal_category, eff.tier as eff_tier
+    FROM press_releases pr
+    JOIN signals sig ON sig.id = pr.signal_id
+    ${EFFECTIVE_TIER_JOIN}
+    WHERE julianday(REPLACE(REPLACE(pr.created_at,'T',' '),'Z','')) >= julianday('now','-1 day')
+    ORDER BY pr.created_at DESC
+  `)
 }

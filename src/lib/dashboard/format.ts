@@ -239,14 +239,7 @@ export function parseSpeurderNote(raw: string | null | undefined): string | null
   return `beoordeeld door de speurder op ${day} ${NL_MONTHS[month - 1]}`
 }
 
-// ── Persberichtqueue ──────────────────────────────────────
-
-export const JOB_STATUS_META: Record<string, { label: string; color: string }> = {
-  queued: { label: 'In wachtrij', color: 'var(--t3)' },
-  running: { label: 'Wordt uitgewerkt', color: 'var(--amber)' },
-  done: { label: 'Klaar', color: '#5fd97a' },
-  error: { label: 'Mislukt', color: 'var(--error)' },
-}
+// ── Persberichten ─────────────────────────────────────────
 
 /**
  * Parseert JSON die door de redactieassistent is weggeschreven (facts, open_questions,
@@ -302,27 +295,36 @@ export function buildPressReleaseClipboardText(pr: PressReleaseTextFields): stri
   if (pr.lead) parts.push(pr.lead)
   if (pr.body) parts.push(pr.body)
 
+  // Let op: safeParseJsonArray geeft `[]` terug voor een geldige lege array — dat is
+  // niet hetzelfde als `null` (onparsebaar/geen array). Alleen bij `null` valt dit terug
+  // op de ruwe tekst; een geldige lege array levert gewoon geen sectie op.
   const facts = safeParseJsonArray<PressReleaseFact>(pr.facts)
-  if (facts && facts.length > 0) {
-    parts.push(
-      ['FEITEN EN BRONNEN', ...facts.map((f) => `- ${f.feit}${f.bron_naam ? ` — bron: ${f.bron_naam}` : ''}${f.bron_url ? ` (${f.bron_url})` : ''}`)].join('\n')
-    )
+  if (facts) {
+    if (facts.length > 0) {
+      parts.push(
+        ['FEITEN EN BRONNEN', ...facts.map((f) => `- ${f.feit}${f.bron_naam ? ` — bron: ${f.bron_naam}` : ''}${f.bron_url ? ` (${f.bron_url})` : ''}`)].join('\n')
+      )
+    }
   } else if (pr.facts && pr.facts.trim()) {
     parts.push(`FEITEN EN BRONNEN\n${pr.facts}`)
   }
 
   const questions = safeParseJsonArray<string>(pr.open_questions)
-  if (questions && questions.length > 0) {
-    parts.push(['OPEN VRAGEN VOOR DE REDACTIE', ...questions.map((q) => `- ${q}`)].join('\n'))
+  if (questions) {
+    if (questions.length > 0) {
+      parts.push(['OPEN VRAGEN VOOR DE REDACTIE', ...questions.map((q) => `- ${q}`)].join('\n'))
+    }
   } else if (pr.open_questions && pr.open_questions.trim()) {
     parts.push(`OPEN VRAGEN VOOR DE REDACTIE\n${pr.open_questions}`)
   }
 
   const sources = safeParseJsonArray<PressReleaseSource>(pr.sources)
-  if (sources && sources.length > 0) {
-    parts.push(
-      ['BRONNEN', ...sources.map((s) => `- ${s.naam}${s.tier ? ` (T${s.tier})` : ''}${s.url ? ` — ${s.url}` : ''}`)].join('\n')
-    )
+  if (sources) {
+    if (sources.length > 0) {
+      parts.push(
+        ['BRONNEN', ...sources.map((s) => `- ${s.naam}${s.tier ? ` (T${s.tier})` : ''}${s.url ? ` — ${s.url}` : ''}`)].join('\n')
+      )
+    }
   } else if (pr.sources && pr.sources.trim()) {
     parts.push(`BRONNEN\n${pr.sources}`)
   }

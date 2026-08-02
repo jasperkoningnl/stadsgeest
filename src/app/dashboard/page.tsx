@@ -6,9 +6,9 @@ import {
   getLatestSignals,
   getLatestPublishedArticles,
   getAttentionPoints,
-  getRecentJobs,
+  getTodaysPressReleases,
 } from '@/lib/dashboard/queries'
-import { formatDate, formatRelative, formatTime, SIGNAL_STATUS_META, JOB_STATUS_META } from '@/lib/dashboard/format'
+import { formatDate, formatRelative, SIGNAL_STATUS_META, TIER_META } from '@/lib/dashboard/format'
 import NoDatabase from './NoDatabase'
 
 export const revalidate = 30
@@ -18,18 +18,37 @@ export default async function DashboardVandaagPage() {
     return <NoDatabase />
   }
 
-  const [funnel, opbrengst, latestSignals, latestArticles, attentionPoints, recentJobs] = await Promise.all([
+  const [funnel, opbrengst, latestSignals, latestArticles, attentionPoints, todaysPressReleases] = await Promise.all([
     getFunnel24h(),
     getOpbrengstTotals(),
     getLatestSignals(6),
     getLatestPublishedArticles(6),
     getAttentionPoints(),
-    getRecentJobs(),
+    getTodaysPressReleases(),
   ])
 
   return (
     <div>
-      <div className="dash-funnel mt8">
+      {todaysPressReleases.length > 0 && (
+        <div className="dash-card mt8">
+          <div className="dash-card-title">Persberichten van vandaag</div>
+          <div className="dash-pr-list dash-pr-list-compact">
+            {todaysPressReleases.map((r) => (
+              <Link key={r.id} href={`/dashboard/persbericht/${r.id}`} className="dash-pr-card">
+                <div className="dash-pr-card-headline">{r.headline || r.signal_title}</div>
+                <div className="dash-pr-card-tags">
+                  {r.eff_tier ? (
+                    <span className="dash-tier-pill" title={TIER_META[r.eff_tier]?.desc}>T{r.eff_tier}</span>
+                  ) : null}
+                  <span className="dash-pr-card-category">{r.signal_category || 'Geen categorie'}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className={`dash-funnel ${todaysPressReleases.length > 0 ? 'mt24' : 'mt8'}`}>
         <div className="dash-funnel-step">
           <div className="dash-funnel-num">{funnel.itemsScraped}</div>
           <div className="dash-funnel-label">Items gescraped (24u)</div>
@@ -118,33 +137,6 @@ export default async function DashboardVandaagPage() {
                 <span className="dash-attn-label">
                   {p.href ? <Link href={p.href} style={{ color: 'inherit' }}>{p.label}</Link> : p.label}
                   <span style={{ display: 'block', fontSize: 12.5, color: 'var(--t3)', marginTop: 2 }}>{p.detail}</span>
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {recentJobs.length > 0 && (
-        <div className="dash-card mt24">
-          <div className="dash-card-title">Aanvragen</div>
-          <div>
-            {recentJobs.map((j) => (
-              <div key={j.id} className="dash-run-row">
-                <span className="dash-run-main">
-                  <Link href={`/dashboard/signaal/${j.signal_id}`} className="dash-run-label" style={{ color: 'inherit' }}>
-                    {j.signal_title}
-                  </Link>
-                  <span className="dash-run-meta">Aangevraagd om {formatTime(j.requested_at)}</span>
-                </span>
-                <span className="dash-run-outcome">
-                  {j.status === 'done' ? (
-                    <Link href={`/dashboard/signaal/${j.signal_id}`} style={{ color: 'var(--accent)' }}>
-                      {JOB_STATUS_META.done.label} →
-                    </Link>
-                  ) : (
-                    JOB_STATUS_META[j.status]?.label || j.status
-                  )}
                 </span>
               </div>
             ))}
