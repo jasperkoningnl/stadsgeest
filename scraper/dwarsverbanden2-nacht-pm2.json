@@ -1,0 +1,21 @@
+{
+  "script": "src\\dwarsverbanden2.cjs",
+  "name": "dwarsverbanden2-nacht",
+  "filter_env": [],
+  "namespace": "default",
+  "env": {},
+  "cron_restart": "15 1 * * *",
+  "merge_logs": true,
+  "vizion": true,
+  "autostart": true,
+  "autorestart": false,
+  "watch": false,
+  "instance_var": "NODE_APP_INSTANCE",
+  "pmx": true,
+  "automation": true,
+  "treekill": true,
+  "username": "Jasper Koning",
+  "windowsHide": true,
+  "kill_retry_time": 100,
+  "write": true
+}
