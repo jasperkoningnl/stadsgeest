@@ -1,6 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { q, qOne } from '@/lib/turso'
-import { daysSince, formatDate } from './format'
+import { daysSince, formatDate, parseBriefing } from './format'
+
+// ── Schema-introspectie (defensief tegen ontbrekende kolommen/tabellen) ──
+//
+// Sommige kolommen (sources.health, press_releases.type) en tabelinhoud
+// (signals.crossref_briefing) zijn recent of stapsgewijs toegevoegd door de
+// scraper-kant. PRAGMA table_info geeft een lege set terug voor een
+// niet-bestaande tabel (geen fout), dus dit dient ook als bestaan-check.
+async function getTableColumns(table: string): Promise<Set<string>> {
+  const rows = await q<{ name: string }>(`PRAGMA table_info(${table})`)
+  return new Set(rows.map((r) => r.name))
+}
 
 // ── Vandaag ───────────────────────────────────────────────
 
@@ -201,6 +212,12 @@ export interface SourceRow {
   lastErrorMessage: string | null
   daysSinceLast: number | null
   healthStatus: 'green' | 'grey' | 'red'
+  /** sources.health — door bronnenwacht.cjs bepaald op basis van de laatste gelogde runs, nooit op kalenderdagen. null als de kolom nog niet bestaat. */
+  health: 'ok' | 'verdacht' | 'dood' | 'uitgeschakeld' | null
+  healthNote: string | null
+  lastHealthCheckAt: string | null
+  /** Resultaat van de laatste gelogde run uit scrape_runs, ongeacht of die goed ging. */
+  lastRun: { itemsFound: number | null; status: string | null; startedAt: string | null } | null
 }
 
 export interface TierAggregate {
@@ -245,11 +262,21 @@ export async function getTierAggregates(): Promise<TierAggregate[]> {
   }))
 }
 
-export async function getSourcesOverview(): Promise<SourceRow[]> {
+export interface SourcesOverview {
+  rows: SourceRow[]
+  /** true als sources.health bestaat — bepaalt of de gezondheidsbadge getoond wordt. */
+  healthTracked: boolean
+}
+
+export async function getSourcesOverview(): Promise<SourcesOverview> {
+  const sourceCols = await getTableColumns('sources')
+  const healthTracked = sourceCols.has('health')
+
   const [sources, errorsBySource, publishedBySource, topSignalRows] = await Promise.all([
     q<any>(`
       SELECT
         s.id, s.name, s.url, s.tier, s.source_type,
+        ${healthTracked ? 's.health, s.health_note, s.last_health_check,' : ''}
         MAX(REPLACE(REPLACE(r.scraped_at,'T',' '),'Z','')) as last_item_at,
         COUNT(DISTINCT CASE WHEN julianday(r.scraped_at) >= julianday('now','-7 days') THEN r.id END) as items_7d,
         COUNT(DISTINCT CASE WHEN julianday(r.scraped_at) >= julianday('now','-30 days') THEN r.id END) as items_30d,
@@ -262,7 +289,7 @@ export async function getSourcesOverview(): Promise<SourceRow[]> {
       ORDER BY s.name ASC
     `),
     q<any>(`
-      SELECT source_id, status, error_message, started_at
+      SELECT source_id, status, error_message, items_found, started_at
       FROM scrape_runs
       WHERE source_id IS NOT NULL
       ORDER BY started_at DESC
@@ -302,7 +329,7 @@ export async function getSourcesOverview(): Promise<SourceRow[]> {
     topSignalsBySource.get(r.source_id)!.push({ id: r.signal_id, title: r.title })
   }
 
-  return sources.map((s): SourceRow => {
+  const rows = sources.map((s): SourceRow => {
     const latest = latestBySource.get(s.id)
     const daysAgo = daysSince(s.last_item_at)
     const hadError = latest && (latest.status === 'error' || latest.status === 'timeout')
@@ -328,8 +355,14 @@ export async function getSourcesOverview(): Promise<SourceRow[]> {
       lastErrorMessage: latest?.error_message ?? null,
       daysSinceLast: daysAgo,
       healthStatus,
+      health: healthTracked ? (s.health ?? 'ok') : null,
+      healthNote: healthTracked ? (s.health_note ?? null) : null,
+      lastHealthCheckAt: healthTracked ? (s.last_health_check ?? null) : null,
+      lastRun: latest ? { itemsFound: latest.items_found ?? null, status: latest.status ?? null, startedAt: latest.started_at ?? null } : null,
     }
   })
+
+  return { rows, healthTracked }
 }
 
 // ── Intake ────────────────────────────────────────────────
@@ -506,6 +539,10 @@ export interface PressReleaseRow {
   sources: string | null
   status: string | null
   created_at: string
+  /** 'persbericht' (default) of 'tip' — kolom toegevoegd P5, kan ontbreken op oudere rijen/databases. */
+  type: 'persbericht' | 'tip' | null
+  /** 'laag' | 'middel' | 'hoog' — verplicht bij tips, optioneel bij persberichten. */
+  betrouwbaarheid: 'laag' | 'middel' | 'hoog' | null
 }
 
 const EFFECTIVE_TIER_JOIN = `
@@ -568,4 +605,150 @@ export async function getTodaysPressReleases(): Promise<PressReleaseListRow[]> {
     WHERE julianday(REPLACE(REPLACE(pr.created_at,'T',' '),'Z','')) >= julianday('now','-1 day')
     ORDER BY pr.created_at DESC
   `)
+}
+
+// ── Dwarsverbanden ────────────────────────────────────────
+//
+// Twee bronnen voor hetzelfde soort signaal: (1) signalen die de speurder
+// zelf als LABEL: DWARSVERBAND markeert in de briefingtekst (zelfde
+// conventie als LABEL: WEEKANALYSE, zie parseBriefing), en (2) losse
+// detecties die dwarsverbanden2.cjs (KRUISBRON/STAPELING/SUBSIDIE/
+// ROLCONFLICT) in signals.crossref_briefing schrijft — één regel per
+// detectie, cumulatief aangevuld, format:
+// "[DET | betrouwbaarheid: X] entiteit: info. Journalistieke vraag: Y".
+// item_ids van een detectie worden niet bewaard, dus "betrokken
+// documenten/bronklassen" wordt hier afgeleid van de bronnen die aan het
+// gekoppelde signaal hangen (signal_items → raw_items → sources).
+
+export interface DwarsverbandItem {
+  kind: 'label' | 'detectie'
+  signalId: number
+  signalTitle: string
+  signalStatus: string
+  /** KRUISBRON | STAPELING | SUBSIDIE | ROLCONFLICT — alleen bij kind 'detectie' met herkend format. */
+  detector: string | null
+  entity: string | null
+  betrouwbaarheid: 'laag' | 'middel' | 'hoog' | null
+  info: string
+  vraag: string | null
+  bronKlassen: string[]
+  entities: string[]
+  lastSeenAt: string
+}
+
+const BETROUWBAARHEID_RANK: Record<string, number> = { hoog: 3, middel: 2, laag: 1 }
+const DETECTION_HEADER_RE = /^\[([A-Z]+)\s*\|\s*betrouwbaarheid:\s*(laag|middel|hoog)\]\s*(.+)$/i
+
+function parseCrossrefLine(line: string): { detector: string | null; entity: string | null; betrouwbaarheid: 'laag' | 'middel' | 'hoog' | null; info: string; vraag: string | null } {
+  const header = DETECTION_HEADER_RE.exec(line.trim())
+  if (!header) return { detector: null, entity: null, betrouwbaarheid: null, info: line.trim(), vraag: null }
+
+  const [, detector, betrouwbaarheid, rest] = header
+  const colonIdx = rest.indexOf(': ')
+  const entity = colonIdx >= 0 ? rest.slice(0, colonIdx).trim() : null
+  const remainder = colonIdx >= 0 ? rest.slice(colonIdx + 2) : rest
+
+  const vraagMarker = 'Journalistieke vraag:'
+  const vraagIdx = remainder.indexOf(vraagMarker)
+  const info = (vraagIdx >= 0 ? remainder.slice(0, vraagIdx) : remainder).replace(/\.\s*$/, '').trim()
+  const vraag = vraagIdx >= 0 ? remainder.slice(vraagIdx + vraagMarker.length).trim() : null
+
+  return { detector: detector.toUpperCase(), entity, betrouwbaarheid: betrouwbaarheid.toLowerCase() as 'laag' | 'middel' | 'hoog', info, vraag }
+}
+
+/**
+ * Overzicht voor /dashboard/dwarsverbanden. Geeft supported: false terug als
+ * signals.crossref_briefing nog niet bestaat op deze database — de pagina
+ * verbergt de feature dan in plaats van te crashen.
+ */
+export async function getDwarsverbanden(): Promise<{ items: DwarsverbandItem[]; supported: boolean }> {
+  const signalCols = await getTableColumns('signals')
+  if (!signalCols.has('crossref_briefing')) return { items: [], supported: false }
+
+  const rows = await q<any>(`
+    SELECT id, title, status, summary, crossref_briefing, last_seen_at
+    FROM signals
+    WHERE crossref_briefing IS NOT NULL OR summary LIKE '%DWARSVERBAND%'
+  `)
+  if (rows.length === 0) return { items: [], supported: true }
+
+  const ids = rows.map((r: any) => r.id)
+  const placeholders = ids.map(() => '?').join(',')
+
+  const [bronRows, entityRows] = await Promise.all([
+    q<any>(
+      `SELECT DISTINCT si.signal_id, s.name as source_name, s.category
+       FROM signal_items si JOIN raw_items r ON r.id = si.raw_item_id JOIN sources s ON s.id = r.source_id
+       WHERE si.signal_id IN (${placeholders})`,
+      ids
+    ),
+    q<any>(
+      `SELECT DISTINCT es.signal_id, e.name
+       FROM entity_signals es JOIN entities e ON e.id = es.entity_id
+       WHERE es.signal_id IN (${placeholders})`,
+      ids
+    ),
+  ])
+
+  const bronBySignal = new Map<number, Set<string>>()
+  for (const r of bronRows) {
+    if (!bronBySignal.has(r.signal_id)) bronBySignal.set(r.signal_id, new Set())
+    bronBySignal.get(r.signal_id)!.add(r.category || r.source_name)
+  }
+  const entitiesBySignal = new Map<number, Set<string>>()
+  for (const r of entityRows) {
+    if (!entitiesBySignal.has(r.signal_id)) entitiesBySignal.set(r.signal_id, new Set())
+    entitiesBySignal.get(r.signal_id)!.add(r.name)
+  }
+
+  const items: DwarsverbandItem[] = []
+
+  for (const r of rows) {
+    const bronKlassen = Array.from(bronBySignal.get(r.id) ?? [])
+    const entities = Array.from(entitiesBySignal.get(r.id) ?? [])
+
+    if (r.crossref_briefing) {
+      const lines = String(r.crossref_briefing).split('\n').map((l: string) => l.trim()).filter(Boolean)
+      for (const line of lines) {
+        const parsed = parseCrossrefLine(line)
+        items.push({
+          kind: 'detectie',
+          signalId: r.id,
+          signalTitle: r.title,
+          signalStatus: r.status,
+          bronKlassen,
+          entities,
+          lastSeenAt: r.last_seen_at,
+          ...parsed,
+        })
+      }
+    }
+
+    const hasDwarsLabel = parseBriefing(r.summary).tags.some((t) => /^label:/i.test(t.key) && /dwarsverband/i.test(t.label))
+    if (hasDwarsLabel) {
+      items.push({
+        kind: 'label',
+        signalId: r.id,
+        signalTitle: r.title,
+        signalStatus: r.status,
+        detector: null,
+        entity: entities[0] ?? null,
+        betrouwbaarheid: null,
+        info: 'Door de speurder gelabeld als dwarsverband.',
+        vraag: null,
+        bronKlassen,
+        entities,
+        lastSeenAt: r.last_seen_at,
+      })
+    }
+  }
+
+  items.sort((a, b) => {
+    const rankA = a.betrouwbaarheid ? BETROUWBAARHEID_RANK[a.betrouwbaarheid] : 0
+    const rankB = b.betrouwbaarheid ? BETROUWBAARHEID_RANK[b.betrouwbaarheid] : 0
+    if (rankA !== rankB) return rankB - rankA
+    return (b.lastSeenAt || '').localeCompare(a.lastSeenAt || '')
+  })
+
+  return { items, supported: true }
 }

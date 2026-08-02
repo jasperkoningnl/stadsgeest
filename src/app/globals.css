@@ -1046,3 +1046,37 @@ a.dash-pr-fact-source:hover { text-decoration: underline; }
 .dash-pr-sources li { display: flex; gap: 8px; align-items: center; font-size: 13.5px; }
 .dash-pr-sources a { color: var(--accent); text-decoration: none; }
 .dash-pr-sources a:hover { text-decoration: underline; }
+
+/* Tips voor de redactie — visueel apart van persbureauberichten (/dashboard/persberichten, detail) */
+.dash-tip-section-title {
+  font-family: var(--f-d); font-weight: 800; font-size: 18px; letter-spacing: -0.01em;
+  color: var(--amber); margin-bottom: 6px;
+}
+.dash-pr-card-tip { border-style: dashed; border-color: var(--amber); background: var(--amber-dim); }
+.dash-pr-card-tip:hover { border-color: var(--amber); background: var(--amber-container, var(--amber-dim)); }
+.dash-pr-card-tip .dash-pr-card-headline { color: var(--t1); }
+.dash-tip-banner {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  border: 1px dashed var(--amber); background: var(--amber-dim); border-radius: var(--r-lg);
+  padding: 10px 14px; font-size: 13.5px; color: var(--t1); font-weight: 500;
+}
+
+/* Dwarsverbanden (/dashboard/dwarsverbanden) */
+.dash-dwars-list { display: flex; flex-direction: column; gap: 14px; }
+.dash-dwars-card { border: 1px solid var(--border); border-radius: var(--r-xl); padding: 16px 18px; }
+.dash-dwars-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.dash-dwars-card-badges { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.dash-dwars-card-date { font-family: var(--f-m); font-size: 11.5px; color: var(--t3); white-space: nowrap; }
+.dash-dwars-entity { font-family: var(--f-d); font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+.dash-dwars-info { font-size: 14px; color: var(--t2); line-height: 1.55; margin-bottom: 8px; }
+.dash-dwars-vraag {
+  font-size: 13.5px; color: var(--t1); line-height: 1.55; margin-bottom: 8px;
+  border-left: 2px solid var(--accent); padding-left: 12px;
+}
+.dash-dwars-card-footer {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-s);
+}
+.dash-dwars-signal-link { font-size: 13.5px; color: var(--accent); text-decoration: none; }
+.dash-dwars-signal-link:hover { text-decoration: underline; }
+.dash-dwars-card-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }

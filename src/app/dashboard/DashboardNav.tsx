@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/bronnen', label: 'Bronnen' },
   { href: '/dashboard/intake', label: 'Intake' },
   { href: '/dashboard/signalen', label: 'Signalen' },
+  { href: '/dashboard/dwarsverbanden', label: 'Dwarsverbanden' },
 ]
 
 export default function DashboardNav() {

@@ -2,7 +2,7 @@ import { Fragment } from 'react'
 import Link from 'next/link'
 import { hasTurso } from '@/lib/turso'
 import { getSourcesOverview, getTierAggregates, type SourceRow } from '@/lib/dashboard/queries'
-import { formatDate } from '@/lib/dashboard/format'
+import { formatDate, SOURCE_HEALTH_META } from '@/lib/dashboard/format'
 import NoDatabase from '../NoDatabase'
 
 export const revalidate = 30
@@ -22,11 +22,36 @@ const TIER_INTRO: Record<number, { title: string; body: string }> = {
   },
 }
 
+function HealthBadge({ source }: { source: SourceRow }) {
+  if (!source.health) return null
+  const meta = SOURCE_HEALTH_META[source.health] ?? { label: source.health, color: 'var(--t3)', desc: '' }
+  const title = source.healthNote ? `${meta.desc ? `${meta.desc} — ` : ''}${source.healthNote}` : meta.desc
+  return (
+    <span className="dash-pill" style={{ background: `${meta.color}22`, color: meta.color }} title={title || undefined}>
+      {meta.label}
+    </span>
+  )
+}
+
+function LastRunCell({ source }: { source: SourceRow }) {
+  if (!source.lastRun) return <span style={{ color: 'var(--t3)' }}>nog geen run gelogd</span>
+  const { itemsFound, status, startedAt } = source.lastRun
+  const failed = status === 'error' || status === 'timeout'
+  return (
+    <div style={{ fontSize: 12.5 }}>
+      <div style={{ color: failed ? 'var(--red, #c0392b)' : 'var(--t1)' }}>
+        {itemsFound ?? 0} item{itemsFound === 1 ? '' : 's'}{status ? ` · ${status}` : ''}
+      </div>
+      <div style={{ color: 'var(--t3)' }}>{formatDate(startedAt)}</div>
+    </div>
+  )
+}
+
 function SourceProof({ source, defaultOpen }: { source: SourceRow; defaultOpen: boolean }) {
   if (source.topSignals.length === 0) return null
   return (
     <tr>
-      <td colSpan={7} style={{ padding: 0, borderBottom: '1px solid var(--border-s)' }}>
+      <td colSpan={8} style={{ padding: 0, borderBottom: '1px solid var(--border-s)' }}>
         <details open={defaultOpen} style={{ padding: '0 14px 12px' }}>
           <summary style={{ cursor: 'pointer', fontSize: 12.5, color: 'var(--t3)', padding: '4px 0' }}>
             Laatste signalen uit deze bron
@@ -74,7 +99,8 @@ function TierSection({ tier, aggregate, sources }: { tier: number; aggregate: { 
                 <th>Items totaal</th>
                 <th>Signalen</th>
                 <th>Gepubliceerd</th>
-                <th>Status</th>
+                <th>Gezondheid</th>
+                <th>Laatste run</th>
               </tr>
             </thead>
             <tbody>
@@ -92,15 +118,8 @@ function TierSection({ tier, aggregate, sources }: { tier: number; aggregate: { 
                     <td>{s.itemsTotal}</td>
                     <td>{s.signalCount}</td>
                     <td>{s.publishedCount}</td>
-                    <td style={{ maxWidth: 260, fontSize: 12.5 }}>
-                      {s.lastErrorStatus === 'error' || s.lastErrorStatus === 'timeout' ? (
-                        <span style={{ color: 'var(--red, #c0392b)' }}>
-                          {s.lastErrorMessage || `laatste run: ${s.lastErrorStatus}`}
-                        </span>
-                      ) : (
-                        '—'
-                      )}
-                    </td>
+                    <td><HealthBadge source={s} /></td>
+                    <td style={{ maxWidth: 220 }}><LastRunCell source={s} /></td>
                   </tr>
                   <SourceProof source={s} defaultOpen={i < 3} />
                 </Fragment>
@@ -116,7 +135,7 @@ function TierSection({ tier, aggregate, sources }: { tier: number; aggregate: { 
 export default async function BronnenPage() {
   if (!hasTurso()) return <NoDatabase />
 
-  const [allSources, aggregates] = await Promise.all([getSourcesOverview(), getTierAggregates()])
+  const [{ rows: allSources }, aggregates] = await Promise.all([getSourcesOverview(), getTierAggregates()])
 
   const producing = allSources.filter((s) => s.signalCount > 0)
   const noYield = allSources
@@ -152,8 +171,8 @@ export default async function BronnenPage() {
                 <th>Tier</th>
                 <th>Type</th>
                 <th>Items totaal</th>
-                <th>Laatste item</th>
-                <th>Reden (voor zover bekend)</th>
+                <th>Gezondheid</th>
+                <th>Laatste run</th>
               </tr>
             </thead>
             <tbody>
@@ -168,8 +187,8 @@ export default async function BronnenPage() {
                   <td>{s.tier ? `T${s.tier}` : '—'}</td>
                   <td>{s.sourceType || '—'}</td>
                   <td>{s.itemsTotal}</td>
-                  <td>{s.lastItemAt ? formatDate(s.lastItemAt) : 'nooit'}</td>
-                  <td style={{ maxWidth: 300, fontSize: 12.5, color: 'var(--t2)' }}>{s.lastErrorMessage || '—'}</td>
+                  <td><HealthBadge source={s} /></td>
+                  <td style={{ maxWidth: 220 }}><LastRunCell source={s} /></td>
                 </tr>
               ))}
             </tbody>
