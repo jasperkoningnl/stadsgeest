@@ -50,8 +50,9 @@ const FREQUENCY_LABEL: Record<string, string> = { hourly: 'ieder uur ververste',
 export async function getAttentionPoints(): Promise<AttentionPoint[]> {
   const [staleRows, failed] = await Promise.all([
     q<any>(`
-      SELECT s.name, s.tier, s.scrape_frequency, MAX(r.scraped_at) as last_at,
-             julianday('now') - julianday(MAX(r.scraped_at)) as days_ago
+      SELECT s.name, s.tier, s.scrape_frequency,
+             MAX(REPLACE(REPLACE(r.scraped_at,'T',' '),'Z','')) as last_at,
+             julianday('now') - julianday(MAX(REPLACE(REPLACE(r.scraped_at,'T',' '),'Z',''))) as days_ago
       FROM sources s JOIN raw_items r ON r.source_id = s.id
       GROUP BY s.id
       HAVING COUNT(r.id) >= 2
@@ -249,7 +250,7 @@ export async function getSourcesOverview(): Promise<SourceRow[]> {
     q<any>(`
       SELECT
         s.id, s.name, s.url, s.tier, s.source_type,
-        MAX(r.scraped_at) as last_item_at,
+        MAX(REPLACE(REPLACE(r.scraped_at,'T',' '),'Z','')) as last_item_at,
         COUNT(DISTINCT CASE WHEN julianday(r.scraped_at) >= julianday('now','-7 days') THEN r.id END) as items_7d,
         COUNT(DISTINCT CASE WHEN julianday(r.scraped_at) >= julianday('now','-30 days') THEN r.id END) as items_30d,
         COUNT(DISTINCT r.id) as items_total,
@@ -443,7 +444,7 @@ export async function getSignalDossier(id: number) {
     q<any>(
       `SELECT r.id, r.title, r.external_url, r.scraped_at, s.name as source_name, s.tier
        FROM signal_items si JOIN raw_items r ON r.id = si.raw_item_id JOIN sources s ON s.id = r.source_id
-       WHERE si.signal_id = ? ORDER BY r.scraped_at DESC`,
+       WHERE si.signal_id = ? ORDER BY REPLACE(REPLACE(r.scraped_at,'T',' '),'Z','') DESC`,
       [id]
     ),
     q<any>(
@@ -484,4 +485,87 @@ export async function getSignalDossier(id: number) {
     decisions,
     article,
   }
+}
+
+// ── Persberichten ─────────────────────────────────────────
+//
+// press_releases wordt eenmaal per dag (13:00) gevuld door de redactieassistent
+// (Cowork-agent op de notebook), die maximaal drie signalen uitwerkt tot een
+// persbureaubericht. Dit dashboard is puur lezend voor deze tabel — geen knoppen,
+// geen wachtrij, geen schrijvende route.
+
+export interface PressReleaseRow {
+  id: number
+  signal_id: number
+  job_id: number | null
+  headline: string | null
+  lead: string | null
+  body: string | null
+  facts: string | null
+  open_questions: string | null
+  sources: string | null
+  status: string | null
+  created_at: string
+}
+
+const EFFECTIVE_TIER_JOIN = `
+  LEFT JOIN (
+    SELECT signal_id, tier FROM (
+      SELECT si.signal_id, s.tier,
+             ROW_NUMBER() OVER (PARTITION BY si.signal_id ORDER BY s.tier ASC, s.id ASC) as rn
+      FROM signal_items si JOIN raw_items r ON r.id = si.raw_item_id JOIN sources s ON s.id = r.source_id
+    ) ranked WHERE rn = 1
+  ) eff ON eff.signal_id = pr.signal_id
+`
+
+export interface PressReleaseListRow extends PressReleaseRow {
+  signal_title: string
+  signal_category: string | null
+  eff_tier: number | null
+}
+
+/** Alle persberichten, nieuwste eerst — voor /dashboard/persberichten. */
+export async function getPressReleasesOverview(): Promise<PressReleaseListRow[]> {
+  return q<PressReleaseListRow>(`
+    SELECT pr.*, sig.title as signal_title, sig.category as signal_category, eff.tier as eff_tier
+    FROM press_releases pr
+    JOIN signals sig ON sig.id = pr.signal_id
+    ${EFFECTIVE_TIER_JOIN}
+    ORDER BY pr.created_at DESC
+  `)
+}
+
+/** Eén persbericht met signaalcontext, voor /dashboard/persbericht/[id]. */
+export async function getPressRelease(id: number): Promise<PressReleaseListRow | null> {
+  return qOne<PressReleaseListRow>(
+    `SELECT pr.*, sig.title as signal_title, sig.category as signal_category, eff.tier as eff_tier
+     FROM press_releases pr
+     JOIN signals sig ON sig.id = pr.signal_id
+     ${EFFECTIVE_TIER_JOIN}
+     WHERE pr.id = ?`,
+    [id]
+  )
+}
+
+/** Meest recente persbericht voor een signaal, indien aanwezig — voor de link op het signaaldossier. */
+export async function getLatestPressReleaseForSignal(signalId: number): Promise<{ id: number } | null> {
+  return qOne<{ id: number }>(
+    `SELECT id FROM press_releases WHERE signal_id = ? ORDER BY created_at DESC LIMIT 1`,
+    [signalId]
+  )
+}
+
+/**
+ * Persberichten van de afgelopen 24 uur, voor het blok op /dashboard — zelfde
+ * rollende-24u-definitie van "vandaag" als de rest van deze pagina (zie getFunnel24h).
+ */
+export async function getTodaysPressReleases(): Promise<PressReleaseListRow[]> {
+  return q<PressReleaseListRow>(`
+    SELECT pr.*, sig.title as signal_title, sig.category as signal_category, eff.tier as eff_tier
+    FROM press_releases pr
+    JOIN signals sig ON sig.id = pr.signal_id
+    ${EFFECTIVE_TIER_JOIN}
+    WHERE julianday(REPLACE(REPLACE(pr.created_at,'T',' '),'Z','')) >= julianday('now','-1 day')
+    ORDER BY pr.created_at DESC
+  `)
 }

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { hasTurso } from '@/lib/turso'
 import { client } from '@/lib/sanity'
-import { getSignalDossier } from '@/lib/dashboard/queries'
+import { getSignalDossier, getLatestPressReleaseForSignal } from '@/lib/dashboard/queries'
 import {
   formatDate,
   formatDateTime,
@@ -39,6 +39,7 @@ export default async function SignaalDossierPage({ params }: Props) {
 
   const { signal, effectiveTier, effectiveSource, rawItems, entitiesByType, events, article } = dossier
   const briefing = parseBriefing(signal.summary)
+  const pressRelease = await getLatestPressReleaseForSignal(id)
 
   let articleSlug: string | null = null
   if (article) {
@@ -170,6 +171,15 @@ export default async function SignaalDossierPage({ params }: Props) {
           </div>
 
           <div>
+            {pressRelease && (
+              <div className="sidebar-box">
+                <div className="sidebar-title">Persbericht</div>
+                <Link href={`/dashboard/persbericht/${pressRelease.id}`} style={{ color: 'var(--accent)', fontSize: 14 }}>
+                  Bekijk persbericht →
+                </Link>
+              </div>
+            )}
+
             <div className="sidebar-box">
               <div className="sidebar-title">Status</div>
               <span className="dash-pill" style={{ background: `${statusMeta?.color || 'var(--t3)'}22`, color: statusMeta?.color || 'var(--t3)' }}>

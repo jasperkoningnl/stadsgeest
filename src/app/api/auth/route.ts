@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createHash } from 'crypto'
+import { AUTH_COOKIE, AUTH_TOKEN } from '@/lib/dashboardAuth'
 
-const AUTH_COOKIE = 'sg_auth'
-const PASSWORD_HASH = 'f28d5b97fc847044a60e7d675cf6dfd83e329c4b52224825ce9d1142b62f6252'
 const ONE_YEAR = 365 * 24 * 60 * 60
 
 export async function POST(request: Request) {
@@ -12,7 +11,7 @@ export async function POST(request: Request) {
 
   const hash = createHash('sha256').update(password).digest('hex')
 
-  if (hash !== PASSWORD_HASH) {
+  if (hash !== AUTH_TOKEN) {
     const url = new URL('/login', request.url)
     url.searchParams.set('error', '1')
     if (from !== '/') url.searchParams.set('from', from)
@@ -22,7 +21,7 @@ export async function POST(request: Request) {
   const destination = new URL(from.startsWith('/') ? from : '/', request.url)
   const response = NextResponse.redirect(destination, { status: 303 })
 
-  response.cookies.set(AUTH_COOKIE, PASSWORD_HASH, {
+  response.cookies.set(AUTH_COOKIE, AUTH_TOKEN, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
