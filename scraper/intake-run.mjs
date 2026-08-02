@@ -42,6 +42,10 @@ function matchScore(item, signal) {
   for (const t of itemTokens) {
     if (sigTokens.has(t)) common++;
   }
+  // Fix 2026-08-02 (n.a.v. #587: agendapunt gekoppeld aan motorrace-vergunning):
+  // bij dunne titels/items is 2 gedeelde woorden te zwak — eis dan 3.
+  const dun = sigTokens.size < 6 || itemTokens.size < 6;
+  if (dun && common < 3) return 0;
   return common;
 }
 
