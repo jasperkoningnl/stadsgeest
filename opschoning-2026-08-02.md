@@ -1,0 +1,914 @@
+# Opschoning P9 — 2026-08-02
+
+
+## #98 [discarded] "Rekenkamer Amersfoort: IT-investeringen en fraudebestrijding bijstand" — 349 items, 0 behouden, 349 losgekoppeld
+- los: item 1822 :: Rekenkamerrapport IT-investeringen (PDF - 682.01 kB)
+- los: item 1823 :: Persbericht afronding rekenkameronderzoek IT-investeringen en rekenkameronderzoek fraudebe
+- los: item 1824 :: Rekenkamerrapport fraudebestrijding bijstandsuitkeringen (PDF - 598.93 kB)
+- los: item 1825 :: bestuurlijke reactie rekenkameronderzoek fraudebestrijding bijstandsuitkeringen (PDF - 162
+- los: item 1826 :: bestuurlijke reactie op rekenkameronderzoek IT-investeringen (PDF - 330.81 kB)
+- los: item 1896 :: Verhuurder vordert een verklaring voor recht dat het beroep van de huurder op huurbescherm
+- los: item 1898 :: De werknemer is bij de werkgever in dienst als leerkracht. De werkgever heeft per 10 febru
+- los: item 1900 :: ECLI:NL:RBMNE:2025:2706
+- los: item 1902 :: De verdachte heeft zich schuldig gemaakt aan een verkeersongeval door aanmerkelijk onvoorz
+- los: item 1903 :: Consumentenrecht. Een consument heeft een pakketreis geboekt. Hij is op reis geweest. Na a
+- los: item 1906 :: Meester van basisschool wordt integraal vrijgesproken van het plegen van ontucht met twee 
+- los: item 1908 :: Koop tweedehands auto. Vergoeding van herstelkosten wordt afgewezen, omdat de verkoper nie
+- los: item 1909 :: ECLI:NL:RBMNE:2025:3163
+- los: item 1910 :: Wabo, omgevingsvergunning voor het transformeren van bestaand kantoorpand naar 12 appartem
+- los: item 1911 :: Eiser heeft werkzaamheden verricht voor gedaagde en heeft zich op 15 januari 2024 ziekgeme
+- los: item 1912 :: Aanvraag Dak- en Thuislozenuitkering (Pw). Aanvraag terecht afgewezen wegens ongerijmdhede
+- los: item 1913 :: Huur bedrijfsruimte; verhuurder vordert in conventie o.a. ontbinding, ontruiming, achterst
+- los: item 1914 :: Machtiging gesloten jeugdhulp en aansluitend een machtiging tot uithuisplaatsing. De macht
+- los: item 1916 :: pro forma beschikking wegens een verstoorde arbeidsverhouding
+- los: item 1918 :: De laattijdige Wajong-aanvraag is terecht afgewezen. Het Uwv heeft terecht geconcludeerd d
+- los: item 1919 :: AVG, PGA (persoonsgerichte aanpak), procesbelang reputatieschade, doorlopende verwerking, 
+- los: item 1920 :: Mansfield II. PGB-fraude. Vrijspraak van medeplegen dan wel medeplichtigheid aan oplichtin
+- los: item 1921 :: Verdachte wordt veroordeeld voor een zestal feiten: het als minderjarige seksueel binnendr
+- los: item 1923 :: Eiser wil met deze procedure bereiken dat gedaagde zijn woning ontruimt en dat een vergoed
+- los: item 1924 :: ECLI:NL:RBMNE:2025:3879
+- los: item 1925 :: De verdachte heeft zich in korte tijd schuldig gemaakt aan een aantal ernstige strafbare f
+- los: item 1926 :: Facturen architect woning.
+- los: item 1927 :: Contractovername. Bewijsopdracht.
+- los: item 1928 :: Benoeming deskundige en vaststellen definitieve vraagstelling. (ZIE OOK: ECLI:NL:RBMNE:202
+- los: item 1929 :: Vaststellen voorschot deskundige. (ZIE OOK: ECLI:NL:RBMNE:2025:3257, ECLI:NL:RBMNE:2025:40
+- los: item 1931 :: Dringend eigen gebruik woonruimte
+- los: item 1932 :: Gedaagde huurt sinds 1 april 2023 de woning van eiser en huisvest in de woning een aantal 
+- los: item 1933 :: Eiseres heeft om doorhaling verzocht. Gedaagde verzet zich hiertegen. De zaak wordt daarom
+- los: item 1934 :: Verdenking verkrachting dochter in periode 1994 tot 2005. Onvoldoende steunbewijs. Verklar
+- los: item 1935 :: Gedaagde verblijft samen met haar minderjarige kinderen en meerderjarige zoon in een asiel
+- los: item 1936 :: Verzekeringsrecht. art. 7:941 lid 5 BW. Vermeende diefstal auto na sleutelonderzoek. Opzet
+- los: item 1937 :: ECLI:NL:RBMNE:2025:4488
+- los: item 1940 :: ECLI:NL:RBMNE:2025:4584
+- los: item 1941 :: Eiser is door de gemeente Amersfoort uitgeschreven uit de BRP omdat hij feitelijk niet in 
+- los: item 1942 :: Veroordeling voor medeplegen van witwassen van ongeveer 210.000 euro. Gerechtvaardigd verm
+- los: item 1944 :: Afwikkeling huur bedrijfsruimte na voortijdige beëindiging.
+- los: item 1947 :: De zaak gaat over een werknemer die op staande voet is ontslagen omdat hij volgens de werk
+- los: item 1948 :: Verstek. Consumentenrecht. Verschuldigde hoofdsom is na aanmaning (na verstrijken van gege
+- los: item 1951 :: Didam. Eiseres exploiteert een brasserie en huurt daarvoor van gedaagde bedrijfsruimte. Ei
+- los: item 1952 :: Omgevingswet. Verzoek om voorlopige voorziening. Uitspraak buiten zitting. De voorzieninge
+- los: item 1953 :: Gedaagde was werkzaam bij eiseres op grond van een arbeidsovereenkomst voor bepaalde tijd,
+- los: item 1954 :: Veroordeling voor medeplegen van witwassen van ongeveer 210.000 euro. Gerechtvaardigd verm
+- los: item 1955 :: Veroordeling voor het in vereniging plegen van mensenhandel door samen met een ander een m
+- los: item 1956 :: Veroordeling voor het in vereniging plegen van mensenhandel door samen met een ander haar 
+- los: item 1957 :: Voorlopige voorziening afgewezen. Mondelinge uitspraak. Het gaat om een woningsluiting voo
+- los: item 1958 :: Veroordeling voor het medeplegen van handel en transport van in totaal 423 kg cocaïne tot 
+- los: item 1959 :: De werknemer heeft vanwege ziekte aangepast werk verricht en wil zijn oude werkzaamheden w
+- los: item 1960 :: Veroordeling voor het medeplegen van verduistering in dienstbetrekking van banken. Verwerp
+- los: item 1962 :: Beroep tegen een besluit van de gemeenteraad ongegrond. Tegen het raadsbelsuit staat geen 
+- los: item 1963 :: Ontbindingsverzoek werkgever, e-, g- en i-grond. Delen opname gesprek met werkgever met co
+- los: item 1964 :: Invorderingsbesluit vanwege overtreding LOD artikel 2:74a APV Amersfoort, verbod op drugsh
+- los: item 1965 :: Eiseres vordert betaling van de factuur voor reparatiewerkzaamheden aan de auto van gedaag
+- los: item 1966 :: Onbetaalde factuur Buma en Sena-rechten; geen rechtsverwerking aan de zijde van eiseres en
+- los: item 1968 :: ECLI:NL:RBMNE:2025:5555
+- los: item 1969 :: Eiser wil primair met deze procedure bereiken dat gedaagde in totaal 57 zaken aan hem (ter
+- los: item 1970 :: Vordering tot betaling boete na ontbinding koopovereenkomst onder voorbehoud van financier
+- los: item 1971 :: Verdachte heeft zich schuldig gemaakt aan een poging tot doodslag. Verdachte heeft met een
+- los: item 1974 :: Vordering tot vergoeding van opgelopen studievertraging na ongeval wordt toegewezen.
+- los: item 1976 :: Eiser vordert betaling van loon. Overeenkomst van opdracht. Bewijslevering.
+- los: item 1977 :: Eiser vordert betaling van loon. Overeenkomst van opdracht. Geen vriendendienst. Bewijslev
+- los: item 1978 :: BNT WIA aanvraag gegrond
+- los: item 1979 :: Subsidieregister Amersfoort 2023
+- los: item 1980 :: ECLI:NL:RBMNE:2025:5775
+- los: item 1982 :: ECLI:NL:RBMNE:2025:5777
+- los: item 1983 :: Gedaagde woont in een woning te Amersfoort. De woning heeft een elektriciteits- en gasaans
+- los: item 1988 :: Koop tweedehands auto tussen twee particulieren. Versleten versnellingsbak levert geen non
+- los: item 1989 :: ECLI:NL:RBMNE:2025:6058
+- los: item 1990 :: Eiser heeft werkzaamheden uitgevoerd voor de vennootschap van gedaagde. Een deel van de fa
+- los: item 1993 :: Partijen hebben een overeenkomst van lastgeving gesloten met betrekking tot de verkoop van
+- los: item 1994 :: vovo afgewezen. Besluit strekt tot afwijzing Pgb voor behandeling op instelling. Weliswaar
+- los: item 1995 :: In een bindend adviesprocedure is vastgesteld dat de gemeente Amersfoort tekort is geschot
+- los: item 2000 :: Moeder niet-ontvankelijk in haar verzoek tot ontkenning van het vaderschap van de man omda
+- los: item 2001 :: BNT beroep te laat niet-ontvankelijk
+- los: item 2002 :: ECLI:NL:RBMNE:2025:6323
+- los: item 2003 :: Ontslag op staande voet. Poging om malware op laptops werkgever te installeren. Verzoek om
+- los: item 2004 :: Dexia effectenlease tussenpersoon
+- los: item 2007 :: BNT WIA aanvraag
+- los: item 2008 :: BNT WIA, aanvraag
+- los: item 2013 :: Verzoek toestemming inrit. Nieuwe beslissing op bezwaar na gegrondverklaring rechtbank. He
+- los: item 2015 :: Verzoek om kwijtschelding lening bijzondere bijstand voor woninginrichting niet ten onrech
+- los: item 2017 :: Wabo. Leges omgevingsvergunning. Verweerder heeft voor het vaststellen van de leges ten on
+- los: item 2018 :: Eiser vordert ontbinding van de huurovereenkomst en ontruiming van het gehuurde vanwege ve
+- los: item 2019 :: Verleende omgevingsvergunning voor een dakopbouw. De rechtbank verklaart het beroep van de
+- los: item 2023 :: Legesaanslag voor het in behandeling nemen van aanvraag omgevingsvergunning voor het wijzi
+- los: item 2027 :: Het door de verdediging gevoerde niet-ontvankelijkheidsverweer in verband met de forse ove
+- los: item 2029 :: Veroordeling voor het voorhanden hebben van een vuurwapen, wederspannigheid, bedreiging, p
+- los: item 2032 :: Vordering betaling consultkosten tandarts toegewezen. Geen sprake van wanprestatie.
+- los: item 2033 :: Deurwaardersrenvooi. Procedure gestart door deurwaarder om vast te laten stellen wat de om
+- los: item 2035 :: Vier verdachten hebben zich samen schuldig gemaakt aan wederrechtelijke vrijheidsberoving 
+- los: item 2040 :: Voorlopige voorziening. Ordemaatregel. Last onder bestuursdwang vanwege overtreding van de
+- los: item 2041 :: Onderzoek naar vermeende paranormale energieën op gemeentelijke begraafplaats. De kinderen
+- los: item 2044 :: Toewijzing ontruiming bedrijfsruimte. Huurprijs € 30.250,00 per maand. Eerder is huurder v
+- los: item 2046 :: Geschil over reiskostenvergoeding. Ontslag op staande voet houdt geen stand. Arbeidsoveree
+- los: item 2052 :: Verkeerszaak: geen poging doodslag, maar wel roekeloos rijden. Dollemansrit waarbij de ver
+- los: item 2056 :: Proces-verbaal mondelinge uitspraak. Verzoek om voorlopige voorziening en beroep. Huisverb
+- los: item 2057 :: Datingfraude van 2021 tot en met 2025, oplichting, dwang, witwassen, 11 slachtoffers, scha
+- los: item 2064 :: Afwijzing verzoek wijziging zorgregeling ex art. 1:265g lid 2 BW. Wel sprake van een wijiz
+- los: item 2065 :: Tbs met dwangverpleging voor verdachte met uitgebreide psychiatrische voorgeschiedenis, di
+- los: item 2067 :: Rioolheffing. De verordening rioolheffing heeft ten doel dat de gemeente ervoor kan zorgen
+- los: item 2068 :: De GI verzoekt ogv art. 1:262b BW te beslissen over een geschil en verzoekt te bepalen dat
+- los: item 2069 :: De kantonrechter oordeelt dat er een overeenkomst op afstand is gesloten met een consument
+- los: item 2073 :: Afwijzing aanvraag algemene bijstand. Recht niet vast te stellen.
+- los: item 2081 :: Natuurlijke verbintenis is omgezet in een overeenkomst. Artikel 6:5 BW.
+- los: item 2083 :: Coffeeshopbeleid Amersfoort 2025. Beleidsregel waar geen bezwaar- en beroep tegen openstaa
+- los: item 2092 :: Wahv, snelheidsovertreding binnen de bebouwde kom van Amersfoort. In dit geval kan Google 
+- los: item 2093 :: Wahv, snelheidsovertreding binnen de bebouwde kom van Amersfoort. In dit geval kan Google 
+- los: item 2095 :: Voorlopige voorziening tegen een omgevingsvergunning voor het uitbreiden van de eerste ver
+- los: item 2098 :: Het verzoek om voorlopige voorziening wordt buiten zitting afgewezen wegens het ontbreken 
+- los: item 2100 :: Afwijzing verzoek tot ontbinding arbeidsovereenkomst. Werknemer mocht er op basis van beri
+- los: item 2103 :: WVW rijden zonder rijbewijs, veroorzaken aanrijding met motorrijder die zwaar lichamelijk 
+- los: item 2104 :: De rb is van oordeel dat in dit geval het slechts bij Koninklijk Besluit kunnen wijzigen v
+- los: item 2112 :: Huurcommissie heeft huurprijs op een lager bedrag vastgesteld. De kantonrechter beoordeelt
+- los: item 2113 :: Huurders vorderen huurvermindering vanwege schimmel in de woning. De vordering wordt afgew
+- los: item 2115 :: Eiser heeft een omgevingsvergunning aangevraagd voor het gebruik van een bijgebouw op zijn
+- los: item 2120 :: Stilzwijgende contractsovername (6:159 BW) Vordering betaling facturen toegewezen. Gedaagd
+- los: item 2127 :: oproeping | deurwaardersexploot of betekening Belastingdienst
+- los: item 2128 :: uitschrijving basisregistratie personen
+- los: item 2129 :: Ontheffing sluitingsuur - Sportlaan 32 - CLZ-00036171
+- los: item 2130 :: Publiceren afhandeling beschikking
+- los: item 2131 :: Ontheffing sluitingstijd 26-06-2026
+- los: item 2132 :: Kennisgeving Incidentele Festiviteit - Appelmarkt 18 - CLZ-00034128
+- los: item 2133 :: Intrekking van de Procedure klachten bij aanbestedingen gemeente Amersfoort 2019
+- los: item 2134 :: Ontheffing sluitingstijd
+- los: item 2135 :: Ontheffing sluitingsuur WK 26-06-2026
+- los: item 2136 :: Intrekkingsbesluit ‘Geluidsnota Amersfoort Wet geluidhinder’
+- los: item 2137 :: Ontheffing sluitingsuur - Hoolesteeg 4 - CLZ-00036055
+- los: item 2138 :: Verleende omgevingsvergunning voor het Persoonlijke gedoogbeschikking op het perceel De Bo
+- los: item 2139 :: Ontheffing sluitingsuur 26-06-2026 - CLZ-00036471
+- los: item 2140 :: Ingetrokken aanvraag voor het kappen van een boom op het perceel Heinsiuslaan 25, 3818 JE 
+- los: item 2141 :: Aanvraag evenementenvergunning voor het Hoogland Dweilland 5 juli 2026 Hamseweg in Hooglan
+- los: item 2142 :: Verlenging verleende vergunning tijdelijk gebruik van de weg, plaatsen van een vrachtwagen
+- los: item 2144 :: Kennisgeving intrekken aanvraag - plaatsen van een airco-unit op de dakkapel - Graaf Lodew
+- los: item 2145 :: Kennisgeving intrekken aanvraag - constructieve wijziging van het pand - Everard Meysterwe
+- los: item 2146 :: Ontheffing artikel 35 alcoholwet Koningsavond 2026 Zevenhuizerstraat 151, 3828 PT Hoogland
+- los: item 2147 :: Evenementenvergunning voor het evenement 033 SKATE
+- los: item 2148 :: vergunning Alcoholwet voor het alcoholvergunning - Horeca Daam Fockemalaan 22, 3818 KG Ame
+- los: item 2149 :: vergunning Alcoholwet - Horeca Aldegondestraat 1, 3817 AP Amersfoort
+- los: item 2150 :: Amersfoort - Publicatie beslistermijn verlengen Prinses Marielaan 25, 3818 HL Amersfoort
+- los: item 2151 :: Amersfoort - Publicatie beslistermijn verlengen Kruidendreef 14, 3824 NX Amersfoort
+- los: item 2152 :: vergunning Alcoholwet - Horeca Kleine Koppel 36, 3812 PH Amersfoort
+- los: item 2154 :: Amersfoort - Publicatie beslistermijn verlengen Afrikaring 71, 3823 CH Amersfoort
+- los: item 2155 :: Amersfoort - Publicatie beslistermijn verlengen De Houtmanstraat 22, 3814 VJ Amersfoort
+- los: item 2156 :: Verleend Evenementenvergunning voor het evenement Amersfoort City Trail op 22 maart 2026 o
+- los: item 2157 :: Amersfoort - Publicatie beslistermijn verlengen Stoutenburgerlaan 16
+- los: item 2158 :: Amersfoort - Publicatie beslistermijn verlengen Amerikaring 2, 3823 HT Amersfoort
+- los: item 2159 :: Ontheffing artikel 35 alcoholwet t.b.v. evenementen 2026 Lieve Vrouwestraat 4, 3811 BR Ame
+- los: item 2160 :: Horeca-exploitatie vergunning voor het exploitatievergunning - Horeca Darthuizerberg 71, 3
+- los: item 2161 :: Verleend Evenementenvergunning voor het evenement No Limit Fightevents | Infinity #4 15 fe
+- los: item 2162 :: Verleend Evenementenvergunning voor het Anitaas op de Appelmarkt 23 april 2026 Appelmarkt
+- los: item 2163 :: Evenementenvergunning voor het evenement JOHO! Race op 16 mei 2026 op de locatie Boelenhoe
+- los: item 2164 :: Amersfoort - Publicatie beslistermijn verlengen Arnhemseweg 43 A, 3817 CA Amersfoort
+- los: item 2165 :: Horeca-exploitatie vergunning voor het exploitatievergunning - Horeca Langestraat 20, 3811
+- los: item 2166 :: Amersfoort - Publicatie beslistermijn verlengen Verbindingsweg 1
+- los: item 2167 :: Kennisgeving intrekken aanvraag - plaatsen van reclame aan de gevel - Soesterweg 330, 3812
+- los: item 2168 :: Verleend Evenementenvergunning voor het evenement Proef Amersfoort 2026 van 13 t/m 17 mei 
+- los: item 2169 :: Ontheffing artikel 35 alcoholwet Oude Fabriekstraat 7, 3812 NR Amersfoort
+- los: item 2170 :: Ontheffing artikel 35 alcoholwet voor het JOHO! Jump op 25 mei 2026 aan de Engweg 115 in H
+- los: item 2171 :: Amersfoort - Publicatie beslistermijn verlengen Amersfoortsestraat 23, 3821 CA Amersfoort
+- los: item 2172 :: Amersfoort - Publicatie beslistermijn verlengen Berkelstraat 34, 3812 KC Amersfoort
+- los: item 2173 :: Verleend Evenementenvergunning voor het Koningsdag in Vathorst 2026 27 april 2026 Cruquius
+- los: item 2174 :: Amersfoort - Publicatie beslistermijn verlengen Rietvelderf 68, 3822 ET Amersfoort
+- los: item 2175 :: Amersfoort - Publicatie beslistermijn verlengen Zonnewijzer 21, 3824 EE Amersfoort
+- los: item 2176 :: Ontheffing artikel 35 alcoholwet Lieve Vrouwestraat 17, 3811 BP Amersfoort
+- los: item 2177 :: Ingetrokken aanvraag omgevingsvergunning voor het leggen van een lagedruk gasleiding en la
+- los: item 2178 :: Kennisgeving intrekken aanvraag - uitbreiden aan de achtergevel - Maanlander 7, 3824 MN Am
+- los: item 2179 :: vergunning Alcoholwet voor het Alcoholwetvergunning Hendrik van Viandenstraat 40, 3817 AB 
+- los: item 2180 :: Kennisgeving buiten behandeling laten - plaatsen van een dakkapel - Ronhaarstraat 5, 3815 
+- los: item 2181 :: Horeca-exploitatie vergunning voor het exploitatievergunning - Horeca Grote Sint Jansstraa
+- los: item 2182 :: Kennisgeving intrekken aanvraag - realiseren van een uitbouw met dakterras - Van Goudoever
+- los: item 2183 :: Amersfoort - Publicatie beslistermijn verlengen Dool-om-Bergh 14, 3817 XB Amersfoort
+- los: item 2184 :: Amersfoort - Publicatie beslistermijn verlengen Le Corbusierstraat 4, 3822 EA Amersfoort
+- los: item 2185 :: Horeca-exploitatie vergunning - Horeca Kleine Koppel 36, 3812 PH Amersfoort
+- los: item 2186 :: Kennisgeving intrekken aanvraag - realiseren van een dubbele nokverhoging op de woning - K
+- los: item 2187 :: Amersfoort - Publicatie beslistermijn verlengen Eikstraat 61, 3812 MB Amersfoort
+- los: item 2188 :: Kennisgeving buiten behandeling laten - vervangen van het dakvlak - Sportpark Bokkeduinen 
+- los: item 2189 :: Amersfoort - Publicatie beslistermijn verlengen Bachweg 90-100
+- los: item 2190 :: Vooraankondiging voor het evenement Jubileumfeest op 5, 6 en 7 juni 2026 op Sportlaan 30, 
+- los: item 2191 :: Amersfoort - Publicatie beslistermijn verlengen Gabriëlstraat 5, 3817 DZ Amersfoort
+- los: item 2192 :: Buiten behandeling laten aanvraag omgevingsvergunning voor het plaatsen van een fietsenhok
+- los: item 2193 :: Evenementenvergunning voor het St. Joseph Festival op 16 mei 2026 aan de Weverssingel 44 A
+- los: item 2194 :: Ontheffing artikel 35 alcoholwet Groenmarkt 6, 3811 CP Amersfoort
+- los: item 2195 :: Aanwijzingsbesluit toezichthouder
+- los: item 2196 :: Ontheffing artikel 35 alcoholwet voor het Ontheffing artikel 35 Lieve Vrouwekerkhof 2, 381
+- los: item 2197 :: Amersfoort - Publicatie beslistermijn verlengen Heiligenbergerweg 151, 3816 AJ Amersfoort
+- los: item 2198 :: Evenementenvergunning voor het evenement HOPPAAA! van 21 t/m 23 augustus 2026 in het Kaipa
+- los: item 2199 :: Kennisgeving buiten behandeling laten - vervangen van de kozijnen aan de voorgevel - Zuids
+- los: item 2201 :: Verzoek tot vernietiging van besluit VvE. Ontvankelijkheidsverweer. Verweerder niet explic
+- los: item 2206 :: Vervolg op ECLI:NL:GHARL:2023:10751. Eindarrest in zaak van vastgoedbeleggers in spe die o
+- los: item 2209 :: Meander MC Jaarverslag 2023
+- los: item 2210 :: De Alliantie Jaarverslag 2023
+- los: item 2211 :: Portaal Jaarverslag 2023
+- los: item 2212 :: Amfors/RWA Jaarverslag 2023
+- los: item 2213 :: Gemeente Amersfoort Jaarverslag 2023
+- los: item 2214 :: PCBO Amersfoort Jaarverslag 2024
+- los: item 2217 :: SWV De Eem Jaarverslag 2023
+- los: item 2218 :: Onderwijsgroep Amersfoort Jaarverslag 2023
+- los: item 2219 :: CBS Kerncijfers wijken en buurten Amersfoort 2023
+- los: item 2220 :: CBS Kerncijfers wijken en buurten Amersfoort 2022
+- los: item 2225 :: Hoger beroep van ECLI:NL:RBMNE:2024:633. Geen prijs afgesproken voor het maken van vijf ex
+- los: item 2226 :: Niet de rijbaan gebruiken. Digitale handhaving. Regeling domeinlijsten buitengewoon opspor
+- los: item 2227 :: Niet de rijbaan gebruiken. Digitale handhaving. Beleidskader digitale handhaving geslotenv
+- los: item 2230 :: Artikel 5 WVW 1994. Generalis/specialis. Op het trottoir geparkeerde motorfiets. Nu uit he
+- los: item 2231 :: Uitleg van een ‘Agreement of Intent’. Inbreng activa van eenmanszaak in een op te richten 
+- los: item 2233 :: Verzoek tot bevel dwangakkoord, artikel 287a Fw. Tussenarrest; hof heeft te weinig informa
+- los: item 2235 :: Het gerechtshof veroordeelt een 39-jarige vrouw tot 8 jaar gevangenisstraf voor poging moo
+- los: item 2238 :: 7:377 BW. Vervolg op ECLI:NL:GHARL:2025:2173. Benoeming deskundigen in verband met bepalin
+- los: item 2239 :: Verzoek tot bevel dwangakkoord, artikel 287a Fw afgewezen. Vervolg op tussenarrest waarin 
+- los: item 2240 :: Aangetekende verzending. Als een geadresseerde stelt dat hij geen kennis heeft gekregen va
+- los: item 2242 :: Verdachte is door het hof veroordeeld voor mishandeling meermalen gepleegd en poging zware
+- los: item 2248 :: Hoger beroep van ECLI:NL:RBNNE:2024:1872 en ECLI:NL:RBNNE:2024:4635. Geschil tussen zorgaa
+- los: item 2249 :: Bij deze vergadering is ondertiteling beschikbaar. U kunt deze aanzetten door in de balk o
+- los: item 2250 :: Presidium
+- los: item 2251 :: <p>Bij deze vergadering is ondertiteling beschikbaar. U kunt deze aanzetten door in de bal
+- los: item 2252 :: Invoering betaald parkeren en vergunningparkeren in uw wijk (gemeente Amersfoort)
+- los: item 2253 :: Hoef Buitencafé (gemeente Amersfoort)
+- los: item 2254 :: De Raad: raadsvergadering Het Besluit
+- los: item 2255 :: Hybride: Vermeerzaal / Digitaal
+- los: item 2256 :: Inloopavond bewoners en belangstellenden de Meridiaan
+- los: item 2257 :: Opening expositie femicide
+- los: item 2258 :: College van B. & W.
+- los: item 2259 :: Zomeravond (alle commissies)
+- los: item 2260 ::  Bij deze vergadering is ondertiteling beschikbaar. U kunt deze aanzetten door in de balk 
+- los: item 2262 :: Presentatie Meerjarenbegroting 2026-2029
+- los: item 2263 :: Bij deze vergadering is ondertiteling beschikbaar. U kunt deze aanzetten door naast het vo
+- los: item 2264 :: Agenda College van B. & W.
+- los: item 2265 :: Commissie Omgeving / raadsvergadering Het Besluit
+- los: item 2266 :: Oude Stadhuis, kamer 0.04
+- los: item 2267 :: Raadsacademie Sociaal Domein
+- los: item 2268 :: Informatieavond ontsluitingsweg Vathorst
+- los: item 2269 :: 18e Groenvisie in Vogelvlucht
+- los: item 2273 :: AFGELAST: Nieuwjaarsreceptie gemeente Amersfoort
+- los: item 2277 :: Uitnodiging Woningbouw Debat WoningBouwersNL
+- los: item 2281 :: Politiek Debat MBO Amersfoort
+- los: item 2289 ::  Een kloppend stadshart, In debat over de binnenstad van morgen
+- los: item 2299 :: Landelijke GemeenschappelijkWonenDag 2026
+- los: item 2305 ::  Bij deze vergadering is ondertiteling beschikbaar. U kunt deze aanzetten door in de balk 
+- los: item 2460 :: Samenvatting collegebesluiten 9 juni 2026
+- los: item 2464 :: Amersfoortse docent Jaco Scheer uitgeroepen tot ‘Impact Docent van het Jaar’
+- los: item 2469 :: Nieuwsplein33: ‘Een fiets is de eerste stap naar zelfstandigheid’, 11.000 euro bij elkaar 
+- los: item 2472 :: Internationale Dag tegen Kinderarbeid: tweedehands shoppen tegen kinderarbeid
+- los: item 2473 :: Miniportret: Predikant Jaap van der Windt
+- los: item 2474 :: Krommedag na acht jaar terug in Krommestraat
+- los: item 2477 :: WK onder de Toren: Samen naar Oranje kijken op het Lieve Vrouweplein
+- los: item 2478 :: Van Gent Finaleweken: Twee keer Europees zilver voor Dance Centre Amersfoort
+- los: item 2479 :: Boek ‘Onder één hemel’ van Amersfoortse auteur in televisie programma
+- los: item 2481 :: Van Gent Finaleweken: Landelijke ‘Beeballdag’ ook gevierd bij BSC Quick Amersfoort
+- los: item 2482 :: Van Gent Finaleweken: MIA mist de titel op slotdag, Botman hoopt op frisse wind
+- los: item 2486 :: Van Gent Finaleweken: scheidsrechter Andy Wolff bereikt het betaald voetbal: ‘Allebei mijn
+- los: item 2487 :: Nieuwsplein33: Amersfoort heeft beste regenboogbeleid, maar ‘in het nachtleven is nog wins
+- los: item 2489 :: Nieuwsplein33: Omwonenden bezorgd over mogelijke geluidsoverlast nieuw zwembad Hoogland
+- los: item 2490 :: Tanja ter Brake wint juryprijs Utrechts Cabaret Festival 2026
+- los: item 2491 :: Van Gent Finaleweken: ALTA heeft mooie mix tussen jong en oud, maar ‘De landstitel blijft 
+- los: item 2492 :: Onderwijsinspectie ziet duidelijke verbetering bij Amersfoortse school
+- los: item 2493 :: Van Gent Finaleweken: Opnieuw een triathlon voor kinderen tijdens Henschotermeer Games
+- los: item 2494 ::  Amersfoort Toen en Nu: De Koppelpoort
+- los: item 2495 :: Van Gent Finaleweken: Hoogland handhaaft zich in de vierde divisie na dubbele winst op Vel
+- los: item 2496 :: Van Gent Finaleweken: De Posthoorn verslaat SEC en keert na één jaar terug in de vierde kl
+- los: item 2497 :: Boek over 700 jaar Amersfoorts bier: alle feiten op een rij, alle mythes ontkracht
+- los: item 2498 :: Demonstranten vragen aandacht voor stijgende kosten en lokaal beleid in Amersfoort
+- los: item 2499 :: Maureen Kemeling wil afstand tussen honden: ‘Kan bijtincidenten voorkomen’
+- los: item 2502 :: Lancering Startmotor Wonen Eerst Jongeren om dakloosheid van jongeren op te lossen
+- los: item 2503 :: Kan gemeente Amersfoort de participatiekloof dichten?
+- los: item 2505 :: Acht klantmanagers in acht jaar: ‘Is dit ontmoedigingsbeleid?’
+- los: item 2507 :: Van Gent Finaleweken: SRO Sportcafé ‘Positieve Sportcultuur’ voor Amersfoortse sportclubs
+- los: item 2508 :: Derde kinderburgemeester Djennah Allache blikt terug
+- los: item 2510 :: Samenwerking moet psychische hulp regio Eemland sneller en passender maken
+- los: item 2511 :: Meest voorkomende WK-uitslagen zijn 1-0, 2-1 en 2-0
+- los: item 2513 :: Voor Jan Muizelaar is stilstaan geen optie: In beweging voor Nacht van de Vluchteling
+- los: item 2514 :: “Bijna helft LHBTIQA+-gemeenschap in Amersfoort ervaart discriminatie”
+- los: item 2515 :: What de Flint?!: veelzijdig muziekfestival voor en door jongeren
+- los: item 2517 :: Herinrichting wijk Jeruzalem - Gemeente Amersfoort
+- los: item 2518 :: Circulaire betonnen bestratingsmaterialen - Gemeente Amersfoort
+- los: item 2523 :: Nieuwe beisa oryx-man aangekomen in DierenPark Amersfoort
+- los: item 2527 :: Gratis bodemadvies agrariërs Gelderse Vallei
+                    
+                      
+ 
+- los: item 2547 :: Amersfoort wil 250 flexwoningen per jaar, maar er komen maar 156 tijdelijke woningen in vi
+- los: item 2549 :: Eemland Actueel 5 juni: LHBTIQA+ veilig in Amersfoort? En honderden honden naar Baarn
+- los: item 2551 :: Omwonenden bezorgd over mogelijke geluidsoverlast nieuw zwembad Hoogland
+- los: item 2560 :: ACM: kringloopwinkels mogen samenwerken om hun positie in de circulaire textielketen te ve
+- los: item 2561 :: Geen vergunning voor overname deel glasvezelnetwerk van DELTA Fiber door Glaspoort (eindme
+- los: item 2562 :: ACM verbiedt overname glasvezelnetwerken Delta door KPN-joint venture
+- los: item 2563 :: Convent Capital wil, via haar dochteronderneming Movares Group, uitsluitende zeggenschap v
+- los: item 2565 :: bewoners geven groen licht voor aanpak 5 flats in molenwijk
+- los: item 2582 :: ‘Goed werk’ van buur bij explosie Amersfoort: zette slachtoffer meteen onder koude douche
+- los: item 2586 :: Ex-politieman hoort 4 jaar cel eisen voor verkrachting meisje (17): 'Ze maakte geen enkele
+- los: item 2594 :: NIEUWS
+                                                
+
+                                 
+- los: item 2603 :: Schriftelijke vragen 2026-064 KeiHart voor Amersfoort Buurthuis Schothorst
+- los: item 2608 :: Panelonderzoek Houtstook
+- los: item 2609 :: Raadsinformatiebrief 2026-060 Ter inzagelegging Omgevingsprogramma Langs Eem en Spoor 'Gez
+- los: item 2610 :: Raadsinformatiebrief 2026-059 Wooncoaches in Amersfoort
+- los: item 2611 :: Raadsinformatiebrief 2026-058 Woningbouwinitiatieven Hooglanderveen, groene zoom
+- los: item 2613 :: Amersfoort - Publicatie beslistermijn verlengen Van Zuilenlaan 29, 3829 AP Hooglanderveen
+- los: item 2617 :: Ontvangen aanvraag omgevingsvergunning voor het verlenging tijdelijke vergunning bouwplaat
+- los: item 2618 :: 3. Bedrijvigheid 319 Rovisie juni 2026 ROVA 10-06-2026 Kennisnemen Bekijken Programma 3. B
+- los: item 2620 :: 3. Bedrijvigheid 318 Wind op Isselt Inspreker 10-06-2026 Betrekken bij de commissie Bedrij
+- los: item 2630 :: Ontvangen aanvraag omgevingsvergunning voor het afwijken van het omgevingsplan t.b.v. koff
+- los: item 2636 :: Ontvangen aanvraag omgevingsvergunning voor het bouw van een speelhuisje op het perceel Or
+- los: item 2637 :: Verleende vergunning tijdelijk gebruik van de weg, plaatsen van 4 bigbags van 17 t/m 19 ju
+- los: item 2639 :: Verleende vergunning tijdelijk gebruik van de weg, plaatsen van een afvalcontainer van 12 
+- los: item 2643 :: Aanvraag omgevingsvergunning, het aanbrengen van gevelreclame, Aquamarijnlaan 17B, 3523EK 
+- los: item 2645 :: Aanvraag omgevingsvergunning, het bouwen van een dakopbouw op een woning, Seringstraat 70,
+- los: item 2646 :: Aanvraag omgevingsvergunning, het bouwen van een dakopbouw, Steve Bikostraat 344, 3573BJ U
+- los: item 2647 :: Aanvraag omgevingsvergunning, het herbouwen van een bestand bijgebouw, Wilhelminalaan 5, 3
+- los: item 2648 :: Aanvraag omgevingsvergunning, het aanbrengen van gevelreclame, Vismarkt 3, 3511KR Utrecht,
+- los: item 2649 :: Aanvraag omgevingsvergunning, het tijdelijk afwijken van de bestemming voor een evenement 
+- los: item 2650 :: Aanvraag omgevingsvergunning, het bouwen van een dakopbouw op een woning, Zwartewater 9A, 
+- los: item 2652 :: Aanvraag vergunning voor het samenvoegen van twee woonruimten, Oudegracht 63-BS en 63-BSA,
+- los: item 2653 :: Bekendmaking aanvraag maatwerkbesluit voor Kanaalweg 14- 18 in Utrecht
+- los: item 2655 :: Aanvraag omgevingsvergunning, het dichtbouwen van de tuin, plaatsen ramen in de zijgevel, 
+- los: item 2657 :: [Gesloten Stad] Afgelopen week hebben wij deze prachtige badkamerverbouwing mogen oplevere
+- los: item 2661 :: Aanvraag omgevingsvergunning, het bouwen van een dakterras, Steenstraat 7, 3572SW Utrecht,
+- los: item 2667 :: Aanvraag omgevingsvergunning, het plaatsen van een airco buitenunit, Zonstraat 21B, 3581MP
+- los: item 2670 :: Aanvraag omgevingsvergunning, het splitsen van de winkel en woning en toevoegen van een bi
+- los: item 2673 :: Aanvraag omgevingsvergunning, het plaatsen van een dakkapel op het achterdakvlak van een w
+- los: item 2676 :: Bekendmaking aanvraag om een omgevingsvergunning voor een wateractiviteit nabij Grebbedijk
+- los: item 2678 :: Bekendmaking aanvraag om een omgevingsvergunning voor een wateractiviteit bij Beulenkamper
+- los: item 2680 :: Bekendmaking omgevingsvergunning voor een wateractiviteit bij Hoge Hof 64 en tussen Hoge H
+- los: item 2688 :: Melding voor de Doorkomst van de wandeltocht op 28 juni 2026 in natuur/-bosgebied Gerwen-N
+- los: item 2689 :: [Hoornplantsoen] Na 3 jaar gaat onze schoonmaakster helaas stoppen. Zodoende zoeken wij va
+- los: item 2690 :: Kennisgeving ingekomen aanvraag omgevingsvergunning: het bouwen van een fietsberging - Sma
+- los: item 2693 :: [De Horsten] 🎨 KunstRoute Rustenburg 2026 Wist je dat er in Rustenburg ontzettend veel cr
+- los: item 2694 :: Melding voor een Buurtborrel op 21 juni 2026 aan Vonderrijt 1 tot en met 11 te Nuenen
+- los: item 2696 :: Aanvraag omgevingsvergunning Afvalwater met oplosmiddelen, IPPC-installatie, lozen op een 
+- los: item 2702 :: [Bloemenbuurt-Oost] Ontzettend dankbaar. Heb voor mn zoontje gratis Duplo opgehaald. Dankj
+- los: item 2707 :: [Buitengebied Leusden-Zuid] Ik ben mijn oorbel verloren al fietsend ergens tussen de Lockh
+- los: item 2710 :: [Rustenburg-Zuid] Een week geleden werd de halve marathon van Amersfoort gelopen. Het parc
+- los: item 2711 :: Aanvraag vergunning voor het wijzigen van de oeverconstructie nabij Oost Ringdijk 102 in M
+- los: item 2713 :: Nieuwe aanvraag omgevingsvergunning voor een wateractiviteit, ter hoogte van De Plassen No
+- los: item 2715 :: [Neptunusplein] Tijdens Proef Kruiskamp Koppel op 27 juni is er ook een gratis kindervoors
+- los: item 2716 :: Kennisgeving van Aanvraag Omgevingsvergunning het Mat 1, 1721 EC Broek op Langedijk
+- los: item 2718 :: Aanvraag tot wijziging van een aanhangsel op grond van de Alcoholwet in verband met het bi
+- los: item 2722 :: Bedrijfssluiting – 5 juni 2026
+- los: item 2723 :: Onbedoeld hoog water in Ootmaanlanden
+- los: item 2724 :: Zwarte stern broedt weer in de Kortenhoefse Plassen
+- los: item 2725 :: Podwalk Natuurgeheimen onthult verborgen verhalen van Waterloopbos
+- los: item 2727 :: Toezichthouder: vaste prijs energie is ook echt vast
+- los: item 2731 :: museum flehite wordt museum amersfoort html
+- los: item 2738 :: Monitoringsresultaten schelpdieren week 22 van 2026De NVWA geeft in dit document een overz
+- los: item 2739 :: Monitoringsresultaten schelpdieren week 16 van 2026Bekijk hier de monitoringsresultaten sc
+- los: item 2740 :: Monitoringsresultaten schelpdieren week 24 van 2026 deel IDe NVWA geeft in dit document ee
+- los: item 2742 :: Agenda College van B. & W. — 09-06-2026
+- los: item 2743 :: Besluitenlijst: College van B. & W. — 09-06-2026
+- los: item 2744 :: Besluitenlijst: College van B. & W. — 02-06-2026
+- los: item 2745 :: Ouders van kinderen onder 12 jaar: vraag DigiD machtiging aan
+- los: item 2746 :: IC-nazorg polikliniek bestaat 10 jaar
+
+## #31 [discarded] "ECLI:NL:RBZWB:2026:4780, Rechtbank Zeeland-West-Brabant, 30-04-2026, C" — 157 items, 0 behouden, 157 losgekoppeld
+- los: item 1253 :: ECLI:NL:RBAMS:2026:4604, Rechtbank Amsterdam, 29-05-2026, 12093454 \ CV EXPL 26-1643
+- los: item 1254 :: ECLI:NL:GHSHE:2026:1237, Gerechtshof 's-Hertogenbosch, 13-05-2026, 24/202
+- los: item 1255 :: ECLI:NL:RBDHA:2026:5103, Rechtbank Den Haag, 26-02-2026, AWB - 24 _ 7093
+- los: item 1257 :: ECLI:NL:RBZWB:2026:4381, Rechtbank Zeeland-West-Brabant, 19-05-2026, 25/121
+- los: item 1259 :: ECLI:NL:GHARL:2026:3198, Gerechtshof Arnhem-Leeuwarden, 19-05-2026, 24/1231
+- los: item 1261 :: ECLI:NL:GHSHE:2026:1165, Gerechtshof 's-Hertogenbosch, 06-05-2026, 26/452 tot en met 26/45
+- los: item 1263 :: ECLI:NL:GHSHE:2026:1261, Gerechtshof 's-Hertogenbosch, 20-05-2026, 25/170
+- los: item 1265 :: ECLI:NL:GHARL:2026:2717, Gerechtshof Arnhem-Leeuwarden, 28-04-2026, 20/85
+- los: item 1267 :: ECLI:NL:HR:2026:811, Hoge Raad, 29-05-2026, 23/01379
+- los: item 1269 :: ECLI:NL:RBMNE:2026:716, Rechtbank Midden-Nederland, 18-02-2026, 11830837 \ LC EXPL  25-168
+- los: item 1271 :: ECLI:NL:RBDHA:2026:4215, Rechtbank Den Haag, 18-02-2026, C/09/689354 / HA ZA 25-667
+- los: item 1273 :: ECLI:NL:RBGEL:2026:1208, Rechtbank Gelderland, 04-02-2026, C/05/452371
+- los: item 1275 :: ECLI:NL:GHAMS:2026:500, Gerechtshof Amsterdam, 24-02-2026, 200.338.829
+- los: item 1277 :: ECLI:NL:RBMNE:2026:559, Rechtbank Midden-Nederland, 18-02-2026, C/16/580021 / HL ZA 24-230
+- los: item 1280 :: ECLI:NL:GHARL:2026:1418, Gerechtshof Arnhem-Leeuwarden, 10-03-2026, 200.355.545/01 en 200.
+- los: item 1283 :: ECLI:NL:GHARL:2026:1299, Gerechtshof Arnhem-Leeuwarden, 03-03-2026, 200.348.926
+- los: item 1285 :: ECLI:NL:RBLIM:2026:1787, Rechtbank Limburg, 13-02-2026, C/03/347031 / KG ZA 25-436
+- los: item 1287 :: ECLI:NL:RBDHA:2026:3413, Rechtbank Den Haag, 20-02-2026, C/09/697724 / KG ZA 26-39
+- los: item 1289 :: ECLI:NL:RBMNE:2026:451, Rechtbank Midden-Nederland, 28-01-2026, C/16/586603 / HA ZA 25-21
+- los: item 1383 :: ECLI:NL:RBAMS:2026:4604, Rechtbank Amsterdam, 29-05-2026, 12093454 \ CV EXPL 26-1643
+- los: item 1384 :: ECLI:NL:GHDHA:2026:889, Gerechtshof Den Haag, 25-03-2026, BK-25/20 en BK-25/21
+- los: item 1385 :: ECLI:NL:GHSHE:2026:1237, Gerechtshof 's-Hertogenbosch, 13-05-2026, 24/202
+- los: item 1386 :: ECLI:NL:RBZWB:2026:4381, Rechtbank Zeeland-West-Brabant, 19-05-2026, 25/121
+- los: item 1387 :: ECLI:NL:GHARL:2026:3198, Gerechtshof Arnhem-Leeuwarden, 19-05-2026, 24/1231
+- los: item 1388 :: ECLI:NL:RBDHA:2026:5103, Rechtbank Den Haag, 26-02-2026, AWB - 24 _ 7093
+- los: item 1389 :: ECLI:NL:GHSHE:2026:1261, Gerechtshof 's-Hertogenbosch, 20-05-2026, 25/170
+- los: item 1390 :: ECLI:NL:GHSHE:2026:1165, Gerechtshof 's-Hertogenbosch, 06-05-2026, 26/452 tot en met 26/45
+- los: item 1391 :: ECLI:NL:GHARL:2026:2717, Gerechtshof Arnhem-Leeuwarden, 28-04-2026, 20/85
+- los: item 1392 :: ECLI:NL:HR:2026:811, Hoge Raad, 29-05-2026, 23/01379
+- los: item 1393 :: ECLI:NL:RBMNE:2026:716, Rechtbank Midden-Nederland, 18-02-2026, 11830837 \ LC EXPL  25-168
+- los: item 1394 :: ECLI:NL:RBDHA:2026:4215, Rechtbank Den Haag, 18-02-2026, C/09/689354 / HA ZA 25-667
+- los: item 1395 :: ECLI:NL:RBGEL:2026:1208, Rechtbank Gelderland, 04-02-2026, C/05/452371
+- los: item 1396 :: ECLI:NL:GHAMS:2026:500, Gerechtshof Amsterdam, 24-02-2026, 200.338.829
+- los: item 1397 :: ECLI:NL:RBMNE:2026:559, Rechtbank Midden-Nederland, 18-02-2026, C/16/580021 / HL ZA 24-230
+- los: item 1398 :: ECLI:NL:GHARL:2026:1418, Gerechtshof Arnhem-Leeuwarden, 10-03-2026, 200.355.545/01 en 200.
+- los: item 1399 :: ECLI:NL:GHARL:2026:1299, Gerechtshof Arnhem-Leeuwarden, 03-03-2026, 200.348.926
+- los: item 1400 :: ECLI:NL:RBDHA:2026:3413, Rechtbank Den Haag, 20-02-2026, C/09/697724 / KG ZA 26-39
+- los: item 1401 :: ECLI:NL:RBLIM:2026:1787, Rechtbank Limburg, 13-02-2026, C/03/347031 / KG ZA 25-436
+- los: item 1402 :: ECLI:NL:RBMNE:2026:451, Rechtbank Midden-Nederland, 28-01-2026, C/16/586603 / HA ZA 25-21
+- los: item 1437 :: ECLI:NL:RBZWB:2026:4804, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/439646 / JE RK 2
+- los: item 1438 :: ECLI:NL:RBZWB:2026:4797, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/446170 / JE RK 2
+- los: item 1439 :: ECLI:NL:RBZWB:2026:4805, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/ 446365 FA RK 26
+- los: item 1440 :: ECLI:NL:RBZWB:2026:4799, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/447290 / FA RK 2
+- los: item 1441 :: ECLI:NL:RBZWB:2026:4800, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/446846 / JE RK 2
+- los: item 1442 :: ECLI:NL:RBZWB:2026:4798, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/447281 / JE RK 2
+- los: item 1443 :: ECLI:NL:RBZWB:2026:4802, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/439685 / FA RK 2
+- los: item 1444 :: ECLI:NL:RBZWB:2026:4801, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/447258 / JE RK 2
+- los: item 1445 :: ECLI:NL:RBZWB:2026:4803, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/446106 FA RK 26-
+- los: item 1446 :: ECLI:NL:RBZWB:2026:4792, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/445395 / FA RK 2
+- los: item 1447 :: ECLI:NL:RBZWB:2026:4794, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/447602 / FA RK 2
+- los: item 1448 :: ECLI:NL:RBZWB:2026:4793, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/446703 / JE RK 2
+- los: item 1449 :: ECLI:NL:RBZWB:2026:4795, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/447660 / FA RK 2
+- los: item 1450 :: ECLI:NL:RBZWB:2026:4796, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/445217 / JE RK 2
+- los: item 1451 :: ECLI:NL:RBZWB:2026:4786, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/439857 / FA RK 2
+- los: item 1452 :: ECLI:NL:RBZWB:2026:4787, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/447124 / KG ZA 2
+- los: item 1453 :: ECLI:NL:RBZWB:2026:4788, Rechtbank Zeeland-West-Brabant, 30-04-2026, 445287
+- los: item 1454 :: ECLI:NL:RBZWB:2026:4790, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/445221 / JE RK 2
+- los: item 1455 :: ECLI:NL:RBZWB:2026:4789, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/446844 / JE RK 2
+- los: item 1456 :: ECLI:NL:RBZWB:2026:4780, Rechtbank Zeeland-West-Brabant, 30-04-2026, C/02/447192 / FA RK 2
+- los: item 1478 :: Jonge zwemmer overleden bij de Maarsseveense Plassen
+- los: item 1481 :: Gemeente trekt grens: illegale uitbouwen op vakantiepark moeten worden aangepakt
+- los: item 1515 :: ECLI:NL:RBMNE:2026:2987, Rechtbank Midden-Nederland, 29-05-2026, 16/054689.25 (ontneming)
+- los: item 1516 :: ECLI:NL:RBMNE:2026:2988, Rechtbank Midden-Nederland, 29-05-2026, 16-400134-24 (ontneming)
+- los: item 1519 :: Geen luchtalarmtest in Veiligheidsregio Utrecht
+- los: item 1611 :: ECLI:NL:GHARL:2026:2941, Gerechtshof Arnhem-Leeuwarden, 12-05-2026, Wahv 200.360.068/01
+- los: item 1619 :: ECLI:NL:RBMNE:2026:2954, Rechtbank Midden-Nederland, 29-05-2026, 16-093189-24 (ontneming)
+- los: item 1620 :: ECLI:NL:RBMNE:2026:3038, Rechtbank Midden-Nederland, 27-05-2026, UTR 23/4619
+- los: item 1915 :: Ontbinding stichting, omdat zij haar doelstellingen niet meer kan bereiken. De bestuurders
+- los: item 1961 :: Veroordeling voor het medeplegen van verduistering in dienstbetrekking van banken. De rech
+- los: item 1967 :: De verdachte heeft als beginnend bestuurder met ruim vier keer de toegestane hoeveelheid a
+- los: item 1972 :: Integrale vrijspraak. De rechtbank kan niet buiten redelijke twijfel vaststellen dat het d
+- los: item 1973 :: De verdachte heeft gedurende bijna vier jaar in totaal 684 kinderpornografische afbeelding
+- los: item 1991 :: Omgevingswet. Maatwerkvoorschrift om geluidhinder van muziek te beperken. Voorschrift ziet
+- los: item 1998 :: Tussenvonnis. De rechtbank acht niet wettig en overtuigend bewezen dat de verdachte een po
+- los: item 2005 :: De verdachte is onder meer veroordeeld voor ernstige zedenfeiten en seksuele uitbuiting. A
+- los: item 2010 :: Veroordeling voor het plegen van ontucht met een 14-jarige door een 20-jarige verdachte. E
+- los: item 2025 :: Het door de verdediging gevoerde niet-ontvankelijkheidsverweer in verband met de forse ove
+- los: item 2026 :: Het door de verdediging gevoerde niet-ontvankelijkheidsverweer in verband met de forse ove
+- los: item 2028 :: Verstekzaak. Ontruiming pand. Veiligheidsrisico vanwege slechte staat van het pand.
+- los: item 2030 :: Verdachte wordt veroordeeld tot een geheel voorwaardelijke gevangenisstraf van twaalf maan
+- los: item 2031 :: Eindafrekening na inleveren leaseauto met schade.
+- los: item 2034 :: Oneerlijke handelspraktijken, verbod op exploiteren websites.
+- los: item 2036 :: ECLI:NL:RBMNE:2026:188
+- los: item 2037 :: Meerjarige productiesubsidie Fonds Podiumkunsten 2025-2028. Beroep gegrond. Het advies van
+- los: item 2038 :: Maatregel Uwv 100% verlaging ZW uitkering over 4 maanden. Afwijzing verzoek om een voorlop
+- los: item 2039 :: Buiten zitting. Pkv.
+- los: item 2045 :: Openstaande facturen advocaat. Consumentenrecht. Kostenbeding is niet transparant maar nie
+- los: item 2047 :: Vordering tot loondoorbetaling en verbod op verwerking gegevens. Vorderingen worden afgewe
+- los: item 2048 :: ECLI:NL:RBMNE:2026:509
+- los: item 2049 :: Huurovereenkomst. Ontbinding en ontruiming. Achterstallig tuinonderhoud en overlast.
+- los: item 2050 :: Ontbindingsverzoek werkgever e, g, of i-grond omdat werknemer na een aanrijding is doorger
+- los: item 2051 :: ECLI:NL:RBMNE:2026:619
+- los: item 2053 :: Veroordeling voor het medeplegen van diefstal in dienstbetrekking.
+- los: item 2054 :: Vordering tot betaling kosten voor begeleiding na gastric bypass operatie toegewezen
+- los: item 2055 :: Vordering betaling facturen. Verweer houdt in dat de gefactureerde werkzaamheden niet zijn
+- los: item 2058 :: Financial lease. De term 'vroegtijdig boetevrij aflossen' moet ook echt boetevrij zijn. Ei
+- los: item 2059 :: Wvggz , vcm , ook ambulant uit te voeren
+- los: item 2060 :: Artikel 8:41 Awb; beroep niet ontvankelijk; griffierecht niet betaald; betalingsonmacht re
+- los: item 2061 :: ECLI:NL:RBMNE:2026:932
+- los: item 2062 :: Ontslag op staande voet niet rechtsgeldig gegeven. De enkele verdenking van diefstal is ni
+- los: item 2063 :: O&O vanwege huurachterstand
+- los: item 2066 :: Verzoek tot vernietiging proeftijdontslag afgewezen. Geen misbruik van recht of slecht wer
+- los: item 2070 :: Netbeheerder mag energietoevoer afsluiten omdat er geen energiecontract is voor de woning.
+- los: item 2071 :: Veroordeling voor het negeren van een zwaar inreisverbod, art. 197 Sr. Ambtshalve Unierech
+- los: item 2072 :: Kort geding. Verstek. Vordering tot nakoming van een schikking toegewezen.
+- los: item 2074 :: Kwalificatie overeenkomst van aanneming, financiële afwikkeling en sanctie vanwege schendi
+- los: item 2075 :: Eenhoofdig gezag vanwege bemoeienis vader op het terrein van moeder. Wijziging omgangsrege
+- los: item 2076 :: vovo, bz, griffierecht niet voldaan, verzoek NO.
+- los: item 2077 :: Bewezenverklaring: poging tot doodslag, dragen van een machete, bedreiging en stalking. De
+- los: item 2078 :: Kort geding; verstekvonnis; ontruiming bedrijfsruimte en (deel) huurachterstand toegewezen
+- los: item 2079 :: Afwijziging vordering schadevergoeding; tegelwerk. Door het tijdsverloop van 3 jaar, wat n
+- los: item 2080 :: Verzetzaak; ongegrond; geschil over kennisneming van de oorspronkelijke dagvaarding. Dagva
+- los: item 2082 :: Jeugdstrafrecht. Bewezenverklaring poging tot afpersing in vereniging en openlijke geweldp
+- los: item 2084 :: Afwijzing verzoek PKV na intrekking beroep. Het college is volledig tegemoetgekomen aan he
+- los: item 2085 :: Veroordeling voor meerdere diefstallen en heling.
+- los: item 2086 :: Veroordeling voor medeplichtigheid aan opzettelijk een ontploffing teweegbrengen, terwijl 
+- los: item 2087 :: ECLI:NL:RBMNE:2026:1474
+- los: item 2088 :: Pensioenrecht. Aanspraken gehuwde werkneemsters na privatisering PTT. Art. 5 Personeelswet
+- los: item 2089 :: Omgevingswet. OPA. Omgevingsvergunning voor het isoleren en verduurzamen van het dak op de
+- los: item 2090 :: ECLI:NL:RBMNE:2026:1611
+- los: item 2091 :: Dexia; aandelenlease; art.1:88 BW.
+- los: item 2094 :: artikel 3:29 BW; waardeloosverklaring inschrijving hypotheekrecht; gesecureerde vordering 
+- los: item 2096 :: CBM, Verzoek Bewind en mentorschap toegewezen, ondanks verzet van betrokkene en zijn kinde
+- los: item 2097 :: Bewezenverklaring wederrechtelijke vrijheidsberoving en poging zware mishandeling. Verdach
+- los: item 2101 :: ontbinding g-grond, geen billijke vergoeding want drempel wordt niet gehaald
+- los: item 2102 :: ECLI:NL:RBMNE:2026:1966
+- los: item 2105 :: Inhoudsindicatie volgt
+- los: item 2106 :: Omgevingswet. Uitbreiding horecafunctie locatie in Amersfoort. Evenwichtige toedeling van 
+- los: item 2107 :: Onredelijk bezwarend vervalbeding in algemene voorwaarden?; aanneming van werk (bouw van e
+- los: item 2108 :: Vordering tot ontruiming in kort geding toegewezen. Gedaagde moet de bedrijfshal ontruimin
+- los: item 2109 :: Naheffingsaanslag parkeerbelasting; gegrond.
+- los: item 2110 :: BNT ZW, EZWb, Eerstejaars Ziektewetbeoordeling, aanvraag
+- los: item 2111 :: betaling factuur, opschortingsrecht en vordering tot schadevergoeding
+- los: item 2114 :: Verzoek van een hypotheekhouder voor onderhandse verkoop van rechten van erfpacht, in plaa
+- los: item 2116 :: Werkgever heeft de arbeidsovereenkomst opgezegd en niet de ontbindende voorwaarde ingeroep
+- los: item 2117 :: ECLI:NL:RBMNE:2026:2371
+- los: item 2118 :: IBS niet ten uitvoer gelegd in Wzd accommodatie, zitting over Voortzetting IBS gaat wel do
+- los: item 2119 :: Dexia; effectenlease; tussenpersoon
+- los: item 2121 :: Deelgeschil. Val bij inladen bestelbus. Geen werkgeversaansprakelijkheid.
+- los: item 2122 :: Huurrecht. Bedrijfsruimte. Opzegging wegens DEG. Vaststelling einde van de huurovereenkoms
+- los: item 2123 :: Insolventie, Wsnp toegewezen, ambtshalve eerdere ingangsdatum vastgesteld, maximaal afgedr
+- los: item 2124 :: Uitleg pensioenontslagbeding in arbeidsovereenkomst. Vennootschapsrechtelijk ontslag geldt
+- los: item 2125 :: Kort geding. Werknemer is vrijgesteld van werk vooruitlopend op ontbindingsprocedure. Geen
+- los: item 2126 :: Insolventie, dwangakkoord, afgewezen, aanbod in dwangakkoord niet meer actueel, gezakt naa
+- los: item 2224 :: Ziekenhuis aansprakelijk voor handelen gynaecoloog die zijn eigen zaad gebruikte voor het 
+- los: item 2228 :: Afwikkeling huwelijkse voorwaarden. Verrekening lijfrentepolis, verdeling woning, ontslagv
+- los: item 2229 :: Mondelinge uitspraak in executie kort geding.
+- los: item 2232 :: Ontslag curator
+- los: item 2234 :: Ontruiming kraker woning GGZ-zorgterrein. Weging van alle omstandigheden. Langere ontruimi
+- los: item 2236 :: 1:435 lid BW en 1:452 lid 3 BW. Afwijken van persoonlijke en wettelijke voorkeur bij benoe
+- los: item 2237 :: Overeenstemming tussen partijen vastgelegd in beschikking.
+- los: item 2241 :: ECLI:NL:GHARL:2026:1798
+- los: item 2243 :: Aannemingsovereenkomst asbestsanering. Beoogde sanering in risicoklasse 1 uitgevoerd in ri
+- los: item 2244 :: De huurovereenkomst wordt ontbonden omdat de huurachterstand meer dan drie maanden bedraag
+- los: item 2245 :: Koop/verkoop woning met omgevingsrechtelijke bestemming ‘bedrijfswoning’. Uitleg artikel 6
+- los: item 2246 :: Tussenarrest. Effectenlease. Dexia. Art. 1:88 BW en art. 1:89 BW. Tussenarrest 21 oktober 
+- los: item 2247 :: Wijziging kinderalimentatie. Verdiencapaciteit; niet aannemelijk dat man in loondienst mee
+
+## #35 [discarded] "[De Lichtenberg] De papieren Falk stadsplattegrond van Amersfoort, met" — 110 items, 0 behouden, 110 losgekoppeld
+- los: item 1250 :: Danishia Moese wordt de nieuwe kinderburgemeester
+- los: item 1251 :: Soesterkwartier krijgt per 1 mei 2027 betaald parkeren en vergunningparkeren
+- los: item 1252 :: Let op: maandag 1 juni NL-Alert testbericht
+- los: item 1256 :: Vera Vlogt: ‘Heel veel schatten’
+- los: item 1258 :: Nieuwe kinderburgemeester verrast: ‘Had dit niet verwacht’
+- los: item 1260 :: Toch betaald parkeren in Soesterkwartier om woningbouw mogelijk te maken
+- los: item 1262 :: Daklozen in tentjes zorgen voor onrust bij omwonenden
+- los: item 1264 :: Meer dan 160 kilo afval uit Amersfoortse grachten gehaald
+- los: item 1266 :: Zes auto’s betrokken bij kettingbotsing op A28 bij Amersfoort
+- los: item 1268 :: Broertjes samen naar Italië voor behandeling long covid
+- los: item 1270 :: Botsing tussen scooter en auto op Stadsring in Amersfoort
+- los: item 1274 :: Al 10.000 gebruikers van kortingsactie voor mensen met kleine beurs
+- los: item 1276 :: Informatiemarkt voor mensen met, en na, kanker in Toon Hermans Huis Amersfoort
+- los: item 1279 :: Nieuwe subsidieregeling voor circulaire en klimaatinitiatieven
+- los: item 1281 :: Toch betaald parkeren in Soesterkwartier om woningbouw mogelijk te maken
+- los: item 1282 :: Duidelijkheid over doorgaan woningbouwprojecten tijdens aansluitpauze
+- los: item 1284 :: Korfbalvereniging AKV Soesterkwartier 90 jaar: 'De verbondenheid is bij ons groot'
+- los: item 1286 :: Toch losse fietspaden langs Hamseweg na kritiek uit Hoogland
+- los: item 1298 :: Na 15 jaar lesgeven geniet faculteitspaard Faldo van haar pensioen
+- los: item 1299 :: Zijn allerlaatste gerbera: de kas van Aad gaat tegen de vlakte
+- los: item 1302 :: Van toezichthouder naar ‘inspirator’
+- los: item 1303 :: [Randenbroekerweg] Ik zoek oppas voor mijn lieve flatcoat Abbey Voor de week van 13 juli t
+- los: item 1304 :: [Randenbroekerweg] Staat nog steeds bij de voordeur, wie haalt het op? Schumannstraat 20 K
+- los: item 1305 :: [Schimmelpenninckstraat] Is er iemand die voor een redelijke vergoeding mijn 2 hondjes wil
+- los: item 1306 :: [Evertsenstraat] Overbodig. Opruiming. 4 grote bekers Choco Licious 11 cm hoog NIEUW €4 · 
+- los: item 1307 :: [Hogesteeg] ZE IS GEVONDEN!❤️ Helaas is onze poes Lola niet meer thuisgekomen sinds 26 mei
+- los: item 1308 :: [Randenbroekerweg] Ik zoek er
+- los: item 1310 :: [BergZuid] Hoi lieve buren, wij gaan op 21 juni trouwen en zoeken 2 jongelui die willen he
+- los: item 1311 :: [Bloemenbuurt-West] Zou de mevrouw die deze gistermiddag om 13.55 uit mijn voortuin heeft 
+- los: item 1312 :: [Evertsenstraat] Opruiming. 6 nieuwe wijnglazen 13 cm hoog €1 · 1.1 km
+- los: item 1313 :: [Stadstuin] Weet iemand toevallig een goede pedicure die voor een redelijke prijs de teenn
+- los: item 1314 :: [Soesterberg Oost] UPDATE: Beer is terecht ❤️ (zie reactie bij dit bericht) 🚨 VERMIST IN 
+- los: item 1316 :: [Erasmusstraat] Hoi lieve buren! 😊 Is er hier iemand die het Panini WK-album spaart en zi
+- los: item 1317 :: [Central Living, Vlassakerweg & Korte Bergstraat] Hallo allemaal! Ik zoek een bijbaantje v
+- los: item 1319 :: [Randenbroekerweg] Donder en bliksem: code geel: geen Rondje Zachtheid vanavond 19.00 uur 
+- los: item 1320 :: [Voltastraat] Van half juni t/m eind september kun je onbeperkt tennissen, krijg je twee c
+- los: item 1321 :: [Gesloten Stad] Hoi allemaal, Voor de verkoop van mijn huis ben ik op zoek naar iemand/sch
+- los: item 1322 :: [Bloemenbuurt-Oost] Morgen is het zover: 30 mei 2026 en het grote feest kan beginnen: onze
+- los: item 1324 :: [Evertsenstraat] Leuk speelgoed, maar ook handig voor volwassenen. Nieuwe Spinner Toi-Toys
+- los: item 1325 :: [Binnenstad] Vakman! Henry van de Bovenkamp 4 dagen geleden Hallo buren, ik ben een nieuw 
+- los: item 1326 :: [Rubensstraat] Iemand die morgen (zondag) om 12:00 uur met mijn mee kan rijden naar leusde
+- los: item 1327 :: [Schuilenburg] Bekijk dit bericht op Nextdoor: https://nextdoor.nl/p/LRTRx9yspjjc?utm_sour
+- los: item 1328 :: [Willem III] 11 juni is er weer een informatieavond in Amersfoort! Wil je lid worden of ov
+- los: item 1331 :: Soms begint de ochtend niet zoals je hoopt,maar komt het uiteindelijk toch wel goed uit. N
+- los: item 1333 :: [Boerenstreek] Weet iemand of SolarTop uit Soest (zonnepanelen etc.) failliet is?? Probeer
+- los: item 1334 :: [Vinkenbaan] Ik heb onlangs mijn bankstel, tapijt en traptapijt laten reinigen en ben echt
+- los: item 1335 :: Aanvulling RNQP-bijschrijvingen voor import van planten voor opplant (6 juli 2026): bijsch
+- los: item 1336 :: Inspectieresultaten 2022We houden toezicht op de voedselveiligheid bij bedrijven in de hor
+- los: item 1337 :: Inspectieresultaten 2025We houden toezicht op de voedselveiligheid bij bedrijven in de hor
+- los: item 1338 :: Inspectie- en onderzoeksresultaten horeca, ambacht en retailWe houden toezicht op de voeds
+- los: item 1339 :: Onze inspecties in horeca, retail en ambachtWe houden toezicht op de voedselveiligheid. We
+- los: item 1340 :: Technisch configuratiebestand zf-edDit bestand zorgt ervoor dat de techniek van onze websi
+- los: item 1341 :: Technisch configuratiebestand as-edDit bestand zorgt ervoor dat de techniek van onze websi
+- los: item 1342 :: Russische Federatie, vismeel (DC) (DPDL-280)Deze instructie geldt voor het exporteren van 
+- los: item 1343 :: Russische Federatie, diervoeder en diervoederadditieven (DPDL-75)Deze instructie geldt voo
+- los: item 1344 :: Veiligheidswaarschuwing kindervestje ZeemanZeeman waarschuwt voor een kindervestje in de m
+- los: item 1406 :: [Buitengebied Leusden-Zuid] Ook lekker biologisch en uit de regio eten? Sluit je aan bij h
+- los: item 1410 :: [De Ham] Hierbij vraag ik om hulp!! We zoeken nog 6 digitale zegels voor de juichjacks. Ev
+- los: item 1411 :: [Juliana van Stolberg] Voor een gezellig en druk gezin zoeken we een oppas / begeleider vo
+- los: item 1414 :: [Binnenstad] Vakman! H Henry van de Bovenkamp 4 dagen geleden Hallo buren, ik ben een nieu
+- los: item 1416 :: [Stadskwartier] Te koop t e.a.b schoenenkast met spiegel. Wat heb je voor over?
+- los: item 1418 :: [Holkerveen] Onze aardbeien zijn plukrijp 🍓🍓🍓genieten maar! ☀️ heerlijke natuurlijke aa
+- los: item 1420 :: [Architectenbuurt-West] Hoi allemaal, ik ben op zoek naar een tweedehands waterbaan, kinde
+- los: item 1421 :: [De Driehoek] Elke dinsdag gaan we samen met wijkgenoten aan de slag in de moestuin. Een l
+- los: item 1422 :: [De Lichtenberg] De papieren Falk stadsplattegrond van Amersfoort, met Soest en Soesterber
+- los: item 1472 :: Raad akkoord met Skaeve Huse aan Palestinaweg-Oost, maar rechtszaak dreigt
+- los: item 1473 :: Flint krijgt Braillepluim voor eerste theater met compleet programma in braille
+- los: item 1474 :: Auto’s slaan over de kop na botsing op A28, verkeer richting Utrecht vast
+- los: item 1480 :: Deze militairen noemen Soesterberg straks thuis
+- los: item 1482 :: Tips van een 60-jarige marathonveteraan: 'Tijdens de wedstrijd dorst? Dan ben je te laat'
+- los: item 1483 :: [Stadskwartier] Thuiskapster gezocht.
+- los: item 1484 :: [Voltastraat] gisteren, zaterdagochtend 29 mei is om 10.15 uur voor de Izi wasserette mijn
+- los: item 1486 :: [Meridiaan] Ik zoek imad voor 4 uurjes om schoon de maken
+- los: item 1487 :: [Albert Cuypstraat] Heb je nog spullen te koop neem een kleed of tafel mee en kom staan er
+- los: item 1488 :: [Sterrenberg] Nationaal Park Utrechtse Heuvelrug (NPUH) wordt fors uitgebreid. Het noordel
+- los: item 1489 :: [Evertsenstraat] Hallo, Is er iemand die een zaagtafel heeft en voor mij bij 4 planken een
+- los: item 1490 :: [Binnenstad] Iemand een paar uurtjes tijd? L Linde Snoek 19 uur geleden Oppas gezocht voor
+- los: item 1491 :: [Indische Buurt] Wij hebben interesse in een outdoor full-size tafeltennistafel. Mocht je 
+- los: item 1492 :: [Lient] Hello dear dog lovers… is there any dog sitter available to take our Labrador for 
+- los: item 1494 :: [Vlinderbuurt] Iemand interesse in een bestway zwembad? 221x150x43 Geen gebreken, geen gaa
+- los: item 1495 :: [Vlinderbuurt] Iemand nog zegels over van de AH? Hoi, kan je me helpen brabantia sparen? H
+- los: item 1496 :: [Noordwijck] Goedendag, beste buren, Onze kat is sinds gisteren vermist en wij zijn hier e
+- los: item 1497 :: [De Driehoek] Elke tweede en vierde maandag van de maand organiseren we een gezellige en s
+- los: item 1498 :: [Schuilenburg] 17-jarige zoekt kluswerk in Amersfoort. Hallo, Mijn naam is Jason en ik ben
+- los: item 1500 :: [Architectenbuurt-Oost] Gordijnen !! 3 gordijnen waarvan 1 gelijkstel . Nog bijna nieuw ma
+- los: item 1501 :: [Nieuwland-Centrum] Lieve buren, 🐶 Mijn kinderen hebben een witte Maltezer genaamd Cookie
+- los: item 1502 :: [Albatrosstraat] Gratis op te halen op Fuutstraat 27: heel veel plantenpotjes voor binnen 
+- los: item 1503 :: [Soest Midden] Hoi, onze lieve poes Snoes is al een week niet thuis gekomen. Ze is gechipt
+- los: item 1504 :: [Binnenstad] Vakman! H Henry van de Bovenkamp 5 dagen geleden Hallo buren, ik ben een nieu
+- los: item 1505 :: [Waterkwartier] Hallo allemaal, Mijn naam is Monique en ik heb ruim 10 jaar ervaring als r
+- los: item 1506 :: [Vlinderbuurt] Smoby chefs house Staat nu ongeveer 3 jaar buiten Lichte verkleuring maar n
+- los: item 1507 :: [Bieshaar-Zuid] Durf te vragen Van wie mag ik even een waterstofzuiger lenen. Er zit een d
+- los: item 1508 :: Van Gent Finaleweken: Hoogland met uitblinker Milan Suvaal simpel naar nacompetitiefinale
+- los: item 1509 :: Finalisten Keistad Cabaret Festival 2026 bekend
+- los: item 1517 :: Lammetjesdagen op Texel
+- los: item 1518 :: Samen schouders onder natuur in het Holtingerveld
+- los: item 1520 :: Voedselbank Amersfoort verwelkomt nieuwe klanten
+- los: item 1521 :: Starterslening opnieuw gevuld: raad wil 5,5 miljoen euro in de pot
+- los: item 1522 :: Amersfoort soepeler met grote schermen tijdens WK
+- los: item 1523 ::  Amersfoort Toen en Nu: Stadsmuur Sint Annastraat
+- los: item 1526 :: Amersfoortse grachten 163 kilo zwerfafval lichter: Clean up on Tour vist fietsen en autoba
+- los: item 1534 :: Eerste Familieschool in Amersfoort is geopend
+- los: item 1535 :: Eerste Familieschool in Amersfoort is geopend
+- los: item 1536 :: Gezinnen en vrijwilligers vieren dertig jaar Home-Start in Amersfoort
+- los: item 1537 :: Van Gent Finaleweken: Oranje-waterpolomannen keren terug naar Amerena voor interland tegen
+- los: item 1538 :: MBO Amersfoort kijkt terug op succesvolle deelname Marathon Amersfoort met 200 deelnemers
+- los: item 1539 :: Marathons eerder in het jaar houden? 'In de weg van andere wedstrijden'
+- los: item 2310 :: Besluit omgevingsvergunning bouw schietfaciliteiten op het kazerneterrein van Kamp Soester
+- los: item 2319 :: Bouw schietfaciliteiten op het kazerneterrein van Kamp Soesterberg aan het Zeisterspoor
+- los: item 2458 :: 1. Omgeving 301 E-mail inwoner Soest betreft parkeerbeleid Soesterkwartier Inwoner Soest 0
+
+## #33 [discarded] "Met Spoed Ambulance 89415 Met Spoed" — 50 items, 0 behouden, 50 losgekoppeld
+- los: item 1345 :: Met Spoed Ambulance 89314 Met Spoed
+- los: item 1346 :: Met Grote Spoed Ambulance 89301 Met Grote Spoed
+- los: item 1347 :: Met Spoed Ambulance 89296 Met Spoed
+- los: item 1348 :: Met Grote Spoed Ambulance 89284 Met Grote Spoed
+- los: item 1349 :: Met Grote Spoed Ambulance 89274 Met Grote Spoed
+- los: item 1350 :: Met Grote Spoed Ambulance 89273 Met Grote Spoed
+- los: item 1351 :: Met Grote Spoed Ambulance 89237 Met Grote Spoed
+- los: item 1352 :: Met Spoed Ambulance 89230 Met Spoed
+- los: item 1353 :: Met Zeer Grote Spoed Ambulance 89166 Met Zeer Grote Spoed
+- los: item 1354 :: Met Grote Spoed Meldkamer: Brandweer Midden-Nederland, Incidentkanaal 1 Reanimatie 098036
+- los: item 1355 :: Met Grote Spoed Ambulance 89119 Met Grote Spoed
+- los: item 1356 :: Met Grote Spoed Ambulance 89115 Met Grote Spoed
+- los: item 1357 :: Met Spoed Ambulance 89104 Met Spoed
+- los: item 1358 :: Met Spoed Meldkamer: Brandweer Midden-Nederland, Incidentkanaal 4 Dier In Problemen Prins 
+- los: item 1359 :: Met Grote Spoed Ambulance 89076 Met Grote Spoed
+- los: item 1360 :: Met Spoed Ambulance 89069 Met Spoed
+- los: item 1361 :: Met Grote Spoed Ambulance 89067 Met Grote Spoed
+- los: item 1362 :: Met Grote Spoed Ambulance 89052 Met Grote Spoed
+- los: item 1363 :: Met Grote Spoed Ambulance 88976 Met Grote Spoed
+- los: item 1364 :: Met Spoed Ambulance 88967 Met Spoed
+- los: item 1365 :: Met Spoed Ambulance 88947 Met Spoed
+- los: item 1366 :: Met Grote Spoed Ambulance 88935 Met Grote Spoed
+- los: item 1367 :: Met Spoed Ambulance 88909 Met Spoed
+- los: item 1370 :: Met Spoed Ambulance 88886 Met Spoed
+- los: item 1371 :: Met Spoed Ambulance 88834 Met Spoed
+- los: item 1372 :: Met Spoed Meldkamer: Brandweer Midden-Nederland, Incidentkanaal 7 Dienstverlening 090152 0
+- los: item 1373 :: Met Spoed Ambulance 88767 Met Spoed
+- los: item 1374 :: Met Grote Spoed Ambulance 88743 Met Grote Spoed
+- los: item 1423 :: Met Grote Spoed Ambulance 89501 Met Grote Spoed
+- los: item 1424 :: Met Grote Spoed Ambulance 89481 Met Grote Spoed
+- los: item 1425 :: Met Spoed Ambulance 89479 Met Spoed
+- los: item 1426 :: Met Grote Spoed Ambulance 89477 Met Grote Spoed
+- los: item 1428 :: Met Spoed Ambulance 89472 Met Spoed
+- los: item 1429 :: Met Spoed Meldkamer: Brandweer Midden-Nederland, Incidentkanaal 1 Liftopsluiting 090132
+- los: item 1430 :: Met Grote Spoed Ambulance 89453 Met Grote Spoed
+- los: item 1431 :: Met Grote Spoed Ambulance 89446 Met Grote Spoed
+- los: item 1432 :: Met Spoed Meldkamer: Brandweer Midden-Nederland, Incidentkanaal 1 Brandmelding Buiten Riga
+- los: item 1433 :: Met Spoed Ambulance 89415 Met Spoed
+- los: item 1434 :: Met Grote Spoed Ambulance 89389 Met Grote Spoed
+- los: item 1435 :: Met Grote Spoed Ambulance 89344 Met Grote Spoed
+- los: item 1510 :: BRA — Met Spoed Meldkamer: Brandweer Midden-Nederland, Incidentkanaal 1 Brandmelding Buite
+- los: item 1511 :: BRA — Met Grote Spoed Meldkamer: Brandweer Oost-Nederland, Incidentkanaal 1 Ongeval Wegver
+- los: item 1512 :: Politie — Aanrijding Letsel 401134
+- los: item 1513 :: Politie — Aanrijding Letsel 401134
+- los: item 1530 :: BRA — Met Spoed Meldkamer: Brandweer Midden-Nederland, Incidentkanaal 1 Stank/Hind. Lucht 
+- los: item 1531 :: BRA — Met Spoed Meldkamer: Brandweer Midden-Nederland, Incidentkanaal 3 Brandmelding Buite
+- los: item 1541 :: BRA — Met Spoed Meldkamer: Brandweer Midden-Nederland, Incidentkanaal 6 Brandmelding Afval
+- los: item 1542 :: BRA — Met Spoed Meldkamer: Brandweer Midden-Nederland, Incidentkanaal 6 Brandmelding Afval
+- los: item 1543 :: Ambulance — Met Grote Spoed Aanrijding Letsel Re 42,5
+- los: item 1544 :: BRA — Met Spoed Meldkamer: Brandweer Midden-Nederland, Incidentkanaal 3 Brandmelding Conta
+
+## #197 [discarded] "Verordening van de gemeenteraad van de gemeente Amersfoort houdende re" — 49 items, 0 behouden, 49 losgekoppeld
+- los: item 2318 :: Ontwerpbesluit omgevingsvergunning en ontwerpbesluit hogere grenswaarden Wet geluidhinder 
+- los: item 2320 :: Ontwerpbesluit omgevingsvergunning zero-emissie energiestation De Wieken
+- los: item 2322 :: Bouw 38 appartementen, commerciële voorzieningen (110 m2) en vier werkloodsen met de bijbe
+- los: item 2323 :: Bouw 38 appartementen en commerciële voorzieningen (110 m2) met de bijbehorende parkeervoo
+- los: item 2324 :: Bouw 34 woningen en een commerciële ruimte in Vathorst – Blok 14 Stationsplein
+- los: item 2325 :: Ontwerpbesluit omgevingsvergunning Fietsroute Kattenbroek- Gangboord_De Kreek
+- los: item 2326 :: Omgevingsvergunning Utrechtseweg 174 (watertoren)
+- los: item 2327 :: Omgevingsvergunning Zonnepark Hoevelakense Beek (Koedijkerweg)
+- los: item 2328 :: Ontwerpbesluit omgevingsvergunning Utrechtseweg 174 (watertoren)
+- los: item 2329 :: Ontwerpbesluit omgevingsvergunning Zonnepark Hoevelakense Beek (Koedijkerweg)
+- los: item 2332 :: Verkeersbesluit gemeente Amersfoort wijk Vermeerkwartier: het instellen van een parkeerver
+- los: item 2334 :: Verkeersbesluit gemeente Amersfoort wijk Vermeerkwartier-Leusderkwartier: opheffen van een
+- los: item 2335 :: Verkeersbesluit gemeente Amersfoort wijk Nieuwland: aanleggen van een gehandicaptenparkeer
+- los: item 2336 :: Verkeersbesluit gemeente Amersfoort wijk Vermeerkwartier-Leusderkwartier: het aanleggen va
+- los: item 2337 :: Verkeersbesluit gemeente Amersfoort: het opheffen van een gehandicaptenparkeerplaats op de
+- los: item 2338 :: Verkeersbesluit gemeente Amersfoort wijk Soesterkwartier: het aanwijzen van twee parkeerva
+- los: item 2339 :: Verkeersbesluit gemeente Amersfoort wijk Liendert: het aanwijzen van twee parkeervakken vo
+- los: item 2340 :: Verkeersbesluit gemeente Amersfoort wijk Isselt: het aanwijzen van twee parkeervakken voor
+- los: item 2341 :: Verkeersbesluit gemeente Amersfoort wijk Nieuwland: het opheffen van een gehandicaptenpark
+- los: item 2342 :: Verkeersbesluit gemeente Amersfoort wijk Vathorst: het instellen van een parkeerverbod uit
+- los: item 2343 :: Verkeersbesluit gemeente Amersfoort wijk Vathorst: het aanwijzen van twee parkeervakken vo
+- los: item 2344 :: Verkeersbesluit gemeente Amersfoort wijk Leusderkwartier: het aanwijzen van twee parkeerva
+- los: item 2345 :: Verkeersbesluit gemeente Amersfoort wijk Randenbroek: het aanwijzen van twee parkeervakken
+- los: item 2346 :: Verkeersbesluit gemeente Amersfoort wijk Vathorst: het realiseren van twee zebrapaden op d
+- los: item 2347 :: Verkeersbesluit gemeente Amersfoort wijk Kattenbroek: het aanwijzen van twee parkeervakken
+- los: item 2348 :: Verkeersbesluit gemeente Amersfoort wijk Liendert: het aanwijzen van twee parkeervakken vo
+- los: item 2349 :: Verkeersbesluit gemeente Amersfoort wijk Nieuwland: het aanwijzen van twee parkeervakken v
+- los: item 2350 :: Verkeersbesluit gemeente Amersfoort wijk Vathorst: het aanwijzen van twee parkeervakken vo
+- los: item 2351 :: Verkeersbesluit gemeente Amersfoort wijk Leusderkwartier: het aanwijzen van twee parkeerva
+- los: item 2352 :: Verkeersbesluit gemeente Amersfoort wijk Vathorst: het opheffen van een gehandicaptenparke
+- los: item 2353 :: Verkeersbesluit gemeente Amersfoort wijk Vathorst: het instellen van een parkeerverbodzone
+- los: item 2354 :: Verkeersbesluit gemeente Amersfoort wijk Hooglanderveen: het aanwijzen van 2 parkeervakken
+- los: item 2355 :: Verkeersbesluit gemeente Amersfoort wijk Soesterkwartier: hat aanleggen van een gehandicap
+- los: item 2357 :: Verordening van de gemeenteraad van de gemeente Amersfoort houdende regels omtrent de heff
+- los: item 2359 :: Besluit van het college van burgemeester en wethouders van de gemeente Amersfoort houdende
+- los: item 2361 :: Reglement van het dagelijks bestuur van de Veiligheidsregio Utrecht houdende regels omtren
+- los: item 2362 :: Besluit van het college van burgmeester en wethouders van de gemeente Amersfoort houdende 
+- los: item 2363 :: Besluit van het college van burgemeester en wethouders van de gemeente Amersfoort houdende
+- los: item 2364 :: Besluit van het college van burgemeester en wethouders van de gemeente Amersfoort houdende
+- los: item 2365 :: Besluit van het college van burgmeester en wethouders van de gemeente Amersfoort houdende 
+- los: item 2366 :: Besluit van het college van burgemeester en wethouders van de gemeente Amersfoort houdende
+- los: item 2367 :: Besluit van de afdelingsmanager Werk, Inkomen en Zorg van de gemeente Amersfoort houdende 
+- los: item 2368 :: Besluit van het dagelijks bestuur van de Veiligheidsregio Utrecht houdende regels omtrent 
+- los: item 2369 :: Besluit van het dagelijks bestuur van de Veiligheidsregio Utrecht houdende regels omtrent 
+- los: item 2370 :: Besluit van het dagelijks bestuur van de Veiligheidsregio Utrecht houdende regels omtrent 
+- los: item 2371 :: Verordening van de gemeenteraad van de gemeente Amersfoort houdende regels omtrent de heff
+- los: item 2373 :: Besluit van het college van burgemeester en wethouders van de gemeente Amersfoort houdende
+- los: item 2375 :: Beleidsregel van het college van burgemeester en wethouders van de gemeente Amersfoort hou
+- los: item 2376 :: Verordening van de gemeenteraad van de gemeente Amersfoort houdende regels omtrent huisves
+
+## #41 [discarded] "[112 Amersfoort] 112amersfoort.nl/schoorsteen-... #Amersfoort" — 45 items, 0 behouden, 45 losgekoppeld
+- los: item 1382 :: [112 Amersfoort] 112amersfoort.nl/schoorsteen-... #Amersfoort
+- los: item 1471 :: [112 Amersfoort] 112amersfoort.nl/deelnemer-ma... #Amersfoort
+- los: item 2270 :: Raadzaal
+- los: item 2271 :: Molendijkzaal
+- los: item 2272 :: Vermeerzaal
+- los: item 2274 :: Barchman Wuytierslaan 53
+- los: item 2275 :: Collegekamer (1.25)
+- los: item 2276 :: Een raadsakkoord of klassiek formeren?
+- los: item 2278 :: Verkiezingsevenement Let's Go Vote
+- los: item 2279 :: Debatavond: Groene Stad
+- los: item 2280 :: Debatavond: woningbouw
+- los: item 2282 :: Jongerenverkiezingsavond 2026: Jouw stem, praat mee!
+- los: item 2283 :: Democratie fitness
+- los: item 2284 :: Lijsttrekkersdebat
+- los: item 2285 :: Verkiezingsdebat van Amnesty International
+- los: item 2286 :: Vrouwendebat en Dialoog
+- los: item 2287 :: Verkiezingsdebat Sociëteit Amicitia
+- los: item 2288 :: VGZ Publieksdebat over zorg en ondersteuning
+- los: item 2290 :: Verkiezingsdebat Vathorst-Hooglanderveen
+- los: item 2291 :: Verkiezingsbijeenkomst wonen en mobiliteit regio Amersfoort
+- los: item 2292 :: Debatavond: Mobiliteit
+- los: item 2293 :: Journalistiek Café over (doorlopende) Democratie
+- los: item 2294 :: Duidingsdebat Gemeenteraadsverkiezingen
+- los: item 2295 :: Raadzaal 
+- los: item 2296 :: Stadhuis Amersfoort, Stadhuisplein 1  
+- los: item 2297 :: Stadhuis Amersfoort, Stadhuisplein 1 
+- los: item 2298 :: Dag van Europa
+- los: item 2300 :: Langs Eem en Spoorcafé
+- los: item 2301 ::  Zie uitnodigingen
+- los: item 2302 :: Vide, Stadhuis
+- los: item 2303 :: Raadzaal, Stadhuis Amersfoort, Stadhuisplein 1
+- los: item 2304 :: Stadsgesprekken over Inclusie en Toegankelijkheid
+- los: item 2306 :: Inwerkprogramma (interne werksessie)
+- los: item 2614 :: Verleende omgevingsvergunning voor het plaatsen van een dakkapel op het perceel De Belschu
+- los: item 2615 :: Verleende omgevingsvergunning voor het realiseren van een dakopbouw op het perceel Triange
+- los: item 2619 :: Verleende omgevingsvergunning voor het plaatsen van een dakkapel op het voordakvlak van de
+- los: item 2621 :: Verleende omgevingsvergunning voor het plaatsen van een dakkapel op het perceel Abraham Bl
+- los: item 2623 :: Verleende omgevingsvergunning voor het legaliseren van gevelreclame op het perceel Databan
+- los: item 2627 :: Verleende omgevingsvergunning voor het plaatsen van een dakkapel en wijzigen tuinberging o
+- los: item 2640 :: Verleende omgevingsvergunning voor het plaatsen van een dakkapel op het voordakvlak van de
+- los: item 2641 :: Verleende omgevingsvergunning voor het plaatsen van een dakkapel op het voordakvlak van de
+- los: item 2662 :: [112 Amersfoort] 112amersfoort.nl/hulpdiensten... #Amersfoort
+- los: item 2665 :: [112 Amersfoort] 112amersfoort.nl/demonstratie... #Amersfoort
+- los: item 2668 :: [112 Amersfoort] 112amersfoort.nl/twee-autos-b... #Amersfoort
+- los: item 2671 :: [112 Amersfoort] 112amersfoort.nl/burgernet-ac... #Amersfoort
+
+## #32 [discarded] "[NS] Utrecht - Amersfoort; Utrecht - Hilversum; Utrecht - Baarn." — 22 items, 0 behouden, 22 losgekoppeld
+- los: item 1272 :: Nieuwsplein33: Hindoestaanse cultuur in Vathorst: ‘Het is geen geloof, maar een manier van
+- los: item 1278 :: Hindoestaanse cultuur in Vathorst: 'Het is geen geloof, maar een manier van leven'
+- los: item 1293 :: Afsluitingen in Utrecht: dit zijn de gevolgen voor het verkeer van de marathon
+- los: item 1297 :: Zie jij Harry Styles zondag door Utrecht rennen? Fans speculeren over deelname marathon
+- los: item 1309 :: [Albatrosstraat] https://www.jumbo.com/extras/digital-stamps/saving-stamps/zegelverzoek?re
+- los: item 1315 :: [Rustenburg-Noord] Ik verloot deze laptop aankomende zondag aan diegene die hem heel hard 
+- los: item 1323 :: [Het Hallehuis] Heb een zak gedroogde kippen pooten voor de hond mijn hond lust het niet s
+- los: item 1329 :: [Nijkerkerveen] ✈️ Airport / Vliegveld Service ✈️ Comfortabel en betrouwbaar vervoer van e
+- los: item 1332 :: [Albatrosstraat] ✨ Gisteren maakten onze cursisten tijdens hun allereerste wire wrap works
+- los: item 1375 :: [NS] Utrecht - Tiel; Utrecht - Eindhoven.
+- los: item 1376 :: [NS] Utrecht - Leiden.
+- los: item 1377 :: [NS] Utrecht - Amersfoort; Utrecht - Baarn.
+- los: item 1407 :: [Albatrosstraat] 🇪🇸☀️ Droom weg aan de Costa Blanca ☀️🇪🇸 Toe aan zon, rust en de heerl
+- los: item 1408 :: [Waterkwartier] Woon je in Nieuwland? Dan kun je gratis meedoen aan Wijkgame Nieuwland: ee
+- los: item 1409 :: [Rustenburg-Noord] Ik verloot deze laptop aankomende zondag aan diegene die hem heel hard 
+- los: item 1412 :: [Queekhoven] Deze fiets ligt in de struiken op de Sara Burgerhartsingel. Van wie is ie?
+- los: item 1413 :: [Amaniet] Laat je gratis je bloeddruk, cholesterol en bloedsuiker checken en krijg advies!
+- los: item 1417 :: [Vinkenbaan] Stapelblokken gratis ophalen liendert
+- los: item 1419 :: [Albatrosstraat] ✨ Maak jouw eigen unieke amulet van natuursteen en metaaldraad! ✨ Ben je 
+- los: item 1436 :: [NS] Utrecht - Amersfoort; Utrecht - Hilversum; Utrecht - Baarn.
+- los: item 1528 :: Muzikaal sprookjesavontuur: ‘De Gelaarsde Kat’ komt tot leven
+- los: item 1660 :: [NS] Amersfoort - Deventer.
+
+## #80 [published] "Starterslening Amersfoort opnieuw gevuld: raad wil 5,5 miljoen euro" — 16 items, 1 behouden, 15 losgekoppeld
+- los: item 2356 :: Verordening van de gemeenteraad van de gemeente Amersfoort houdende regels omtrent de bege
+- los: item 2444 :: Schriftelijke vragen 2026-059 CDA Een stralende marathon Amersfoort
+- los: item 2445 :: Schriftelijke vragen 2026-058 Amersfoort voor Vrijheid Ondergrondse GFT-containers
+- los: item 2446 :: 2026-057 Schriftelijke vragen Amersfoort voor Vrijheid Jongerenoverlast winkelcentrum Vath
+- los: item 2447 :: 2026-056 Schriftelijke vragen BPA Recente banenmarkt voor statushouders en asielzoekers in
+- los: item 2448 :: Raadsinformatiebrief 2026-057 Evaluatie Focusteam Bijlaatsingen
+- los: item 2449 :: Raadsinformatiebrief 2026-056 Reactie op het accountantsverslag 2025
+- los: item 2450 :: 3. Bedrijvigheid 309 Inspreektekst inspreker over hondenuitlaat gebied Inspreker 03-06-202
+- los: item 2451 :: 308 Inspreektekst inspreker over zwembad Hoogland BETR BIJ COM OMG 03-06-2026
+- los: item 2452 :: 4. Bestuur 307 Verslag bijeenkomst bewoners Zielhorst met raadsleden Wijkcentrum ’t Middel
+- los: item 2453 :: 1. Omgeving 306 Inspreektekst mbt zwembad Hoogland Inspreker 02-06-2026 Betrekken bij comm
+- los: item 2454 :: 3. Bedrijvigheid 305 Dringende oproep bestuurlijke interventie windturbines industrieterre
+- los: item 2455 :: 1. Omgeving 304 Parkeren bij station Amersfoort Schothorst Inwoner Grave 02-06-2026 Taak c
+- los: item 2456 :: 3. Bedrijvigheid 303 Raadsbrief zienswijzen uittreding gemeenten De Ronde Venen en Eemnes 
+- los: item 2457 :: 3. Bedrijvigheid 302 Constructieve bijdrage tot het evenementen-/geluidsbeleid en de toeko
+
+## #97 [published] "Zakkenrollen in Amersfoort stijgt in eerste maanden 2026" — 21 items, 1 behouden, 20 losgekoppeld
+- los: item 1907 :: art. 7:653 BW. Kort geding. Vordering tot schorsing concurrentiebeding. Geldigheid. Ingrij
+- los: item 1950 :: Ontruiming horecapand vanwege huurachterstand. Deel van gedaagden is verschenen. Huurachte
+- los: item 2042 :: Vordering tot betaling van schadevergoeding, nadat gedaagde in auto van eiser is gevlucht 
+- los: item 2099 :: Vordering tot betaling factuur. Factuur in eerste instantie niet betwist en gedaagde niet 
+- los: item 2386 :: Kennisgeving buiten behandeling laten - plaatsen warmtepomp voor de dakkapel - Groote Kree
+- los: item 2387 :: Ontvangen aanvraag omgevingsvergunning voor het plaatsen van nieuwe kozijnen op het percee
+- los: item 2388 :: Ontvangen aanvraag omgevingsvergunning voor het kappen van een boom op het perceel Dorrest
+- los: item 2389 :: Verleende vergunning tijdelijk gebruik van de weg, plaatsen van een vaste steiger van 21 m
+- los: item 2390 :: Verleende omgevingsvergunning voor het kappen van een boom  op het perceel Boomrijk 43, 38
+- los: item 2391 :: Verleende vergunning tijdelijk gebruik van de weg, aanleg van een tijdelijke inrit tbv slo
+- los: item 2392 :: Verleende omgevingsvergunning voor het wijzigen van de draagconstructie en voorgevel en pl
+- los: item 2393 :: Ontvangen aanvraag omgevingsvergunning voor het kappen van een boom op het perceel Deelerw
+- los: item 2394 :: Ontvangen aanvraag omgevingsvergunning voor het realiseren van een uitbouw aan de achterzi
+- los: item 2396 :: Ontvangen aanvraag omgevingsvergunning voor het plaatsen van een dakopbouw op het perceel 
+- los: item 2397 :: Verleende vergunning tijdelijk gebruik van de weg, tijdelijk plaatsen van een hoogwerker v
+- los: item 2398 :: Verleende vergunning tijdelijk gebruik van de weg, plaatsen van een steiger van 22 juni t/
+- los: item 2399 :: Verleende omgevingsvergunning voor het kappen van een boom op het perceel Dorresteinseweg 
+- los: item 2401 :: Verleende omgevingsvergunning voor het renoveren van de woning en het realiseren van een p
+- los: item 2402 :: Ontvangen aanvraag omgevingsvergunning voor het realiseren van een uitbouw aan de achterzi
+- los: item 2403 :: Verleende omgevingsvergunning voor het De uitbreiding van de bestaande 2e verdieping op he
+
+## #207 [published] "Wethouder Bijlholt vertrekt naar Amsterdam Zuidoost" — 34 items, 4 behouden, 30 losgekoppeld
+- los: item 2459 :: Opening Faunahuis: eerste stap in vernieuwing Bernhardkazerne
+- los: item 2461 :: Burgemeester Lucas Bolsius bezoekt 100-jarige mevrouw J. Kooiman - Woelders
+- los: item 2465 :: Faunahuis geopend op Bernhardkazerne in Amersfoort
+- los: item 2480 :: Van Gent Finaleweken: Jelle Smeding (14) driemaal Nederlands kampioen én krijgt NOC/NSF-st
+- los: item 2484 :: Van Gent Finaleweken: Uno net te sterk voor Eemvallei Heren 1, maar club wil volgend seizo
+- los: item 2501 :: Delegatie Amersfoorts klokkenluidersgilde kreeg les in Engels Ringluiden
+- los: item 2504 :: Sloop Lobelius-serre in Amersfoort van start
+- los: item 2512 :: Talent in aantocht
+- los: item 2541 :: Activiteitenkalender college van burgemeester en wethouders tot en met zondag 14 juni 2026
+- los: item 2546 :: Amersfoort heeft beste regenboogbeleid, maar 'in het nachtleven is nog winst te behalen'
+- los: item 2559 :: Tientallen hardlopers onwel: Marathon Amersfoort onderzoekt eerdere datum in 2027
+- los: item 2602 :: Schriftelijke vragen 2026-065 BPA Vragen aan College vanuit perspectief Metropoolregio Utr
+- los: item 2616 :: Verleende vergunning tijdelijk gebruik van de weg, plaatsen van een afvalcontainer en toil
+- los: item 2622 :: 3. Bedrijvigheid 317 Overlast Noordewierweg Inwoners 09-06-2026 Taak college, raad neemt k
+- los: item 2625 :: Vertrokken met onbekende bestemming van A. Skujnieks
+- los: item 2632 :: Vertrokken met onbekende bestemming van E.F. Martina
+- los: item 2634 :: Verleende vergunning tijdelijk gebruik van de weg, plaatsen van een afvalcontainer en toil
+- los: item 2638 :: Verleende vergunning tijdelijk gebruik van de weg, plaatsen van een afvalcontainer op 29 j
+- los: item 2651 :: Verleende Omgevingsvergunning, het bouwen van een entresolvloer in een bedrijfsgebouw, Ove
+- los: item 2658 :: Verleende Omgevingsvergunning, het intern wijzigen van het pand en verplaatsen van een bra
+- los: item 2664 :: Bekendmaking melding toepassen van grond of baggerspecie op de Heidelberglaan 25 in Utrech
+- los: item 2672 :: [Birkhoven en Bokkeduinen] Afgelopen zondag tijdens een rit op bus 70 en ronduit asociaal 
+- los: item 2677 :: [De Hoef-Oost] Gezocht: Model voor Pedicurebehandeling – 8 juli Voor een pedicurebehandeli
+- los: item 2683 :: [Birkhoven en Bokkeduinen] Afgelopen zondag tijdens een rit op bus 70 en ronduit asociaal 
+- los: item 2691 :: [Evertsenstraat] Proef Kruiskamp/Koppel is een jaarlijks, gratis wijkfestival in Amersfoor
+- los: item 2705 :: [Birkhoven en Bokkeduinen] Afgelopen zondag tijdens een rit op bus 70 en ronduit asociaal 
+- los: item 2720 :: Nieuw bij Railcenter: de Wall-PD!
+- los: item 2732 :: NVWA breidt terugroepactie Brabantse vleesverwerker uitDe Nederlandse Voedsel- en Warenaut
+- los: item 2733 :: Inspectieresultaten Q-koorts 2024Houders van schapen en geiten moeten maatregelen nemen om
+- los: item 2734 :: Inspectieresultaten Q-koorts 2023Houders van schapen en geiten moeten maatregelen nemen om
+
+## #209 [published] "Steekincident Turpijnplaats Schothorst Amersfoort" — 19 items, 3 behouden, 16 losgekoppeld
+- los: item 2483 :: Van Gent Finaleweken: VOP dankzij Berry Powel terug naar vierde klasse: ‘Er moest een mome
+- los: item 2485 :: Persoon trekt aan noodrem van trein, springt eruit en raakt mogelijk te water in Amersfoor
+- los: item 2509 :: Meander nodigt inwoners uit om mee te praten over toekomst van het ziekenhuis
+- los: item 2534 :: [NS] Utrecht - Amersfoort.
+- los: item 2567 :: Steekpartij Amersfoort ontstond na ruzie met fatbiker, politie zoekt 3 verdachten
+- los: item 2568 :: Gewonde bij steekpartij in Amersfoort, verdachte op de vlucht
+- los: item 2569 :: Man in Amersfoort aangehouden voor smokkel van tonnen drugs
+- los: item 2577 :: Jongen (3) naar politie gebracht, maar het is een raadsel wie hij is
+- los: item 2578 :: Slachtoffer gasexplosie Amersfoort aan verwondingen overleden
+- los: item 2599 :: Praat mee over de toekomst van uw ziekenhuis | Meander Medisch Centrum
+- los: item 2659 :: [112 Amersfoort] 112amersfoort.nl/hulpdiensten... #steekpartij #Amersfoort
+- los: item 2669 :: [Binnenstad] Mijn 2 sleutels in zwart tasje verloren. Tussen Pothstraat Amersfoort en Mole
+- los: item 2695 :: [Bachweg-Zuid] Getuigen gezocht – doorrijding na schade aan geparkeerde auto Beste buurtbe
+- los: item 2697 :: [Stadskwartier] . S Suus Stegg 1 dag geleden ✨ PEDICURE MODEL GEZOCHT ✨ 💰 Beloning: €50,-
+- los: item 2700 :: [G. van Stellingwerfstraat] Ik breng deze graag nog een keer onder de aandacht! 🙏 Eva P. 
+- los: item 2714 :: [Albatrosstraat] Zon, Zee en Strand in La Mata, Torrevieja! ☀️🏖️ Bent u op zoek naar de p
+
+## #210 [published] "Raadsbesluit betaald parkeren Soesterkwartier voor 5500 woningen" — 16 items, 0 behouden, 16 losgekoppeld
+- los: item 2466 :: Van boerderij naar nieuwbouwwoning: Twee opties voor kopers project Hoogland
+- los: item 2467 :: Amersfoort krijgt eerste Offline Club
+- los: item 2470 :: De Specialist: ‘De notaris en het mysterie van de vergeten akte’
+- los: item 2488 :: Museum Flehite heropent als Museum Amersfoort
+- los: item 2506 :: Albert Heijn Emiclaerhof twee weken dicht vanwege verbouwing
+- los: item 2558 :: 35.000 woningen in provincie krijgen aansluiting stroomnet, ook in Amersfoort en Leusden
+- los: item 2571 :: Fietsenstalling Amersfoort Centraal op de schop na jaar van werkzaamheden op Stationsplein
+- los: item 2579 :: Zorgen bij buurtbewoners over woningen voor overlastgevers aan de rand van Amersfoort
+- los: item 2612 :: Terrasvergunning - Horeca Utrechtsestraat 47, 3811 LA Amersfoort
+- los: item 2682 :: Besluit omgevingsvergunning is verleend, het verbouwen van het bedrijfsgebouw, Broekakkerw
+- los: item 2698 :: Gemeente Gilze en Rijen - kennisgeving melding Besluit activiteiten leefomgeving - Coppens
+- los: item 2701 :: Besluit: Vergunning verleend Staringlaan 43, 1702 GK Heerhugowaard
+- los: item 2703 :: Nieuwe aanvraag omgevingsvergunning voor een wateractiviteit, ter hoogte van Karperweg 39 
+- los: item 2708 :: Nieuwe aanvraag omgevingsvergunning voor een wateractiviteit, ter hoogte van Polygoongrach
+- los: item 2737 :: Stappenplan Met mijn paard op reis binnen de Europese Unie (EU)Gaat u met uw paard vanuit 
+- los: item 2741 :: Besluit tot intrekking van het Besluit maatregelen Grevelingenmeer (uitsluitend voor MHC B
+
+---
+Totaal losgekoppeld: 879. Items nu op is_processed=0 (klaar voor herintake): 881.
