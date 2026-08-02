@@ -47,7 +47,10 @@ async function scrape() {
       const href = $(el).attr('href') || '';
       const url = href.startsWith('http') ? href : (href.startsWith('/') ? `${BASE_URL}${href}` : '');
       const title = $(el).text().trim();
-      if (url.includes('arbeidsmarkt') && title.length > 5 && !items.find(i => i.url === url)) {
+      // Fix 2026-08-02: fallback haalde landelijke regiolijst binnen (Noord/Midden/Zuid-Limburg).
+      // Alleen links die aantoonbaar over de eigen regio gaan.
+      const regio = /amersfoort|eemland/i;
+      if (url.includes('arbeidsmarkt') && title.length > 5 && (regio.test(url) || regio.test(title)) && !items.find(i => i.url === url)) {
         items.push({ url, title });
       }
     });

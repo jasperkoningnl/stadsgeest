@@ -69,4 +69,12 @@ try {
   console.error('Entiteitsextractie mislukt:', err.message);
 }
 
+// Bronnenwacht (P4, 2026-08-02)
+try {
+  const bwOut = execSync(`node "${path.join(__dirname, 'bronnenwacht.cjs')}"`, { stdio: 'pipe', timeout: 300000, encoding: 'utf8', env: { ...process.env, SCRAPE_JOB_NAME: JOB_NAME } });
+  if (bwOut) process.stdout.write(bwOut);
+} catch (err) {
+  console.error('Bronnenwacht mislukt:', err.message);
+}
+
 console.log(`\n=== Browser-scrape-run voltooid: ${new Date().toISOString()} ===\n`);

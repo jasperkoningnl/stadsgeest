@@ -289,14 +289,22 @@ async function scrapeACM() {
         pubLinks.set(href, text);
       }
     });
+    // Fix 2026-08-02: filter werd nooit toegepast — helft van de items was landelijke ruis.
+    // Nu: publicatiepagina ophalen en alleen opslaan bij aantoonbare regionale relevantie
+    // (plaatsnaam of bekende lokale organisatie zoals Ennatuurlijk/Eemwarmte bij het warmtenet).
+    const relevantie = /amersfoort|eemland|hoogland|vathorst|soesterkwartier|ennatuurlijk|eemwarmte|inwarmte|warmtebedrijf amersfoort/i;
     for (const [href, text] of Array.from(pubLinks).slice(0, 30)) {
       const url = href.startsWith('http') ? href : 'https://www.acm.nl' + href;
-      // Haal de publicatie-pagina op om inhoud te checken op Amersfoort-relevantie
-      // (alleen als we < 5 candidates hebben om rate limiting te vermijden)
+      let pageText = '';
+      try {
+        const pubHtml = await fetchHtml(url);
+        pageText = cheerio.load(pubHtml)('main, article, body').first().text().replace(/\s+/g, ' ').substring(0, 8000);
+      } catch { /* pagina niet leesbaar: beoordeel op titel */ }
+      if (!relevantie.test(text) && !relevantie.test(pageText)) { stats.skipped++; continue; }
       const r = await insertItem(db, {
         source_id: sid,
         title: text.substring(0, 300),
-        content: 'ACM publicatie — verificeer Amersfoort-relevantie via URL.',
+        content: (pageText || 'ACM publicatie — regionale relevantie op titel vastgesteld.').substring(0, 8000),
         external_url: url,
         scraped_at: new Date().toISOString(),
       });

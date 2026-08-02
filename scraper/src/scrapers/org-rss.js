@@ -50,7 +50,8 @@ const FEEDS = [
     feedUrl: 'https://www.natuurmonumenten.nl/api/news?_format=rss',
     category: 'local_news',
     reliability: 'secondary',
-    filter: null,
+    // Fix 2026-08-02: landelijke feed, 26/27 items niet-regionaal — regiofilter verplicht
+    filter: 'amersfoort',
   },
   // RCE en Defensie: geen RSS beschikbaar (Next.js-site) → HTML in erfgoed-natuur.js
 ];
