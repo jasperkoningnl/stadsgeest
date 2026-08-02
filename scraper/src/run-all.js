@@ -63,4 +63,12 @@ for (const scraper of scrapers) {
   }
 }
 
+// Entiteitsextractie over nieuwe items (P1, 2026-08-02) — lift mee met elke actieve run
+try {
+  const extractOut = execSync(`node "${path.join(__dirname, 'extract-entities.cjs')}"`, { stdio: 'pipe', timeout: 600000, encoding: 'utf8' });
+  if (extractOut) process.stdout.write(extractOut);
+} catch (err) {
+  console.error('Entiteitsextractie mislukt:', err.message);
+}
+
 console.log(`\n=== Scrape-run voltooid: ${new Date().toISOString()} ===\n`);

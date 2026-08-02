@@ -254,6 +254,41 @@ async function run() {
     const allTitlesResult = await db.execute(`SELECT title FROM signals`);
     const allSignalTitles = new Set(allTitlesResult.rows.map(r => (r.title || '').toLowerCase().trim()));
 
+    // Entity-gebaseerde matching (P1, 2026-08-02): per actief signaal de set entiteiten
+    // (personen/organisaties/adressen tellen zwaar; locaties licht). Items zijn vóór intake
+    // al gescand door extract-entities.cjs (draait in de run-files).
+    const sigEnt = new Map(); // signal_id -> {strong:Set, loc:Set}
+    const entRows = await db.execute(`
+      SELECT si.signal_id, e.entity_type, e.normalized_name
+      FROM signal_items si JOIN entities e ON e.raw_item_id = si.raw_item_id
+      WHERE e.entity_type IN ('person','organization','address','location')
+    `);
+    for (const r of entRows.rows) {
+      if (!sigEnt.has(r.signal_id)) sigEnt.set(r.signal_id, { strong: new Set(), loc: new Set() });
+      const b = sigEnt.get(r.signal_id);
+      (r.entity_type === 'location' ? b.loc : b.strong).add(r.normalized_name);
+    }
+    async function entityMatchSignal(itemId) {
+      const ie = await db.execute({ sql: `SELECT entity_type, normalized_name FROM entities WHERE raw_item_id = ?`, args: [itemId] });
+      if (!ie.rows.length) return null;
+      const iStrong = new Set(), iLoc = new Set();
+      for (const r of ie.rows) (r.entity_type === 'location' ? iLoc : iStrong).add(r.normalized_name);
+      // 'gemeente amersfoort' is te generiek als enige match
+      iStrong.delete('gemeente amersfoort');
+      let best = null, bestN = 0;
+      for (const sig of activeSignals) {
+        const b = sigEnt.get(sig.id);
+        if (!b) continue;
+        let n = 0;
+        for (const e of iStrong) if (b.strong.has(e)) n += 2;
+        let locN = 0;
+        for (const e of iLoc) if (b.loc.has(e)) locN++;
+        if (locN >= 2) n += 2; // ≥2 gedeelde locaties telt als één sterke match
+        if (n >= 2 && n > bestN) { bestN = n; best = sig; }
+      }
+      return best ? { sig: best, n: bestN } : null;
+    }
+
     for (const item of items) {
       const tier = item.tier || 2;
       const isHist = item.is_historical === 1;
@@ -284,12 +319,19 @@ async function run() {
         }
       }
 
-      // Signaalmatching
-      let bestMatch = null, bestScore = 0;
-      for (const sig of activeSignals) {
-        const score = matchScore(item, sig);
-        if (score >= 2 && score > bestScore) { bestScore = score; bestMatch = sig; }
+      // Signaalmatching — primair op gedeelde entiteiten (P1), woordoverlap als fallback
+      let bestMatch = null, bestScore = 0, matchBasis = 'woorden';
+      const em = await entityMatchSignal(item.id);
+      if (em) {
+        bestMatch = em.sig; bestScore = em.n; matchBasis = 'entiteiten';
+      } else {
+        for (const sig of activeSignals) {
+          const score = matchScore(item, sig);
+          if (score >= 2 && score > bestScore) { bestScore = score; bestMatch = sig; }
+        }
       }
+      // Bescherming: signalen met al veel items nooit verder voeden via woordoverlap
+      if (bestMatch && matchBasis === 'woorden' && (bestMatch.confirmations || 0) > 10) { bestMatch = null; bestScore = 0; }
 
       if (bestMatch) {
         await db.execute({ sql: `UPDATE signals SET confirmations = confirmations + 1, last_seen_at = datetime('now') WHERE id = ?`, args: [bestMatch.id] });
@@ -297,7 +339,7 @@ async function run() {
         bestMatch.confirmations = (bestMatch.confirmations || 0) + 1;
         stats.bijgewerktSignaal++;
         console.log(`  MATCH [T${tier}] "${(item.title||'').substring(0,50)}" → #${bestMatch.id} (score:${bestScore})`);
-        await decisionBatcher.push(decisionStmt(runId, item, tier, 'matched', `gekoppeld aan signaal #${bestMatch.id} (${bestScore} gedeelde woorden in de titel)`, { signal_id: bestMatch.id, match_score: bestScore }));
+        await decisionBatcher.push(decisionStmt(runId, item, tier, 'matched', `gekoppeld aan signaal #${bestMatch.id} (basis: ${matchBasis}, score ${bestScore})`, { signal_id: bestMatch.id, match_score: bestScore, match_basis: matchBasis }));
         await eventBatcher.push(eventStmt(bestMatch.id, 'confirmed', { reason: `bevestigd door nieuw item uit ${item.source_name || 'onbekende bron'}` }));
       } else {
         const normTitle = (item.title || '').toLowerCase().trim();
