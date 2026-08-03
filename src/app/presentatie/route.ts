@@ -76,7 +76,7 @@ const html = `<!DOCTYPE html>
   .stat .big{font-size:calc(var(--u)*4.6);line-height:1;color:var(--accent)}
   .stat .lbl{font-size:calc(var(--u)*1.15);color:var(--muted);
     margin-top:calc(var(--u)*.9);line-height:1.35}
-  .quote{font-size:calc(var(--u)*2.6);line-height:1.35;font-style:italic;max-width:86%}
+  .quote{font-size:calc(var(--u)*2.2);line-height:1.35;font-style:italic;max-width:88%}
   .note{font-size:calc(var(--u)*1.3);color:var(--muted);line-height:1.5}
   .foot{margin-top:auto;font-family:"Helvetica Neue",Arial,sans-serif;
     font-size:calc(var(--u)*.9);color:var(--muted);border-top:1px solid var(--line);
@@ -133,7 +133,7 @@ const html = `<!DOCTYPE html>
         <ul style="margin-top:0">
           <li>Volledig <b>transparant</b> over het AI-karakter.</li>
           <li>Alle content <b>vrij herbruikbaar</b>.</li>
-          <li>Gericht op bronnen waar <b>anderen niet naar kijken</b>.</li>
+          <li>Gericht op bronnen waar <b>AI juist goed mee uit de voeten kan</b>.</li>
           <li>Nu nog <b>afgeschermd</b>: experimenteerfase.</li>
         </ul>
       </div>
@@ -147,7 +147,7 @@ const html = `<!DOCTYPE html>
     <h2>Vijf diensten, elke dag</h2>
     <div class="flow">
       <div class="step"><div class="n">00:10</div><div class="t">Intake</div><div class="d">Alles wat is opgehaald wordt geordend. Losse berichten worden gebundeld tot &ldquo;signalen&rdquo;.</div></div>
-      <div class="step"><div class="n">01:00</div><div class="t">Speurder</div><div class="d">Weegt de signalen. Nieuw? Meer dan één bron? Al eens over geschreven? Kiest maximaal drie.</div></div>
+      <div class="step"><div class="n">01:00</div><div class="t">Analist</div><div class="d">Weegt de signalen. Nieuw? Meer dan één bron? Al eens over geschreven? Kiest maximaal drie.</div></div>
       <div class="step"><div class="n">02:00</div><div class="t">Researcher</div><div class="d">Zoekt context: eerdere berichtgeving, betrokken personen en organisaties, reacties uit de wijk.</div></div>
       <div class="step"><div class="n">06:00</div><div class="t">Schrijver</div><div class="d">Schrijft, publiceert, zet de bronnen eronder. Nieuw nieuws over een oud verhaal wordt een update.</div></div>
       <div class="step"><div class="n">07:00</div><div class="t">Designer</div><div class="d">Zoekt beeld en bepaalt de indeling van de voorpagina.</div></div>
@@ -217,14 +217,14 @@ const html = `<!DOCTYPE html>
     <div class="cols">
       <div>
         <h3>Was</h3>
-        <p>Een site die zelf publiceert. Eindproduct, lezer als doelgroep. Beeld, opmaak en voorpagina moeten kloppen.</p>
+        <p><b>Eindproduct, gericht op de lezer.</b> Een site die zelf publiceert, met beeld, opmaak en een voorpagina die moeten kloppen.</p>
       </div>
       <div>
         <h3>Wordt</h3>
-        <p><b>Grondstof, geen eindproduct.</b> Berichten met de feiten, de vindplaats van elk feit en de open vragen die nog beantwoord moeten worden. Plus het proces zelf inzichtelijk: waar komt dit vandaan, en waarom denkt het systeem dat dit iets is.</p>
+        <p><b>Grondstof, gericht op de redactie.</b> Berichten met de feiten, de vindplaats van elk feit en de vragen die nog open staan. Plus het proces erachter inzichtelijk.</p>
       </div>
     </div>
-    <p class="note" style="margin-top:calc(var(--u)*1.2)">Wat overblijft is precies waar het systeem goed in is: veel bronnen doorspitten en vasthouden waar iets vandaan komt.</p>
+    <p class="note" style="margin-top:calc(var(--u)*1.2)">De ambitie blijft overeind: dwarsverbanden vinden, en een beeld opbouwen van wie wat doet in Amersfoort — wethouders, raadsleden, bestuurders, en de stichtingen en bedrijven daaromheen.</p>
     <div class="foot"><span>Stadsgeest</span><span>8</span></div>
   </section>
 
@@ -232,11 +232,11 @@ const html = `<!DOCTYPE html>
   <section class="slide">
     <div class="kicker">Waarom dit gesprek</div>
     <h2>Liever samen dan alleen</h2>
-    <p class="quote">Ik weet vrij precies wat het systeem kan.<br>Ik weet niet of wat eruit komt bruikbaar is voor iemand die echt een stad verslaat.</p>
-    <ul style="margin-top:calc(var(--u)*3)">
-      <li>Welke bronnen zou je willen laten doorspitten als tijd geen rol speelde?</li>
-      <li>Wat maakt een signaal bruikbaar — en wat maakt het onbruikbaar?</li>
-      <li>In welke vorm zou je zoiets willen ontvangen?</li>
+    <p class="quote">Ik heb dit gebouwd als experiment: lukt het een AI-gedreven site te maken die zelfstandig bronnen doorzoekt en berichten publiceert?<br>Dat lukt.</p>
+    <ul style="margin-top:calc(var(--u)*2.5)">
+      <li>Ik heb ideeën over doorontwikkeling en wat er verder mogelijk is.</li>
+      <li>Maar ik doe dat liever samen dan alleen. Deels vanwege de kosten.</li>
+      <li>Vooral om het aan de praktijk te toetsen: werkt dit met echte voorbeelden, en is het écht nuttig voor een lokale nieuwssite?</li>
     </ul>
     <div class="foot"><span>Jasper Koning &middot; stadsgeest.nl</span><span>9</span></div>
   </section>
