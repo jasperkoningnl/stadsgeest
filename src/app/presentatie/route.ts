@@ -178,7 +178,7 @@ const html = `<!DOCTYPE html>
         <p><b>Tier 3</b> — signalen: sociale media, andere media, 112. Alleen aanleiding, nooit de basis.</p>
       </div>
     </div>
-    <p class="note" style="margin-top:calc(var(--u)*1.5)">Ruim honderd bronnen geregistreerd, waarvan een kleine vijftig dagelijks of wekelijks wordt opgehaald.</p>
+    <p class="note" style="margin-top:calc(var(--u)*1.5)">123 bronnen geregistreerd, waarvan een kleine vijftig dagelijks of wekelijks wordt opgehaald. Zeventig daarvan hebben ooit een signaal opgeleverd.</p>
     <div class="foot"><span>Stadsgeest</span><span>5</span></div>
   </section>
 
@@ -187,13 +187,13 @@ const html = `<!DOCTYPE html>
     <div class="kicker">Wat het opleverde</div>
     <h2>Cijfers na een paar maanden</h2>
     <div class="stats">
-      <div class="stat"><div class="big">3.200+</div><div class="lbl">ruwe berichten en documenten opgehaald</div></div>
-      <div class="stat"><div class="big">340+</div><div class="lbl">signalen gevormd — mogelijke verhalen</div></div>
-      <div class="stat"><div class="big">~57</div><div class="lbl">daadwerkelijk gepubliceerde artikelen</div></div>
-      <div class="stat"><div class="big">729</div><div class="lbl">personen en organisaties in de database</div></div>
+      <div class="stat"><div class="big">4.200+</div><div class="lbl">ruwe berichten en documenten opgehaald</div></div>
+      <div class="stat"><div class="big">700+</div><div class="lbl">signalen gevormd — mogelijke verhalen</div></div>
+      <div class="stat"><div class="big">91</div><div class="lbl">gepubliceerde artikelen, alle met beeld</div></div>
+      <div class="stat"><div class="big">950+</div><div class="lbl">personen, organisaties en locaties herkend</div></div>
     </div>
-    <p style="margin-top:calc(var(--u)*3);max-width:88%">De verhouding is het verhaal: van ruim drieduizend documenten blijft een paar dozijn artikel over. Het filter werkt. De vraag is of het de <i>juiste</i> dingen doorlaat.</p>
-    <div class="foot"><span>Stadsgeest &middot; stand per zomer 2026</span><span>6</span></div>
+    <p style="margin-top:calc(var(--u)*3);max-width:88%">De verhouding is het verhaal: van ruim vierduizend documenten blijven een kleine honderd artikelen over — en van de signalen wordt ruim driekwart weggegooid. Het filter werkt. De vraag is of het de <i>juiste</i> dingen doorlaat.</p>
+    <div class="foot"><span>Stadsgeest &middot; stand 3 augustus 2026</span><span>6</span></div>
   </section>
 
   <!-- 7 -->
@@ -201,10 +201,10 @@ const html = `<!DOCTYPE html>
     <div class="kicker">Eerlijk</div>
     <h2>Waar het schuurt</h2>
     <ul>
-      <li><b>De dwarsverbanden blijven uit.</b> Het idee was verbanden leggen die een redactie niet ziet omdat het te veel tijd kost. De praktijk: eendimensionale berichten, te vaak op één bron. De machine vindt nieuws, maar zelden een <i>verhaal</i>.</li>
-      <li><b>Beeld is een echt probleem.</b> Vrije beeldbanken leveren zelden iets passends. Grafieken alleen bij harde cijfers, kaartjes alleen bij plaatsgebonden nieuws. AI-beeld op een nieuwssite vind ik onacceptabel.</li>
-      <li><b>Het kost geld.</b> Vijf tot tien agentdiensten per dag verbruiken serieus rekencapaciteit.</li>
-      <li><b>Stille fouten.</b> Scrapers die een week stilstonden zonder dat iemand het merkte; koppelingen die honderden losse berichten aan één verhaal plakten.</li>
+      <li><b>De dwarsverbanden komen moeizaam op gang.</b> Het idee was verbanden leggen die een redactie niet ziet omdat het te veel tijd kost. De praktijk: eendimensionale berichten, te vaak op één bron. De machine vindt nieuws, maar zelden een <i>verhaal</i>.</li>
+      <li><b>Beeld blijft een probleem.</b> Elk artikel heeft nu een beeld, maar zelden een goed beeld. Vrije beeldbanken leveren nauwelijks iets uit Amersfoort — van het stadhuis bestaat geen bruikbare kleurenfoto. Grafieken alleen bij harde cijfers, kaartjes alleen bij plaatsgebonden nieuws. AI-beeld op een nieuwssite vind ik onacceptabel.</li>
+      <li><b>Het kost geld.</b> De routines liggen bewust vaak stil om verbruik te sparen; ik zet ze met de hand aan.</li>
+      <li><b>Stille fouten.</b> Scrapers die negentien dagen stillagen zonder dat iemand het merkte; koppelingen die honderden losse berichten aan één verhaal plakten.</li>
     </ul>
     <div class="foot"><span>Stadsgeest</span><span>7</span></div>
   </section>
@@ -221,10 +221,10 @@ const html = `<!DOCTYPE html>
       </div>
       <div>
         <h3>Wordt</h3>
-        <p><b>Grondstof, geen eindproduct.</b> Signalen uit taaie bronnen, met vindplaats en context, klaar om door een redactie opgepakt te worden. En het proces zelf inzichtelijk: waar komt dit vandaan, waarom denkt het systeem dat dit iets is.</p>
+        <p><b>Grondstof, geen eindproduct.</b> Berichten met de feiten, de vindplaats van elk feit en de open vragen die nog beantwoord moeten worden. Plus het proces zelf inzichtelijk: waar komt dit vandaan, en waarom denkt het systeem dat dit iets is.</p>
       </div>
     </div>
-    <p class="note" style="margin-top:calc(var(--u)*1.2)">Beeld en voorpagina zijn dan andermans probleem — precies het stuk dat niet werkt.</p>
+    <p class="note" style="margin-top:calc(var(--u)*1.2)">Wat overblijft is precies waar het systeem goed in is: veel bronnen doorspitten en vasthouden waar iets vandaan komt.</p>
     <div class="foot"><span>Stadsgeest</span><span>8</span></div>
   </section>
 
