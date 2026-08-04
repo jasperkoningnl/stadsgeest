@@ -8,7 +8,7 @@ De scheduled tasks en scrapers liggen bewust regelmatig stil om tokens te bespar
 
 - **BELANGRIJK — alle 10 stadsgeest scheduled tasks staan op `enabled: false`** (geverifieerd via `mcp__scheduled-tasks__list_scheduled_tasks`, 2026-07-24). Deze intake-run vandaag is dus een handmatige/systeem-trigger geweest, geen automatische cron-fire — morgen om 00:40 gaat hij NIET vanzelf weer draaien tenzij Jasper de tasks heractiveert. Al sinds minstens 2026-07-13 zo (zie eerdere Cowork-update) — niet door mij aangepast, productiebeslissing.
 - **stadsgeest-intake** — dagelijks 00:10 — raw_items verwerken, signalen bijwerken — laatste run: 2026-08-01 ✓ (471 onverwerkte items verwerkt, backlog van 8 dagen weggewerkt, zie Cowork-update 2026-08-01) — status task zelf: niet opnieuw geverifieerd deze run
-- **stadsgeest-speurder** (analist nacht) — dagelijks 01:01 — signalen analyseren, kandidaten selecteren — laatste run: 2026-08-03 ✓ (83 open signalen doorgenomen, 1 kandidaat geselecteerd (#531 verkeersbesluit deelauto's), 10 gediscard, 6 gereviewd, 1 crossref, opruiming leverde 0 op — zie Cowork-update 2026-08-03). Daarvóór: 2026-08-02 (tweede run, avond) ✓ (104 open signalen doorgenomen, 3 kandidaten geselecteerd (#503, #521, #507), 27 gediscard, 26 gereviewd, opruiming leverde 0 op — zie Cowork-update 2026-08-02, tweede speurder-run). Eerdere run diezelfde dag: 3 kandidaten (#516, #578, #589), 4 gediscard, 9 gereviewd, opruiming 138 signalen.
+- **stadsgeest-speurder** (analist nacht) — dagelijks 01:01 — signalen analyseren, kandidaten selecteren — laatste run: 2026-08-04 ✓ (122 open signalen doorgenomen, 2 kandidaten geselecteerd (#787 Portaal-flat Workumstraat, #541 startfoto Vathorst-Hooglanderveen), 39 gediscard waarvan 36 BAG-ruis, 6 gereviewd, 2 crossref, opruiming leverde 0 op — zie Cowork-update 2026-08-04, speurder-run). Daarvóór: 2026-08-03 ✓ (83 open signalen doorgenomen, 1 kandidaat geselecteerd (#531 verkeersbesluit deelauto's), 10 gediscard, 6 gereviewd, 1 crossref, opruiming leverde 0 op — zie Cowork-update 2026-08-03). Daarvóór: 2026-08-02 (tweede run, avond) ✓ (104 open signalen doorgenomen, 3 kandidaten geselecteerd (#503, #521, #507), 27 gediscard, 26 gereviewd, opruiming leverde 0 op — zie Cowork-update 2026-08-02, tweede speurder-run). Eerdere run diezelfde dag: 3 kandidaten (#516, #578, #589), 4 gediscard, 9 gereviewd, opruiming 138 signalen.
 - **stadsgeest-researcher** — dagelijks 02:04 — achtergrondinfo verzamelen per kandidaat — laatste run: 2026-08-02 ✓ (2e run van de dag: 3 kandidaten opgepakt (#516, #578, #589), 2 verrijkt, 1 gediscard als verouderd (#578) — zie Cowork-update 2026-08-02, tweede researcher-run)
 - **stadsgeest-schrijver** — dagelijks 06:05 — artikelen schrijven en publiceren naar Sanity — laatste run: 2026-08-04 ✓ (3 kandidaten verwerkt: 2 nieuwe artikelen gepubliceerd (#507, #531), 1 geblokkeerd op 'researching' (#516); 1 openstaande rectificatie afgerond — zie Cowork-update 2026-08-04). Daarvóór: 2026-07-24 ✓ (4 signalen verwerkt: 3 nieuwe artikelen + 1 update)
 - **stadsgeest-designer** — dagelijks 07:05 — afbeeldingen zoeken, homepage-indeling — laatste run: 2026-08-02 06:51 ✓ (1 artikel van beeld voorzien via kaart Vathorst/OpenStreetMap; top-artikel vers 5h, geen vervanging nodig — zie Cowork-update 2026-08-02)
@@ -70,6 +70,7 @@ De scheduled tasks en scrapers liggen bewust regelmatig stil om tokens te bespar
 
 ## Database Turso (geverifieerd 2026-08-04)
 
+- **signals (2026-08-04, na speurder-run):** 601 discarded, 90 published, 74 watching, 7 new, 3 researching. Mutaties deze run: 2 signalen naar 'researching' (#787 gevelvervanging Portaal-flat Workumstraat, #541 startfoto Vathorst-Hooglanderveen), 39 gediscard met reden (waarvan 36 automatische BAG-pandregistraties "Pand in gebruik" — pure registerruis zonder nieuwswaarde), 6 bewust op 'watching' gehouden met reden, 2 crossref-events vastgelegd (Renewi Smink, #523↔#524). De automatische opruiming (14 dagen 'new' / 7 dagen 'watching') leverde 0 kandidaten op. 49 `signal_events` weggeschreven, gelijk aan het aantal beoordeelde signalen. `novelty_score`, `category` en `decision_reason` nu voor het eerst gevuld op de geselecteerde signalen.
 - **signals (2026-08-04, na schrijver-run):** #507 en #531 van 'researching' naar 'published', #516 blijft op 'researching' (geblokkeerd). Er stonden 3 kandidaten klaar, geen achterstand. 4 `signal_events` weggeschreven: 2x `status_change` (507, 531), 1x `blocked` (516), 1x `rectified` (526). 2 rijen toegevoegd aan `articles`. 4 `dossier_facts` toegevoegd aan dossier 5 (Lokale politiek en college), alle met `article_slug` en `actor='schrijver'` — voor het eerst niet overgeslagen sinds de gemiste runs van 2026-08-02.
 - **dossiers:** 5 dossiers actief (Explosies Amersfoort, Warmtenet en biomassa, Droogte en waterbeheer, Woningbouw en wonen, Lokale politiek en college). Geen dossier dekt parkeren/mobiliteit/deelvervoer — het deelauto-artikel kon daardoor terecht geen dossier-koppeling krijgen. Overweging voor Jasper: een dossier "Parkeren en mobiliteit" toevoegen, er liggen inmiddels vier artikelen op dat thema.
 - **signals (2026-08-03, na speurder-run):** 562 discarded, 88 published, 72 watching, 3 researching, 0 new. Mutaties deze run: 1 signaal naar 'researching' (#531 verkeersbesluit deelauto's), 10 gediscard met reden, 6 bewust op 'watching' gehouden met reden, 1 crossref vastgelegd. De automatische opruiming (14 dagen 'new' / 7 dagen 'watching') leverde 0 kandidaten op. 18 `signal_events` weggeschreven, gelijk aan het aantal beoordeelde signalen.
@@ -436,6 +437,40 @@ Cowork-update: 2026-08-03
 **Ontbrekende entiteiten (niet zelf aangemaakt, conform prompt):** Provincie Utrecht, Bureau Regio Amersfoort, ministerie van Defensie, Greenwheels en MyWheels bestaan niet in de Turso `organizations`-tabel; J.W. Boelhouwers (afdelingsmanager Stad en Ontwikkeling) niet in `persons`. Beide artikelen hebben daardoor alleen Gemeente Amersfoort als organisatiereferentie, terwijl de andere partijen inhoudelijk centraal staan. Aanbeveling: deze zes toevoegen aan de personen-/organisatiedatabase met Sanity-koppeling.
 
 **Events weggeschreven:** 4 — 2x `status_change`, 1x `blocked`, 1x `rectified`.
+
+Cowork-update: 2026-08-04
+
+---
+
+## Speurder-run 2026-08-04
+
+**Weekanalyse:** overgeslagen — signaal #546 ([WEEKANALYSE] Nieuw college opent subsidiekraan) is op 2026-08-01 gestart en inmiddels gepubliceerd. De 7-dagencheck staat dus dicht tot 8 augustus.
+
+**Kandidaten (2):**
+
+1. **#787 — "Gevel van scheurende flat Workumstraat gaat er helemaal af"** (news, top, nieuw artikel, categorie wonen). De gemeente verleende op 30-07-2026 een omgevingsvergunning (CLZ-00035818) voor het aanpassen van gevel én constructie van blok 2C hoogbouw aan de Wervershoofstraat/Workumstraat. Portaal-bewoners van Workumstraat 15 t/m 69 (28 adressen, negen woonlagen) melden al jaren scheuren en klemmende ramen door te veel werking in vloer en gevel, en krijgen sinds 1 februari 2025 20% huurkorting. Aannemer Hemubo start 10 augustus met steigers, 31 augustus met het strippen van het metselwerk; de Workumstraat gaat tot eind december deels dicht en er komt een tijdelijke looptunnel voor scholieren. Betrokken: Portaal, Hemubo, gemeente Amersfoort, Eteck, St. Pieters en Bloklands Gasthuis (blok A), bewonersklankbordgroep. ELDERS_GEBRACHT: ja — RTV Utrecht schreef eerder over herstel en huurkorting; de vergunning zelf en de uitvoeringsplanning zijn nergens gemeld.
+2. **#541 — "Rijkste wijk van Amersfoort kent verborgen armoede"** (analysis, top, nieuw artikel, categorie zorg). De gemeentelijke Startfoto Vathorst-Hooglanderveen (juni 2026) is de nulmeting voor het wijk- en dorpsplan voor de komende vier tot zes jaar. Contra-intuïtieve uitkomsten: Vathorst-De Laak heeft 9,8% huishoudens met problematische schulden tegen 8,0% stedelijk; 16% van de 65-plussers is sterk eenzaam tegen 10% stedelijk; in Vathorst-Centrum heeft 18,1% van de 18-30-jarigen geen startkwalificatie tegen 10,6% stedelijk, plus een onveiligheidsgevoel van 2,5 tegen 1,6. Professionals benoemen expliciet "verborgen armoede" en een ADHD-wachtlijst die vooral uit Vathorst komt. ELDERS_GEBRACHT: nee — geen enkel lokaal medium heeft het document opgepakt.
+
+**Bronbalans:** beide kandidaten steunen op tier 1 (officiële bekendmaking respectievelijk gemeentelijk onderzoeksdocument), geen enkele op emergency/112. Voldoet aan de publicatieregels 2, 3 en 4.
+
+**Bewust géén derde kandidaat.** De rest van de verse aanvoer was routinevergunningen (dakkapellen, oprit, boomkap), BAG-registerruis en NVWA-landelijke pagina's. Drie is een richtlijn, geen quotum; een zwakke derde toevoegen zou de twee sterke verdunnen.
+
+**Afgevoerd (39):**
+- **36 BAG-signalen** ("Pand 0203100000… — Pand in gebruik") — automatische statusmeldingen uit PDOK BAG over panden uit 1700 tot 2012. Zeggen niets over nieuwbouw of wijziging en vervuilden het signalenoverzicht ernstig. Alle met reden gelogd.
+- **#552** — verzamelsignaal van losse rechtspraakuitspraken zonder onderling of Amersfoorts verband. Gecontroleerd: de Didam-uitspraak ECLI:NL:RBMNE:2026:1977 betreft de gemeente **Dronten**, niet Amersfoort; de WOZ-zaak over een vliegtuighangar speelt evenmin in Amersfoort.
+- **#826** — Nextdoor-advertentie (knuffels van huisdieren vanaf €25).
+- **#827** — RTV Utrecht human-interest over een gevonden explosief in het water, zonder aantoonbare Amersfoortse locatie, alleen tier 3.
+
+**Op watching gehouden met reden (6):** #519 (Stadsring-petities, alleen tier 3 en al bij De Stad Amersfoort), #466 (evenementenlocaties, elders gebracht, wacht op de uitkomst), #532 (TenderNed-anomalie, verificatie nodig), #553 (UWV ArbeidsmarktInZicht levert lege pagina's), #587 (redactieassistent maakte hier vandaag al een tip van — niet dubbel oppakken), #525 (NS-verstoring Amersfoort-Zwolle, oorzaak onbekend).
+
+**Dwarsverbanden (2):** Renewi Smink aan de Lindeboomseweg koppelt #523 (twee prio 1-meldingen bij het bedrijf) aan #524 (reeks stank- en gasluchtmeldingen). Beide stonden al als TIP-KANDIDAAT; opnieuw geen tier 1-bevestiging via ODU of handhavingsbesluiten gevonden. Payload met `linked_signals` weggeschreven op beide signalen.
+
+**Events weggeschreven:** 49 — 2x `selected`, 39x `discarded`, 6x `reviewed`, 2x `crossref`. Komt overeen met het aantal beoordeelde signalen, geen afwijking.
+
+**Twee bevindingen voor Jasper (bronkwaliteit):**
+
+1. **De NVWA-scraper levert landelijke ruis.** De bron "NVWA — inspectieresultaten Amersfoort" haalde de afgelopen 48 uur uitsluitend generieke NVWA-pagina's binnen: exportinstructies voor broedeieren naar de VAE, schelpdiermonitoring, thrips-bestrijding in boomkwekerijen, productveiligheid. Nul Amersfoortse inspectieresultaten. Deze items vormen inmiddels het merendeel van de tier 1-aanvoer en verdringen echte signalen. Aanbeveling: de scraper filteren op Amersfoortse vestigingen of de bron voorlopig uitzetten.
+2. **De intake clustert te grof.** Signaal #532 bevat een TenderNed-aanbesteding, drie raadsvergaderingen, een jaarverslag-404, een Nextdoor-persbericht over Amerena en drie losse omgevingsvergunningen. Signaal #552 bevat acht ongerelateerde rechtspraakuitspraken uit drie zittingsplaatsen. Dit is de matching-bug uit de sectie "Bekende databevuiling", nog steeds actief. Zulke verzamelbakken zijn niet analyseerbaar en kosten elke run tijd.
 
 Cowork-update: 2026-08-04
 
