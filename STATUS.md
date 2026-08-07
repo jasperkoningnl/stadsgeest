@@ -817,3 +817,41 @@ Normale dagelijkse aanmaak, zonder backfill en zonder registerruis, ligt tussen 
 **Openstaand na deze sessie:** verificatie of `TURSO_URL` en `TURSO_AUTH_TOKEN` in de Vercel-projectinstellingen staan. Er is geen Vercel-, GitHub-, Sanity- of Turso-CLI op de notebook geïnstalleerd, dus dat moet via de webinterface.
 
 *Cowork-update: 2026-08-07 (Nieuwsplein33-account, eerste sessie)*
+
+---
+
+### Cowork-update: 2026-08-07 — Blok 1 en 2 uitgevoerd: archief bevroren, site teruggebracht tot persbureau
+
+**Blok 1 — archief.** Besluit van Jasper: het archief gaat offline en wordt lokaal naslag.
+
+- `Stadsgeest-documentatie\archief\` (94 MB): alle 98 artikelen als markdown, 105 afbeeldingen, en de onbewerkte JSON per documenttype als lossless laag. Ook 118 personen, 43 organisaties, 253 bronnen, 20 tags, 19 locaties, 1 melding. Met `README.md` en `INDEX.md`.
+- `Stadsgeest-documentatie\turso-dump-2026-08-07\`: 30 tabellen, 21.677 rijen, met `schema.sql`.
+- Scripts zijn herhaalbaar: `scripts\export-sanity-archief.mjs` en `scripts\dump-turso.mjs`.
+
+Drie bevindingen uit de export:
+
+1. **De 15 ontbrekende artikelen zijn gevonden.** Sanity had er 98, de `articles`-tabel 84. De vijftien staan alleen in Sanity en zijn gepubliceerd tussen 28 mei en 8 juli; de koppeling werd pas rond 8 juli structureel bijgehouden. Omgekeerd ontbreekt niets: alle 84 Turso-rijen hebben een `sanity_document_id` met tegenhanger. Het archief is dus vollediger dan de database.
+2. **Eén artikel staat dubbel in Sanity** (WK-uitzendingen, 29 mei, twee minuten na elkaar; de tweede is een concept). De eerste exportronde schreef daardoor 97 in plaats van 98 bestanden weg — botsende bestandsnaam. Gerepareerd met een achtervoegsel op het document-ID; beide zijn bewaard. Gevonden door te tellen, niet door de exit code.
+3. **Eén artikel is een testartikel** met een lege body ("Gemeente Amersfoort presenteert nieuwe huisstijl", 28 mei). Geen exportfout.
+
+**Blok 2 — site herpositioneren.** Besluit van Jasper: zo kaal mogelijk, geen enkele oude route behouden.
+
+- Verwijderd: `/112`, `/archief`, `/artikel/[slug]`, `/nieuws`, `/over`, `/persoon/[slug]`, `/privacy`, `/tag/[slug]`, `/feed.xml`, `/presentatie`, `/api/report`, negen ongebruikte componenten, `src/lib/queries.ts` en `src/types/index.ts`.
+- Nieuwe voorpagina met de premisse "persbureau voor lokale journalistiek": kop, drie processtappen met inline lijniconen, een trechtergrafiek (bronnen → signalen → redactie), een alinea over het AI-karakter en de grenzen daarvan, en contact via `stadsgeest@proton.me`. Nieuwsplein33 wordt bewust niet genoemd, in afwachting van afstemming met Gideon. Eigen CSS onder `.home-`-prefix, los van de oude klassen.
+- **Sanity is volledig uit de frontend.** De laatste verwijzing was de artikel-link op `/dashboard/signaal/[id]`, die naar de verwijderde `/artikel`-route wees; vervangen door de titel plus een verwijzing naar het lokale archief. Daarna waren `next-sanity` en `@sanity/image-url` nergens meer nodig en zijn ze verwijderd. De frontend heeft nu vijf afhankelijkheden.
+- **Proxy beschermde de hele site en beschermt nu alleen `/dashboard/:path*`.** De voorpagina is publiek en indexeerbaar; robots sluit dashboard, login en api uit; de sitemap is teruggebracht tot de voorpagina.
+- `studio/` uitgesloten van de type-check. Dat is de kopie van Sanity Studio in `stadsgeest033`; de deploybron is `projects\amersfoort-lokaal`. Kan bij de opruimronde weg.
+
+Live geverifieerd na deploy (`f2266d6`): voorpagina 200 zonder inlog met kop, trechter, iconen en mailadres; `/dashboard` 307 naar login; `/nieuws` en `/artikel/test` 404; robots.txt correct.
+
+**Beveiligingsbevinding — nog niet opgelost, hoort bij blok 3c.** `src/lib/dashboardAuth.ts` bevat een hardcoded `AUTH_TOKEN` die tegelijk de SHA-256 van het wachtwoord én de geldige cookiewaarde is, in een **publieke** repo. Wie de repo leest kan die string als cookie zetten en is binnen, zonder het wachtwoord te kennen. Bovendien is een ongesalte SHA-256 van een kort wachtwoord snel te kraken. Zolang er alleen gelezen wordt is de schade beperkt, maar zodra de redactie feedback gaat schrijven volstaat dit niet meer. Los dit op vóór Pien en Gideon toegang krijgen.
+
+**Overige aandachtspunten.**
+
+- Vercel: `TURSO_URL` en `TURSO_AUTH_TOKEN` staan er sinds 1 augustus, voor Production én Preview — dat punt uit een eerdere update is dus afgehandeld. De Sanity-variabelen staan alleen op Production. Het account draait op het Hobby-plan; runtimelogs worden daar maar een uur bewaard, wat debuggen tijdens de testperiode beperkt.
+- `stadsgeest033\.env.local` miste de Turso-sleutels, waardoor het dashboard lokaal zonder data draaide. Toegevoegd; het bestand staat in `.gitignore`.
+- De 1082 regels CSS van de oude publiekssite blijven voorlopig staan omdat het dashboard erop leunt. Meenemen in de opruimronde ná de dashboardverbouwing.
+- `SANITY_WRITE_TOKEN` staat in platte tekst in `.env.local` en is tijdens deze sessie uitgelezen. Intrekken bij het uitfaseren van Sanity.
+- Nog te doen voor blok 1/2: het Sanity-project zelf op non-actief zetten (niet verwijderen).
+
+*Cowork-update: 2026-08-07 (Nieuwsplein33-account, tweede sessie)*
