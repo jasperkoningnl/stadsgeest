@@ -890,3 +890,26 @@ Geverifieerd vóórdat er iets werd geïnstalleerd: de scrapers hebben een eigen
 - **Nieuwsplein33 is zelf een tier 3-bron** met 160 items en 25 signalen. Bruikbaar voor ontdubbeling, maar dan moet het dashboard dat tonen in plaats van het als vondst te presenteren.
 
 *Cowork-update: 2026-08-07 (Nieuwsplein33-account, derde sessie)*
+
+---
+
+### Cowork-update: 2026-08-07 — Sanity op non-actief gezet
+
+Blok 1 is hiermee volledig afgerond. Het project is **niet verwijderd**, conform het overdrachtsplan.
+
+Vooraf gecontroleerd dat niets er nog aan hangt: nul Sanity-verwijzingen in `src/`, nul actieve aanroepen in de scrapers, en de enige twee routines die naar Sanity schreven (schrijver en designer) staan sinds ongeveer 13 juli uit en vervallen.
+
+Uitgevoerd via de CLI-login van Jasper (`.config\sanity\config.json`), die beheerrechten heeft:
+
+- **Studio ge-undeployed.** `stadsgeest033.sanity.studio` geeft nu 404. Terug te draaien met `sanity deploy` vanuit `projects\amersfoort-lokaal` — dat is en blijft de deploybron.
+- **Beide API-tokens ingetrokken:** `Frontend read` (sib5j90ptl3d7o) en `Routine write` (simDwjO8r5GSDA). Geverifieerd: het oude schrijftoken krijgt nu 401. Er staan geen tokens meer op het project. Dit was ook nodig omdat het schrijftoken in platte tekst in `.env.local` stond en tijdens een eerdere sessie is uitgelezen.
+- **Project en dataset blijven bestaan.** `60uiz6xa` / `production`, met de 98 artikelen erin. De dataset staat op `public`; dat was hij al en de inhoud stond op een publieke site, dus dat verandert niets aan de blootstelling. Wie er weer bij wil moet als eigenaar een nieuw token aanmaken.
+- **Dode sleutels opgeruimd:** `SANITY_WRITE_TOKEN`, `NEXT_PUBLIC_SANITY_PROJECT_ID` en `NEXT_PUBLIC_SANITY_DATASET` uit `.env.local`, en `SANITY_WRITE_TOKEN` uit `scraper\.env`. Beide bestanden bevatten nu alleen wat daadwerkelijk wordt gebruikt.
+
+Na afloop geverifieerd: build slaagt, stadsgeest.nl geeft 200, elf van elf PM2-jobs actief.
+
+**Nog te doen door Jasper:** de drie Sanity-variabelen staan nog in de Vercel-projectinstellingen. Ze doen niets meer en kunnen weg — de MCP-koppeling kan omgevingsvariabelen niet wijzigen.
+
+**Let op bij het archief:** met de tokens ingetrokken is `scripts\export-sanity-archief.mjs` alleen nog te draaien zolang de dataset publiek leesbaar blijft. De export van vandaag in `Documents\Stadsgeest-archief` is daarmee in de praktijk de kopie waar je op terugvalt.
+
+*Cowork-update: 2026-08-07 (Nieuwsplein33-account, vierde sessie)*
