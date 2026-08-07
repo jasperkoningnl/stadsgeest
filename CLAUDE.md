@@ -20,7 +20,9 @@ De repo is publiek. Zet er geen sleutels in.
 
 ## STATUS.md
 
-STATUS.md staat in de hoofdmap van dit project en is het geheugen van Stadsgeest: ruim 800 regels, per routine-run wat er is gebeurd inclusief gevonden bugs en openstaande punten.
+STATUS.md staat in de hoofdmap van dit project en is het geheugen van Stadsgeest: ruim 900 regels, per routine-run wat er is gebeurd inclusief gevonden bugs en openstaande punten.
+
+**Lees het uit deze map, nooit via GitHub.** `raw.githubusercontent.com` en de GitHub-webinterface leveren voor deze repo aantoonbaar gecachete versies van weken tot maanden oud — meerdere sessies zijn daardoor gaan denken dat het bestand van juni was. Het bestand staat in een gekoppelde projectmap; je hebt het gewoon. Bovenaan STATUS.md staat tot wanneer het is bijgewerkt; klopt dat niet met wat je verwacht, dan lees je een cache.
 
 Lees het relevante deel voordat je iets aanraakt. Werk het bij aan het eind van elke sessie waarin je iets hebt gebouwd, gewijzigd of ontdekt, en push naar GitHub. Schrijf op wat je vond, niet alleen wat je deed — ook wat niet werkte, en wat je bewust hebt laten liggen.
 

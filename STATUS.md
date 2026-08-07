@@ -1,5 +1,26 @@
 # STATUS.md — Stadsgeest 033
 
+> ### Bijgewerkt tot en met **7 augustus 2026**
+>
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-07 — Sanity op non-actief gezet"**.
+>
+> **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
+> Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
+> voor deze repo regelmatig versies van weken tot maanden oud. Op 7 augustus leverde de
+> webinterface een momentopname met 52 commits terwijl de repo er 126 had.
+>
+> **Lees dit bestand daarom lokaal**, uit
+> `C:\Users\Jasper Koning\Documents\Claude\Projects\Nieuwssite Amersfoort\STATUS.md`.
+> Die map is aan het Cowork-project gekoppeld; je hebt het bestand dus gewoon.
+> Haal het niet via GitHub op, ook niet "even snel".
+>
+> Twijfel je? Dit is de enige betrouwbare controle:
+> ```powershell
+> cd "$env:USERPROFILE\Documents\Claude\Projects\Nieuwssite Amersfoort"
+> git fetch origin; git log -1 --format="%h %ad %s" --date=short origin/main
+> Get-Content STATUS.md -Tail 1
+> ```
+
 ## Meetprincipe brongezondheid (toegevoegd 2026-08-02)
 
 De scheduled tasks en scrapers liggen bewust regelmatig stil om tokens te besparen; Jasper zet ze incidenteel handmatig aan. Dagen of weken zonder nieuwe raw_items zijn dus GEEN indicatie van een kapotte bron of pipeline. Een bron geldt pas als inactief wanneer hij tijdens een actieve scrape-run 0 items oplevert terwijl vergelijkbare bronnen in diezelfde run wél leveren. Alle monitoring en analyses (bronnenwacht, heartbeat, weekreview, intake-rapportages) moeten brongezondheid daarom meten in runs, niet in kalendertijd.
