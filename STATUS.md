@@ -855,3 +855,38 @@ Live geverifieerd na deploy (`f2266d6`): voorpagina 200 zonder inlog met kop, tr
 - Nog te doen voor blok 1/2: het Sanity-project zelf op non-actief zetten (niet verwijderen).
 
 *Cowork-update: 2026-08-07 (Nieuwsplein33-account, tweede sessie)*
+
+---
+
+### Cowork-update: 2026-08-07 — Projectopzet, documentatie en een skill
+
+Voorbereiding op werken met losse taakchats per onderwerp. Elke chat begint koud, dus de opzet moet dat opvangen.
+
+**Eén werkkopie.** `projects\stadsgeest033` is buiten gebruik gesteld. Die was schoon en volledig gepusht, dus er ging niets verloren. `.env.local` en `.vercel\` zijn naar de projectmap verhuisd; de Sanity Studio-bronbestanden naar `Documents\Stadsgeest-archief\sanity-studio-kopie` — dat bleken er vijf te zijn met twee schema's, dus die kopie was sowieso onvolledig tegenover `projects\amersfoort-lokaal`. De projectmap bouwt de frontend nu zelf (`npm install` + `npm run build` geslaagd). In de oude map staat een `LEES-DIT-EERST.md`; 799 MB aan node_modules is opgeruimd, de map kan in zijn geheel weg.
+
+Geverifieerd vóórdat er iets werd geïnstalleerd: de scrapers hebben een eigen `scraper/package.json` en `scraper/node_modules`, en elke externe import (@libsql/client, cheerio, dotenv, pdfjs-dist, playwright, rss-parser) zit daarin. Een `npm install` in de hoofdmap kan de pipeline dus niet breken.
+
+**Archief buiten de projectmappen.** `archief\` en `turso-dump-2026-08-07\` zijn verhuisd naar `Documents\Stadsgeest-archief`, met een eigen README. De documentatiemap ging van 126 naar 18 MB. De doelpaden in de export- en dumpscripts zijn meeverhuisd.
+
+**Nieuwe documentatie**, in `Stadsgeest-documentatie`:
+
+- `START-HIER.md` — het eerste wat een verse taakchat leest
+- `PROJECTINSTRUCTIES.md` — de tekst voor de Cowork-projectinstructies
+- `documentatie\RUNBOOK.md` — starten, stoppen, storingsdiagnose, de PM2-valkuilen
+- `documentatie\ARCHITECTUUR.md` — de keten, de database, wat er nog niet is
+- `documentatie\ROUTINES.md` — wat elke routine doet en wat ervan overblijft
+- `documentatie\BRONNEN.md` — de feitelijke staat van alle 124 bronnen
+
+`CLAUDE.md` en `README.md` in de repo zijn herschreven. CLAUDE.md noemde Sanity nog als onderdeel van de pipeline en verwees naar een verouderd STATUS.md-pad; de README was nog letterlijk de create-next-app boilerplate. De verouderde kopieën van beide die in `documentatie\` stonden zijn verwijderd — kopieën van repo-bestanden lopen achter en worden dan voor de waarheid aangezien.
+
+**Skill `stadsgeest-sessie-afronden`** aangemaakt: schrijft de bevindingen in STATUS.md en pusht, met de huisstijl en de valkuilen erin (eerst pullen, onderaan toevoegen, opschrijven wat je vond in plaats van wat je deed, controleren dat de gemengde regeleindes geen inhoud wegvagen).
+
+**Bevindingen uit het opstellen van BRONNEN.md** — dit is nieuw en relevant voor punt 5 van de planning:
+
+- **De bronnentabel is vervuild.** Museum Flehite staat er drie keer in, Eemland1 / CliniClowns / B&W besluitenlijsten / Onderwijsinspectie elk twee keer, TenderNed onder twee namen. Daarbij negen `jaarverslag-*`-bronnen met precies één item uit 2023 of 2024 — dat waren eenmalige scrapes, geen doorlopende bronnen. Realistisch draaien er ongeveer tachtig echte bronnen, niet 124. Ontdubbelen vóór er iets geteld of toegevoegd wordt.
+- **Zesendertig bronnen hebben nog nooit één item opgeleverd**, waarvan dertien in tier 1: Centraal Insolventieregister, BIG-register, LRK-kinderopvanginspecties, OpenKvK, Huurcommissie, Raad van State, EP-online, Europese subsidies, iBabs. Dat is precies het materiaal waar het idee op rust.
+- **Veertien tier 1-bronnen liggen aantoonbaar stil**, langer dan de daemon-uitval van juli verklaart: rechtspraak 80 dagen, IGJ 70, subsidieregister 70, Rekenkamer 64, B&W-besluitenlijsten 38. Deels opgevolgd — er draaien inmiddels vier gesplitste bekendmakingen-scrapers die op 7 augustus nog leverden.
+- **Ongemakkelijke uitkomst:** de bronnen die het vaakst tot een gepubliceerd artikel leidden zijn overwegend tier 3 — De Stad Amersfoort 26, RTV Utrecht 11, Nieuwsplein33 zelf 9, amersfoort.nieuws.nl 8. Rechtspraak leverde 207 signalen op en twee artikelen. Dit meet de oude publiekssite en tier 1 is per definitie meer werk, maar het is wel het cijfer om tijdens de testperiode te bewaken: bestaat de opbrengst voor Nieuwsplein33 vooral uit dingen die ze zelf al publiceerden, dan levert Stadsgeest niets.
+- **Nieuwsplein33 is zelf een tier 3-bron** met 160 items en 25 signalen. Bruikbaar voor ontdubbeling, maar dan moet het dashboard dat tonen in plaats van het als vondst te presenteren.
+
+*Cowork-update: 2026-08-07 (Nieuwsplein33-account, derde sessie)*
