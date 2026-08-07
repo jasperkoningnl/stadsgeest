@@ -746,3 +746,74 @@ Al het Stadsgeest-materiaal dat verspreid lag is geordend in `C:\Users\Jasper Ko
 **Stand van de database op 2026-08-07** (rechtstreeks uitgelezen): 4.864 raw_items waarvan 0 onverwerkt, laatste scrape 04:46 UTC. 827 signalen — 621 discarded, 95 published, 84 watching, 27 new. 124 bronnen, 2.821 entiteiten, 84 artikelen. Driekwart van alle signalen is afgekeurd; dat is precies de stapel waar de feedbackfunctie van de redactie op moet aangrijpen.
 
 *Cowork-update: 2026-08-07 (werksessie, geen routine)*
+
+---
+
+### Cowork-update: 2026-08-07 — Beide uitzoekpunten opgelost, PM2-bewaking gebouwd
+
+Eerste sessie vanuit het Claude-account van Nieuwsplein33. Geen routine-run. De twee uitzoekpunten uit de vorige werksessie zijn allebei uitgezocht en beantwoord.
+
+**Uitzoekpunt 1 — hoe worden de processen gestart? Antwoord: uitsluitend PM2. Er is geen tweede route en dus geen risico op dubbel scrapen.**
+
+- De Cowork scheduled tasks staan uit en er bestaan er nul op het nieuwe account (geverifieerd via `list_scheduled_tasks`).
+- `intake_run.bat` is **dood**: het roept `scraper\intake.cjs` aan en dat bestand bestaat niet meer. De intake draait via PM2 als `stadsgeest-intake` (`intake-run.mjs`). Het .bat-bestand kan weg.
+- Buiten "PM2 Resurrect" wijst geen enkele Windows-taak naar de projectmap.
+- `ecosystem.config.cjs` bestaat inderdaad niet; herstel gaat via `pm2 resurrect` uit `dump.pm2`.
+
+**De daemon lag opnieuw plat, voor de derde keer.** Bij aanvang van deze sessie kende `pm2 jlist` nul processen. De logs laten zien dat alle elf jobs vanmorgen nog normaal draaiden (dwarsverbanden2-nacht 01:15, scrape-browser 06:03, scrape-dagelijks 06:31, scrape-ob 06:46, scrape-wekelijks 07:02, fetch-fulltext 07:30, intake 08:00). De draaiende daemon was gestart om 09:32 en was leeg — de oude is dus tussen 08:00 en 09:32 gestorven. Hersteld met `pm2 resurrect`; alle elf jobs staan er weer.
+
+**Waarom de auto-recovery nooit heeft gewerkt.** De taak "PM2 Resurrect" voerde uit: `cmd.exe /c "...\npm\pm2.ps1 resurrect"`. `cmd.exe` kan geen `.ps1` uitvoeren. De laatste run (15 juli) eindigde dan ook met resultaatcode 1, en er stond geen volgende run gepland. De taak heeft in zijn hele bestaan geen enkele uitval opgevangen — ook niet die van 5 tot 24 juli, de negentien dagen zonder data.
+
+**Vervangen door een echte gezondheidscheck**, `scraper\pm2-healthcheck.ps1`:
+
+- Leest de verwachte jobnamen uit `dump.pm2`, telt hoeveel de daemon er kent, en doet `pm2 resurrect` zodra er ontbreken. Vangt dus ook gedeeltelijke uitval, niet alleen een volledig lege daemon.
+- Roept **nooit** `pm2 save` aan. Dat is belangrijk: een `pm2 save` op een lege daemon overschrijft `dump.pm2` met een lege lijst en wist alle elf jobdefinities. Dat is het scenario waarin de pipeline echt onherstelbaar was geweest.
+- Herstelt niet als `dump.pm2` zelf leeg is, zodat een storing niet stilletjes wordt weggepoetst.
+- Logt naar `scraper\pm2-healthcheck.log`.
+- Draait nu elk uur plus bij inloggen. Getest op vier scenario's: gezonde daemon, volledige uitval, gedeeltelijke uitval (één job verwijderd) en herstelbevestiging — alle vier goed, exitcode 0, proefdraai via de Task Scheduler geslaagd.
+
+Kanttekening: `ConvertFrom-Json` is onbruikbaar op de uitvoer van `pm2 jlist` en op `dump.pm2`. De env-blokken bevatten sleutels die alleen in hoofdlettergebruik verschillen (`username` naast `USERNAME`), waar Windows PowerShell op afbreekt. Het script telt daarom op jobnaam.
+
+**Uitzoekpunt 2 — de signaalschommeling is verklaard en het is géén matchingbug.**
+
+De piek van 220 op 2 augustus bestaat voor 178 uit **historische** signalen uit een eenmalige backfill. `intake_runs` #7 die dag: 489 items in, 36 nieuwe signalen, 178 historische. Run #6 dezelfde dag verwerkte 500 items waarvan er 499 werden gefilterd met redenen als "gescraped meer dan 48 uur geleden (1261 uur)" — dat is 52 dagen oud. De bron was vooral rechtspraak (129 signalen) en raadsinformatie (56).
+
+De piek van 50 op 4 augustus is registerruis: PDOK BAG leverde 36 signalen "Pand in gebruik", die de speurder allemaal heeft gediscard.
+
+De dalen zijn geen dalen maar uitval: 5 augustus telt 6 signalen omdat de daemon die dag tot 21:30 plat lag.
+
+Normale dagelijkse aanmaak, zonder backfill en zonder registerruis, ligt tussen **17 en 28 signalen**. Dat is het getal waar het dashboardontwerp en de verwachting van de redactie op gebaseerd moeten worden, niet op 220.
+
+| dag | aangemaakt | waarvan historisch/ruis | raw_items |
+|---|---|---|---|
+| 1 aug | 37 | — | 41 |
+| 2 aug | 220 | 178 backfill | 116 |
+| 3 aug | 9 | — | 116 |
+| 4 aug | 50 | 36 BAG-ruis | 135 |
+| 5 aug | 6 | daemon plat | 64 |
+| 6 aug | 18 | — | 72 |
+| 7 aug | 28 | — | 86 |
+
+**Databevuiling — herijkt.** De twaalf signalen met absurde koppelingen uit de matchingbug van juni zijn **al opgeschoond**: #98 (was 349 items), #31 (was 157) en #35 (was 110) hebben nu nul koppelingen. STATUS.md was op dit punt verouderd. Wat er feitelijk nog ligt:
+
+- **31 signalen zonder enig gekoppeld bronitem** (23 published, 8 discarded) — restant van die opschoning, plus WEEKANALYSE-signalen die per ontwerp geen `signal_items` hebben.
+- **88 signalen met een dubbele titel** (44 titels), vrijwel allemaal rechtspraakzaken die tijdens de backfill van 2 augustus tweemaal binnenkwamen. Overwegend al discarded.
+- **178 historische backfill-signalen**: 140 discarded, 38 nog op watching. Die 38 zijn maanden oud en zouden de redactie alleen maar afleiden.
+- **36 BAG-registersignalen** ("Pand in gebruik"), alle discarded.
+- **`entities_old_20260802`**: 953 rijen, restant van de migratie. `entities` bevat er nu 2.821.
+- **`job_requests` en `job_logs`**: leeg, restant van de vervallen persberichtwachtrij.
+- **`signals.tier` is voor alle 827 signalen leeg**, `crossref_briefing` voor 822, `novelty_score` voor 814, `category` voor 804. Het dashboard leidt tier daarom af via `signal_items → raw_items → sources`. Relevant zodra de redactie op tier wil filteren.
+- Geen verweesde `signal_items` (0). De referentiële integriteit is intact.
+
+**Documentatiehygiëne.**
+
+- De kopie van STATUS.md in `Stadsgeest-documentatie\documentatie\` was de versie van 2 juni (73 regels) en is verwijderd. Vervangen door `LEESWIJZER.md`, dat naar het echte bestand verwijst en de rolverdeling tussen de twee werkkopieën vastlegt.
+- De projectmap liep één commit achter op `projects\stadsgeest033`. Rechtgezet met `git pull`; beide staan nu op `6670390`, met een byte-identieke STATUS.md.
+- Rolverdeling vastgelegd: de projectmap is de draaiende pipeline, `stadsgeest033` is de deploybron (heeft `.vercel\project.json` en `.env.local`).
+- Er ontbreekt geen intake-prompt. De intake is code, geen routine.
+- **Sanity project-ID: `60uiz6xa` is juist.** De fallback in `src/lib/sanity.ts` staat op `60u1z6xa` — een typefout die alleen niet opvalt zolang `NEXT_PUBLIC_SANITY_PROJECT_ID` is gezet. Dit verklaart waarschijnlijk de terugkerende melding "Dataset not found" in omgevingen zonder die variabele. Niet gewijzigd, want Sanity wordt binnenkort uitgefaseerd.
+- `SANITY_WRITE_TOKEN` staat in platte tekst in `stadsgeest033\.env.local` en is tijdens deze sessie uitgelezen. Intrekken bij het uitfaseren van Sanity.
+
+**Openstaand na deze sessie:** verificatie of `TURSO_URL` en `TURSO_AUTH_TOKEN` in de Vercel-projectinstellingen staan. Er is geen Vercel-, GitHub-, Sanity- of Turso-CLI op de notebook geïnstalleerd, dus dat moet via de webinterface.
+
+*Cowork-update: 2026-08-07 (Nieuwsplein33-account, eerste sessie)*
