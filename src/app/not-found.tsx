@@ -19,10 +19,7 @@ export default function NotFound() {
       </p>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         <Link href="/" className="btn btn-primary" style={{ textDecoration: 'none' }}>
-          Naar de homepage
-        </Link>
-        <Link href="/nieuws" style={{ fontFamily: 'var(--f-d)', fontSize: 14, color: 'var(--accent)', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-          Alle berichten →
+          Naar de voorpagina
         </Link>
       </div>
     </div>

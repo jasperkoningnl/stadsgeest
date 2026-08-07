@@ -1080,3 +1080,104 @@ a.dash-pr-fact-source:hover { text-decoration: underline; }
 .dash-dwars-signal-link { font-size: 13.5px; color: var(--accent); text-decoration: none; }
 .dash-dwars-signal-link:hover { text-decoration: underline; }
 .dash-dwars-card-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+/* ── Voorpagina persbureau (2026-08-07) ─────────────────────
+   Zelfstandige stijl voor de nieuwe voorpagina. Staat los van de
+   klassen van de oude publiekssite, zodat die bij de opruimronde
+   na de dashboardverbouwing in één keer weg kunnen. */
+
+.home { min-height: 100vh; padding: 0 var(--pad) 96px; }
+.home-wrap { max-width: 760px; margin: 0 auto; }
+
+.home-top { padding: 40px 0 0; }
+.home-merk {
+  font-family: var(--f-d); font-weight: 800; font-size: 15px;
+  letter-spacing: 0.14em; color: var(--t2);
+}
+.home-merk-accent { color: var(--accent); margin-left: 2px; }
+
+.home-hero { padding: 72px 0 8px; }
+.home-eyebrow {
+  font-family: var(--f-m); font-size: 12px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 22px;
+}
+.home-titel {
+  font-family: var(--f-d); font-weight: 800;
+  font-size: clamp(30px, 5.4vw, 50px); line-height: 1.13;
+  letter-spacing: -0.028em; color: var(--t1); margin-bottom: 26px;
+  text-wrap: balance;
+}
+.home-lead {
+  font-family: var(--f-b); font-size: clamp(17px, 2vw, 20px);
+  line-height: 1.62; color: var(--t2); max-width: 62ch;
+}
+
+.home-stappen {
+  display: grid; gap: 1px; background: var(--border-s);
+  border: 1px solid var(--border-s); border-radius: var(--r-lg);
+  margin: 24px 0 72px; overflow: hidden;
+}
+@media (min-width: 820px) { .home-stappen { grid-template-columns: repeat(3, 1fr); } }
+.home-stap { background: var(--bg-card); padding: 28px 24px 30px; }
+.home-stap-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.home-stap-icoon { color: var(--accent); flex-shrink: 0; }
+.home-stap-nr {
+  font-family: var(--f-m); font-size: 12px;
+  letter-spacing: 0.1em; color: var(--t3);
+}
+.home-stap-kop {
+  font-family: var(--f-d); font-weight: 700; font-size: 19px;
+  letter-spacing: -0.01em; color: var(--t1); margin-bottom: 10px;
+}
+.home-stap-tekst {
+  font-family: var(--f-b); font-size: 15px; line-height: 1.66; color: var(--t2);
+}
+
+/* Trechtergrafiek voorpagina */
+.home-trechter {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 20px; align-items: end;
+  padding: 30px 0 4px; margin-top: 46px;
+}
+.home-trechter-kolom { display: flex; flex-direction: column; gap: 12px; }
+.home-trechter-staven {
+  display: flex; flex-wrap: wrap; gap: 4px; align-items: flex-end; min-height: 44px;
+}
+.home-trechter-staaf { width: 3px; border-radius: 1px; display: block; }
+.home-trechter-label {
+  font-family: var(--f-m); font-size: 11px;
+  letter-spacing: 0.13em; text-transform: uppercase;
+}
+@media (max-width: 560px) { .home-trechter { gap: 12px; } }
+
+.home-blok { padding: 40px 0; border-top: 1px solid var(--border-s); }
+.home-blok-kop {
+  font-family: var(--f-d); font-weight: 700;
+  font-size: clamp(21px, 2.8vw, 26px); letter-spacing: -0.018em;
+  color: var(--t1); margin-bottom: 18px; text-wrap: balance;
+}
+.home-blok-tekst p {
+  font-family: var(--f-b); font-size: 16px; line-height: 1.7;
+  color: var(--t2); max-width: 66ch;
+}
+.home-blok-tekst p + p { margin-top: 14px; }
+
+.home-blok-contact { padding-bottom: 8px; }
+.home-mail {
+  display: inline-block; margin-top: 24px; padding: 12px 20px;
+  font-family: var(--f-m); font-size: 15px;
+  color: var(--accent); text-decoration: none;
+  background: var(--accent-dim); border: 1px solid var(--accent);
+  border-radius: var(--r-lg);
+  transition: background .16s ease, color .16s ease;
+}
+.home-mail:hover { background: var(--accent); color: var(--bg); }
+.home-mail:focus-visible { outline: 2px solid var(--accent-hi); outline-offset: 3px; }
+
+.home-voet {
+  margin-top: 64px; padding-top: 22px; border-top: 1px solid var(--border-s);
+  font-family: var(--f-m); font-size: 12px; letter-spacing: 0.06em; color: var(--t3);
+}

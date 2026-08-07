@@ -1,186 +1,120 @@
-import { client } from '@/lib/sanity'
-import { homepageQuery } from '@/lib/queries'
-import type { Article } from '@/types'
-import Link from 'next/link'
-import Image from 'next/image'
-import { urlFor } from '@/lib/sanity'
-import { relativeTime, FORMAT_LABELS } from '@/lib/utils'
-import ArticleCard from '@/components/ArticleCard'
+import type { Metadata } from 'next'
+import { IconDoorzoeken, IconWegen, IconDoorgeven } from '@/components/HomeIcons'
+import HomeTrechter from '@/components/HomeTrechter'
 
-export const revalidate = 60
-
-interface HomepageData {
-  topArticle: Article | null
-  kortCards: Article[]
-  analyseCard: Article | null
-  normalCards: Article[]
+export const metadata: Metadata = {
+  title: 'Stadsgeest — persbureau voor lokale journalistiek',
+  description:
+    'Stadsgeest doorzoekt dagelijks honderden openbare bronnen op zoek naar lokaal nieuws dat blijft liggen, en levert de vondsten aan lokale redacties.',
+  alternates: { canonical: '/' },
 }
 
-const EMPTY: HomepageData = { topArticle: null, kortCards: [], analyseCard: null, normalCards: [] }
+const STAPPEN = [
+  {
+    nr: '01',
+    kop: 'Doorzoeken',
+    icoon: IconDoorzoeken,
+    tekst:
+      'Elke dag komen ruim honderd openbare bronnen binnen: raadsstukken, officiële bekendmakingen, vergunningen, subsidieregisters, rechtspraak, aanbestedingen, inspectierapporten, jaarverslagen.',
+  },
+  {
+    nr: '02',
+    kop: 'Wegen',
+    icoon: IconWegen,
+    tekst:
+      'Wat binnenkomt wordt geclusterd tot signalen en beoordeeld op nieuwswaarde. Hoeveel onafhankelijke bronnen bevestigen het? Is het eerder gemeld? Verreweg het meeste valt af.',
+  },
+  {
+    nr: '03',
+    kop: 'Doorgeven',
+    icoon: IconDoorgeven,
+    tekst:
+      'Wat overblijft komt in een dashboard voor de redactie: het signaal, de brondocumenten, de achtergrond en de vragen die nog open staan. Geen kant-en-klaar artikel — een startpunt.',
+  },
+]
 
-export default async function HomePage() {
-  let data: HomepageData = EMPTY
-
-  try {
-    data = await client.fetch<HomepageData>(homepageQuery, {}, { next: { revalidate: 60 } })
-  } catch {
-    // Sanity not connected yet
-  }
-
-  const { topArticle, kortCards, analyseCard, normalCards } = data
-  const hasContent = topArticle || kortCards.length > 0 || analyseCard || normalCards.length > 0
-
+export default function Home() {
   return (
-    <div className="page-in">
-      {/* ── Hero ── */}
-      <div className="wrap" style={{ paddingTop: '32px' }}>
-        {topArticle ? (
-          <Link
-            href={`/artikel/${topArticle.slug.current}`}
-            className="hero"
-            aria-label={topArticle.title}
-          >
-            <div className="hero-ph">
-              {topArticle.mainImage && (
-                <Image
-                  src={urlFor(topArticle.mainImage).width(1400).height(700).url()}
-                  alt={topArticle.mainImage.alt || ''}
-                  fill
-                  priority
-                  sizes="100vw"
-                  style={{ objectFit: 'cover' }}
-                />
-              )}
-            </div>
-            <div className="hero-grad" />
-            <div className="hero-body">
-              <div className="hero-inner">
-                <div className="hero-tags">
-                  {topArticle.tags?.filter(t => t?.slug?.current).slice(0, 1).map((t) => (
-                    <span key={t.slug.current} className="hero-tag hero-tag-primary">
-                      {t.name}
-                    </span>
-                  ))}
-                  <span className="hero-tag hero-tag-secondary">
-                    {FORMAT_LABELS[topArticle.format] || 'Nieuws'}
-                  </span>
+    <main className="home">
+      <div className="home-wrap">
+        <header className="home-top">
+          <span className="home-merk">
+            STADSGEEST<span className="home-merk-accent">033</span>
+          </span>
+        </header>
+
+        <section className="home-hero">
+          <p className="home-eyebrow">Persbureau voor lokale journalistiek</p>
+          <h1 className="home-titel">Het nieuws zit in stukken die niemand leest.</h1>
+          <p className="home-lead">
+            Stadsgeest doorzoekt dagelijks honderden openbare bronnen over Amersfoort, weegt wat er
+            tussen zit, en levert de vondsten aan bij een redactie. Geen concurrent van lokale media,
+            maar een leverancier — het werk waar op een redactie zelden tijd voor is.
+          </p>
+        </section>
+
+        <HomeTrechter />
+
+        <section className="home-stappen" aria-label="Hoe het werkt">
+          {STAPPEN.map((s) => {
+            const Icoon = s.icoon
+            return (
+              <article key={s.nr} className="home-stap">
+                <div className="home-stap-top">
+                  <Icoon className="home-stap-icoon" />
+                  <span className="home-stap-nr">{s.nr}</span>
                 </div>
-                <h1 className="hero-title">{topArticle.title}</h1>
-                {topArticle.lead && (
-                  <p className="hero-lead">{topArticle.lead}</p>
-                )}
-                <div className="hero-meta">
-                  <span className="hero-meta-icon">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <rect x="2" y="3" width="10" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
-                      <path d="M5 1.5V4M9 1.5V4M2 6h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-                    </svg>
-                    {relativeTime(topArticle.publishedAt)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Link>
-        ) : (
-          <div style={{ height: 'clamp(300px, 52vw, 580px)', background: 'var(--bg-raised)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--r-lg)' }}>
-            <p style={{ color: 'var(--t3)', fontSize: 14 }}>Geen topverhaal gevonden</p>
+                <h2 className="home-stap-kop">{s.kop}</h2>
+                <p className="home-stap-tekst">{s.tekst}</p>
+              </article>
+            )
+          })}
+        </section>
+
+        <section className="home-blok">
+          <h2 className="home-blok-kop">Dit is een machine, en dat zeggen we erbij</h2>
+          <div className="home-blok-tekst">
+            <p>
+              Het doorzoeken, clusteren en wegen gebeurt geautomatiseerd, met taalmodellen. Dat is
+              waarom het kan: geen mens leest elke dag alle bekendmakingen van een gemeente. Het is
+              ook waarom het niet af is.
+            </p>
+            <p>
+              Een signaal uit Stadsgeest is een aanwijzing, geen bevestigd feit. Het systeem legt
+              verbanden die niet kloppen, mist context die een verslaggever meteen zou zien, en
+              haalt met regelmaat een routinevergunning binnen alsof het nieuws is. Daarom staat bij
+              elk signaal waar het vandaan komt en waarom het is doorgelaten, en daarom eindigt de
+              keten bij een journalist die beslist of er een verhaal in zit.
+            </p>
+            <p>
+              Wij publiceren zelf niet. Wat hier gevonden wordt, wordt geschreven en gecontroleerd
+              door de redactie die het afneemt.
+            </p>
           </div>
-        )}
+        </section>
+
+        <section className="home-blok home-blok-contact">
+          <h2 className="home-blok-kop">Voor redacties</h2>
+          <div className="home-blok-tekst">
+            <p>
+              Stadsgeest draait op dit moment op Amersfoort en wordt beproefd met één redactie. De
+              methode is niet aan die stad gebonden — waar openbare bronnen zijn, werkt hetzelfde
+              principe.
+            </p>
+            <p>
+              Werk je bij een lokale of regionale redactie en wil je weten wat dit voor jullie zou
+              opleveren? Laat het weten.
+            </p>
+          </div>
+          <a className="home-mail" href="mailto:stadsgeest@proton.me">
+            stadsgeest@proton.me
+          </a>
+        </section>
+
+        <footer className="home-voet">
+          <p>Stadsgeest 033 — Amersfoort</p>
+        </footer>
       </div>
-
-      {/* ── Rij 1: 112 + Analyse ── */}
-      <div className="wrap mt56">
-        <div className="bento">
-          {/* 112 & Actueel compact feed (4 cols) */}
-          {kortCards.length > 0 && (
-            <div className="bento-4" style={{ display: 'flex', flexDirection: 'column' }}>
-              <div className="sec-head" style={{ paddingTop: 0 }}>
-                <span className="sec-dot" />
-                <span className="sec-label">112 &amp; Actueel</span>
-              </div>
-              <div className="feed-112 mt8">
-                {kortCards.slice(0, 2).map((a) => (
-                  <ArticleCard key={a._id} article={a} variant="112" />
-                ))}
-              </div>
-              <div style={{ marginTop: 'auto', paddingTop: 16 }}>
-                <Link href="/112" style={{ fontFamily: 'var(--f-d)', fontSize: 14, fontWeight: 600, color: 'var(--error)', textDecoration: 'none' }}>
-                  Alle 112 meldingen →
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {/* Diepgaande analyse (8 cols) */}
-          {analyseCard && (
-            <div className="bento-8">
-              <Link href={`/artikel/${analyseCard.slug.current}`} className="ai-module">
-                <div className="ai-module-body">
-                  <div className="ai-module-label">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M8 1 L9.5 5.5 L14 5.5 L10.5 8.5 L11.8 13 L8 10.5 L4.2 13 L5.5 8.5 L2 5.5 L6.5 5.5 Z" fill="currentColor" opacity="0.8"/>
-                    </svg>
-                    Diepgaande Analyse
-                  </div>
-                  <h2 className="ai-module-title">{analyseCard.title}</h2>
-                  {analyseCard.lead && (
-                    <p className="ai-module-quote">"{analyseCard.lead}"</p>
-                  )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span className="ai-module-btn">Lees de analyse</span>
-                    {(analyseCard.bodyWordCount || analyseCard.lead) && (
-                      <span style={{ fontSize: 13, color: 'var(--t3)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-                          <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3"/>
-                          <path d="M7 4v3l2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-                        </svg>
-                        {Math.max(1, Math.ceil(((analyseCard.bodyWordCount || 0) + (analyseCard.lead?.split(' ').length || 0)) / 200))} min leestijd
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {analyseCard.mainImage?.asset && (
-                  <div className="ai-module-img">
-                    <Image
-                      src={urlFor(analyseCard.mainImage).width(440).height(440).url()}
-                      alt={analyseCard.mainImage.alt || ''}
-                      fill
-                      sizes="220px"
-                      style={{ objectFit: 'cover' }}
-                    />
-                  </div>
-                )}
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ── Rij 2: Nieuwsteasers ── */}
-      {normalCards.length > 0 && (
-        <div className="wrap mt56">
-          <div className="bento">
-            {normalCards.slice(0, 3).map((a) => (
-              <div key={a._id} className="bento-4">
-                <ArticleCard article={a} variant="with-image" catColor="teal" />
-              </div>
-            ))}
-          </div>
-          <div style={{ marginTop: 24, textAlign: 'right' }}>
-            <Link href="/nieuws" style={{ fontFamily: 'var(--f-d)', fontSize: 14, fontWeight: 600, color: 'var(--accent)', textDecoration: 'none' }}>
-              Alle berichten →
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {!hasContent && (
-        <div className="wrap">
-          <div className="empty-state mt56">
-            <p>Nog geen artikelen gepubliceerd.</p>
-          </div>
-        </div>
-      )}
-    </div>
+    </main>
   )
 }

@@ -2,7 +2,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { hasTurso } from '@/lib/turso'
-import { client } from '@/lib/sanity'
 import { getSignalDossier, getLatestPressReleaseForSignal } from '@/lib/dashboard/queries'
 import {
   formatDate,
@@ -40,14 +39,6 @@ export default async function SignaalDossierPage({ params }: Props) {
   const { signal, effectiveTier, effectiveSource, rawItems, entitiesByType, events, article } = dossier
   const briefing = parseBriefing(signal.summary)
   const pressRelease = await getLatestPressReleaseForSignal(id)
-
-  let articleSlug: string | null = null
-  if (article) {
-    const doc = await client
-      .fetch<{ slug?: { current: string } } | null>(`*[_id == $id][0]{ slug }`, { id: article.sanity_document_id })
-      .catch(() => null)
-    articleSlug = doc?.slug?.current ?? null
-  }
 
   const statusMeta = SIGNAL_STATUS_META[signal.status]
 
@@ -210,13 +201,11 @@ export default async function SignaalDossierPage({ params }: Props) {
             {article && (
               <div className="sidebar-box">
                 <div className="sidebar-title">Artikel</div>
-                {articleSlug ? (
-                  <Link href={`/artikel/${articleSlug}`} target="_blank" style={{ color: 'var(--accent)', fontSize: 14 }}>
-                    {article.title} →
-                  </Link>
-                ) : (
-                  <span style={{ fontSize: 14, color: 'var(--t2)' }}>{article.title}</span>
-                )}
+                <span style={{ fontSize: 14, color: 'var(--t2)' }}>{article.title}</span>
+                <div style={{ fontSize: 12, color: 'var(--t3)', marginTop: 6 }}>
+                  Gepubliceerd op de oude publiekssite. Die is op 7 augustus 2026 offline gehaald;
+                  het artikel staat in het lokale archief.
+                </div>
               </div>
             )}
           </div>
