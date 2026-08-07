@@ -711,3 +711,38 @@ Twee kandidaten op 'researching' aangetroffen, beide gepubliceerd. Geen achterst
 **Dashboardlogging:** 2 `signal_events` weggeschreven, beide van het type `status_change` (researching → published), actor 'schrijver'.
 
 *Cowork-update: 2026-08-07*
+
+---
+
+### Cowork-update: 2026-08-07 — Strategisch besluit, opruiming notebook, overdrachtsvoorbereiding
+
+Geen routine-run maar een werksessie met Jasper. Drie dingen: een koerswijziging vastgelegd, de notebook opgeruimd, en de overdracht naar een nieuw Claude-account voorbereid.
+
+**Koerswijziging.** Na een gesprek met Nieuwsplein33 wordt Stadsgeest.nl als publieksnieuwssite geparkeerd. De pipeline blijft, maar de opbrengst gaat naar de redactie van Nieuwsplein33 in plaats van naar een eigen site. Concreet:
+
+- Stadsgeest.nl krijgt een voorpagina met de premisse "persbureau voor lokale journalistiek"
+- Het dashboard komt op stadsgeest.nl/nieuwsplein33
+- De routines worden afgeslankt tot intake en analyse; schrijver en designer vervallen
+- **Sanity vervalt.** Het dashboard is lezen, filteren, status zetten en feedback geven — databasewerk, geen CMS-werk. Alles gaat op Turso. Het Sanity-project wordt geëxporteerd en op non-actief gezet, niet verwijderd
+- Nieuwe bron: persberichten die de redactie doorstuurt naar een apart adres. Let op de naamsverwarring met de bestaande `press_releases`-tabel — die bevat uitgaande stukken van de redactieassistent, niet inkomende persberichten. Voor die laatste is een aparte tabel of een onderscheidend veld nodig
+- Testperiode tot medio oktober 2026, tweewekelijkse evaluatie met hoofdredacteur Gideon Hofland en redacteur Pien Nieman
+- **Succescriterium:** het dashboard heeft 3 tot 5 keer aantoonbaar geleid tot een artikel op Nieuwsplein33 dat er zonder het dashboard niet was geweest. Dit moet in het dashboard zelf gemeten worden — een artikel-URL-veld plus een vinkje per signaal — anders wordt de evaluatie in oktober een reconstructie uit het geheugen
+- Nieuwsplein33 krijgt een eigen Claude-account dat de routines aanstuurt. Repo, Vercel, Turso en domein blijven ongewijzigd; alleen de aansturing verhuist. Jasper blijft technisch beheerder
+
+**Opruiming notebook.** OpenClaw volledig verwijderd: de map `.openclaw` (262 MB, negen agent-workspaces) plus de npm-pakketten `openclaw` en `clawhub`. Downloads leeggemaakt (games, installatiebestanden, restanten) en `.ouroboros`, `cowork-scout`, `Project Dashboard` en losse npm-artefacten uit de gebruikersmap. Samen circa 1,7 GB. Nog openstaand en alleen door Jasper te doen: drie Telegram-bots verwijderen via BotFather en de WhatsApp-koppeling intrekken — die bestaan nog aan de kant van die diensten.
+
+Al het Stadsgeest-materiaal dat verspreid lag is geordend in `C:\Users\Jasper Koning\Documents\Stadsgeest-documentatie\` met submappen `documentatie`, `prompts`, `bronnen`, `ontwerp`, `scripts`, `routines` (de SKILL.md-prompts van alle zeven scheduled tasks) en `projectbestanden` (de bestanden uit het Claude.ai-project, die anders met het uitloggen onbereikbaar werden). Herstelsleutels staan apart in `Documents\Herstelsleutels`.
+
+**Niet verplaatst, en dat is belangrijk:** `Documents\Claude\Projects\Nieuwssite Amersfoort\` (de werkmap waar alle elf scraperprocessen uit draaien), `Documents\gmail-smtp-mcp\` (draaiende MCP-server, staat in `claude_desktop_config.json`), `intake_run.bat`, `.pm2` en `projects\stadsgeest033`.
+
+**Correctie op een eerdere constatering in deze sessie.** Ik meldde dat STATUS.md een maand achterliep. Dat was onjuist: een fetch van `raw.githubusercontent.com` leverde een gecachete versie van 6 juli terwijl `origin/main` wel degelijk de update van 7 augustus bevatte. Wat er wél aan de hand was: de lokale kloon in `projects\stadsgeest033` liep 11 commits achter op origin. Rechtgezet met `git pull`; de kloon is nu gelijk aan origin en aan de werkkopie in de projectmap.
+
+**Twee openstaande uitzoekpunten, allebei niet opgelost in deze sessie:**
+
+1. **Hoe worden de scraperprocessen feitelijk gestart?** De logs laten zien dat alles draait (scrape-browser 06:03, scrape-dagelijks 06:31, scrape-ob 06:46, scrape-wekelijks 07:02, fetch-fulltext 07:30, intake 08:00), maar een `pm2 list` moest een nieuwe daemon starten en kende nul processen, terwijl `dump.pm2` er elf bevat. Ofwel de daemon was gestopt, ofwel de runs komen van `intake_run.bat` of de Cowork-routines langs PM2 om. De geplande taak "PM2 Resurrect" liep voor het laatst op 15 juli. Dit moet uitgezocht worden vóórdat er een runbook geschreven wordt, en vóórdat er nieuwe routines naast de bestaande komen te draaien — dubbel scrapen vult de database dubbel.
+
+2. **De signaalaanmaak schommelt extreem.** 220 signalen op 2 augustus, 37 op 1 augustus, 50 op 4 augustus, 9 op 3 augustus, 6 op 5 augustus, bij een vrij constante instroom van 40 tot 135 raw_items per dag. Een factor 35 verschil. Vermoedelijk een matchingkwestie zoals die van juni. Dit bepaalt direct hoeveel de redactie dagelijks te zien krijgt en verdient onderzoek vóór de start van de testperiode.
+
+**Stand van de database op 2026-08-07** (rechtstreeks uitgelezen): 4.864 raw_items waarvan 0 onverwerkt, laatste scrape 04:46 UTC. 827 signalen — 621 discarded, 95 published, 84 watching, 27 new. 124 bronnen, 2.821 entiteiten, 84 artikelen. Driekwart van alle signalen is afgekeurd; dat is precies de stapel waar de feedbackfunctie van de redactie op moet aangrijpen.
+
+*Cowork-update: 2026-08-07 (werksessie, geen routine)*
