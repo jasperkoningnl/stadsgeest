@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **8 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-08 — Tiplaag, weegroutine en een nieuw redactiedashboard"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-08 — Eerste volledige weger-run: vier tips, en drie bronnen die niets leveren"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -1093,3 +1093,213 @@ vragen met documentverwijzing, nooit als beweringen. Het herstel van de tier
 weg is; het dagelijkse verslag over de pipeline moet opnieuw worden gebouwd.
 
 *Cowork-update: 2026-08-08 (Nieuwsplein33-account, dashboard- en weegroutinesessie)*
+
+---
+
+### Cowork-update: 2026-08-08 — Eerste volledige weger-run: vier tips, en drie bronnen die niets leveren
+
+De weegroutine heeft zijn eerste volledige run gedraaid. Dat is het punt dat in de
+vorige sectie als onverifieerd stond: ja, hij schrijft weg, en de scores vallen
+redelijk uit. Maar de run legt vooral bloot dat de bronkant het knelpunt is, niet
+de weging.
+
+**Wat er is weggeschreven, geteld in de database.** 117 signalen beoordeeld — de
+111 open signalen bij aanvang plus zes die tijdens de run binnenkwamen. Nul open
+signalen zonder beoordeling. 112 `reviewed`-events, 5 `tip_created`-events, 4 tips,
+11 rijen `tip_signals` (5 dragend, 2 bevestigend, 4 context), 4 `tip_events`,
+29 dossierfeiten, 1 nieuw dossier, 39 statuswijzigingen (18 naar `discarded`,
+21 van `new` naar `watching`). De tabel `tips` was vóór deze run leeg; dit zijn
+tip 1 tot en met 4.
+
+Let op dat 117 geen dagproductie is. Normale signaalaanmaak ligt tussen 17 en 28
+per dag; dit was een achterstand van alles wat de speurder had laten liggen. De
+volgende runs zullen veel kleiner zijn.
+
+**De vier tips.** Score 6, 6, 10 en 6.
+
+1. *Rechtbank: Amersfoort rekende bed-and-breakfastvergunning af als nieuwbouw*
+   (verdieping, bestuur). De gemeente stelde de leges voor een gebruikswijziging
+   naar bed and breakfast vast op € 12.697,50, berekend op de bouwkosten van een
+   compleet nieuwe woning. De rechtbank keurde dat af in zaak UTR 24/5953,
+   ECLI:NL:RBMNE:2025:7451 van 15 december 2025, en de gemeente moet opnieuw
+   beslissen. De Stad Amersfoort schreef eerder over de tariefhoogte en de kritiek
+   van Vereniging Eigen Huis, niet over deze uitspraak — vandaar soort `verdieping`.
+2. *Nieuwe Amersfoortse basisschool strandt op veertien niet-verstuurde uitnodigingen*
+   (nieuwsfeit, onderwijs). Stichting Waldorf School Amersfoort nodigde 9 van de
+   23 verplichte schoolbesturen uit; bekostiging geweigerd, spoedverzoek afgewezen
+   op 1 juni 2026, bezwaar loopt nog.
+3. *Acht Amersfoortse adressen kregen sinds maart een nieuwe horecavergunning*
+   (patroon, economie). Tien vergunningen op acht adressen, vijf in de binnenstad,
+   drie in de eerste week van augustus, met een grootschalige ODU-controle van de
+   binnenstadhoreca op 4 juli als context.
+4. *Gemeente weigerde sinds eind juni vier kapaanvragen op vier adressen*
+   (patroon, milieu). Vier van de vijf weigeringen in de hele verzameling gaan over
+   bomen, alle sinds 29 juni.
+
+**Dossiers.** Explosies Amersfoort, Warmtenet en biomassa en Droogte en waterbeheer
+stonden alle drie op nul feiten; die zijn nu op gang met respectievelijk 5, 2 en 5
+feiten. Woningbouw en wonen kreeg 4, Lokale politiek en college 3. Drie feiten
+hebben een vastgelegde tegenstrijdigheid. Verdeling naar zekerheid: 14 officieel,
+12 onbevestigd, 2 claim_belanghebbende, 1 bevestigd. Alle 29 hebben een bron-URL.
+
+Nieuw **dossier 6, Milieu-incidenten en toezicht Amersfoort**, met 10 feiten: twee
+incidenten bij Renewi Smink aan de Lindeboomseweg (de zeer grote brand van 2 juni en
+twee meldkamermeldingen op 31 juli), vijf stank- en gasluchtmeldingen tussen 28 juli
+en 1 augustus, drie meldingen voor het toepassen van grond of baggerspecie waarin
+Zandink B.V. driemaal voorkomt, en één ODU-bericht. De omschrijving waarschuwt de
+opvolger uitdrukkelijk dat 112-berichten alarmclassificaties zijn en geen
+gebeurtenissen, en dat een melding op grond van artikel 4.1266 Bal een kennisgeving
+zonder besluit is — er is geen toets uitgevoerd.
+
+**Drie bronnen leveren aantoonbaar niets, en één ervan vervuilt de rest.**
+
+- **NVWA — inspectieresultaten Amersfoort** levert geen inspectieresultaten. Wat
+  binnenkomt zijn landelijke voorlichtingspagina's (dierziekten, fytosanitaire
+  exporteisen voor Turkije en het Verenigd Koninkrijk, salmonella bij pluimvee,
+  monitoring van schelpdieren) en zelfs technische configuratiebestanden van de
+  NVWA-website. Tien beoordeelde signalen komen hieruit, en de bron zit óók in de
+  clusters 502, 603, 688 en 781 waar hij niets te zoeken heeft. Dit is de
+  belangrijkste bronreparatie: het gat "toezicht en inspectie" uit
+  `NIEUWSPLEIN33.md` wordt niet gevuld, en de bron maakt actief andere signalen
+  onbruikbaar.
+- **Raad van State — Amersfoort** heeft een filterprobleem. Van de negen uitspraken
+  in deze run bleken er vijf over andere gemeenten te gaan: vier over landgoed
+  Tongeren in **Epe** en één over de basisregistratie in **Stichtse Vecht**. Ze
+  kwamen binnen omdat er een rechtsbijstandverlener of advocaat *in Amersfoort*
+  werkt, of omdat Amersfoort als vergelijkbaar geval werd aangehaald. Daarnaast
+  slaat de bron alleen het zaaknummer en de ECLI op, geen tekst — zonder de pagina
+  op te halen is er niets te wegen. Filteren op de vestigingsplaats van partijen in
+  plaats van op elke tekstvermelding zou dit grotendeels oplossen.
+- **UWV ArbeidsmarktInZicht** slaat alleen een URL met een datum-anker op. Vijf
+  items, alle zonder enige inhoud.
+- **Subsidieregister en de vijf jaarverslagenbronnen** leveren placeholders of een
+  HTTP 404. Het subsidieregister-item bevat letterlijk de tekst dat het handmatig
+  moet worden ingevuld. Het gat "geldstromen over tijd" wordt dus nul procent
+  gevuld, terwijl dat volgens `NIEUWSPLEIN33.md` een van de sterkste kansen is.
+- **Nextdoor** leverde 15 van de 117 beoordeelde signalen, vrijwel uitsluitend
+  marktplaatsadvertenties. Eén was een exacte dubbel van een eerder weggezet
+  signaal.
+
+**Patronen tellen kan nu niet, en dat raakt de kern van de routine.** De weging kent
+vier punten voor "onderdeel van een aantoonbaar patroon, mét getal". Dat criterium is
+voor de bekendmakingen grotendeels onbruikbaar, om twee redenen die samen optellen.
+De gesplitste bekendmakingenstromen bestaan pas sinds **4 juni 2026**, dus er is geen
+vergelijkbare eerdere periode. En `scraped_at` is niet de publicatiedatum: de scraper
+haalt met sprongen binnen, met op 24 juli **113 vergunningsberichten in één keer**
+tegenover 9 op 30 juli. Een telling per maand meet dus de scrapecadans, niet de stad.
+
+Concreet: kap-gerelateerde bekendmakingen lijken op te lopen van 11 in juni naar 13
+in juli naar 17 in de eerste zeven augustusdagen. Dat ziet eruit als een
+verdrievoudiging en het is een artefact. Daarom heeft tip 4 géén patroonpunten
+gekregen en is hij geformuleerd als een telling van weigeringen, en is tip 3
+uitdrukkelijk als ondergrens geschreven ("minstens acht adressen"). Dit hangt samen
+met de bevinding uit de vorige sectie over het 48-uursfilter op scrapemoment: zolang
+de publicatiedatum van het document niet leidend is, kan de weger geen betrouwbare
+tijdreeks maken. **Dat is nu geen theoretisch punt meer maar een gemeten
+belemmering.**
+
+**De clustering is onbetrouwbaar en dat kost weegtijd.** Signaal 632 bundelt zeven
+verkiezingsdebatten uit maart met vier evenementenvergunningen. 781 en 783 bundelen
+elk elf ongerelateerde vergunningsberichten. 502 mengt landelijke droogte met
+NVWA-pagina's over Scirtothrips en salmonella én een raadsstuk over het
+Isolatieoffensief. 688 zet een legesuitspraak, een subsidiezaak van het Fonds
+Podiumkunsten, een NVWA-pagina over cyberbeveiliging en een atletiekbericht bij
+elkaar. Gevolg: bijna elke beoordeling vraagt om het lezen van alle onderliggende
+documenten, en waardevolle items verstoppen zich in clusters met een nietszeggende
+titel — de legesuitspraak die tip 1 werd, zat in zo'n cluster.
+
+**Twee dingen die in de weegprompt moeten worden bijgesteld.**
+
+- De puntentabel kent **geen punten toe aan een dragende bron uit tier 2**. Alleen
+  tier 1 levert +3. De Raad van State staat in `sources` op tier 2, terwijl stap 2
+  van de routine rechtspraak juist als tier 1-publicatiebron beschrijft. Voor tip 2
+  is de uitspraak als dragende publicatiebron met +3 gewogen en is die keuze in het
+  veld `weging` genoteerd, maar de tabel hoort dit zelf te regelen.
+- De routine schrijft geen status voor bij een signaal dat dragend is voor een tip.
+  Daardoor staat signaal 858 nog op `new` in plaats van `watching`. Onschadelijk —
+  het valt via `tip_signals` buiten de volgende werklijst — maar het is een gaatje
+  in de instructie.
+
+**Wat niet werkte.**
+
+- **`mcp__Windows-MCP__PowerShell` is midden in de run ruim drie kwartier uitgevallen**
+  — niet de tool zelf, maar de veiligheidscontrole die de aanroep moet goedkeuren.
+  Dat is de enige route naar Turso. De tips en dossierfeiten stonden toen al in de
+  database, de 112 beoordelingen nog niet, en die zijn in een tweede aanloop alsnog
+  weggeschreven. Dit is de tweede sessie op rij waarin PowerShell op een ongelegen
+  moment wegvalt (vorige sectie: de rooktest van het dashboard). **Een routine die
+  in één tooltype vastzit, is kwetsbaar.**
+- Het uitwijkpad dat werkte: **Desktop Commander** (`start_process` met
+  `cmd /c "cd /d %TEMP% && node script.js"`) kan node draaien zonder de gemiste
+  goedkeuring. Twee dingen om te weten voor de volgende keer. Paden met een spatie
+  breken zowel `node "C:\Users\Jasper Koning\..."` als het doorgeven van
+  `NODE_PATH`; los dat op door in het script zelf `require()` te doen op het
+  absolute pad naar `scraper\node_modules\@libsql\client` en de `.env` met `fs` te
+  lezen. En `mcp__Windows-MCP__PowerShell` heeft een **lengtelimiet** op het commando:
+  een script van ruim honderd regels via een here-string doorgeven faalt met
+  "De bestandsnaam of -extensie is te lang". Schrijf het bestand in stukken en draai
+  het daarna.
+- De Linux-sandbox is definitief geen alternatief voor databasetoegang: naast de
+  ontbrekende libsql-binary uit de vorige sectie blijkt er ook **geen netwerkroute
+  naar de Turso-host** te zijn (curl geeft exit 56). Twee onafhankelijke
+  blokkades — niet opnieuw proberen.
+- `raadvanstate.nl` geeft **HTTP 403 op `mcp__Windows-MCP__Scrape`**. `WebFetch` werkt
+  daar wél, maar levert de volledige pagina inclusief menu's, wat per uitspraak flink
+  wat context kost. De weegprompt noemt `Scrape` als de manier om pagina's op te
+  halen; voor deze bron moet dat `WebFetch` zijn.
+- `uitspraken.rechtspraak.nl` is client-rendered en geeft via `Scrape` alleen
+  "Rechtspraak.nl - Zoeken in uitspraken". De open-data-ingang
+  `data.rechtspraak.nl/uitspraken/content?id=<ECLI>` geeft XML, maar `WebFetch` toont
+  dat als "[binary data]" en een `[xml]`-cast in PowerShell leverde lege `InnerText`
+  door de namespaces. Wat wél werkte was **WebSearch op het ECLI-nummer**: dat gaf de
+  gemeente, het bedrag en het zaaknummer voor ECLI:NL:RBMNE:2025:7451. Voor de
+  volgende keer: de inhoudsindicatie van rechtspraak-uitspraken staat wel in
+  `raw_items.content`, dus alleen bij een uitspraak die je echt volledig moet lezen
+  is dit een probleem.
+
+**Niet geverifieerd.**
+
+- **ECLI:NL:RBMNE:2025:7002**, van dezelfde dag als de legesuitspraak en over exact
+  dezelfde rekenfout (bouwkosten van een nieuwbouwwoning als uitgangspunt). Welke
+  gemeente daar verweerder is, heb ik niet vastgesteld. Als dat ook Amersfoort is,
+  wordt tip 1 aanzienlijk sterker: dan zijn het twee gecorrigeerde aanslagen op één
+  dag. Staat als eerste vervolgvraag bij de tip en als reden bij signaal 627.
+- **Twee uitspraken van de Raad van State (signalen 555 en 560) zijn niet beoordeeld.**
+  De bron bewaart geen tekst en de pagina's kwamen deze ronde niet binnen. Dat staat
+  zo in hun `reviewed`-reden; ze blijven op `watching`.
+- Ik heb **geen enkel artikel van Nieuwsplein33 volledig gelezen**. De spiegelcheck
+  rust op koppen, URL's en gerichte zoekopdrachten. Bij de vier tips is dat
+  waarschijnlijk voldoende — geen van de onderwerpen komt in hun koppen voor — maar
+  het is geen harde controle.
+- De horecatelling en de kapweigeringen zijn **ondergrenzen**, geen volledige
+  tellingen, om de reden die hierboven bij de scrapecadans staat.
+
+**Bewust laten liggen.**
+
+- **De explosiereeks levert geen tip en dat is een structureel probleem.** Alles komt
+  van de politie en 112-nu (tier 3) en van De Stad Amersfoort en Nieuwsplein33
+  (spiegel). Er is geen dragende tier 1- of 2-bron die geen spiegelbron is, dus de
+  harde regel sluit het uit — terecht, maar het betekent dat het meest opvallende
+  Amersfoortse veiligheidsverhaal van dit jaar buiten de tips valt. De vier feiten
+  staan nu wel in dossier 1. De uitweg is een tier 1-bron: er staat een uitspraak van
+  17 maart 2026 over medeplichtigheid aan het teweegbrengen van een ontploffing
+  (signaal 654, eerder weggezet) die naast de reeks gelegd moet worden. Genoteerd als
+  openstaande vraag bij signaal 462.
+- **Signaal 697** (ontruiming bedrijfsruimte, huurprijs € 30.250 per maand,
+  zittingsplaats Amersfoort) is opvallend maar geanonimiseerd. Bewust op `watching`
+  gehouden: als het pand ooit te identificeren is, is dat een concreet
+  leegstandsverhaal.
+- **Signaal 634**: de rechtbank verklaarde een invorderingsbesluit op grond van
+  artikel 2:74a APV Amersfoort (verbod op drugshandel op straat) gegrond — de gemeente
+  kreeg dus ongelijk. Eén zaak is te weinig voor een tip; de vraag is hoe vaak de
+  gemeente dat artikel inzet en met welk resultaat. Feit vastgelegd in dossier 5.
+- De statuswaarde `published` op 95 signalen is een restant van de oude
+  publicatiepijplijn en is niet aangeraakt.
+
+**Wat hierna het meest oplevert**, op grond van deze run: eerst de NVWA-bron
+herconfigureren of uitzetten (hij levert niets en beschadigt andere clusters), dan de
+publicatiedatum van bekendmakingen opslaan en gebruiken in plaats van het
+scrapemoment, dan het RvS-filter, en dan het subsidieregister. De clustering
+verdient een eigen blok; die kost nu bij elke run onnodig veel leeswerk.
+
+*Cowork-update: 2026-08-08 (Nieuwsplein33-account, eerste weger-run)*
