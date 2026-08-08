@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **7 augustus 2026**
+> ### Bijgewerkt tot en met **8 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-07 — Sanity op non-actief gezet"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-08 — Tiplaag, weegroutine en een nieuw redactiedashboard"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -934,3 +934,162 @@ Na afloop geverifieerd: build slaagt, stadsgeest.nl geeft 200, elf van elf PM2-j
 **Let op bij het archief:** met de tokens ingetrokken is `scripts\export-sanity-archief.mjs` alleen nog te draaien zolang de dataset publiek leesbaar blijft. De export van vandaag in `Documents\Stadsgeest-archief` is daarmee in de praktijk de kopie waar je op terugvalt.
 
 *Cowork-update: 2026-08-07 (Nieuwsplein33-account, vierde sessie)*
+
+---
+
+### Cowork-update: 2026-08-08 — Tiplaag, weegroutine en een nieuw redactiedashboard
+
+Sessie met Jasper over het ontwerp van het dashboard voor Nieuwsplein33. Er is
+eerst onderzocht wat die redactie zelf al dekt, daarna is de tiplaag gebouwd, de
+weegroutine geschreven en het oude dashboard vervangen.
+
+**Onderzoek Nieuwsplein33** — vastgelegd in `Stadsgeest-documentatie\documentatie\NIEUWSPLEIN33.md`.
+
+Twee bevindingen die het ontwerp veranderd hebben. De eerste: Nieuwsplein33 noemt
+op zijn eigen over-ons-pagina zijn samenwerkingspartners, en dat zijn er meer dan
+gedacht — BDU Media (De Stad Amersfoort en Leusder Krant), Eemland1, De Stadsbron,
+RTV Utrecht, Bibliotheek Eemland en Golfbreker Radio. Leg dat naast de bronnen die
+in de geschiedenis van Stadsgeest het vaakst tot een gepubliceerd artikel leidden
+en het overgrote deel blijkt partnermateriaal: De Stad Amersfoort (26), RTV Utrecht
+(11), Nieuwsplein33 zelf (9), Eemland1 (6). Het gecontroleerde artikel over de
+herkomst van biomassa bleek een bewerking van deel twee van een vierdelig onderzoek
+van De Stadsbron, met doorverwijzing. Die redactie krijgt partnerwerk dus gewoon
+binnen. Een tip uit die hoek is voor hen geen vondst.
+
+De tweede: hun opdracht bestrijkt Amersfoort **én Leusden**, en Leusden hangt aan
+twee freelancers. De bronnenlijst van Stadsgeest is vrijwel volledig Amersfoorts.
+Dat is een gat in onze pipeline, niet in hun dekking. Toegevoegd aan de lijst voor
+het herstelwerk aan de bronnen.
+
+Verder blijkt de veronderstelling dat zij geen zware onderwerpen doen onjuist: het
+Blaustein-dossier, Vahstal, SRO, zorgfraude bij BZMN, nepfacturen van Basismedia en
+meerdere rekenkameronderzoeken staan er gewoon. Wat ze structureel níét doen is het
+registerwerk: KvK, insolventie, inspectierapporten, subsidiepatronen over jaren,
+aanbestedingen, Raad van State en Huurcommissie. Dat valt vrijwel één op één samen
+met de dertien tier 1-bronnen die nog nooit één item hebben opgeleverd.
+
+**Tiplaag aangemaakt** via `scraper\migrate-tips.cjs` (idempotent). Nieuwe tabellen
+`tips`, `tip_signals`, `tip_feedback` en `tip_events`, alle vier leeg bij aanmaak.
+`sources` heeft er twee kolommen bij: `bronrol` en `gemeente`. Zes bronnen zijn als
+`spiegel` gemarkeerd: De Stad Amersfoort, Eemland1 (twee keer — dat is de bekende
+dubbeling), Nieuwsplein33 Amersfoort, RTV Utrecht — Amersfoort en amersfoort.nieuws.nl.
+De Stadsbron, de Leusder Krant, Golfbreker en Bibliotheek Eemland komen in de
+bronnentabel helemaal niet voor. **Let op: Eemland1 stond op tier 2 en is nu
+spiegelbron, en dus niet meer dragend voor een tip.** Dat is een bewuste consequentie
+van de partnerlijst, maar het verdient een beslissing van Jasper.
+
+Een tip is een cluster van signalen, niet een hernoemd signaal. Statuslevensloop:
+`wachtrij → goedgekeurd → in_behandeling → gepubliceerd | niet_gebruikt`, met
+`geparkeerd` en `afgekeurd` als zijpaden. Feedback is append-only.
+
+**Nieuwe routine `stadsgeest-weger`**, prompt in
+`Stadsgeest-documentatie\routines\stadsgeest-weger.md`, ingepland als Cowork
+scheduled task, dagelijks 09:31 — ná de PM2-intake. Dit is de eerste scheduled task
+op het Nieuwsplein33-account; er stonden er nul, geverifieerd via
+`list_scheduled_tasks`. De tien oude routines leven op het account van Jasper.
+
+De routine kent twee gelijkwaardige uitgangen: een tip, of een of meer feiten in
+`dossier_facts`, of allebei. Weggooien is de uitzondering. Harde regel: een tip
+heeft minstens één dragende bron uit tier 1 of 2 die geen spiegelbron is. Een
+spiegelbron is nooit dragend maar ook nooit een reden om iets weg te gooien — staat
+er al iets over, dan is de vraag wat wij toevoegen, en dat wordt een tip van soort
+`verdieping`. Er is bewust géén maximum aantal tips per dag, op verzoek van Jasper.
+De routine mag zelfstandig nieuwe dossiers aanmaken, maar alleen bij minstens drie
+feiten die erin thuishoren.
+
+**Oude dashboard verwijderd, nieuw redactiedashboard op `/nieuwsplein33`.** Weg zijn
+`src/app/dashboard/` (twaalf bestanden), `src/components/dashboard/` en
+`src/lib/dashboard/queries.ts`; 258 regels `.dash-`-CSS zijn vervangen door een
+nieuw blok, geverifieerd op nul resterende `.dash-`-treffers. `format.ts` is
+teruggebracht tot wat nog gebruikt wordt. `robots.ts` sluit nu `/nieuwsplein33` uit
+in plaats van `/dashboard`.
+
+Nieuw: wachtrij met één regel per tip, pagina's voor Mee bezig, Geparkeerd en
+Archief, en een tipdetailpagina met tabjes voor het verhaal, de bronnen, hoe de tip
+is gevonden (inclusief de uitgeklapte puntentelling), de vervolgvragen en de
+dossiertijdlijn. Drie beslisknoppen met vaste redencodes, en de meetknop
+(artikel-URL plus het vinkje "dit hadden we zonder Stadsgeest niet gehad") verwerkt
+in de levensloop in plaats van als losse functie. Twee schrijvende API-routes,
+`/api/tip/[id]/beslis` en `/api/tip/[id]/artikel`, die zichzelf op authenticatie
+controleren en niet alleen op de proxy vertrouwen.
+
+**De lekke inlog is dicht.** De hardcoded `AUTH_TOKEN` staat niet meer in
+`src/lib/dashboardAuth.ts`. De cookie bevat nu een met HMAC ondertekende sessie met
+vervaldatum van dertig dagen; het geheim zit uitsluitend in de omgevingsvariabelen
+`DASHBOARD_WACHTWOORD_HASH` en `DASHBOARD_SESSIE_SECRET`. Ontbreekt een van beide,
+dan komt niemand binnen — bewust dicht in plaats van per ongeluk open. Web Crypto in
+plaats van `node:crypto`, zodat het ook in de Edge-proxy werkt. Zolang er één
+gedeelde inlog is, schrijft het dashboard `gedeelde-inlog` weg als gebruiker in
+plaats van een naam te verzinnen. De magic link per persoon komt hier later
+overheen; de sessielaag hoeft daarvoor niet te wijzigen.
+
+**De entiteitenlaag doorgemeten**, omdat het gesprek ging over een knowledge graph.
+De opslag is er al ruimschoots: `persons` (134), `organizations` (32, met een kolom
+`kvk_number`), `roles` (134), `person_aliases` (398), `org_aliases` (40),
+`entity_mentions` (1.955), `entity_signals` (1.961), plus `org_relations` (6) en
+`person_relations` (1). Het probleem zit in de vulling. Van 2.821 entiteitsrijen
+zijn er maar 160 unieke organisaties en 95 unieke personen. Er staan **vijf adressen
+in 4.864 documenten** en **zes bedragen**, terwijl alleen het subsidieregister al
+1.678 rijen heeft. De oorzaak staat in `intake-run.mjs`: de extractie is een reeks
+reguliere expressies plus een vaste lijst met bekende personen en organisaties, dus
+de graaf kan alleen bevatten wat we al wisten. Dat is terug te zien in de top:
+gemeente amersfoort (119 signalen), amersfoort (38), daarna uitsluitend wethouders
+en raadsleden. `crossref_briefing` is gevuld bij vijf van de 827 signalen.
+
+Conclusie voor later: dit is geen graafdatabase-vraagstuk maar een extractievraagstuk.
+Bij deze omvang volstaat Turso ruimschoots. Wat moet gebeuren is extractie per
+document door een taalmodel, en scoring van verbanden op inverse frequentie — een
+gedeelde entiteit is meer waard naarmate hij zeldzamer is, anders verbindt "gemeente
+Amersfoort" alles met alles. Dat laatste is precies de fout waar `intake-run.mjs` al
+een uitzondering voor heeft moeten inbouwen.
+
+**Bevindingen over de intake.** De intake gooit tier 1 en 2 niet weg op inhoud; de
+enige filters zijn leeg item, rechtspraak zonder uitspraaktekst, historisch tier 3,
+exacte titeldubbel, en tier 3 zonder trefwoord uit een vaste regexlijst. Maar er
+staat wél een filter op van 48 uur na scrapemoment: alles wat ouder is verdwijnt
+zonder ooit een signaal te worden. Gecombineerd met het meetprincipe bovenaan dit
+bestand — scrapers en routines liggen bewust stil om tokens te sparen — betekent dat
+dat elke stilstand van een paar dagen materiaal kost dat je voor een tijdlijn nodig
+hebt. **Bewust niet aangeraakt deze sessie**, maar met dossieropbouw als uitgangspunt
+weegt dit zwaarder dan voorheen. Voorstel voor later: filteren op de publicatiedatum
+van het document in plaats van op het scrapemoment.
+
+**Niet geverifieerd.**
+
+- De rooktest van het dashboard is **niet uitgevoerd**. De build slaagt (exit 0,
+  dertien routes) en de TypeScript-controle komt schoon door, maar er is geen enkele
+  pagina live opgehaald. Hoe de wachtrij en de tipdetailpagina er werkelijk uitzien,
+  en of de drie knoppen doen wat ze moeten, is dus onbekend. PowerShell was tijdens
+  de geplande test tijdelijk niet beschikbaar.
+- De omgevingsvariabelen `DASHBOARD_WACHTWOORD_HASH` en `DASHBOARD_SESSIE_SECRET`
+  staan nog nergens, niet lokaal en niet op Vercel. **Tot dat gebeurt is
+  `/nieuwsplein33` voor niemand bereikbaar** — de inlog faalt dicht. Dit moet vóór
+  de eerstvolgende deploy geregeld zijn.
+- De weegroutine had bij het schrijven van deze update nog geen volledige run
+  afgerond. Of hij daadwerkelijk tips wegschrijft en of de scores redelijk uitvallen,
+  moet blijken uit de eerste runs.
+
+**Doodlopende wegen, voor wie het opnieuw wil proberen.**
+
+- Turso is niet te bevragen vanuit de Linux-sandbox: `scraper/node_modules` bevat de
+  Windows-binaries van libsql, en een `@libsql/linux-x64-gnu` ontbreekt. Alle
+  databasetoegang liep via `mcp__Windows-MCP__PowerShell` met node.
+- `nieuwsplein33.nl` levert bij een gewone fetch een lege pagina op — de site is
+  volledig client-rendered op het platform regiogroei.cloud. `mcp__Windows-MCP__Scrape`
+  werkt wel. Er is een RSS-feed op `/rss-feed` die we niet gebruiken; onze scraper
+  draait met Playwright op `/amersfoort` en slaat alleen titel en URL op, zonder
+  inhoud. Die feed is vrijwel zeker de betere ingang.
+- Een `git status` vanuit de Linux-schil meldde 106 gewijzigde bestanden met 19.008
+  toevoegingen tegenover 19.006 verwijderingen. Dat zijn regeleindes, geen inhoud —
+  een artefact van de mount, niet van de werkkopie. Op Windows is de status schoon.
+  Niet opnieuw als bevinding rapporteren.
+
+**Bewust laten liggen.** De extractie- en graaflaag is besproken maar niet gebouwd;
+volgorde is afgesproken als extractie en entity resolution eerst, daarna
+anomaliedetectie op volumes, dan tijd in de relaties, dan verbandscores, en
+hypothesegeneratie pas als de rest zich bewezen heeft — en dan uitsluitend als
+vragen met documentverwijzing, nooit als beweringen. Het herstel van de tier
+1-bronnen is als apart blok belegd. Er is geen technisch dashboard meer nu het oude
+weg is; het dagelijkse verslag over de pipeline moet opnieuw worden gebouwd.
+
+*Cowork-update: 2026-08-08 (Nieuwsplein33-account, dashboard- en weegroutinesessie)*

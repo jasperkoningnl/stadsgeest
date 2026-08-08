@@ -1,31 +1,33 @@
 import { NextResponse } from 'next/server'
-import { createHash } from 'crypto'
-import { AUTH_COOKIE, AUTH_TOKEN } from '@/lib/dashboardAuth'
-
-const ONE_YEAR = 365 * 24 * 60 * 60
+import { AUTH_COOKIE, isGeconfigureerd, maakSessie, wachtwoordKlopt } from '@/lib/dashboardAuth'
 
 export async function POST(request: Request) {
   const formData = await request.formData()
-  const password = (formData.get('password') as string) ?? ''
-  const from = (formData.get('from') as string) || '/'
+  const wachtwoord = (formData.get('password') as string) ?? ''
+  const from = (formData.get('from') as string) || '/nieuwsplein33'
 
-  const hash = createHash('sha256').update(password).digest('hex')
-
-  if (hash !== AUTH_TOKEN) {
+  const terugNaarLogin = (code: string) => {
     const url = new URL('/login', request.url)
-    url.searchParams.set('error', '1')
-    if (from !== '/') url.searchParams.set('from', from)
+    url.searchParams.set('error', code)
+    if (from) url.searchParams.set('from', from)
     return NextResponse.redirect(url, { status: 303 })
   }
 
-  const destination = new URL(from.startsWith('/') ? from : '/', request.url)
-  const response = NextResponse.redirect(destination, { status: 303 })
+  if (!isGeconfigureerd()) return terugNaarLogin('config')
+  if (!(await wachtwoordKlopt(wachtwoord))) return terugNaarLogin('1')
 
-  response.cookies.set(AUTH_COOKIE, AUTH_TOKEN, {
+  const sessie = await maakSessie()
+  if (!sessie) return terugNaarLogin('config')
+
+  // Alleen paden binnen deze site toestaan, anders is dit een open redirect.
+  const bestemming = new URL(from.startsWith('/') && !from.startsWith('//') ? from : '/nieuwsplein33', request.url)
+  const response = NextResponse.redirect(bestemming, { status: 303 })
+
+  response.cookies.set(AUTH_COOKIE, sessie.waarde, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: ONE_YEAR,
+    maxAge: sessie.maxAge,
     path: '/',
   })
 

@@ -1,0 +1,53 @@
+import { NextResponse } from 'next/server'
+import { turso } from '@/lib/turso'
+import { isAuthedCookieHeader } from '@/lib/dashboardAuth'
+
+// Zolang er één gedeelde inlog is, weten we niet wie dit deed. Dat wordt hier
+// expliciet vastgelegd in plaats van een naam te verzinnen; zodra er per persoon
+// wordt ingelogd komt de echte gebruiker hier te staan.
+const GEBRUIKER_ONBEKEND = 'gedeelde-inlog'
+
+const TOEGESTAAN = new Set(['goedgekeurd', 'geparkeerd', 'afgekeurd'])
+
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!(await isAuthedCookieHeader(request.headers.get('cookie')))) {
+    return NextResponse.json({ fout: 'Niet ingelogd' }, { status: 401 })
+  }
+  if (!turso) return NextResponse.json({ fout: 'Geen database' }, { status: 503 })
+
+  const { id: idParam } = await params
+  const id = parseInt(idParam, 10)
+  if (Number.isNaN(id)) return NextResponse.json({ fout: 'Ongeldige tip' }, { status: 400 })
+
+  const body = await request.json().catch(() => null)
+  const actie = body?.actie
+  if (!TOEGESTAAN.has(actie)) return NextResponse.json({ fout: 'Onbekende actie' }, { status: 400 })
+
+  const redenCode = typeof body.reden_code === 'string' ? body.reden_code.slice(0, 60) : null
+  const redenTekst = typeof body.reden_tekst === 'string' ? body.reden_tekst.slice(0, 4000) : null
+
+  const huidig = await turso.execute({ sql: 'SELECT status FROM tips WHERE id = ?', args: [id] })
+  if (huidig.rows.length === 0) return NextResponse.json({ fout: 'Tip bestaat niet' }, { status: 404 })
+  const vorigeStatus = String(huidig.rows[0].status)
+
+  // Feedback is append-only: er wordt nooit iets overschreven, zodat later terug
+  // te zien is hoe het oordeel van de redactie zich heeft ontwikkeld.
+  await turso.batch([
+    {
+      sql: `UPDATE tips SET status = ?, updated_at = datetime('now') WHERE id = ?`,
+      args: [actie, id],
+    },
+    {
+      sql: `INSERT INTO tip_feedback (tip_id, gebruiker, actie, reden_code, reden_tekst)
+            VALUES (?, ?, ?, ?, ?)`,
+      args: [id, GEBRUIKER_ONBEKEND, actie, redenCode, redenTekst],
+    },
+    {
+      sql: `INSERT INTO tip_events (tip_id, actor, event_type, status_from, status_to, reason)
+            VALUES (?, ?, 'beslissing', ?, ?, ?)`,
+      args: [id, GEBRUIKER_ONBEKEND, vorigeStatus, actie, redenCode ?? redenTekst],
+    },
+  ], 'write')
+
+  return NextResponse.json({ ok: true, status: actie })
+}

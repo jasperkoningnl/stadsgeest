@@ -12,7 +12,10 @@ export default async function LoginPage({
 }) {
   const params = await searchParams
   const error = params.error === '1'
-  const from = params.from || '/'
+  // 'config' betekent: de omgevingsvariabelen DASHBOARD_WACHTWOORD_HASH en
+  // DASHBOARD_SESSIE_SECRET ontbreken. Dan komt niemand binnen — dat is opzet.
+  const nietIngesteld = params.error === 'config'
+  const from = params.from || '/nieuwsplein33'
 
   return (
     <main style={{
@@ -61,6 +64,22 @@ export default async function LoginPage({
             fontFamily: 'var(--f-d)',
           }}>
             Onjuist wachtwoord. Probeer het opnieuw.
+          </p>
+        )}
+
+        {nietIngesteld && (
+          <p style={{
+            background: 'rgba(255,180,171,0.10)',
+            border: '1px solid var(--error)',
+            color: 'var(--error)',
+            borderRadius: 'var(--r-lg)',
+            padding: '10px 14px',
+            fontSize: '14px',
+            marginBottom: '20px',
+            fontFamily: 'var(--f-d)',
+          }}>
+            De inlog is nog niet ingesteld op deze omgeving. Zet <code>DASHBOARD_WACHTWOORD_HASH</code> en{' '}
+            <code>DASHBOARD_SESSIE_SECRET</code> in de omgevingsvariabelen.
           </p>
         )}
 

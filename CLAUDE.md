@@ -39,3 +39,5 @@ Laat bestaande secties intact; voeg onderaan toe.
 ## Werkwijze
 
 Nederlands, ook in commentaar en commitberichten. Overleg ontwerpkeuzes met Jasper voordat je bouwt. Verifieer je eigen werk — tel wat je hebt weggeschreven, draai de build, controleer live. Een exit code van 0 is geen bewijs dat het klopt.
+
+**Geef nooit een tijdsinschatting** voor hoe lang bouwen of uitzoeken duurt — geen uren, geen dagen, geen weken. Die schattingen zijn onbetrouwbaar en irrelevant voor de planning. Beschrijf omvang desnoods in stappen of afhankelijkheden, niet in tijd.
