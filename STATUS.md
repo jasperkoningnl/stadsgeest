@@ -1303,3 +1303,71 @@ scrapemoment, dan het RvS-filter, en dan het subsidieregister. De clustering
 verdient een eigen blok; die kost nu bij elke run onnodig veel leeswerk.
 
 *Cowork-update: 2026-08-08 (Nieuwsplein33-account, eerste weger-run)*
+
+---
+
+### Cowork-update: 2026-08-08 — Vervolg: inlog werkend, rooktest geslaagd, eerste weger-run
+
+Correctie op de vorige sectie: de drie punten onder "Niet geverifieerd" zijn
+inmiddels wél gecontroleerd. Wat daar staat over de rooktest en de
+omgevingsvariabelen is achterhaald.
+
+**Inlog werkt.** Jasper heeft `DASHBOARD_WACHTWOORD_HASH` en
+`DASHBOARD_SESSIE_SECRET` op Vercel gezet, voor Preview én Production, beide als
+Sensitive. De waarden staan in `Documents\Herstelsleutels\stadsgeest-dashboard-inlog.txt`
+— bewust buiten de repo en buiten elke chat. Omdat de variabelen na de laatste
+deploy zijn toegevoegd, is er opnieuw gedeployd; die is aangekomen en aan
+stadsgeest.nl gekoppeld.
+
+De Vercel CLI is nu bruikbaar. Het opgeslagen token in
+`AppData\Roaming\xdg.data\com.vercel.cli\auth.json` was verlopen; na `vercel login`
+door Jasper werkt `whoami` weer. Installeren was niet nodig, `npx vercel` volstaat.
+Dit is nieuw ten opzichte van de aantekening van 7 augustus dat
+omgevingsvariabelen niet via een koppeling te wijzigen waren — via de CLI kan het
+wel.
+
+**Rooktest geslaagd.** Ingelogd via `/api/auth`, cookie `sg_sessie` wordt gezet en
+geaccepteerd. Wachtrij, Mee bezig, Geparkeerd en Archief geven alle vier 200. De
+vier tipdetailpagina's renderen met de tabjes Het verhaal, Bronnen, Hoe dit is
+gevonden en Vervolgvragen; bij tip #1 verschijnt ook het dossiertabje. Wat nog
+níét is getest: de schrijvende kant. De drie beslisknoppen en de meetknop zijn
+alleen als code geverifieerd, er is nog geen echte beslissing weggeschreven.
+
+**Eerste run van de weger.** Vier tips, alle vier op `wachtrij`:
+
+| # | Soort | Score | Kop |
+|---|---|---|---|
+| 3 | patroon | 10 | Acht Amersfoortse adressen kregen sinds maart een nieuwe horecavergunning |
+| 1 | verdieping | 6 | Rechtbank: Amersfoort rekende bed-and-breakfastvergunning af als nieuwbouw |
+| 2 | nieuwsfeit | 6 | Nieuwe Amersfoortse basisschool strandt op veertien niet-verstuurde uitnodigingen |
+| 4 | patroon | 6 | Gemeente weigerde sinds eind juni vier kapaanvragen op vier adressen |
+
+De bronregel is nagerekend en houdt stand: elke tip heeft dragende documenten uit
+tier 1 of 2 die geen spiegelbron zijn — respectievelijk 21, 4, 1 en 18. Tips #1 en
+#3 raken ook spiegelbronnen, maar die dragen niet. Daarnaast 29 dossierfeiten over
+zes dossiers en 117 beoordelingen in `signal_events`. Er waren vijf dossiers, dus
+de routine heeft er zelf één aangemaakt.
+
+Inhoudelijk is dit het genre uit `NIEUWSPLEIN33.md`: uitgetelde patronen uit
+bekendmakingen met adressen erbij, een rechtbankuitspraak over leges van
+12.697,50 euro, en de observatie dat weigeringen zeldzaam zijn — vijf sinds 4 juni,
+waarvan vier over het kappen van bomen. Dat laatste is een patroonvondst die met de
+hand niet te zien is.
+
+**Geen enkele tip komt uit Leusden.** Te verwachten, want er zijn geen Leusdense
+bronnen. Dat is het sterkste argument voor die uitbreiding: de helft van het gebied
+van de redactie levert nul.
+
+**Sanity-variabelen verwijderd uit Vercel.** `SANITY_WRITE_TOKEN`,
+`NEXT_PUBLIC_SANITY_PROJECT_ID` en `NEXT_PUBLIC_SANITY_DATASET` zijn weg. Vooraf
+gecontroleerd op nul verwijzingen naar Sanity in `src/`, `scraper/` en
+`package.json`. Er staan nu nog vier variabelen: de twee voor de inlog en de twee
+voor Turso. Het openstaande punt uit de update van 7 augustus is hiermee afgehandeld.
+
+**Wat nog open staat.** De schrijvende dashboardroutes zijn niet live beproefd. De
+weger heeft één run gedaan; of de scores over meerdere dagen redelijk blijven moet
+blijken. Het 48-uursfilter in de intake staat er nog. Er is geen technisch
+dashboard meer sinds het oude weg is, dus het dagelijkse verslag over de pipeline
+moet opnieuw worden gebouwd.
+
+*Cowork-update: 2026-08-08 (Nieuwsplein33-account, vervolg na deploy)*
