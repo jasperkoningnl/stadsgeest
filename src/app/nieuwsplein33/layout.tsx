@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
+// De tellers in de navigatie moeten meelopen met de beslissingen van de redactie.
+export const dynamic = 'force-dynamic'
+
 export default async function RedactieLayout({ children }: { children: React.ReactNode }) {
   const tellingen = hasTurso() ? await getStatusTellingen() : {}
 

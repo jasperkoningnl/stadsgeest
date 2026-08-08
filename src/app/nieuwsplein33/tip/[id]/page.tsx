@@ -11,7 +11,7 @@ import TipTabs, { type Tab } from './TipTabs'
 import TipActies from './TipActies'
 import Meetknop from './Meetknop'
 
-export const revalidate = 0
+export const dynamic = 'force-dynamic'
 
 interface Props { params: Promise<{ id: string }> }
 

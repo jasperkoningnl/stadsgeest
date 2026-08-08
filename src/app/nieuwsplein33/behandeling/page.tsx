@@ -3,7 +3,7 @@ import { getTips, getMeetstand } from '@/lib/dashboard/tipQueries'
 import TipRegel from '../TipRegel'
 import GeenDatabase from '../GeenDatabase'
 
-export const revalidate = 30
+export const dynamic = 'force-dynamic'
 
 export default async function BehandelingPagina() {
   if (!hasTurso()) return <GeenDatabase />

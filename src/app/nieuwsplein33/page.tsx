@@ -4,7 +4,10 @@ import { getTips, getGeparkeerdDezeWeek, getMeetstand } from '@/lib/dashboard/ti
 import TipRegel from './TipRegel'
 import GeenDatabase from './GeenDatabase'
 
-export const revalidate = 30
+// Geen caching: een redacteur die net een tip heeft geparkeerd moet dat meteen
+// terugzien. Met een revalidate van 30 seconden bleef een afgehandelde tip in de
+// wachtrij staan en verscheen hij nog niet bij Geparkeerd.
+export const dynamic = 'force-dynamic'
 
 export default async function WachtrijPagina() {
   if (!hasTurso()) return <GeenDatabase />
