@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **8 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-08 — Vervolg: inlog werkend, rooktest geslaagd, eerste weger-run"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-08 — Geparkeerde tip bleef in de wachtrij staan"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -1371,3 +1371,42 @@ dashboard meer sinds het oude weg is, dus het dagelijkse verslag over de pipelin
 moet opnieuw worden gebouwd.
 
 *Cowork-update: 2026-08-08 (Nieuwsplein33-account, vervolg na deploy)*
+
+---
+
+### Cowork-update: 2026-08-08 — Geparkeerde tip bleef in de wachtrij staan
+
+Jasper parkeerde de eerste tip via het dashboard en zag hem daarna nog steeds in
+de wachtrij staan, terwijl hij niet bij Geparkeerd verscheen. Dat leek een bug in
+de knop, maar was het niet.
+
+**In de database klopte alles.** Tip #1 stond op `geparkeerd` met tijdstempel,
+`tip_feedback` bevatte de regel met redencode `wacht_op_meer`, en `tip_events` de
+overgang `wachtrij → geparkeerd`. De schrijvende route deed precies wat hij moest
+doen.
+
+**Het zat in de weergave.** De vier lijstpagina's stonden op `revalidate = 30` en
+werden door Next.js statisch voorgerenderd — in de buildoutput zichtbaar als `○`.
+Na een beslissing bleef een tip daardoor tot een halve minuut in de wachtrij staan
+en verscheen hij nog niet bij Geparkeerd. `router.refresh()` op de detailpagina
+ververst alleen de eigen route en raakt de cache van de andere pagina's niet.
+
+Alles onder `/nieuwsplein33` staat nu op `force-dynamic`, inclusief de layout, want
+daar zitten de tellers in de navigatie. In de buildoutput zijn alle zes de routes nu
+`ƒ`. Voor een dashboard met een handvol gebruikers levert caching niets op en kost
+het correctheid.
+
+**Les voor de rest van het dashboard:** elke pagina die een beslissing van de
+redactie toont moet dynamisch zijn. Komt er later een pagina bij, zet er dan meteen
+`force-dynamic` op in plaats van een revalidate-waarde.
+
+Live geverifieerd na de deploy: de wachtrij toont drie tips zonder de geparkeerde
+zaak, met de strook "1 tip is deze week geparkeerd" erboven, en op Geparkeerd staat
+de bed-and-breakfastzaak. Commit `2faed68`.
+
+Hiermee is de schrijvende kant van het dashboard voor het eerst in productie
+beproefd. Goedkeuren en afkeuren lopen door dezelfde route `/api/tip/[id]/beslis`
+en werken daarmee ook. **De meetknop is nog steeds ongetest** — die verschijnt pas
+zodra er een tip is goedgekeurd, en dat is nog niet gebeurd.
+
+*Cowork-update: 2026-08-08 (Nieuwsplein33-account, cachefix dashboard)*
