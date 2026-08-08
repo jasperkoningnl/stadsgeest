@@ -314,6 +314,18 @@ async function run() {
         continue;
       }
 
+      // Registerruis: BAG-panden met de status "Pand in gebruik" zijn automatische
+      // registratiemutaties zonder gebeurtenis erachter. Op 4 augustus 2026 leverden
+      // die in één dag 36 nieuwe signalen op, die allemaal zijn afgekeurd.
+      // Panden met een ándere status blijven wel door: bouw gestart, sloopvergunning
+      // verleend of pand gesloopt zijn wél gebeurtenissen.
+      if (item.source_name === 'PDOK BAG Amersfoort'
+          && /Status:\s*Pand in gebruik/i.test(`${item.title} ${item.content || ''}`)) {
+        stats.gefilterd++; stats.ids.push(item.id);
+        await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', 'BAG-pandregistratie met status "Pand in gebruik": registermutatie, geen gebeurtenis'));
+        continue;
+      }
+
       if (!isHist) {
         const ageH = (Date.now() - new Date(item.scraped_at).getTime()) / 3600000;
         if (ageH > 48) {

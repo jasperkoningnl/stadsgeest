@@ -59,6 +59,16 @@ async function fetchFullContent(url) {
   }
 }
 
+// De EF-codes van TenderNed. Alleen de types die in Amersfoortse berichten
+// voorkomen; onbekende codes laten de titel ongemoeid.
+const EF_SOORTEN = {
+  EF29: 'Gunning',
+  EF16: 'Aanbesteding',
+  EFE3: 'Aanbesteding',
+  EF02: 'Vooraankondiging',
+  EF03: 'Gunning',
+};
+
 async function scrape() {
   const sourceId = await getOrCreateSource(db, {
     name: 'TenderNed (Amersfoort)',
@@ -88,11 +98,27 @@ async function scrape() {
         await new Promise(r => setTimeout(r, 1000));
       }
 
+      // EF-type in de titel en een toelichting in de tekst. Zonder dat leest een
+      // gunningsaankondiging (EF29) als een openstaande aanbesteding met een
+      // sluitingsdatum in het verleden, en dat werd door de analist telkens als
+      // datafout aangemerkt in plaats van gebruikt. Een gunning is juist het
+      // interessantste bericht: dan is bekend wie de opdracht heeft gekregen.
+      const efType = (fullContent.match(/Type publicatie:\s*(EF[A-Z0-9]+)/i) || [])[1] || '';
+      const soort = EF_SOORTEN[efType.toUpperCase()] || '';
+      const titel = soort ? `${soort}: ${entry.title}` : entry.title;
+      const toelichting = soort
+        ? `\n\nToelichting Stadsgeest: publicatietype ${efType} betekent "${soort.toLowerCase()}". `
+          + (efType.toUpperCase() === 'EF29'
+            ? 'Bij een gunningsaankondiging ligt de sluitingsdatum per definitie in het verleden; '
+              + 'dat is geen datafout. De opdracht is gegund, en de vraag is aan wie.'
+            : 'De sluitingsdatum hoort hier in de toekomst te liggen.')
+        : '';
+
       const result = await saveRawItem(db, {
         sourceId,
         externalUrl: entry.link,
-        title: entry.title,
-        content: fullContent,
+        title: titel,
+        content: (fullContent + toelichting).substring(0, 5200),
         summary: entry.summary.substring(0, 500),
       });
       if (result.saved) saved++; else skipped++;

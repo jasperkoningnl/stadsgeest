@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **8 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-08 — Geparkeerde tip bleef in de wachtrij staan"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-08 — Bronkant hersteld: een stille storing sinds 7 augustus, en de bronnentabel ontdubbeld"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -1410,3 +1410,202 @@ en werken daarmee ook. **De meetknop is nog steeds ongetest** — die verschijnt
 zodra er een tip is goedgekeurd, en dat is nog niet gebeurd.
 
 *Cowork-update: 2026-08-08 (Nieuwsplein33-account, cachefix dashboard)*
+
+---
+
+### Cowork-update: 2026-08-08 — Bronkant hersteld: een stille storing sinds 7 augustus, en de bronnentabel ontdubbeld
+
+Dit was het derde werkblok, over de bronnen. De opdracht ging uit van kapotte en
+lege registers. Wat er werkelijk aan de hand was is iets anders, en ernstiger.
+
+**De pipeline lag sinds 7 augustus 15:25 voor een groot deel stil, zonder dat er
+iets in `scrape_runs` te zien was.** `scraper/src/lib.js` leest `.env` met een eigen
+parser: `readFileSync(...).split('\n')` en daarna `/^([^=]+)=(.*)$/`. Bij Windows-
+regeleindes blijft er een `\r` aan het eind van elke regel staan. In die regex
+matcht `.` geen `\r`, en zonder de `m`-vlag matcht `$` alleen het einde van de hele
+string — dus de regex faalde op élke regel. `loadEnv()` gaf een leeg object terug en
+`createDb()` viel om met `URL_INVALID`. Dat gebeurde vóór de eerste databaseaanroep,
+dus er is ook niets gelogd. In het bronnenoverzicht zag dat er precies zo uit als
+een bron die niets vindt.
+
+Tien bestanden hangen aan `lib.js`: alle bekendmakingenstromen, alle raadsinformatie-
+types, het subsidieregister, `fetch-fulltext` en `run-nieuw`. Geteld in de database:
+**nul items uit die bronnen tussen 7 augustus 15:25 en vanmiddag**, terwijl de
+scrapers die via `db.js` en dotenv werken gewoon doorliepen — Nextdoor, RTV Utrecht,
+112-nu. `fulltext_fetched_at` stond stil op 2026-08-07T05:30. `.env` is op 7 augustus
+om 15:25 gewijzigd; dat is het moment waarop dit begon. `loadEnv()` splitst nu op
+`/\r?\n/`, negeert commentaarregels, strookt aanhalingstekens en gooit een
+begrijpelijke fout als `TURSO_URL` ontbreekt in plaats van een `URL_INVALID` diep uit
+libsql.
+
+Dit is een tweede les over het meetprincipe. Meten in runs in plaats van in
+kalendertijd werkt alleen als de scraper zijn run ook echt logt. Twee van de drie
+storingen van vandaag waren onzichtbaar in `scrape_runs`.
+
+**Tweede stille bug: `officielebekendmakingen-repo.js` logde sinds 24 juli niets.**
+Onderaan stond `log('Officiële Bekendmakingen Amersfoort (repo)', stats)`, terwijl
+`log()` uit `lib.js` de vorm `(db, sourceId, sourceName, stats)` heeft. De aanroep
+wierp elke run een `TypeError` op `stats.new` — ná het wegschrijven van de items, dus
+de items kwamen wel binnen maar er verscheen geen enkele rij in `scrape_runs`. Daarom
+stonden de zeven gesplitste bekendmakingenbronnen in mijn eerste meting op nul runs
+en leken ze nooit gedraaid te hebben, terwijl ze de grootste tier 1-leverancier van
+het project zijn. De scraper telt nu per rubriek en schrijft zeven rijen weg. Bij de
+controlerun: 138 publicaties opgehaald, van alle 138 de volledige tekst binnen.
+
+**Derde bug: `sid is not defined` in `run-nieuw.js`.** In veertien functies stond
+`const sid = await ensureSource(...)` binnen de `try`, terwijl `await log(db, sid,
+...)` erna staat. Bij tien daarvan is `sid` daardoor buiten bereik en gooide elke
+functie een `ReferenceError` na afloop. `inhaal-nieuw.err` stond er vol mee. Let op
+wat dit wél en niet verklaart: de `insertItem`-aanroepen zitten binnen de `try`, dus
+items werden gewoon opgeslagen. Het was een logbug, geen oogstbug. Gerepareerd met
+`let sid = null` vóór de `try`.
+
+**Daarmee is de aanname over de veertien stilliggende tier 1-bronnen onderuitgehaald.**
+Na de reparatie draait `run-nieuw` schoon: Rekenkamer Amersfoort haalt 77 items op,
+Buurtbudgetten 23, COELO 10, DUO 10, Monumentenregister 8, ACM 6 — allemaal
+duplicaten. Totaal 1 nieuw item, 158 overgeslagen, 1 fout. Die bronnen zijn dus niet
+kapot en liggen niet stil; ze hebben simpelweg niets nieuws. Een rekenkamer publiceert
+niet elke week. `BRONNEN.md` moet op dit punt worden herzien.
+
+**De vier "nooit iets geleverd"-registers zijn bewust uitgezet, niet stuk.**
+`scrapeOpenKvK`, `scrapeEPOnline`, `scrapeHuurcommissie` en `scrapeEUSubsidies` hebben
+allemaal een `return stats` vóór de eigenlijke code, in afwachting van een API-sleutel
+of een geldig dataset-ID. Dat verklaart de reeks `items_found=1, items_new=0` in
+`scrape_runs` en de status `uitgeschakeld` in `sources`. Bij Europese subsidies staat
+onder die vroege return nog een compleet, onbereikbaar codeblok; dat is als vertrekpunt
+blijven staan en de variabele daarin heet nu `sidDood` om verwarring te voorkomen.
+
+**Ontdubbeld door te markeren, niet te verwijderen.** Aan elk `source_id` hangen
+`raw_items`, `scrape_runs`, `intake_decisions` en via `signal_items` ook signalen;
+verwijderen herschrijft historie die hier in STATUS.md staat. Elf dode rijen staan nu
+op `is_active=0`, `health='dubbel'`, met in `health_note` de id van de rij die blijft.
+Naast de vijf naamsgelijke dubbelen uit `BRONNEN.md` bleken er zes onder een andere
+naam te staan: 32 tegenover 18 (Officiële Bekendmakingen), 96 tegenover 7 (TenderNed),
+95 tegenover 17 (rechtspraak), 107 tegenover 8 (CBS StatLine), 33 tegenover 41 (B&W
+besluitenlijsten) en **87 tegenover 125 (Raad van State)**. Die laatste verklaart de
+klacht van de weegroutine: de tier 1-rij van de Raad van State is de lege, de rij die
+levert stond op tier 2. Rij 125 staat nu op tier 1, dus de weger hoeft die +3 niet
+meer met de hand toe te kennen.
+
+Het zijn tien `jaarverslag-*`-bronnen, niet negen; die staan op `health='eenmalig'`.
+Stand na afloop: 126 bronnen, **103 actief**, 11 dubbel, 10 eenmalig, 3 dood.
+
+**De kolom `gemeente` is gevuld** voor alle 126 rijen: 91 Amersfoort, 17 regio, 15
+landelijk, 2 Amersfoort en Leusden, 1 Leusden. De volgorde van de regels doet ertoe:
+een bron met Amersfoort in de naam telt als Amersfoorts, ook als het register erachter
+landelijk is. Het Insolventieregister en het BIG-register worden op Amersfoort
+bevraagd en mogen niet als 'landelijk' uit een filter op de stad vallen. Het script
+staat in `Stadsgeest-documentatie\scripts\bronnen-herijken.mjs` en draait zonder
+`--schrijf` als proef.
+
+**NVWA is vervangen, niet uitgezet.** Er bestaat wel degelijk een ingang per gemeente:
+`openbare-inspectieresultaten.nvwa.nl`, server-rendered, doorzoekbaar op postcode, met
+per bedrijf adres, oordeel en inspectiedatum per onderwerp. Zoeken op "Amersfoort"
+levert alleen bedrijven met Amersfoort in de naam en haalt tegelijk zaken binnen die
+er niet horen (Shell Station Amersfoortseweg) — dezelfde filterfout als bij de Raad
+van State. De nieuwe scraper `nvwa-inspectieresultaten.js` loopt daarom de
+postcodeprefixen af, Amersfoort 3811-3829 en Leusden 3831-3835, en toetst op de
+vestigingsplaats van de detailpagina. Alleen bedrijven met een tekortkoming worden
+opgeslagen; alles opslaan zou ruim driehonderd items per run zijn waarvan het
+overgrote deel "Voldoet".
+
+Eerste run: **13 items**, alle in Amersfoort. Sushi Station aan de Emiclaerhof en
+Huzur Lunchroom aan de Leeghwater vallen op alle vier de onderwerpen door, OMUR MARKT
+aan het Neptunusplein op drie. Leusden heeft 46 bedrijven in het register en op dit
+moment nul met een tekortkoming.
+
+De oude bron 47 was erger dan gemeld: niet tien signalen in vier clusters maar **73
+gekoppelde items in 32 clusters**, en hij leverde tot vanochtend 04:02 nog steeds
+dagelijks TRACES-exportcertificaten en technische configuratiebestanden aan.
+
+**Maar IGJ is niet alleen ruis.** Aan bron 46 hangen drie **gepubliceerde** artikelen:
+Mazazorg, verpleeghuis De Forel en GGz Centraal Kastanjehof. Dezelfde scraper haalde
+er wel "Toegankelijkheid" en "Werken bij IGJ" bij binnen. De bron staat nu uit, maar
+het opruimen is bewust beperkt gebleven tot **open clusters**: zeven koppelingen weg
+uit de signalen 502, 603, 688 en 781 — precies de vier die de weegroutine noemde.
+Gepubliceerde signalen zijn niet aangeraakt, en afgekeurde clusters die volledig uit
+NVWA-pagina's bestaan zijn met rust gelaten omdat leeghalen daar niets oplevert. Nul
+open clusters zijn leeg achtergebleven. Script:
+`Stadsgeest-documentatie\scripts\nvwa-clusters-opschonen.mjs`.
+
+Er is nog geen opvolger voor IGJ. Inspectierapporten van IGJ zijn niet per gemeente te
+filteren; dat is uitzoekwerk voor een volgende sessie.
+
+**Leusden staat erin.** `officielebekendmakingen-repo.js` gebruikte
+`dt.creator=="Amersfoort"`; dat is nu een parameter en er draait een tweede pass op
+`"Leusden"`. Eerste run: **8 nieuwe items** — kennisgevingen aan de Agnietenhove en de
+Kolonel H.L. van Royenweg, verkeersbesluiten over gehandicaptenparkeerplaatsen aan de
+Prelatenhove en de Koningin Julianalaan. Bewust één bron in plaats van zeven rubrieken:
+Leusden publiceert ongeveer acht stukken per week en zeven vrijwel altijd lege bronnen
+maken het overzicht juist onleesbaar.
+
+**Nieuwsplein33 gaat via de feed.** Die zit niet op `/rss-feed` — dat is een gewone
+HTML-pagina — maar op **`/rss/nieuws.xml`**, vindbaar als alternate in de broncode.
+50 items met `pubDate`, rubriek en een lead van een paar honderd tekens. Eerste run:
+14 nieuw. De feed dekt Amersfoort én Leusden; het tweede item ging over een botsing
+tussen Lokaal Belangrijk en Pro-Leusden bij de Kadernota, iets wat de oude Playwright-
+scraper op `/amersfoort` per definitie niet zag. Let op: de publicatiedatum staat in de
+itemtekst, niet in een kolom. `saveRawItem` uit `utils.js` kent geen `scraped_at`-
+parameter en `raw_items` heeft geen veld voor de publicatiedatum. De weger kan de datum
+dus lezen, maar een tijdreeks op een kolom bouwen kan nog steeds niet — hetzelfde punt
+als bij de bekendmakingen.
+
+**Registerruis gefilterd.** In `intake-run.mjs` gaan BAG-panden met de status "Pand in
+gebruik" nu naar `filtered` met een eigen reden. Panden met een ándere status blijven
+door: bouw gestart, sloopvergunning verleend en pand gesloopt zijn wél gebeurtenissen.
+De verhouding was scheef: van de PDOK BAG-items stonden er 36 op `new_signal`, 14 op
+`matched` en **nul** op `filtered`.
+
+TenderNed is niet in de intake aangepast maar bij de bron. De scraper zet het
+publicatietype nu voor de titel — "Gunning: Compute, Storage en Backup - Gemeente
+Amersfoort" — en voegt een toelichting toe dat bij een EF29 de sluitingsdatum per
+definitie in het verleden ligt en dat dat geen datafout is. Dat geldt alleen voor
+nieuwe items; de acht bestaande vallen buiten het 48-uursfilter en komen niet opnieuw
+door de intake.
+
+**Wat niet werkte.**
+
+- `zoek.officielebekendmakingen.nl/sru/Search` geeft HTTP 500 op élke query, ook op
+  `operation=explain`. Dat is geen queryprobleem maar een dood endpoint.
+  `officielebekendmakingen-split.js` draait daarop en is daarmee obsoleet; hij staat
+  niet in PM2 en is dus onschadelijk, maar hij hoort weg. `repository.overheid.nl/sru`
+  werkt wel en is wat `officielebekendmakingen-repo.js` gebruikt.
+- `scrapeGemeenschappelijkeRegelingen` valt om op een ontbrekende `fast-xml-parser` in
+  `scraper/node_modules`. Bewust niet geïnstalleerd: een afhankelijkheid toevoegen aan
+  de scrapermap is een beslissing voor Jasper, niet iets om er tussendoor te doen.
+- De veiligheidscontrole op `mcp__Windows-MCP__PowerShell` viel opnieuw ruim tien
+  minuten uit, midden in de sessie. Dat is nu drie sessies op rij. Zolang dat de enige
+  route naar Turso en naar de notebook is, kost elke sessie daar tijd aan.
+- Langlopende scrapers via de tool starten werkt niet: de MCP-aanroep loopt af en neemt
+  het kindproces mee. Wat wel werkt is een `.bat` wegschrijven en die met
+  `cmd /c start "" /b` losmaken, met de uitvoer naar een logbestand.
+
+**Niet geverifieerd.**
+
+- `raadsinformatie-types.js` en `subsidieregister-records.js` hangen ook aan `lib.js` en
+  zouden nu weer moeten werken, maar ik heb ze niet gedraaid. De PM2-jobs `scrape-nieuw`
+  en `scrape-subsidies` staan allebei op `stopped`.
+- Of de nachtelijke PM2-runs de reparaties oppikken is niet waargenomen, alleen afgeleid
+  uit `dump.pm2`: `scrape-ob` draait `officielebekendmakingen-repo.js` en `run-browser`
+  draait `nieuwsplein33.js`, dus beide reparaties landen vanzelf.
+- De NVWA-scraper telt niet hoeveel detailpagina's hij heeft bekeken; alleen het aantal
+  relevante treffers komt in de log. Bij een volgende run is dus niet te zien of het
+  register kleiner werd of dat het filter strenger uitpakte.
+- Het effect van de BAG-filter is niet in een echte intake-run gezien; de code is wel
+  gelezen maar `intake-run.mjs` is niet gedraaid.
+
+**Bewust laten liggen.**
+
+- Het subsidieregister is minder werk dan gedacht en toch niet gedaan. De twee PDF's
+  staan al met werkende URL in `raw_items` — `openbaar-subsidieregister-2024.pdf` en
+  `-2025.pdf` — en er bestaat al een tabel `subsidies` en een scraper
+  `subsidieregister-records.js`. Wat ontbreekt is een parser. Dat is een eigen blok en
+  het gat "geldstromen over tijd" blijft tot die tijd op nul.
+- Raadsinformatie en het subsidieregister van Leusden zijn niet gebouwd. De
+  bekendmakingen waren bijna gratis omdat het dezelfde index is; die twee zijn nieuwbouw.
+- De weegprompt is niet aangeraakt, zoals afgesproken. Twee dingen horen daar wel in:
+  dat EF29 een gunning is en geen datafout, en dat de Raad van State nu op tier 1 staat
+  zodat de puntentabel het zelf regelt.
+- `officielebekendmakingen-split.js` en `officielebekendmakingen.js` zijn niet verwijderd.
+
+*Cowork-update: 2026-08-08 (Nieuwsplein33-account, bronkant)*

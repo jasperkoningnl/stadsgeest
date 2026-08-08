@@ -1,18 +1,88 @@
-// nieuwsplein33.js — Nieuwsplein33 nieuws Amersfoort
-// Client-rendered (React). Scrapet https://www.nieuwsplein33.nl/amersfoort
-// voor lokale nieuwsartikelen.
+// nieuwsplein33.js — Nieuwsplein33 via de RSS-feed
+//
+// Was: Playwright op https://www.nieuwsplein33.nl/amersfoort, met alleen titel en
+// URL en een lege content. Dat is om drie redenen vervangen door de feed op
+// https://www.nieuwsplein33.nl/rss/nieuws.xml:
+//
+//   1. De feed geeft `pubDate`. De browserscraper had helemaal geen publicatiedatum.
+//      Let op: die datum staat nu in de itemtekst, niet in een kolom — saveRawItem
+//      uit utils.js kent geen scraped_at-parameter en `raw_items` heeft geen veld
+//      voor de publicatiedatum. Voor de weger is de datum daarmee leesbaar, maar
+//      een tijdreeks bouwen op een kolom kan nog niet. Dat is hetzelfde punt dat
+//      bij de bekendmakingen speelt en het verdient een eigen blok.
+//   2. De feed geeft een lead van een paar honderd tekens. Nieuwsplein33 is de
+//      spiegel waartegen wordt ontdubbeld en waarmee het succescriterium van de
+//      testperiode wordt gemeten. Met alleen koppen is die spiegelcheck zwak;
+//      de weger noteerde bij zijn eerste run dat hij geen enkel artikel volledig
+//      had kunnen lezen.
+//   3. De feed dekt Amersfoort én Leusden. De oude ingang stond op /amersfoort,
+//      terwijl Leusden de helft van het gebied van de redactie is.
+//
+// Let op: /rss-feed is een gewone HTML-pagina, niet de feed. De feed zelf staat
+// op /rss/nieuws.xml; die URL staat als alternate in de broncode van die pagina.
 
-import { withBrowser } from '../browser.js';
 import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
 
-const SOURCE_URL = 'https://www.nieuwsplein33.nl/amersfoort';
+const FEED_URL = 'https://www.nieuwsplein33.nl/rss/nieuws.xml';
+const UA = 'Stadsgeest/1.0 (persbureau Amersfoort)';
+
+function pak(blok, tag) {
+  const m = blok.match(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`));
+  if (!m) return '';
+  return m[1]
+    .replace(/^<!\[CDATA\[/, '')
+    .replace(/\]\]>$/, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&#039;|&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ')
+    .trim();
+}
+
+async function haalFeed() {
+  const r = await fetch(FEED_URL, {
+    headers: { 'User-Agent': UA, Accept: 'application/xml,text/xml' },
+    signal: AbortSignal.timeout(20000),
+  });
+  if (!r.ok) throw new Error(`HTTP ${r.status} op ${FEED_URL}`);
+  return r.text();
+}
+
+function leesItems(xml) {
+  const blokken = xml.split('<item>').slice(1);
+  const items = [];
+  for (const ruw of blokken) {
+    const blok = ruw.split('</item>')[0];
+    const titel = pak(blok, 'title');
+    const link = pak(blok, 'link');
+    if (!titel || !link) continue;
+    items.push({
+      titel,
+      link,
+      beschrijving: pak(blok, 'description'),
+      rubriek: pak(blok, 'category'),
+      gepubliceerd: pak(blok, 'pubDate'),
+    });
+  }
+  return items;
+}
+
+function naarIso(pubDate) {
+  const d = new Date(pubDate);
+  return Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+}
 
 async function scrape() {
   const sourceId = await getOrCreateSource(db, {
     name: 'Nieuwsplein33 Amersfoort',
-    url: SOURCE_URL,
-    sourceType: 'scrape',
+    // De bestaande bronrij staat op /amersfoort en wordt op url gematcht. Die URL
+    // blijft dus staan, anders ontstaat er een tweede bronrij en zijn we terug bij
+    // het ontdubbelen van vanochtend.
+    url: 'https://www.nieuwsplein33.nl/amersfoort',
+    sourceType: 'rss',
     reliability: 'secondary',
     category: 'local_news',
     scrapeFrequency: 'daily',
@@ -20,58 +90,44 @@ async function scrape() {
 
   let items = [];
   try {
-    items = await withBrowser(async (page) => {
-      await page.goto(SOURCE_URL, { waitUntil: 'networkidle', timeout: 45000 });
-
-      // Wacht tot artikelen laden (meerdere mogelijke selectors)
-      await Promise.race([
-        page.waitForSelector('article a', { timeout: 15000 }),
-        page.waitForSelector('.item a', { timeout: 15000 }),
-        page.waitForSelector('h2 a', { timeout: 15000 }),
-        page.waitForSelector('[class*="article"] a', { timeout: 15000 }),
-      ]).catch(() => {});
-
-      return await page.$$eval(
-        'article a[href], .item a[href], .card a[href], [class*="news"] a[href]',
-        (els) => {
-          const seen = new Set();
-          return els
-            .filter(el => {
-              const href = el.href || '';
-              const text = el.textContent?.trim() || '';
-              if (!href || !text || text.length < 5) return false;
-              if (seen.has(href)) return false;
-              seen.add(href);
-              return true;
-            })
-            .map(el => ({
-              url: el.href,
-              title: el.textContent.trim(),
-            }));
-        },
-      );
-    }, { timeout: 60000 });
+    items = leesItems(await haalFeed());
   } catch (err) {
-    console.error(`Browser-fout Nieuwsplein33: ${err.message}`);
+    console.error(`[NP33] feed ophalen mislukt: ${err.message}`);
+    await logResult(db, sourceId, 'Nieuwsplein33 Amersfoort', 0, 0, 1, 0);
+    return;
   }
 
-  let saved = 0, skipped = 0, errors = 0;
+  let opgeslagen = 0;
+  let overgeslagen = 0;
+  let fouten = 0;
+
   for (const item of items) {
     try {
-      const result = await saveRawItem(db, {
+      const regels = [
+        item.beschrijving,
+        '',
+        item.gepubliceerd ? `Gepubliceerd: ${item.gepubliceerd}` : null,
+        item.rubriek ? `Rubriek: ${item.rubriek}` : null,
+        'Bron: Nieuwsplein33. Dit is een spiegelbron — wat hier staat is geen tip.',
+      ].filter((r) => r !== null);
+
+      const r = await saveRawItem(db, {
         sourceId,
-        externalUrl: item.url,
-        title: item.title,
-        content: '',
-        summary: '',
+        externalUrl: item.link,
+        title: item.titel,
+        content: regels.join('\n'),
+        summary: item.beschrijving.substring(0, 500),
       });
-      if (result.saved) saved++; else skipped++;
+      if (r.saved) opgeslagen++;
+      else overgeslagen++;
     } catch (err) {
-      errors++;
+      fouten++;
+      console.error(`[NP33] fout bij "${item.titel.substring(0, 60)}": ${err.message}`);
     }
   }
 
-  await logResult(db, sourceId, 'Nieuwsplein33 Amersfoort', saved, skipped, errors);
+  console.log(`[NP33] ${items.length} items in de feed, ${opgeslagen} nieuw`);
+  await logResult(db, sourceId, 'Nieuwsplein33 Amersfoort', opgeslagen, overgeslagen, fouten, items.length);
 }
 
 scrape().catch(console.error);

@@ -26,8 +26,10 @@ async function fetchHtml(url) {
 // ============================================================
 async function scrapeRSS(sourceDef, feedUrl, filterFn = null) {
   const stats = { new: 0, skipped: 0, errors: 0 };
+  // sid buiten de try, anders is hij onbekend bij de log-aanroep na de catch
+  let sid = null;
   try {
-    const sid = await ensureSource(db, sourceDef);
+    sid = await ensureSource(db, sourceDef);
     const feed = await rssParser.parseURL(feedUrl);
     for (const item of feed.items.slice(0, 20)) {
       if (filterFn && !filterFn(item)) { stats.skipped++; continue; }
@@ -57,8 +59,10 @@ async function scrapeRSS(sourceDef, feedUrl, filterFn = null) {
 async function scrapeRekenkamer() {
   const name = 'Rekenkamer Amersfoort';
   const stats = { new: 0, skipped: 0, errors: 0 };
+  // sid buiten de try, anders is hij onbekend bij de log-aanroep na de catch
+  let sid = null;
   try {
-    const sid = await ensureSource(db, {
+    sid = await ensureSource(db, {
       name, url: 'https://www.amersfoort.nl/publicaties-rekenkamer',
       source_type: 'scrape', reliability: 'primary', category: 'government',
       scrape_frequency: 'weekly', tier: 1,
@@ -105,8 +109,10 @@ async function scrapeRaadVanState() {
   const stats = { new: 0, skipped: 0, errors: 0 };
   // RvS-site is Cloudflare-protected en JS-rendered. Plaatsvervanger: gebruik
   // Rechtspraak.nl-zoekopdracht die WEL HTML teruggeeft via hun zoekpagina.
+  // sid buiten de try, anders is hij onbekend bij de log-aanroep na de catch
+  let sid = null;
   try {
-    const sid = await ensureSource(db, {
+    sid = await ensureSource(db, {
       name, url: 'https://uitspraken.rechtspraak.nl/?zoekterm=amersfoort&instantie=Raad+van+State',
       source_type: 'scrape', reliability: 'primary', category: 'registry',
       scrape_frequency: 'weekly', tier: 1,
@@ -158,8 +164,10 @@ async function scrapeOpenKvK() {
 async function scrapeGemeenschappelijkeRegelingen() {
   const name = 'Gemeenschappelijke Regelingen Amersfoort';
   const stats = { new: 0, skipped: 0, errors: 0 };
+  // sid buiten de try, anders is hij onbekend bij de log-aanroep na de catch
+  let sid = null;
   try {
-    const sid = await ensureSource(db, {
+    sid = await ensureSource(db, {
       name, url: 'https://zoek.officielebekendmakingen.nl/',
       source_type: 'scrape', reliability: 'primary', category: 'government',
       scrape_frequency: 'weekly', tier: 1,
@@ -216,8 +224,10 @@ async function scrapeRegioAmersfoort() {
 async function scrapeDUO() {
   const name = 'DUO Open Onderwijsdata — Amersfoort';
   const stats = { new: 0, skipped: 0, errors: 0 };
+  // sid buiten de try, anders is hij onbekend bij de log-aanroep na de catch
+  let sid = null;
   try {
-    const sid = await ensureSource(db, {
+    sid = await ensureSource(db, {
       name, url: 'https://duo.nl/open_onderwijsdata/',
       source_type: 'scrape', reliability: 'primary', category: 'data',
       scrape_frequency: 'weekly', tier: 1,
@@ -269,8 +279,10 @@ async function scrapeHuurcommissie() {
 async function scrapeACM() {
   const name = 'ACM besluiten — Amersfoort';
   const stats = { new: 0, skipped: 0, errors: 0 };
+  // sid buiten de try, anders is hij onbekend bij de log-aanroep na de catch
+  let sid = null;
   try {
-    const sid = await ensureSource(db, {
+    sid = await ensureSource(db, {
       name, url: 'https://www.acm.nl/nl/publicaties/',
       source_type: 'scrape', reliability: 'primary', category: 'registry',
       scrape_frequency: 'weekly', tier: 1,
@@ -357,8 +369,10 @@ async function scrapeEPOnline() {
 async function scrapeKadaster() {
   const name = 'Kadaster BRK — rechtspersonen Amersfoort';
   const stats = { new: 0, skipped: 0, errors: 0 };
+  // sid buiten de try, anders is hij onbekend bij de log-aanroep na de catch
+  let sid = null;
   try {
-    const sid = await ensureSource(db, {
+    sid = await ensureSource(db, {
       name, url: 'https://api.pdok.nl/kadaster/',
       source_type: 'api', reliability: 'primary', category: 'registry',
       scrape_frequency: 'weekly', tier: 1,
@@ -398,8 +412,10 @@ async function scrapeKadaster() {
 async function scrapeMonumentenregister() {
   const name = 'Monumentenregister Amersfoort';
   const stats = { new: 0, skipped: 0, errors: 0 };
+  // sid buiten de try, anders is hij onbekend bij de log-aanroep na de catch
+  let sid = null;
   try {
-    const sid = await ensureSource(db, {
+    sid = await ensureSource(db, {
       name, url: 'https://monumentenregister.cultureelerfgoed.nl/',
       source_type: 'scrape', reliability: 'primary', category: 'registry',
       scrape_frequency: 'weekly', tier: 1,
@@ -447,8 +463,10 @@ async function scrapeMonumentenregister() {
 async function scrapeBuurtbudgetten() {
   const name = 'Buurtbudgetten en wijkplatforms Amersfoort';
   const stats = { new: 0, skipped: 0, errors: 0 };
+  // sid buiten de try, anders is hij onbekend bij de log-aanroep na de catch
+  let sid = null;
   try {
-    const sid = await ensureSource(db, {
+    sid = await ensureSource(db, {
       name, url: 'https://www.amersfoort.nl/buurtbudget',
       source_type: 'rss', reliability: 'primary', category: 'government',
       scrape_frequency: 'weekly', tier: 1,
@@ -514,8 +532,11 @@ async function scrapeEUSubsidies() {
   return stats;
   // Uitgeschakeld totdat juiste dataset-ID is vastgesteld
   const dummy = { new: 0, skipped: 0, errors: 0 };
+  // Hieronder staat onbereikbare code: de functie keert hierboven al terug zolang
+  // het dataset-ID van cohesiondata niet vaststaat. Bewaard als vertrekpunt.
+  let sidDood = null;
   try {
-    const sid = await ensureSource(db, {
+    sidDood = await ensureSource(db, {
       name, url: 'https://cohesiondata.ec.europa.eu/',
       source_type: 'api', reliability: 'primary', category: 'registry',
       scrape_frequency: 'weekly', tier: 1,

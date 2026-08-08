@@ -7,12 +7,27 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const envPath = resolve(__dirname, '../.env');
 
+// Let op: splitsen op /\r?\n/ en niet op '\n'.
+// Bij Windows-regeleinden bleef er een \r aan het eind van elke regel staan. In
+// /^([^=]+)=(.*)$/ matcht . geen \r, en zonder de m-vlag matcht $ alleen het
+// einde van de hele string. De regex faalde dus op elke regel, loadEnv gaf een
+// leeg object terug en createDb viel om met URL_INVALID.
+//
+// Dat is op 7 augustus 2026 om 15:25 gebeurd, toen .env is herschreven. Vanaf dat
+// moment schreef geen enkele scraper die lib.js gebruikt nog iets weg: alle
+// bekendmakingenstromen, alle raadsinformatietypes, het subsidieregister en
+// fetch-fulltext. De scrapers logden ook niets, want ze vielen om vóór de eerste
+// databaseaanroep. In scrape_runs is die stilte dus niet te zien.
 function loadEnv() {
-  const lines = readFileSync(envPath, 'utf8').split('\n');
+  const lines = readFileSync(envPath, 'utf8').split(/\r?\n/);
   const env = {};
   for (const line of lines) {
-    const m = line.match(/^([^=]+)=(.*)$/);
-    if (m) env[m[1].trim()] = m[2].trim();
+    if (!line || line.trimStart().startsWith('#')) continue;
+    const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+    if (m) env[m[1]] = m[2].trim().replace(/^["']|["']$/g, '');
+  }
+  if (!env.TURSO_URL) {
+    throw new Error(`Geen TURSO_URL gevonden in ${envPath}. Controleer het bestand.`);
   }
   return env;
 }
