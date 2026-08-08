@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **8 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-08 — Eerste volledige weger-run: vier tips, en drie bronnen die niets leveren"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-08 — Vervolg: inlog werkend, rooktest geslaagd, eerste weger-run"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
