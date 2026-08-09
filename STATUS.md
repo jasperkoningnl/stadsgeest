@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **9 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Gemeenschappelijke regelingen: pakket geïnstalleerd bleek maar een derde van het probleem"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Weegroutine: 105 signalen beoordeeld, nul tips, en een rechtspraak-bron die niet doet wat de naam belooft"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -1676,3 +1676,80 @@ daar zit **`tuchtrecht`** bij. Dat is het gat "uitspraken die hen aangaan" uit
 Niet uitgezocht, wel het noteren waard.
 
 *Cowork-update: 2026-08-09 (Nieuwsplein33-account, naschrift bronkant)*
+
+---
+
+### Cowork-update: 2026-08-09 — Weegroutine: 105 signalen beoordeeld, nul tips, en een rechtspraak-bron die niet doet wat de naam belooft
+
+Scheduled task `stadsgeest-weger` uitgevoerd (routine `stadsgeest-weger.md`, stap 1
+t/m 10). Alle 105 open signalen (`status IN ('new','watching')`, niet gekoppeld aan
+een tip) beoordeeld. Geverifieerd met een telling achteraf: 105 `signal_events`
+geschreven, 105 unieke signal_id's, 0 signalen onbeoordeeld gebleven.
+
+**Resultaat: 0 tips.** Niet uit terughoudendheid, maar omdat geen enkel signaal de
+drempel van score ≥ 6 haalde. De partij was zwaar gevuld met drie categorieën die
+allemaal om dezelfde reden afvallen: routinevergunningen zonder afwijking (ruim 40
+dakkapellen/tijdelijke wegvergunningen/evenementenvergunningen), losse
+rechtbankuitspraken zonder aantoonbare Amersfoortse verbinding (zie hieronder), en
+zaken die al volledig door een spiegelbron gedekt waren (Sovjet Ereveld-vandalisme,
+Stadsring-petitiestrijd, steekincident Paladijnenweg). Twee signalen (523, 524)
+hadden een eerdere "TIP-KANDIDAAT"-aantekening van de redactieassistent
+(2026-08-02), maar de dossieromschrijving van *Milieu-incidenten en toezicht*
+waarschuwt expliciet dat meldkamerclassificaties geen vastgestelde feiten zijn en
+niet zonder VRU/ODU-cijfers tot een trend mogen worden opgeteld. Die aantekening is
+dus bewust niet gevolgd — met de reden bij het signaal vastgelegd, zoals stap 9
+voorschrijft bij afwijken van een eerdere beoordeling.
+
+**Bronvondst: de `rechtspraak`-scraper filtert niet op Amersfoort.** Zo'n 25
+signalen (o.a. 615, 636, 658, 671, 699) bleken clusters van meerdere losse,
+onderling ongerelateerde strafzaken van Rechtbank Midden-Nederland — geweld, TBS,
+mensenhandel, kinderporno — geclusterd op onderwerp, niet op locatie. Geen van de
+uitspraakteksten noemt een Amersfoortse plaats; "Zittingsplaats: Utrecht" is alleen
+de rechtbanklocatie binnen een groot arrondissement dat ook Lelystad en Almere
+bedient. Zonder aantoonbare lokale verbinding zijn dit geen tips én geen
+dossierfeiten — vastleggen zou een lokale claim suggereren die er niet is. Dit
+raakt de betrouwbaarheid van een tier 1-bron en verdient een eigen uitzoekpunt: of
+de scraper al filtert op Amersfoort-trefwoorden en dat filter lek is, of dat hij
+domweg alles van het arrondissement binnenhaalt.
+
+**Nieuw dossier: Horeca en voedselveiligheid Amersfoort (id 7).** NVWA publiceerde
+op 8 augustus in één keer verbeterpunten bij 13 Amersfoortse horecazaken
+(signalen 894, 895, 896). Geen historische basislijn beschikbaar, dus geen patroon
+te claimen — de dossieromschrijving waarschuwt de volgende weger daar expliciet
+voor (NVWA publiceert twee weken na inspectie, in batches; één gezamenlijke
+publicatiedag zegt iets over de publicatiecyclus, niet over een trend). Wel
+opvallend binnen deze eerste batch: Sushi Station Amersfoort en Huzur Lunchroom
+scoorden op alle vier de onderdelen (voedsel, allergenen, hygiëne, plaagdieren)
+"voldoet niet" — de andere elf zaken hadden telkens één afwijking, meestal
+hygiëne.
+
+**Dossierfeiten: 24 stuks over 7 dossiers**, geverifieerd met een telling na het
+schrijven (niet aangenomen): Explosies Amersfoort +1 (Wieringenpad-explosie 3/4
+juli — dragende bron Politie Amersfoort staat in de database als tier 3, dus geen
+dragende bron voor een tip, wel een feit), Droogte en waterbeheer +4 (hitteplan,
+landelijk watertekort, natuurbrandrisico fase 2, VRU-bijstand Noord-Limburg),
+Warmtenet en biomassa +1 (ODU-werkbezoek RWZI), Woningbouw en wonen +1 (De
+Alliantie, hoogste bouwpunt plot 26 — eigen mededeling corporatie,
+`claim_belanghebbende`), Lokale politiek en college +1 (coalitiestandpunt
+Stadsring: rijstroken blijven, straat wordt groener), Milieu-incidenten en
+toezicht +3 (Renewi Smink-meldingen, gaslucht-cluster, drie
+grond/baggerspecie-kennisgevingen — alle drie als `melding`/`overig` vastgelegd,
+niet als vastgesteld feit), Horeca en voedselveiligheid +13.
+
+**3 signalen op `discarded`**: twee Marktplaats-achtige Nextdoor-advertenties (899,
+900) en één explosie in Nieuwegein (902, buiten het werkgebied). De rest van de 105
+blijft op `watching`/`new` staan — dossierwaarde verjaart niet, zie START-HIER.md.
+
+**Niet geverifieerd.** Drie Raad van State-uitspraken (555, 560, 561): de
+uitspraakpagina's op raadvanstate.nl gaven een HTTP 403 bij het scrapen, dus geen
+inhoud beoordeeld. RvS is volgens `NIEUWSPLEIN33.md` een van de weinige gaten die
+Nieuwsplein33 zelf niet systematisch volgt — de moeite van een andere
+ophaalmethode waard in een volgende sessie. De Zomerrapportage 2026 (signaal 901,
+raadsvergadering 9 september) en het agendapunt Isolatieoffensief (gebundeld in
+signaal 502) zijn niet inhoudelijk gelezen — alleen agenda-metadata, de
+onderliggende PDF's zijn niet geopend. Of signaal 511 (de weekanalyse waarin 483 en
+502 volgens hun eigen aantekening al zouden zitten) inderdaad is afgehandeld, is
+niet apart nagetrokken. De live dashboardweergave van de nieuwe dossierfeiten is
+niet gecontroleerd, alleen de database zelf.
+
+*Cowork-update: 2026-08-09 (Nieuwsplein33-account, weger-run)*
