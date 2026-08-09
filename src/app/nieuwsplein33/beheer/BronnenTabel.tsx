@@ -29,8 +29,12 @@ function metToggle<T>(set: Set<T>, waarde: T): Set<T> {
 }
 
 export default function BronnenTabel({ overzicht }: { overzicht: SourcesOverview }) {
-  const [tiers, setTiers] = useState<Set<number>>(new Set(TIER_OPTIES))
-  const [healths, setHealths] = useState<Set<string>>(new Set(HEALTH_OPTIES))
+  // Leeg = geen filter, dus alles zichtbaar. Zodra er iets is aangeklikt, wordt
+  // dat een insluitfilter: alleen bronnen die aan een van de aangevinkte pillen
+  // voldoen blijven over. Zo kun je pillen uit verschillende groepen combineren
+  // (bijv. "verdacht" + "tier 1") zonder dat je eerst alles hoeft uit te zetten.
+  const [tiers, setTiers] = useState<Set<number>>(new Set())
+  const [healths, setHealths] = useState<Set<string>>(new Set())
   const [sorteerVeld, setSorteerVeld] = useState<SorteerVeld>('tier')
   const [oplopend, setOplopend] = useState(true)
 
@@ -43,9 +47,10 @@ export default function BronnenTabel({ overzicht }: { overzicht: SourcesOverview
   }
 
   const rijen = useMemo(() => {
-    let r = overzicht.rows.filter((s) => s.tier === null || tiers.has(s.tier))
-    if (overzicht.healthTracked) {
-      r = r.filter((s) => s.health === null || healths.has(s.health))
+    let r = overzicht.rows
+    if (tiers.size > 0) r = r.filter((s) => s.tier !== null && tiers.has(s.tier))
+    if (overzicht.healthTracked && healths.size > 0) {
+      r = r.filter((s) => s.health !== null && healths.has(s.health))
     }
     const factor = oplopend ? 1 : -1
     return [...r].sort((a, b) => {
