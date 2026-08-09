@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **9 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Uitloggen, sessie-indicator en Beheer-tab voor Jasper"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Bronnentabel Beheer-tab: filters en sortering"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -2007,3 +2007,38 @@ ene tabblad, niet om een instellingenstelsel; als er meer rolverschillen komen (
 Gideon die iets anders nodig hebben dan elkaar) is dat een apart gesprek.
 
 *Cowork-update: 2026-08-09 (Nieuwsplein33-account, uitloggen en beheer-tab)*
+
+---
+
+### Cowork-update: 2026-08-09 — Bronnentabel Beheer-tab: filters en sortering
+
+Vervolg op de vorige twee secties, zelfde dag. Jasper vroeg om de bronnentabel op de
+Beheer-tab uit te breiden: filteren op gezondheidsstatus, sorteren op laatste item, en
+per tier kunnen isoleren.
+
+**Wat is gebouwd.** De statische bronnentabel is verplaatst naar een eigen
+clientcomponent (`src/app/nieuwsplein33/beheer/BronnenTabel.tsx`) met filter- en
+sorteerstate. Tier 1/2/3 zijn los aan/uit te zetten (bronnen zonder tier blijven altijd
+zichtbaar), evenals de vier gezondheidsstatussen (gezond/verdacht/dood/uitgeschakeld).
+Kolomkoppen zijn klikbaar en sorteren op- of aflopend, inclusief "laatste item". Een
+teller in de filterbalk toont hoeveel bronnen er bij de huidige filters overblijven
+t.o.v. het totaal. Geen extra databasequery nodig: alle bronnen kwamen al in één keer
+binnen via `getSourcesOverview()`, filteren en sorteren gebeurt client-side op wat er
+al is opgehaald.
+
+**Live geverifieerd** tegen `https://stadsgeest.nl/nieuwsplein33/beheer`: filterbalk,
+alle drie tier-pillen en alle vier gezondheid-pillen staan in de uitgeleverde HTML, net
+als de sorteerbare kolomkoppen. Eerste test met een naïeve substring-check
+(`html.includes('Tier 1')`) gaf ten onrechte "niet gevonden" terug — React plaatst een
+hydratiecommentaar tussen tekst- en variabele node (`Tier <!-- -->1`), onzichtbaar in de
+browser maar niet als aaneengesloten string in de ruwe HTML. Geen bug, wel een valkuil
+voor wie de volgende keer weer met kale string-matches tegen SSR-HTML test. `npm run
+build` en `eslint` op de gewijzigde bestanden zijn schoon.
+
+**Onderweg: een paar minuten geen toegang tot deze notebook** via de Cowork-tool
+(Desktop Commander) — read en write faalden allebei met "temporarily unavailable" op
+classifierniveau, dus een storing aan de kant van de tool, niet iets in dit project. De
+code was op dat moment al gecommit, gepusht en live geverifieerd; alleen deze
+STATUS.md-aantekening moest wachten tot de toegang terugkwam.
+
+*Cowork-update: 2026-08-09 (Nieuwsplein33-account, filters bronnentabel)*
