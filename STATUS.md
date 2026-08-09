@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **9 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Filters bronnentabel omgedraaid: default uit, aanklikken sluit in"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Pijplijn herschikt: fulltext vóór entiteiten vóór intake, 48-uursfilter weg"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -2161,3 +2161,192 @@ Live geverifieerd: standaard staat geen enkele pil op `np-pil-actief`. `npm run 
 en `eslint` schoon.
 
 *Cowork-update: 2026-08-09 (Nieuwsplein33-account, filtergedrag omgedraaid)*
+
+---
+
+### Cowork-update: 2026-08-09 — Pijplijn herschikt: fulltext vóór entiteiten vóór intake, 48-uursfilter weg
+
+Sessie met Jasper over de werking van de scrapers en de intake. Eerst doorgemeten,
+daarna herschikt. De kern van wat eruit kwam: de keten stond in de verkeerde
+volgorde, waardoor de entiteitsextractie structureel alleen titels las, en de
+intake gooide stil materiaal weg dat je voor dossieropbouw nodig hebt.
+
+**Wat er mis was, gemeten in de database.**
+
+De entiteitsextractie liep als laatste stap ín `run-all.js`, `run-browser.js` en
+`run-weekly.js`, dus direct na het scrapen — en `fetch-fulltext` draaide pas de
+volgende ochtend om 07:30. Voor alles wat om 11:30 en 21:30 binnenkwam werd dus
+alleen de titel gelezen. Erger nog: de extractie draait incrementeel op
+`entities_scanned_at IS NULL`, dus die items waren permanent afgevinkt en werden
+nooit opnieuw bekeken. Dat verklaart de vijf adressen in bijna vijfduizend
+documenten die op 8 augustus al waren opgevallen.
+
+De entiteitsgebaseerde matching die op 2 augustus is gebouwd vuurde daardoor
+vrijwel nooit: over de hele geschiedenis 7 koppelingen op entiteiten tegenover
+464 op losse woordoverlap.
+
+Het 48-uursfilter had 519 items weggegooid. Het mat vanaf het scrapemoment, niet
+vanaf de publicatiedatum van het document, dus elke stilstand van de pijplijn
+kostte materiaal. Met één intake per dag in plaats van drie zou die marge nog
+krapper worden.
+
+De drempel van 3 bevestigingen hield niets meer tegen sinds de weger dagelijks
+alles leest: 594 van de 854 signalen stonden op precies één bevestiging en 138
+zijn automatisch verlopen zonder ooit beoordeeld te zijn.
+
+**Wat er is gewijzigd.**
+
+De hele keten staat nu 's nachts in één doorlopende volgorde. Cronregels
+bijgewerkt in `dump.pm2` (back-up: `dump.pm2.voor-herschikking-20260809`):
+
+| Tijd | Job |
+|---|---|
+| 01:00 | `scrape-browser` |
+| 02:00 | `scrape-dagelijks` |
+| 02:30 | `scrape-ob` |
+| 03:00 | `scrape-wekelijks` (+ ma 03:15 `scrape-nieuw`, zo 03:15 `scrape-subsidies`) |
+| 04:00 | `fetch-fulltext` |
+| 05:00 | `extract-entities` — **nieuwe job** |
+| 05:30 | `stadsgeest-intake` — nog één keer per dag in plaats van drie |
+| 06:00 | `dwarsverbanden2-nacht` |
+| 07:30 | `stadsgeest-weger` (Cowork, ongewijzigd) |
+
+Het zijn nu **twaalf** PM2-jobs. De healthcheck leest de verwachte namen uit
+`dump.pm2` en telt dus vanzelf mee; de dode variabele `$Verwacht = 11` is
+weggehaald zodat niemand daar later op afgaat. De middag- en avondronde (11:30,
+21:30) blijven staan: die halen alleen op, de verwerking gebeurt 's nachts.
+
+`fetch-fulltext` leest nu PDF's via `pdfjs-dist` (dynamische import, want
+`pdf.mjs` is ESM — `createRequire` werkt daar niet). Maximaal 60 pagina's per
+document. De limiet per run ging van 150 naar 400, omdat de job nog maar één keer
+per nacht draait.
+
+In `intake-run.mjs`: het 48-uursfilter is weg. De peildatum is nu
+`published_at ?? scraped_at` met een venster van zeven dagen, en wat daarbuiten
+valt wordt niet weggegooid maar via de bestaande historische route weggeschreven
+als signaal met status `watching` en het label `[HISTORISCH]`. Tier 3 valt wel af
+als het oud is — dat is de bestaande regel, met een aangepaste reden in
+`intake_decisions`. De drempel staat op 1. De limiet per run ging van 500 naar
+1000. En woordoverlap mag geen bekendmaking meer aan een rechtspraakuitspraak
+knopen: `bronwereld()` deelt bronnen in en `wereldenBotsen()` blokkeert een
+woordmatch tussen twee specifieke werelden. Gedeelde entiteiten mogen die grens
+wél oversteken, want een persoon of adres dat in beide voorkomt is juist het
+interessante geval.
+
+`migrate-pijplijn-20260809.mjs` (idempotent, draait standaard als proef, pas met
+`--doen` echt) heeft vier dingen gedaan: kolom `raw_items.published_at`
+toegevoegd, drempel op 1 gezet voor 117 open signalen, `entities_scanned_at`
+gewist voor 239 items die zonder documenttekst waren gescand, en
+`fulltext_fetched_at` gewist voor 79 PDF-items die eerder waren overgeslagen.
+
+**`published_at` is nog leeg.** Geen enkele scraper vult hem. Zolang dat zo is
+valt de intake terug op `scraped_at` en verandert er niets. Dit is de haak voor de
+bronnentaak: kan een scraper de publicatiedatum van een document uitlezen, dan
+hoort hij daar.
+
+**Stiltealarm.** `stilte-alarm.mjs` kijkt naar de database in plaats van naar de
+processen: laatste item ouder dan 24 uur, laatste intake ouder dan 30 uur, of
+minder dan 10 items in een etmaal. `stilte-alarm.ps1` logt dat en toont een
+Windows-melding, hooguit één keer per zes uur.
+
+Een eigen geplande taak is **niet gelukt**, en dat is het vermelden waard voor wie
+het opnieuw probeert. `Register-ScheduledTask` en `schtasks /Create /XML` geven
+allebei "Toegang geweigerd" zonder beheerdersrechten. Een taak die met
+`schtasks /SC HOURLY` wél werd aangemaakt bleef op status `Queued` staan: hij
+meldde resultaat 0 en een bijgewerkte "Last Run Time", maar er verscheen geen
+enkele logregel, ook niet met een `trap` die alles zou moeten vangen. Ook een
+`.cmd`-wrapper hielp niet, terwijl diezelfde `.cmd` handmatig prima draait.
+Oorzaak niet gevonden. De uitgeschreven taakdefinitie staat als
+`stilte-alarm-taak.xml` klaar voor wanneer iemand met beheerdersrechten het wil
+registreren.
+
+De oplossing die er nu ligt: het alarm hangt aan `pm2-healthcheck.ps1`, de enige
+taak die aantoonbaar elk uur draait. De aanroep staat bewust vóór alle exit-paden
+en in een eigen `try`, zodat hij de healthcheck nooit kan tegenhouden. Sinds 18:05
+staat er elk uur een regel in `stilte-alarm.log`.
+
+**De Turso-schrijfsleutel stond uitgetypt in twee scripts** buiten de repo:
+`projects\stadsgeest-query.js` en `Stadsgeest-documentatie\scripts\stadsgeest-query.mjs`.
+Beide lezen nu uit `scraper\.env`. Een zoekactie op de tokenkop over de hele
+gebruikersmap geeft nul treffers meer buiten `.env`. **Nog te doen door Jasper:**
+de sleutel in Turso vervangen. Zolang dat niet is gebeurd is hij nog geldig, en
+hij heeft in twee bestanden op schijf gestaan.
+
+**Wat de verificatieronde opleverde.** Keten handmatig in de juiste volgorde
+gedraaid.
+
+- `fetch-fulltext`: 222 kandidaten, **191 opgehaald, gemiddeld 9.110 tekens**,
+  1 leeg, 30 fout. Dekking `full_text` ging van 1.131 van 5.049 naar 1.455 van
+  5.391 items.
+- `extract-entities`: 309 items gescand, 138 met een match, **508 nieuwe
+  entiteiten**.
+- `intake-run.mjs` (trigger `handmatig-verificatie`, run 26): 311 binnen,
+  84 gefilterd, 127 gekoppeld, 100 nieuwe signalen, alle 100 direct naar
+  `watching` — de drempel van 1 doet wat hij moet. Duur 67 seconden, status ok.
+- **Matching op entiteiten: 43 van de 127 koppelingen in deze ene run**, tegen
+  7 in de hele geschiedenis daarvoor. Dat is het bewijs dat de volgordefout de
+  oorzaak was en niet de matchinglogica zelf.
+
+**Drie bevindingen die niet in de opdracht zaten.**
+
+*De raadsstukken zijn niet op te halen.* Van de 30 mislukte fulltext-pogingen
+waren er 27 een HTTP 400 op `api.notubiz.nl/document/<id>/<n>` — raadsvoorstellen,
+moties, amendementen, de Kaderbrief 2027-2030, de Jaarstukken 2025. Precies het
+materiaal waar je een dossier mee bouwt. De URL's staan in `raw_items`, maar het
+endpoint weigert een kale GET. Dit hoort bij de bronnentaak, niet bij de pijplijn.
+
+*Een harde `process.exit()` breekt Node af zolang de libsql-client nog een handle
+open heeft.* Op Windows geeft dat `Assertion failed: !(handle->flags &
+UV_HANDLE_CLOSING)` en exitcode -1073740791. `intake-run.mjs` deed dat op de
+"niets te verwerken"-tak en in beide foutpaden, wat PM2 als crash leest. Vervangen
+door `process.exitCode` en netjes terugkeren.
+
+*De documentatie klopt niet op één punt.* `ROUTINES.md` stelt dat het schema via
+een CHECK alleen `person`, `organization`, `location` en `address` toestaat. In
+`entities` staan gewoon 563 rijen `legal_ref`, 16 `amount`, 1 `project` en
+1 `kvk_number`. Die CHECK bestaat dus niet, of niet zo.
+
+**Wat er nu anders uitziet en geen storing is.**
+
+Er staan **234 signalen op `watching`** tegen 103 vanochtend. Twee oorzaken die
+allebei bedoeld zijn: de drempel van 1 zet alles direct door, en de forced
+herstart van alle scrapers vanmiddag leverde 404 items in 24 uur op in plaats van
+de gebruikelijke 40 tot 135. Dat laatste is een artefact van de herschikking —
+elke `pm2 restart` voert de job ook meteen uit. De weger krijgt morgenochtend dus
+een grote stapel. Volgende runs worden weer normaal.
+
+Ook: er verschijnen vanaf nu **historische signalen** waar vroeger niets stond.
+Dat is materiaal dat het 48-uursfilter opat. Verwacht gedrag.
+
+**Niet geverifieerd.**
+
+- De keten heeft nog niet als geheel via de cron gedraaid. De onderdelen zijn
+  handmatig in de juiste volgorde getest, maar de eerste echte nachtrun is die van
+  10 augustus. Controleer 's ochtends of `fetch-fulltext` om 04:00 klaar was en of
+  de intake om 05:30 heeft gedraaid.
+- Van de 508 nieuwe entiteiten is niet gecontroleerd hoeveel er inhoudelijk
+  kloppen. Het aantal **unieke** personen ging van 95 naar 105 en organisaties van
+  160 naar 161, en er staan nog steeds maar 5 adressen. De extractie vindt dus nog
+  altijd vooral wat al in de lijsten stond. De conclusie van 8 augustus blijft
+  overeind: dit is een extractievraagstuk, en de volgende stap is extractie per
+  document door een taalmodel. Nu pas zinvol, want er ís documenttekst.
+- Nextdoor-marktplaatsberichten komen nog steeds door als signaal zodra er een
+  bedrag in staat — "4 Efteling kaarten te koop" werd signaal #1023. Bestaand
+  gedrag van de `opvallend`-regex, niet aangeraakt deze sessie.
+
+**Bewust laten liggen.** `is_active` doet nog steeds niets: de runners lezen die
+kolom niet en er is geen kolom die een scraperbestand aan een `source_id` koppelt.
+Dat vraagt een `scraper_file`-kolom in `sources` en raakt de bronnentaak, die
+gelijktijdig in deze werkkopie werkt. Verder de opruimregel die signalen na 7 tot
+14 dagen zonder activiteit weggooit: die stamt uit de speurder-tijd en kan nu iets
+weggooien waar de weger nog geen oordeel over heeft. Niet aangeraakt, wel het
+nakijken waard.
+
+**Over de werkkopie.** Er liep gelijktijdig een sessie aan het herstellen van
+bronnen, met wijzigingen in `ggd-regio-utrecht.js`, `ibabs-woo.js`,
+`onderwijsinspectie.js`, `provincie-utrecht.js`, `raadsinformatie-ori.js`,
+`uwv-amersfoort.js` en `waaroverheid.js`. Die staan bij het schrijven van deze
+sectie nog ongecommit. Ik heb alleen mijn eigen bestanden aan de commit
+toegevoegd, met de paden expliciet — geen `git add -A`.
+
+*Cowork-update: 2026-08-09 (Nieuwsplein33-account, pijplijnherschikking)*

@@ -8,15 +8,48 @@
 // items waarvoor het eerder is geprobeerd (fulltext_fetched_at gezet, full_text leeg).
 //
 // Gebruik:
-//   node src/fetch-fulltext.js              # standaard: max 150 items per run
-//   MAX_ITEMS=500 node src/fetch-fulltext.js
+//   node src/fetch-fulltext.js              # standaard: max 400 items per run
+//   MAX_ITEMS=1000 node src/fetch-fulltext.js
+//
+// De limiet is op 2026-08-09 van 150 naar 400 gegaan omdat deze job sindsdien nog
+// maar één keer per nacht draait (04:00) in plaats van mee te liften met elke run.
 
 import * as cheerio from 'cheerio';
 import { createDb } from './lib.js';
 
+// pdfjs-dist wordt pas geladen als er echt een PDF langskomt (legacy build, want
+// we draaien in Node zonder DOM). Vóór 2026-08-09 werden PDF's overgeslagen én
+// permanent afgevinkt via fulltext_fetched_at, waardoor raadsstukken en bijlagen
+// nooit tekst kregen. Zie STATUS.md 2026-08-09.
+// Let op: pdf.mjs is ESM, dus dynamische import — createRequire werkt hier niet.
+let pdfjsCache = null;
+async function getPdfjs() {
+  if (!pdfjsCache) pdfjsCache = await import('pdfjs-dist/legacy/build/pdf.mjs');
+  return pdfjsCache;
+}
+
+async function pdfNaarTekst(buffer) {
+  const pdfjs = await getPdfjs();
+  const doc = await pdfjs.getDocument({
+    data: new Uint8Array(buffer),
+    useSystemFonts: true,
+    isEvalSupported: false,
+    disableFontFace: true,
+  }).promise;
+  const delen = [];
+  const maxPaginas = Math.min(doc.numPages, 60); // bijlagen van honderden pagina's leveren geen extra signaal
+  for (let p = 1; p <= maxPaginas; p++) {
+    const page = await doc.getPage(p);
+    const inhoud = await page.getTextContent();
+    delen.push(inhoud.items.map(i => i.str).join(' '));
+  }
+  await doc.destroy();
+  return delen.join('\n').replace(/\s+/g, ' ').trim();
+}
+
 const db = createDb();
 const UA = 'Stadsgeest033/1.0 (lokale nieuwssite Amersfoort; redactie@stadsgeest.nl)';
-const MAX_ITEMS = Number(process.env.MAX_ITEMS || 150);
+const MAX_ITEMS = Number(process.env.MAX_ITEMS || 400);
 const DELAY_MS = Number(process.env.FETCH_DELAY_MS || 800);
 const MIN_TEXT = 200;
 
@@ -54,9 +87,20 @@ async function fetchText(url) {
   const r = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(20000) });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   const ct = r.headers.get('content-type') || '';
-  if (ct.includes('pdf')) return { text: null, reason: 'pdf' };
-  const body = await r.text();
-  if (body.trim().startsWith('%PDF')) return { text: null, reason: 'pdf' };
+  const buf = await r.arrayBuffer();
+  const kop = Buffer.from(buf.slice(0, 5)).toString('latin1');
+
+  if (ct.includes('pdf') || kop.startsWith('%PDF')) {
+    try {
+      const pdfTxt = await pdfNaarTekst(buf);
+      if (pdfTxt.length < MIN_TEXT) return { text: null, reason: `pdf te kort (${pdfTxt.length}) — mogelijk een scan zonder tekstlaag` };
+      return { text: pdfTxt, reason: null };
+    } catch (e) {
+      return { text: null, reason: `pdf onleesbaar: ${e.message}` };
+    }
+  }
+
+  const body = Buffer.from(buf).toString('utf8');
   const txt = cleanText(body);
   if (txt.length < MIN_TEXT) return { text: null, reason: `te kort (${txt.length})` };
   return { text: txt, reason: null };

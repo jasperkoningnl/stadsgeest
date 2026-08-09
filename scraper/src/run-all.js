@@ -64,13 +64,13 @@ for (const scraper of scrapers) {
   }
 }
 
-// Entiteitsextractie over nieuwe items (P1, 2026-08-02) — lift mee met elke actieve run
-try {
-  const extractOut = execSync(`node "${path.join(__dirname, 'extract-entities.cjs')}"`, { stdio: 'pipe', timeout: 600000, encoding: 'utf8' });
-  if (extractOut) process.stdout.write(extractOut);
-} catch (err) {
-  console.error('Entiteitsextractie mislukt:', err.message);
-}
+// Entiteitsextractie is hier op 2026-08-09 weggehaald en een eigen PM2-job geworden
+// (`extract-entities`, 05:00). Reden: de extractie liep direct na het scrapen en dus
+// altijd vóór fetch-fulltext (04:00). Voor alles wat 's middags en 's avonds binnenkwam
+// werd daardoor alleen de titel gelezen in plaats van de documenttekst — vandaar vijf
+// adressen in bijna vijfduizend documenten. De extractie markeert items bovendien
+// permanent met entities_scanned_at, dus die misser werd nooit vanzelf hersteld.
+// De keten is nu: scrapen → fulltext → entiteiten → intake. Zet dit hier niet terug.
 
 // Bronnenwacht (P4, 2026-08-02) — meet gezondheid in runs, niet kalendertijd
 try {

@@ -18,6 +18,32 @@ const db = createClient({
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
+// Hoe oud een item mag zijn en toch als vers signaal doorgaat. Vóór 2026-08-09
+// stond hier 48 uur, gemeten vanaf het scrapemoment, en werd alles daarbuiten
+// wéggegooid: 519 items zijn zo verdwenen zonder ooit een signaal te worden.
+// Twee dingen zijn veranderd. De peildatum is nu de publicatiedatum van het
+// document als die bekend is (kolom published_at, nog leeg — de scrapers moeten
+// hem gaan vullen), anders het scrapemoment. En wat buiten het venster valt gaat
+// niet meer de prullenbak in maar de historische route op: het wordt een signaal
+// met status 'watching' en het label [HISTORISCH], zodat de weger het ziet.
+// Tier 3 blijft wél afvallen als het oud is; dat is de bestaande regel hieronder.
+const VERSHEID_DAGEN = Number(process.env.VERSHEID_DAGEN || 7);
+
+// Woordoverlap mag geen bekendmaking aan een rechtspraakuitspraak knopen. Dat
+// gebeurde structureel: vier meldingen "toepassen van grond of baggerspecie"
+// hingen aan een uitspraak over proceskostenvergoeding, en een vergunning voor
+// zeven appartementen aan de Langestraat hing aan een woning aan 't Zand.
+// Gedeelde entiteiten mogen die grens wél oversteken — een persoon of adres dat
+// in beide voorkomt is juist het interessante geval.
+function bronwereld(naam) {
+  const n = (naam || '').toLowerCase();
+  if (n.includes('rechtspraak') || n.includes('raad van state')) return 'rechtspraak';
+  if (n.includes('bekendmaking') || n.startsWith('ob —') || n.includes('gemeenteblad')
+      || n.includes('provinciaal blad') || n.includes('waterschapsblad')
+      || n.includes('verkeersbesluit') || n.includes('omgevingsvergunning')) return 'bekendmaking';
+  return 'anders';
+}
+
 const STOPWOORDEN = new Set(['de','het','een','en','van','in','te','dat','is','op','aan','met','er','maar','om','dan','ook','door','als','bij','dit','zijn','uit','noch','naar','tot','onder','over','worden','heeft','was','voor','nog','wel','niet','meer','ook','zo','nu','al','elke','alle','elk','die','wat','wie','hoe','waar','wanneer','welke','hoeveel','waarom','echter','omdat','want','toch','ja','nee','hier','daar','deze','dit','die','dat','zo','zeer','veel','meer','minder','andere','ieder','iedere','voor','door','naar','zijn','werd','worden','heeft','hebben','kunnen','zal','zou','mogen','willen','gaan']);
 
 function tokenize(text) {
@@ -233,11 +259,12 @@ async function run() {
 
     const itemsResult = await db.execute(`
       SELECT r.id, r.title, r.content, r.summary, r.external_url, r.scraped_at, r.is_historical,
+             r.published_at,
              s.name as source_name, s.reliability, s.category, s.tier, s.id as source_id
       FROM raw_items r JOIN sources s ON r.source_id = s.id
       WHERE r.is_processed = 0
       ORDER BY r.is_historical ASC, r.scraped_at DESC
-      LIMIT 500
+      LIMIT 1000
     `);
     const items = itemsResult.rows;
     itemsInCount = items.length;
@@ -246,7 +273,11 @@ async function run() {
     if (items.length === 0) {
       console.log('Niets te verwerken.');
       await finishIntakeRun(runId, startedAt, countsFromStats(), 'ok', null);
-      process.exit(0);
+      // Geen process.exit(0) hier: een harde exit terwijl de libsql-client nog
+      // een open handle heeft laat Node op Windows afbreken met een assertion en
+      // een exitcode van -1073740791. PM2 leest dat als een crash. Gewoon
+      // terugkeren; Node eindigt vanzelf zodra de client dicht is.
+      return;
     }
 
     const signalsResult = await db.execute(`
@@ -272,6 +303,29 @@ async function run() {
       const b = sigEnt.get(r.signal_id);
       (r.entity_type === 'location' ? b.loc : b.strong).add(r.normalized_name);
     }
+
+    // Per signaal: uit welke bronwerelden het is opgebouwd. Nodig om te voorkomen
+    // dat woordoverlap een bekendmaking aan een rechtspraakuitspraak knoopt.
+    const sigWerelden = new Map(); // signal_id -> Set('bekendmaking'|'rechtspraak'|'anders')
+    const wereldRows = await db.execute(`
+      SELECT si.signal_id, s.name AS source_name
+      FROM signal_items si
+      JOIN raw_items r ON r.id = si.raw_item_id
+      JOIN sources s ON s.id = r.source_id
+    `);
+    for (const r of wereldRows.rows) {
+      if (!sigWerelden.has(r.signal_id)) sigWerelden.set(r.signal_id, new Set());
+      sigWerelden.get(r.signal_id).add(bronwereld(r.source_name));
+    }
+    // Botsen twee specifieke werelden, dan is woordoverlap geen bewijs van samenhang.
+    function wereldenBotsen(itemWereld, signalId) {
+      if (itemWereld === 'anders') return false;
+      const w = sigWerelden.get(signalId);
+      if (!w || w.size === 0) return false;
+      const specifiek = [...w].filter(x => x !== 'anders');
+      if (specifiek.length === 0) return false;
+      return !specifiek.includes(itemWereld);
+    }
     async function entityMatchSignal(itemId) {
       const ie = await db.execute({ sql: `SELECT entity_type, normalized_name FROM entities WHERE raw_item_id = ?`, args: [itemId] });
       if (!ie.rows.length) return null;
@@ -295,7 +349,14 @@ async function run() {
 
     for (const item of items) {
       const tier = item.tier || 2;
-      const isHist = item.is_historical === 1;
+
+      // Peildatum: publicatiedatum van het document als die er is, anders het
+      // scrapemoment. Wat buiten het versheidsvenster valt wordt niet weggegooid
+      // maar als historisch behandeld — zie de toelichting bij VERSHEID_DAGEN.
+      const peildatum = item.published_at || item.scraped_at;
+      const leeftijdDagen = (Date.now() - new Date(peildatum).getTime()) / 86400000;
+      const verouderd = Number.isFinite(leeftijdDagen) && leeftijdDagen > VERSHEID_DAGEN;
+      const isHist = item.is_historical === 1 || verouderd;
 
       // Filters
       if (!item.title && !item.content) {
@@ -310,7 +371,10 @@ async function run() {
       }
       if (isHist && tier >= 3) {
         stats.gefilterd++; stats.ids.push(item.id);
-        await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', 'historisch item uit tier 3-bron, alleen gebruikt als context'));
+        const waarom = verouderd && item.is_historical !== 1
+          ? `tier 3-item ouder dan ${VERSHEID_DAGEN} dagen (${Math.round(leeftijdDagen)} dagen), alleen bruikbaar als context`
+          : 'historisch item uit tier 3-bron, alleen gebruikt als context';
+        await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', waarom));
         continue;
       }
 
@@ -326,14 +390,8 @@ async function run() {
         continue;
       }
 
-      if (!isHist) {
-        const ageH = (Date.now() - new Date(item.scraped_at).getTime()) / 3600000;
-        if (ageH > 48) {
-          stats.gefilterd++; stats.ids.push(item.id);
-          await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', `gescraped meer dan 48 uur geleden (${Math.round(ageH)} uur)`));
-          continue;
-        }
-      }
+      // Het 48-uursfilter dat hier stond is op 2026-08-09 verwijderd. Oude items
+      // worden nu hierboven als historisch aangemerkt in plaats van weggegooid.
 
       // Signaalmatching — primair op gedeelde entiteiten (P1), woordoverlap als fallback
       let bestMatch = null, bestScore = 0, matchBasis = 'woorden';
@@ -341,7 +399,9 @@ async function run() {
       if (em) {
         bestMatch = em.sig; bestScore = em.n; matchBasis = 'entiteiten';
       } else {
+        const itemWereld = bronwereld(item.source_name);
         for (const sig of activeSignals) {
+          if (wereldenBotsen(itemWereld, sig.id)) continue;
           const score = matchScore(item, sig);
           if (score >= 2 && score > bestScore) { bestScore = score; bestMatch = sig; }
         }
@@ -353,6 +413,8 @@ async function run() {
         await db.execute({ sql: `UPDATE signals SET confirmations = confirmations + 1, last_seen_at = datetime('now') WHERE id = ?`, args: [bestMatch.id] });
         await db.execute({ sql: `INSERT OR IGNORE INTO signal_items (signal_id, raw_item_id) VALUES (?, ?)`, args: [bestMatch.id, item.id] });
         bestMatch.confirmations = (bestMatch.confirmations || 0) + 1;
+        if (!sigWerelden.has(bestMatch.id)) sigWerelden.set(bestMatch.id, new Set());
+        sigWerelden.get(bestMatch.id).add(bronwereld(item.source_name));
         stats.bijgewerktSignaal++;
         console.log(`  MATCH [T${tier}] "${(item.title||'').substring(0,50)}" → #${bestMatch.id} (score:${bestScore})`);
         await decisionBatcher.push(decisionStmt(runId, item, tier, 'matched', `gekoppeld aan signaal #${bestMatch.id} (basis: ${matchBasis}, score ${bestScore})`, { signal_id: bestMatch.id, match_score: bestScore, match_basis: matchBasis }));
@@ -380,18 +442,27 @@ async function run() {
           : `${tierTag} ${item.summary || (item.title||'').substring(0,200)}`;
         const status = isHist ? 'watching' : 'new';
 
+        // Drempel 1 sinds 2026-08-09. De drempel van 3 stamt uit de tijd dat er geen
+        // weger was en er iets moest voorkomen dat de stapel te groot werd. De weger
+        // leest sinds 8 augustus dagelijks álles wat open staat, dus de drempel hield
+        // niets meer tegen: 594 van de 854 signalen bleven op één bevestiging staan.
+        // `confirmations` blijft gewoon doortellen en is voor de weger een aanwijzing
+        // dat er iets speelt — het is alleen geen poort meer.
         let newId;
         if (isHist) {
-          const res = await db.execute({ sql: `INSERT INTO signals (title, summary, status, confirmations, threshold, first_seen_at, last_seen_at) VALUES (?, ?, ?, 1, 3, ?, ?) RETURNING id`, args: [(item.title||'(geen titel)'), summary, status, item.scraped_at, item.scraped_at] });
+          const res = await db.execute({ sql: `INSERT INTO signals (title, summary, status, confirmations, threshold, first_seen_at, last_seen_at) VALUES (?, ?, ?, 1, 1, ?, ?) RETURNING id`, args: [(item.title||'(geen titel)'), summary, status, peildatum, peildatum] });
           newId = res.rows[0]?.id;
         } else {
-          const res = await db.execute({ sql: `INSERT INTO signals (title, summary, status, confirmations, threshold, first_seen_at, last_seen_at) VALUES (?, ?, ?, 1, 3, datetime('now'), datetime('now')) RETURNING id`, args: [(item.title||'(geen titel)'), summary, status] });
+          const res = await db.execute({ sql: `INSERT INTO signals (title, summary, status, confirmations, threshold, first_seen_at, last_seen_at) VALUES (?, ?, ?, 1, 1, datetime('now'), datetime('now')) RETURNING id`, args: [(item.title||'(geen titel)'), summary, status] });
           newId = res.rows[0]?.id;
         }
 
         if (newId) {
           await db.execute({ sql: `INSERT OR IGNORE INTO signal_items (signal_id, raw_item_id) VALUES (?, ?)`, args: [newId, item.id] });
-          activeSignals.push({ id: newId, title: item.title, summary, confirmations: 1, threshold: 3, status });
+          activeSignals.push({ id: newId, title: item.title, summary, confirmations: 1, threshold: 1, status });
+          // Nieuw signaal ook meteen in de wereldenkaart, anders kan een volgend item
+          // in dezelfde run er alsnog dwars overheen matchen.
+          sigWerelden.set(newId, new Set([bronwereld(item.source_name)]));
           allSignalTitles.add(normTitle);
           const reason = `nieuw signaal aangemaakt vanuit ${item.source_name || 'onbekende bron'}, tier ${tier}`;
           if (isHist) { stats.historischSignaal++; console.log(`  HIST [T${tier}] "${(item.title||'').substring(0,50)}" → watching #${newId}`); }
@@ -480,7 +551,7 @@ async function run() {
     } catch (finishErr) {
       console.error('Kon intake_runs niet afsluiten:', finishErr.message);
     }
-    process.exit(1);
+    process.exitCode = 1;
   }
 }
 
@@ -488,5 +559,5 @@ run().catch(e => {
   // Val hier alleen in als er niet eens een intake_runs-rij kon worden aangemaakt
   // (bijv. DB niet bereikbaar) — de rest van de fouten wordt al binnen run() afgehandeld.
   console.error('FOUT: intake-run kon niet starten:', e.message);
-  process.exit(1);
+  process.exitCode = 1;
 });

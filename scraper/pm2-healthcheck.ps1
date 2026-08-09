@@ -13,7 +13,9 @@
 
 $ErrorActionPreference = 'Stop'
 
-$Verwacht  = 11
+# Let op: het aantal verwachte jobs staat hier NIET vast. Het wordt gelezen uit
+# dump.pm2 (zie Lees-Jobnamen), zodat een nieuwe job vanzelf meetelt. Sinds
+# 2026-08-09 zijn het er twaalf: extract-entities is erbij gekomen.
 $Pm2       = Join-Path $env:APPDATA 'npm\pm2.cmd'
 $Dump      = Join-Path $env:USERPROFILE '.pm2\dump.pm2'
 $LogPad    = Join-Path $PSScriptRoot 'pm2-healthcheck.log'
@@ -21,6 +23,29 @@ $LogPad    = Join-Path $PSScriptRoot 'pm2-healthcheck.log'
 function Schrijf-Log([string]$Regel) {
     $tijd = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
     Add-Content -Path $LogPad -Value "$tijd  $Regel" -Encoding UTF8
+}
+
+# ── Stiltealarm, meeliftend (2026-08-09) ─────────────────────────────────────
+# Deze healthcheck kijkt of de PM2-jobs bestaan. Dat zegt niets over de vraag of
+# er nog data binnenkomt: de laptop kan uit staan, het netwerk kan weg zijn, of de
+# scrapers kunnen draaien en niets vinden. stilte-alarm.mjs kijkt daarom naar de
+# database zelf.
+#
+# Waarom het hier hangt en niet in een eigen taak: een tweede geplande taak
+# aanmaken lukt niet zonder beheerdersrechten. `Register-ScheduledTask` en
+# `schtasks /XML` geven allebei "Toegang geweigerd", en een taak die met
+# `schtasks /SC HOURLY` wél werd aangemaakt bleef op status "Queued" staan zonder
+# ooit te draaien. Deze taak ("PM2 Resurrect") draait aantoonbaar elk uur — zie de
+# regels hieronder in dit logbestand — dus liften we mee.
+#
+# Dit staat bewust vóór alle exit-paden hieronder, zodat het altijd draait, ook
+# als de PM2-controle zelf afbreekt. En in een eigen try, zodat het de
+# healthcheck nooit kan tegenhouden.
+try {
+    $alarm = Join-Path $PSScriptRoot 'stilte-alarm.cmd'
+    if (Test-Path $alarm) { & $alarm 2>&1 | Out-Null }
+} catch {
+    Schrijf-Log "stiltealarm kon niet draaien: $($_.Exception.Message)"
 }
 
 # Namen van de verwachte jobs, gelezen uit dump.pm2.
