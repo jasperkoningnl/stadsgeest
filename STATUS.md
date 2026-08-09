@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **9 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Bronnentabel Beheer-tab: filters en sortering"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — `is_active` zet niets uit, en een werkafspraak over bronnen uitzetten"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -2042,3 +2042,100 @@ code was op dat moment al gecommit, gepusht en live geverifieerd; alleen deze
 STATUS.md-aantekening moest wachten tot de toegang terugkwam.
 
 *Cowork-update: 2026-08-09 (Nieuwsplein33-account, filters bronnentabel)*
+
+---
+
+### Cowork-update: 2026-08-09 — `is_active` zet niets uit, en een werkafspraak over bronnen uitzetten
+
+Deze sectie corrigeert twee dingen die ik eerder vandaag zelf heb opgeschreven, en
+legt een werkafspraak vast.
+
+**`is_active` in de tabel `sources` is nergens op aangesloten.** Geen van de vier
+runners — `run-all.js`, `run-weekly.js`, `run-browser.js`, `run-nieuw.js` — leest die
+kolom. Wat draait staat in hardgecodeerde lijsten met bestandsnamen in die runners.
+Een bron op `is_active=0` zetten is dus een etiket voor tellingen en het dashboard,
+geen rem. Alles wat in de secties hierboven "uitgezet" heet, was alleen anders
+gelabeld: `igj-nvwa.js` stond gewoon in de dagelijkse lijst en had vannacht opnieuw
+NVWA-exportcertificaten binnengehaald.
+
+Ik heb dat pas ontdekt bij het maken van het bronnenoverzicht, terwijl ik het had
+moeten testen op het moment dat ik `is_active=0` in `bronnen-herijken.mjs` schreef.
+Het getal "102 actief" in `BRONNEN.md` is daarmee een boekhoudgetal, geen uitspraak
+over wat er draait.
+
+**De onderliggende oorzaak is breder dan deze kolom.** Er zijn drie losse registers
+die niemand met elkaar vergelijkt: de tabel `sources`, de lijsten in de runners, en
+de bestanden in `scrapers/`. Niets bewaakt dat die drie hetzelfde zeggen. Vrijwel
+alles wat op 8 en 9 augustus is gevonden komt daaruit voort — een naam die niet klopt
+met de inhoud, een rij zonder scraper, een scraper zonder rij, een vlag die niets
+doet. `scraper/src/bronnenwacht.cjs` bestaat al en is de logische plek om die drie
+naast elkaar te leggen.
+
+**Werkafspraak, vastgelegd door Jasper op 9 augustus.** Het streven is dat álle
+bronnen altijd blijven draaien. Levert een bron niets op, dan is dat aanleiding om
+hem te inspecteren en te repareren, niet om hem uit te schakelen. Lukt een reparatie
+herhaaldelijk niet, dan beslist alleen Jasper of een bron wordt uitgezet of vervangen.
+
+Daarmee zijn de ingrepen van eerder vandaag teruggedraaid:
+
+- `officielebekendmakingen-split.js` en `officielebekendmakingen.js` waren verwijderd
+  en staan weer terug.
+- `igj-nvwa.js` en `ob-playwright.js` waren uit de lijst van `run-browser.js` gehaald
+  en staan er weer in, met een aantekening over wat er mis is en welke opvolger draait.
+
+**Vier aantekeningen in `run-browser.js` klopten niet.** Bij `ggd-regio-utrecht.js`,
+`waaroverheid.js`, `onderwijsinspectie.js` en `provincie-utrecht.js` stond
+`// UITGESCHAKELD` achter een regel die gewoon werd uitgevoerd. Die scrapers draaien
+dus elke dag en leveren elke dag nul. De aantekening zegt nu wat er werkelijk aan de
+hand is: draait, levert 0, te repareren. Deze vier gaan gerepareerd worden.
+
+**De regel over raadsstukken is verwijderd uit `NIEUWSPLEIN33.md`**, op twee plekken:
+in paragraaf 2 ("Raadsstukken en moties als tip zijn grotendeels verspilde moeite —
+daar zitten er al drie bovenop") en in paragraaf 7 als weegregel. Jasper is het er
+niet mee eens: dat een onderwerp al door anderen gevolgd wordt is geen reden om een
+bron lager te waarderen. Het was een aanname van de onderzoeksronde van 7 augustus,
+geen bevinding, en hij is sindsdien meermaals als feit herhaald — onder meer door mij
+in `BRONNEN.md`, waar hij nu ook weg is.
+
+**Correctie op mezelf van een uur eerder:** ik meldde dat deze regel óók in de
+weegprompt staat en daar actief raadsgerelateerde tips onderdrukt. Dat is onjuist.
+`routines\stadsgeest-weger.md` bevat hem niet; de enige treffer op "raadsstuk" gaat
+over iets anders. De regel stond alleen in `NIEUWSPLEIN33.md`.
+
+**Een gat in de meetmethode: het zomerreces.** Bij Financiën gemeente Amersfoort,
+Amersfoort in Cijfers, Rekenkamer en de raadsstromen is het oordeel "haalt op, niets
+nieuws" niet te scheiden van "de raad ligt stil". De raad is ongeveer van begin juli
+tot eind augustus met reces; nul nieuwe items sinds 4 juli is dan precies wat je
+verwacht. Alle conclusies over gemeente- en raadsbronnen in de secties hierboven zijn
+op dit punt onbetrouwbaar en moeten na eind augustus opnieuw gemeten worden. Dat staat
+nu ook zo in `BRONNEN.md`.
+
+**En een dubbele bronrij die ik zelf veroorzaakte.** De herbouwde `rvs-uitspraken.js`
+gaf een nieuwe URL mee aan `getOrCreateSource`, dat op url matcht en niet op naam.
+Daardoor ontstond rij 128 naast rij 125 — precies de fout die deze twee dagen zijn
+besteed aan opruimen. Rij 128 staat op `dubbel`, de scraper wijst weer naar de URL van
+rij 125, en er staat nu een waarschuwing in de code.
+
+**Verduidelijking.** In `BRONNEN.md` stond dat twee bedrijven "op alle vier de
+onderwerpen doorvallen". De NVWA beoordeelt vier onderdelen: juiste omgang met
+voedsel, allergeneninformatie, hygiëne en plaagdierbeheersing. Bij Sushi Station
+Amersfoort (Emiclaerhof 42, inspectie 15 juli) en Huzur Lunchroom (Leeghwater 4,
+inspectie 2 juli) staat bij alle vier "Voldoet niet". Bij de meeste andere staat er
+één op rood.
+
+**Wat hierna moet gebeuren, en waarom in deze volgorde.**
+
+1. **`expected_yield` vullen.** De kolom bestaat en is leeg. Zonder verwachting is
+   "nul items" niet te lezen: dan zijn een kapotte scraper, een kapotte bron, geen
+   nieuws en reces vier situaties met hetzelfde signaal. Dit is de goedkoopste
+   ingreep met het grootste effect.
+2. **De bronnenwacht laten doen waar hij voor bedoeld is**: per bronrij vaststellen
+   welke scraper ernaartoe schrijft, of die in een runner staat, wanneer hij draaide,
+   wat hij opleverde en wat er werd verwacht. Eén tabel waarin elke rij groen is of
+   een reden met een naam heeft.
+3. **De oranje bronnen**: UWV (96 items, alle 96 met lege inhoud), PDOK BAG, de
+   raadsinformatie-indeling, rij 18 die actief staat zonder scraper.
+4. **De rode bronnen repareren**, te beginnen met de vier hierboven en met iBabs en
+   Raad Amersfoort — Amendementen.
+
+*Cowork-update: 2026-08-09 (Nieuwsplein33-account, correcties en werkafspraak)*

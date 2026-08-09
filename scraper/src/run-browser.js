@@ -19,17 +19,28 @@ const scrapers = [
   'raadsinformatie-types.js',   // C3b: Raadsinformatie type-detectie op titel (vergaderingen + catch-all)
   // 'raadsinformatie-api.js', // UITGESCHAKELD 2026-08-02: Notubiz-modulepagina's achter Cloudflare Turnstile; vervangen door raadsinformatie-ori.js in run-all.js (ORI API)
   'nextdoor.js',                // Nextdoor buurtberichten Amersfoort (login vereist)
-  'igj-nvwa.js',                // IGJ + NVWA inspectieresultaten (zoek op Amersfoort)
+  'igj-nvwa.js',                // IGJ + NVWA. LET OP: haalt op dit moment het verkeerde
+                                //   binnen — zie BRONNEN.md. Blijft draaien; het streven is
+                                //   repareren, niet uitzetten. De NVWA-kant is opgevolgd door
+                                //   nvwa-inspectieresultaten.js hieronder, voor de IGJ-kant
+                                //   is nog geen opvolger.
+  'nvwa-inspectieresultaten.js', // Openbare inspectieresultaten horeca, per postcode
   'omthuis.js',                 // Omthuis woningcorporatie nieuwsberichten
-  'ob-playwright.js',           // C10: Officiële Bekendmakingen — UITGESCHAKELD
+  'ob-playwright.js',           // C10: Officiële Bekendmakingen. Draait op het SRU-endpoint van
+                                //   zoek.officielebekendmakingen.nl, dat HTTP 500 geeft op elke
+                                //   query. Opgevolgd door officielebekendmakingen-repo.js.
+                                //   Blijft in de lijst tot Jasper besluit hem eruit te halen.
 
   // Groep C — wekelijkse browser-scrapers
   'bw-besluiten.js',            // C4: B&W besluitenlijsten — fix 2026-05-28
   'meander.js',                 // C5: Meander Medisch Centrum — fix 2026-05-28
-  'ggd-regio-utrecht.js',       // C6: GGD regio Utrecht — UITGESCHAKELD
-  'waaroverheid.js',            // C8: WaarOverheid — UITGESCHAKELD
-  'onderwijsinspectie.js',      // C9: Onderwijsinspectie — UITGESCHAKELD
-  'provincie-utrecht.js',       // C11: Provincie Utrecht — UITGESCHAKELD
+  // De vier hieronder stonden gemarkeerd als UITGESCHAKELD terwijl de regel gewoon
+  // werd uitgevoerd. Die aantekening klopte dus niet: ze draaien elke dag en leveren
+  // elke dag nul. Ze staan te wachten op reparatie, niet op uitzetten.
+  'ggd-regio-utrecht.js',       // C6: GGD regio Utrecht — draait, levert 0, te repareren
+  'waaroverheid.js',            // C8: WaarOverheid — draait, levert 0, te repareren
+  'onderwijsinspectie.js',      // C9: Onderwijsinspectie — draait, levert 0, te repareren
+  'provincie-utrecht.js',       // C11: Provincie Utrecht — draait, levert 0, te repareren
 ];
 
 console.log(`\n=== Browser-scrape-run gestart: ${new Date().toISOString()} ===\n`);

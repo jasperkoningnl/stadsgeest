@@ -125,7 +125,12 @@ async function haalUitspraak(ecli) {
 async function scrape() {
   const sourceId = await getOrCreateSource(db, {
     name: 'Raad van State — Amersfoort',
-    url: `${ZOEK}?creator=Raad_van_State`,
+    // getOrCreateSource matcht op url, niet op naam. De bestaande bronrij (125) staat
+    // op de oude raadvanstate.nl-zoek-URL. Die URL blijft hier dus staan, ook al halen
+    // we de uitspraken inmiddels bij data.rechtspraak.nl op — anders ontstaat er een
+    // tweede bronrij naast de negen historische items. Dat is bij de eerste run van
+    // deze scraper ook echt gebeurd (rij 128) en is teruggedraaid.
+    url: 'https://www.raadvanstate.nl/uitspraken/?zoeken=true&zoeken_term=amersfoort',
     sourceType: 'api',
     reliability: 'primary',
     category: 'registry',
