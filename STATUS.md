@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **9 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Pijplijn herschikt: fulltext vóór entiteiten vóór intake, 48-uursfilter weg"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Bronnen die wel draaiden maar niet leverden: zeven gerepareerd, vier uitgezocht"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -2350,3 +2350,231 @@ sectie nog ongecommit. Ik heb alleen mijn eigen bestanden aan de commit
 toegevoegd, met de paden expliciet — geen `git add -A`.
 
 *Cowork-update: 2026-08-09 (Nieuwsplein33-account, pijplijnherschikking)*
+
+---
+
+### Cowork-update: 2026-08-09 — Bronnen die wel draaiden maar niet leverden: zeven gerepareerd, vier uitgezocht
+
+Deze sessie liep gelijktijdig met de pijplijnherschikking hierboven en raakte
+uitsluitend bronnen. De opdracht was: repareer wat draait maar niets levert, zet
+niets uit, haal niets uit een runnerlijst, en leg bij elke aangeraakte bron vast
+hoeveel er per week van verwacht mag worden.
+
+**Twee bevindingen bepalen de rest van dit verhaal.** De eerste: `is_active` doet
+niets, dat stond al in de sectie van vanmiddag, maar er is een tweede kolom met
+hetzelfde probleem. `expected_yield` was al in gebruik door `bronnenwacht.cjs`, en
+niet als "hoeveel items per week" maar als *aandeel runs met items* tussen 0 en 1 —
+en de bronnenwacht herberekent hem elke run voor elke bron met tien of meer runs.
+Alles wat je daar met de hand in zet is binnen een dag weg. Daarom staan er nu twee
+kolommen bij, `expected_per_week` en `expected_note`, met de onderbouwing per bron.
+`expected_yield` en `health_note` zijn óók gevuld zoals gevraagd, maar reken erop
+dat de bronnenwacht ze overschrijft. Dit vraagt een keuze: de bronnenwacht die kolom
+laten overslaan als hij handmatig gevuld is, of accepteren dat het twee gescheiden
+begrippen zijn.
+
+De tweede bevinding is de raadsinformatie-indeling, en die verklaarde in één keer
+drie losse raadsels. `getOrCreateSource` zoekt uitsluitend op url en niet op naam.
+`raadsinformatie-ori.js` gaf alle vijf zijn stromen dezelfde url mee,
+`amersfoort.notubiz.nl`, en dat is de url van rij 108 `raadsinformatie`. Alle vijf
+losten dus op naar diezelfde rij. In `scrape_runs` staan sinds 2 augustus twintig
+runs per stroom met vijf verschillende `source_name`-waarden en steeds
+`source_id = 108`, en alle honderd nieuwe items van die periode staan onder rij 108.
+Daarom zag 108 er uit als de op één na productiefste bron terwijl hij op
+`health='dood'` stond; daarom liepen de rijen 115 tot en met 120 leeg; en daarom had
+`Raad Amersfoort — Amendementen` nul items ooit. Amendementen vielen daarbovenop
+onder de motie-regex `/\bmotie\b|amendement/i` en kwamen dus sowieso nooit in hun
+eigen stroom. Beide gerepareerd — alleen de labels, zoals afgesproken. Elke stroom
+krijgt nu zijn eigen url mee en landt weer op zijn eigen rij; geverifieerd door na
+een run te kijken welke `source_id` er in `scrape_runs` staat. Rij 108 houdt zijn
+158 items en er komt niets meer bij. **Het voorstel over samenvoegen ligt bij
+Jasper** en is niet uitgevoerd: rij 108, rij 31 en de zes `Raad Amersfoort —`-rijen
+beschrijven grotendeels hetzelfde materiaal, waarbij 31 een eigen scraper heeft
+(`raadsinformatie.js`) en als enige raadsbron tijdens het reces nog leverde.
+
+**Wat er is gerepareerd, met tellingen uit `raw_items` na een echte run.**
+
+*UWV ArbeidsmarktInZicht (27), 96 items met lege content.* De oorzaak is dat
+`/amersfoort` geen editie is van arbeidsmarktinzicht.nl. De edities zijn Nederland,
+negen provincies en twaalf arbeidsmarktregio's; Amersfoort zit daar niet bij, en
+een onbekende URL levert de generieke Nederland-pagina zonder één Amersfoort-link.
+De scraper viel daardoor elke dag in zijn eigen noodgreep en schreef de pagina zelf
+weg met een datum-anker. De cijfers bestaan wél, op
+`/content/data/bycity?community=263`. Die pagina toont één grafiek, Lopende
+WW-uitkeringen, met UWV als bron; de grafiek haalt zijn data met een POST naar
+`/charts/csvcached` en dat endpoint geeft kale CSV terug, zonder browser, als je het
+attribuut `data-query` uit de iframe-HTML meestuurt. Eén valkuil die een uur heeft
+gekost: in die HTML staat de beroepsdimensie voorgevuld als `51519~Totaal›`, en dan
+geeft csvcached alleen een kopregel; de werkende waarde is `51519~Beroepsklasse›`.
+De scraper schrijft nu de laatste drie maanden weg met de cijfers erin — juni 2026,
+1.924 lopende WW-uitkeringen, plus 8 op de maand en plus 27 op het jaar. Twee runs
+achter elkaar gaven 3 nieuw en daarna 0 nieuw met 3 duplicaten. **De 96 lege items
+staan er nog**, zoals afgesproken.
+
+*Onderwijsinspectie (42).* Stond sinds 28 mei als lege huls die 0/0/0 logde zonder
+één verzoek te doen, met als reden dat de site een Angular-SPA is zonder klikbare
+links. Dat klopt voor de HTML, maar de SPA praat met een open JSON-API zonder
+sleutel: `/api/zoek/elementen` voor de instellingen, `/api/ws/vigerend-oordeel/{id}`
+voor het geldende oordeel en `/api/detail/rapporten-bij-onderzoeken/{id}` voor de
+rapporten. Amersfoort heeft 95 instellingen met samen 51 rapporten, waarvan 7 uit
+het afgelopen jaar en 16 uit de afgelopen twee jaar. Venster op twee jaar gezet om
+een backfill van 51 te vermijden: **16 items**, met onder meer obs "De Magneet",
+oordeel Zeer zwak, rapport vastgesteld 5 februari 2026. Deze scraper heeft geen
+Playwright nodig maar blijft in `run-browser.js` staan omdat er niets uit een
+runnerlijst mag.
+
+*iBabs (35), nul items ooit.* Eén selector. De titelcel in de dashboardtabel is een
+`<th scope="row">` en geen `<td>`, dus `td a` vond nooit een link, elke rij viel af
+en de lijst bleef leeg — met nette nulruns zonder foutmelding als gevolg. Soort en
+datum stonden bovendien op `td` 0 en 1, niet 1 en 2. Ook de detailpagina wordt nu
+opgehaald, want de oude opzet zou als content alleen "Woo-verzoeken — 06-08-2026"
+hebben opgeslagen en een item zonder inhoud is voor de intake net zo waardeloos als
+geen item. **10 items, de eerste ooit**, met zaaknummer, onderwerp en beide datums:
+Woo-verzoeken over gemeentelijke voertuigen, monumentale bomen en de
+adressenrestrictielijst bij parkeervergunningen.
+
+*Provincie Utrecht (39).* De Cloudflare-blokkade lag aan onszelf. De challenge vuurt
+op de User-Agent: met de Chrome-string die alle scrapers hier meesturen komt er een
+pagina van 14 kB terug met de titel "Security verifications", met een eerlijke,
+zichzelf benoemende UA geeft dezelfde URL gewoon 78 kB HTML. Getest op vier
+varianten — geen UA, curl, onze eigen naam en Googlebot; alleen de browser-achtige
+strings worden uitgedaagd. Dit is dus geen omweg om een beveiliging heen maar het
+tegenovergestelde. De eerste filterversie hield 5 van de 9 berichten over waarvan er
+4 niet over Amersfoort gingen: het blok "gerelateerd nieuws" staat binnen `<main>`
+en noemde bij een bericht over een rotonde in Woudenberg drie keer het woord
+Amersfoort. Na aanscherping — kop of URL is bewijs, anders moet de artikeltekst zelf
+de regio twee keer noemen, en `.views-element-container` eerst weg — blijft er 1 van
+de 9 over, en dat is de juiste: de wegaanpassingen aan de N199. De vier onterecht
+opgeslagen items zijn verwijderd.
+
+*GGD regio Utrecht (36).* `ggdregioutrecht.nl` bestaat niet meer; de opvolger
+`ggdru.nl` is WordPress met een open REST-API, en `?search=Amersfoort` geeft twaalf
+berichten waarvan het oudste uit 2024. **11 nieuw, 1 overgeslagen.** Die ene is het
+punt: **rij 93 leest via `run-nieuw.js` dezelfde site** (`ggdru.nl/feed/`) en slaat
+hetzelfde permalinkformaat op. Rij 36 en rij 93 zijn feitelijk dezelfde bron onder
+twee namen. Er zit nu een grendel in die niets opslaat wat al onder een andere bron
+staat, dus een structureel lage opbrengst hier is de overlap en geen storing.
+Samenvoegen is een besluit voor Jasper.
+
+*WaarOverheid (37) — niet gerepareerd, en dat is de uitkomst.* De aanname in de code
+was "React-SPA met bot-detectie". Dat klopt niet. waaroverheid.nl bestaat niet meer
+als eigen product en stuurt door naar openbesluitvorming.nl, waar
+`/gemeente/amersfoort` een 404 geeft. Openbesluitvorming draait op Open
+Raadsinformatie, en dat is exact het endpoint dat `raadsinformatie-ori.js` sinds
+2 augustus al leest: 9.672 documenten voor Amersfoort in vier soorten, MediaObject
+4.242, AgendaItem 3.202, Meeting 2.170 en Organization 58, waarvan de eerste drie al
+worden opgehaald. Wat WaarOverheid vroeger onderscheidde was de kaart — besluiten op
+een adres tonen — en die geo-laag zit niet in de open API. Er is dus niets toe te
+voegen behalve dezelfde documenten onder een tweede naam. Volgens de werkafspraak is
+de bron niet uitgezet: het bestand blijft draaien en toetst nu elke run of de
+doorverwijzing en de ORI-index nog zijn zoals hierboven beschreven, zodat het opvalt
+op de dag dat dat verandert. Het schrijft bewust niets weg. **Besluit aan Jasper:**
+markeer als dubbel van de ORI-stroom, of geef de bron een eigen opdracht, bijvoorbeeld
+de geo-koppeling zelf maken op adressen in besluitteksten.
+
+**De vier bronnen met een vroege `return` in `run-nieuw.js`.** De bevindingen staan
+nu ook als commentaar in dat bestand, op de plek waar iemand ze zoekt.
+
+- *Europese subsidies.* De diagnose in de code klopte niet. Dataset `3kkx-ekfq`
+  werkt gewoon; de 400 kwam uit de query, waar `$where=ms_name='Netherlands'` staat
+  terwijl die kolom `ms` heet. Socrata geeft op een onbekende kolom een 400 en dat is
+  als een verlopen dataset gelezen. Er hoefde dus geen nieuw ID gezocht te worden.
+  Wat we wél nodig hebben staat in `557j-pmg8`, "2014-2020 Kohesio projects":
+  14.562 Nederlandse projecten, waarvan **439 op een Amersfoortse postcode**, met
+  begunstigde, bedrag, fonds en interventiecategorie. Heilijgers Projectontwikkeling,
+  Stichting Philadelphia Zorg met € 19.600, Beweging 3.0 met € 20.000. Twee
+  kanttekeningen: postcode 38 omvat ook Leusden, en dit is de periode 2014-2020, dus
+  historisch materiaal voor entiteitsmatching en niet een nieuwsstroom. Voor
+  2021-2027 staat er op cohesiondata geen Kohesio-bestand; dat zit op
+  kohesio.ec.europa.eu en is niet onderzocht. Niet aangezet, want 439 items ineens is
+  een backfill en er ligt al een grote stapel voor de weger.
+- *EP-online.* Wacht op een API-key, en die is **gratis** — een formulier bij RVO,
+  één keer aanvragen, na vijf minuten bruikbaar, vervalt na een jaar ongebruik. Dit
+  is dus een andere situatie dan OpenKvK. Daarna staan er dagelijkse
+  mutatiebestanden klaar van 20 tot 235 kB (`d20260808_v4.zip`) plus een maandelijks
+  totaalbestand van 228 MB gezipt. De dagbestanden zijn wat we willen, gefilterd op
+  3811-3829 en Leusden 3831-3833. Bouwwerk vergelijkbaar met
+  `subsidieregister-records.js`, geen browser nodig. **Alleen Jasper kan die key
+  aanvragen.**
+- *Huurcommissie.* `huurcommissie.nl/uitspraken` bestaat niet meer. Het register zit
+  op `portaal.huurcommissie.nl/p/uitspraken` en dat is geen Next.js maar een
+  **Mendix-applicatie**: alle data loopt over één sessiegebonden RPC-endpoint
+  (`/xas/`). Er is dus geen API die je met een GET bevraagt; een scraper moet de
+  zoekpagina echt bedienen. Wel getest en het is de moeite waard: zoeken op
+  Amersfoort geeft **422 van de 43.627 uitspraken**, met adres, onderwerp, datum
+  afdoening en datum publicatie — Van Rootselaarstraat 30, huurverlaging op grond van
+  punten, gepubliceerd 26 juli; Palmstraat 328-A, toetsing aanvangshuurprijs,
+  gepubliceerd 15 juli. Materiaal met een adres erin. Kosten: een Playwright-scraper
+  die selecteert op placeholder en zichtbare tekst, niet op de Mendix-id's, want die
+  veranderen per deploy. Let op de waarschuwing van de Huurcommissie zelf dat
+  uitspraken met persoonsgegevens niet worden gepubliceerd, dus het register is niet
+  volledig en niet geschikt voor trendanalyse.
+- *OpenKvK.* Niet aangeraakt, zoals afgesproken. Wel de achterhaalde regel in het
+  commentaar rechtgezet dat de key gratis zou zijn.
+
+**PDOK BAG (16): ja én nee.** Er ís een filter aan de bronkant, maar niet op
+statuswijziging. Het werkt met OGC Filter Encoding via `FILTER=<fes:Filter>`;
+`CQL_FILTER` wordt door deze service stilzwijgend genegeerd — je krijgt gewoon
+ongefilterde resultaten terug, wat een makkelijke valkuil is — en `bbox=` mag niet
+samen met `FILTER`, de BBOX moet ín de filter-XML. Gemeten in de Amersfoortse bbox:
+**109.675 panden, waarvan 1.648 (1,5%) een andere status dan "Pand in gebruik"** —
+212 Bouwvergunning verleend, 126 Verbouwing pand, 95 Bouw gestart, 64
+Sloopvergunning verleend, 3 Pand buiten gebruik. Dat verklaart precies waarom de
+huidige scraper vijftig willekeurige panden ophaalt waarvan de intake er
+negenenveertig weggooit: hij gebruikt `bbox` zonder enig filter. Maar `bag:pand`
+heeft **geen enkel datumveld** — alleen identificatie, rdf_seealso, bouwjaar, status,
+gebruiksdoel, oppervlakte en aantal verblijfsobjecten. Wanneer een status is
+veranderd is aan de bronkant dus niet te zien, en er valt ook niet op mutatiemoment
+te sorteren. Het detecteren van een overgang blijft onze eigen administratie.
+**Niet omgebouwd**: 1.648 panden ineens is een backfill, en de keuze hoe je een
+statusovergang bijhoudt is een ontwerpkeuze. De werkende query staat in
+`expected_note` bij rij 16.
+
+**Wat ik zelf fout heb gedaan en heb rechtgezet.** Bij de eerste testrun van de
+labelreparatie kwamen 64 documenten die al onder rij 108 stonden opnieuw binnen
+onder rij 120. `saveRawItem` dedupliceert op een hash van titel plus url, maar dat
+verhindert kennelijk niet dat hetzelfde document onder een tweede bronrij landt.
+Die 64 zijn verwijderd en er zit nu een grendel in `raadsinformatie-ori.js` die de
+raadsrijen onderling controleert. Dit is het waard om breder te onthouden: er is
+geen bescherming tegen hetzelfde item onder twee bronnen, en bij elke
+bronherindeling is dat het eerste dat misgaat.
+
+**Een uitschieter die verklaard moet worden.** Om te bewijzen dat de amendementen
+na de labelreparatie daadwerkelijk in hun eigen stroom terechtkomen, is
+`raadsinformatie-ori.js` eenmalig met `ORI_DAGEN=45` gedraaid in plaats van 14.
+Daarbij bleek ook dat `size: 100` zonder sortering willekeurig welke honderd
+documenten ES als eerste teruggaf, waardoor de losse amendementen van de vergadering
+van 8 juli buiten beeld bleven en alles in de catch-all viel; dat staat nu op
+`size: 250` met nieuwste eerst. Het resultaat van die run: **223 items in rij 120,
+17 moties, 11 raadsinformatiebrieven, 9 amendementen en 3 schriftelijke vragen**,
+samen ruim 260 items op één dag. Dat is legitiem materiaal van de raadsvergadering
+van 8 juli, maar het komt **bovenop** de 404 items die de pijplijnsessie hierboven al
+meldt. De weger krijgt morgenochtend dus een nog grotere stapel dan daar staat, en
+dat is niet allemaal toe te schrijven aan de geforceerde herstart van de scrapers.
+
+**Niet geverifieerd.**
+
+- Geen van de gerepareerde scrapers heeft via de eigen PM2-cron gedraaid. Alles is
+  handmatig aangeroepen met `SCRAPE_JOB_NAME=handmatig-reparatie`. `node --check` is
+  op alle acht gewijzigde bestanden schoon, en elke scraper is minstens één keer
+  volledig gedraaid met een telling erna, maar de eerste echte nachtrun is die van
+  10 augustus.
+- Van de 16 onderwijsinspectie-items en de 10 iBabs-items is de inhoud steekproefsgewijs
+  bekeken, niet volledig nagelopen.
+- Of het filter van Provincie Utrecht ook op de lange duur scherp blijft is niet te
+  zeggen na één run met negen berichten.
+- De `expected_per_week`-waarden voor de raadsstromen zijn geschat op een venster dat
+  grotendeels in het reces viel. Ze moeten na eind augustus opnieuw gemeten worden,
+  net als alle andere raads- en gemeenteoordelen.
+- De opmerking uit de pijplijnsessie dat 27 raadsstukken een HTTP 400 geven op
+  `api.notubiz.nl/document/<id>/<n>` is doorgeschoven naar de bronnentaak maar in
+  deze sessie niet meer opgepakt.
+
+**Bewust laten liggen.** De kolom `published_at` die vanmiddag aan `raw_items` is
+toegevoegd wordt door geen van deze scrapers gevuld, terwijl UWV, Onderwijsinspectie,
+iBabs en Provincie Utrecht allemaal een echte publicatiedatum in handen hebben. Dat
+vraagt een uitbreiding van `saveRawItem` in `utils.js`, en dat is gedeelde
+infrastructuur die op hetzelfde moment door een andere sessie werd aangeraakt —
+te riskant om er nu doorheen te fietsen. Dit is de eerstvolgende logische stap voor
+de bronnentaak.
+
+*Cowork-update: 2026-08-09 (Nieuwsplein33-account, bronnen repareren)*

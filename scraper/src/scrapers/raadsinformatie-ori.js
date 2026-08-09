@@ -9,12 +9,38 @@ import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
 const ES = 'https://api.openraadsinformatie.nl/v1/elastic/ori_amersfoort*/_search';
 const UA = 'Stadsgeest033/1.0 (redactie@stadsgeest.nl)';
 
+// LABELREPARATIE 9 augustus 2026 — lees dit voordat je hier iets wijzigt.
+//
+// Alle vijf de stromen kregen hierboven dezelfde url mee: amersfoort.notubiz.nl.
+// `getOrCreateSource` zoekt uitsluitend op url (`SELECT id FROM sources WHERE
+// url = ?`) en niet op naam. Alle vijf losten dus op naar dezelfde bronrij, en dat
+// is rij 108 'raadsinformatie', die toevallig die url draagt.
+//
+// Gevolg, terug te zien in de database: sinds 2 augustus staan in `scrape_runs`
+// twintig runs per stroom met vijf verschillende `source_name`-waarden en steeds
+// `source_id = 108`, en zijn alle honderd nieuwe items van die periode onder rij
+// 108 weggeschreven. De zes rijen 115 t/m 120, die precies voor deze stromen zijn
+// aangemaakt, kregen niets meer — vandaar 'Raad Amersfoort — Amendementen' met nul
+// items ooit, en vandaar dat rij 108 er als productiefste bron uit zag terwijl hij
+// op health 'dood' stond.
+//
+// De rijen 115-120 bestaan al, met een eigen url per stroom
+// (https://amersfoort.raadsinformatie.nl/#/raad-...). Dezelfde url's gebruikt
+// raadsinformatie-types.js in `registerSources`. Door die url per stroom mee te
+// geven landt elke stroom weer op zijn eigen rij. Er wordt hier niets samengevoegd
+// en geen rij aangepast; wat er in rij 108 staat blijft staan.
+//
+// Tweede reparatie: amendementen vielen onder de motie-regex en kwamen dus nooit in
+// hun eigen stroom terecht. Amendementen staan nu vóór moties in de lijst, want de
+// eerste treffer wint.
+const BASIS_RAAD = 'https://amersfoort.raadsinformatie.nl';
 const STREAMS = [
-  { name: 'Raad Amersfoort — Schriftelijke vragen', re: /schriftelijke\s+vra(a)?g|beantwoording.*vragen/i },
-  { name: 'Raad Amersfoort — Moties', re: /\bmotie\b|amendement/i },
-  { name: 'Raad Amersfoort — Raadsinformatiebrieven', re: /raadsinformatiebrief|collegebericht|\bRIB\b/i },
-  { name: 'Raad Amersfoort — Ingekomen stukken', re: /ingekomen stuk/i },
-  { name: 'Raad Amersfoort — Vergaderingen en overig', re: /./ }, // catch-all
+  { name: 'Raad Amersfoort — Schriftelijke vragen', sleutel: 'raad-schriftelijke-vragen', re: /schriftelijke\s+vra(a)?g|beantwoording.*vragen/i },
+  { name: 'Raad Amersfoort — Amendementen', sleutel: 'raad-amendementen', re: /amendement/i },
+  { name: 'Raad Amersfoort — Moties', sleutel: 'raad-moties', re: /\bmotie(s)?\b/i },
+  { name: 'Raad Amersfoort — Raadsinformatiebrieven', sleutel: 'raad-informatiebrieven', re: /raadsinformatiebrief|collegebericht|\bRIB\b/i },
+  { name: 'Raad Amersfoort — Ingekomen stukken', sleutel: 'raad-ingekomen-stukken', re: /ingekomen stuk/i },
+  { name: 'Raad Amersfoort — Vergaderingen en overig', sleutel: 'raad-vergaderingen', re: /./ }, // catch-all
 ];
 
 async function scrape() {
@@ -22,18 +48,29 @@ async function scrape() {
   for (const s of STREAMS) {
     sourceIds[s.name] = await getOrCreateSource(db, {
       name: s.name,
-      url: 'https://amersfoort.notubiz.nl',
+      url: `${BASIS_RAAD}/#/${s.sleutel}`,
       sourceType: 'api',
       reliability: 'primary',
       category: 'government',
       scrapeFrequency: 'daily',
     });
   }
+  const uniek = new Set(Object.values(sourceIds).map(String));
+  if (uniek.size !== STREAMS.length) {
+    // Vangnet voor precies de fout die hierboven beschreven staat.
+    console.error(`raadsinformatie-ori: ${STREAMS.length} stromen lossen op naar ${uniek.size} bronrijen — controleer de url's`);
+  }
 
   const dagen = parseInt(process.env.ORI_DAGEN || '14', 10); // 14: raad vergadert niet wekelijks (reces)
   const since = new Date(Date.now() - dagen * 864e5).toISOString();
+  // size 100 zonder sortering leverde willekeurig welke honderd documenten ES als
+  // eerste teruggaf. Daardoor bleven op 9 augustus de losse amendementen van de
+  // raadsvergadering van 8 juli buiten beeld en viel alles in de catch-all, terwijl
+  // ze wel in de index staan (77 documenten met 'amendement' in de naam, met
+  // AANGENOMEN/VERWORPEN in de titel). Nu nieuwste eerst en een ruimere size.
   const body = {
-    size: 100,
+    size: 250,
+    sort: [{ last_discussed_at: { order: 'desc', unmapped_type: 'date' } }],
     query: {
       bool: {
         must: [{ terms: { '@type': ['Meeting', 'MediaObject', 'AgendaItem'] } }],
@@ -58,6 +95,25 @@ async function scrape() {
   const stats = {};
   for (const s of STREAMS) stats[s.name] = { new: 0, skipped: 0, errors: 0 };
 
+  // Grendel tegen dubbelen over bronrijen heen. `saveRawItem` dedupliceert op een
+  // hash van titel + url, maar die constraint blijkt niet te verhinderen dat
+  // hetzelfde document onder een tweede bronrij binnenkomt. Toen de stromen op
+  // 9 augustus naar hun eigen rij werden teruggezet, kwamen daardoor in één run
+  // 64 documenten die al onder rij 108 stonden opnieuw binnen onder rij 120.
+  // Die 64 zijn diezelfde dag verwijderd; deze controle voorkomt de herhaling.
+  // Het raakt alleen de raadsinformatierijen, want daar zit de historische
+  // overlap; een bredere controle zou elke run een tabelscan kosten.
+  const RAADSRIJEN = [108, 31, ...Object.values(sourceIds).map(Number)];
+  const plaatshouders = RAADSRIJEN.map(() => '?').join(',');
+  async function elders(url) {
+    if (!url) return false;
+    const r = await db.execute({
+      sql: `SELECT 1 FROM raw_items WHERE external_url = ? AND source_id IN (${plaatshouders}) LIMIT 1`,
+      args: [url, ...RAADSRIJEN],
+    });
+    return r.rows.length > 0;
+  }
+
   for (const h of hits) {
     const src = h._source || {};
     const naam = String(src.name || '').trim();
@@ -67,6 +123,7 @@ async function scrape() {
     const tekst = String(src.text || src.description || '').substring(0, 8000);
     const datum = src.last_discussed_at || src.start_date || src['@timestamp'] || new Date().toISOString();
     try {
+      if (await elders(url)) { stats[stream.name].skipped++; continue; }
       const r = await saveRawItem(db, {
         sourceId: sourceIds[stream.name],
         externalUrl: url,
