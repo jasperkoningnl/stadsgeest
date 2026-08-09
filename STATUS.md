@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **9 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Weegroutine: 105 signalen beoordeeld, nul tips, en een rechtspraak-bron die niet doet wat de naam belooft"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Openstaande punten afgewerkt: subsidieregister gevuld, Raad van State opnieuw gebouwd, twee bronnen die iets anders bevatten dan hun naam zegt"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -1753,3 +1753,116 @@ niet apart nagetrokken. De live dashboardweergave van de nieuwe dossierfeiten is
 niet gecontroleerd, alleen de database zelf.
 
 *Cowork-update: 2026-08-09 (Nieuwsplein33-account, weger-run)*
+
+---
+
+### Cowork-update: 2026-08-09 — Openstaande punten afgewerkt: subsidieregister gevuld, Raad van State opnieuw gebouwd, twee bronnen die iets anders bevatten dan hun naam zegt
+
+Jasper wees erop dat ik te veel signaleerde en te weinig oploste. Deze sectie werkt
+de punten af die in de vorige twee secties als "bewust laten liggen" stonden.
+
+**Het subsidieregister staat erin, en het was al gebouwd.** `subsidieregister-records.js`
+bestond sinds 24 juli, leest de PDF-tabel per kolom uit en schrijft elke subsidie als
+eigen record. Hij heeft nooit gedraaid: de PM2-job `scrape-subsidies` staat op
+`stopped` en de scraper hangt aan `lib.js`, dat sinds 7 augustus de `.env` niet meer
+kon lezen. Eén handmatige run vult de tabel `subsidies` met **1.678 records over 2024
+en 2025, 344 ontvangers, samen 159 miljoen euro**.
+
+Het patroon waar `NIEUWSPLEIN33.md` om vroeg is daarmee meteen te maken: Stichting
+Sociale Wijkteams Amersfoort ging van 19.951.873 euro in 2024 naar 20.688.205 in 2025,
+Bibliotheken Eemland van 4.886.061 naar 5.170.098, Scholen In De Kunst van 4.990.649
+naar 4.907.966. Het gat "geldstromen over tijd" stond op nul procent en is nu een
+tabel waarin je jaar op jaar kunt vergelijken. Het register anonimiseert particulieren
+al als "Burger"; die records tellen mee in totalen maar krijgen geen
+organisatiekoppeling.
+
+**De Raad van State is opnieuw gebouwd, op een andere ingang.** De oude scraper haalde
+`raadvanstate.nl/uitspraken?zoeken_term=amersfoort` op. Die site geeft **HTTP 403 op
+elke detailpagina die node opvraagt** — getest met een kale fetch, met een
+browser-user-agent en met een volledige set browserheaders, alle drie 403. De
+zoekpagina komt er wel doorheen, de uitspraken niet. Daarom stonden alle negen items
+op nul tekens content en viel er niets te wegen.
+
+De Raad van State publiceert zijn uitspraken ook op `data.rechtspraak.nl`, met
+volledige tekst en inhoudsindicatie, en die ingang blokkeert niets. De scraper haalt nu
+daar op.
+
+Het filter kijkt naar de inhoudsindicatie plus het partijenblok tussen "Uitspraak op
+het" en "Procesverloop", en negeert plaatsnamen die in een rol staan: advocaat,
+gemachtigde, rechtsbijstandverlener, kantoorhoudend, werkzaam. **Getoetst op 1.200
+RvS-uitspraken over 120 dagen.** 945 daarvan hadden tekst, 13 noemden Amersfoort of
+Leusden, en **twaalf van die dertien waren de advocaat of de rechtsbijstandverlener**.
+Het filter wees ze alle twaalf af. De dertiende was Staatsbosbeheer, "gevestigd in
+Amersfoort", in een zaak over Tzummarum in de gemeente Waadhoeke; daarvoor is een
+tweede uitzondering toegevoegd voor landelijke organisaties met hun hoofdkantoor hier.
+
+Dat betekent ook iets voor de verwachting: **een paar treffers per jaar is het juiste
+gedrag voor deze bron, geen storing.** Dat staat nu in `health_note`, zodat een
+volgende sessie hem niet als kapot aanmerkt. De negen oude items blijven staan als
+historie.
+
+Twee dingen die bij het bouwen bleken en die de volgende keer tijd schelen. De
+`q`-parameter van `data.rechtspraak.nl` wordt genegeerd zodra `creator` is meegegeven;
+filteren op "Amersfoort" moet dus aan onze kant. En de nieuwste uitspraken staan er wel
+als metadata maar nog zonder tekst — van de tien nieuwste hadden er negen 149 tekens.
+Het venster loopt daarom een week achter.
+
+**Tuchtrecht: onderzocht, en bewust niet gebouwd.** `repository.overheid.nl` heeft een
+product-area `tuchtrecht` met 48.094 uitspraken, wat er als de vulling van het gat
+"uitspraken die hen aangaan" uitzag. In twaalf maanden noemen precies **twee**
+uitspraken Amersfoort, en bij allebei is dat de gemachtigde: "mr. Y.R. Koorevaar,
+werkzaam in Amersfoort" en "mr. H.A. Dragstra, advocaat te Amersfoort". Een bron
+bouwen die per jaar twee valse positieven oplevert maakt de intake slechter, niet
+beter. Het inzicht is niet verloren: het is gebruikt om het partijenfilter van de Raad
+van State te bouwen, en dat was wel een levende bron die verkeerde data leverde.
+
+**Twee bronnen bevatten iets anders dan hun naam zegt.**
+
+`Officiële Bekendmakingen — Gemeenschappelijke regelingen` (bron 112, 86 items) bevat
+geen enkele gemeenschappelijke regeling. Het zijn gewone Amersfoortse
+gemeentebladberichten: een schutting aan de Larixstraat, het Aanwijzingsbesluit betaald
+en vergunningparkeren, tijdelijk cameratoezicht. Oorzaak: de query
+`dcterms.creator any "Regio Amersfoort"` op het dode zoek-endpoint, met in de code de
+aantekening dat BGR "0 geeft op dit endpoint". De bron staat nu op `is_active=0` met de
+reden erbij; de 86 items blijven als historie staan. Gemeenschappelijke regelingen
+lopen via bron 88.
+
+`officielebekendmakingen-wekelijks.js` is daarnaast helemaal herschreven. Hij draaide
+op hetzelfde dode endpoint en had geen plaatsfilter: `creator any "provincie Utrecht"`
+levert Nieuwegein, Renswoude en Mijdrecht, `Vallei en Veluwe` levert 555 berichten van
+Wageningen tot Nunspeet. Nu met een plaatsfilter op Amersfoort, Hoogland,
+Hooglanderveen, Vathorst, Leusden, Achterveld en Stoutenburg — met woordgrenzen, want
+"Leusderweg" ligt in Amersfoort. Eerste run: van 649 waterschapsberichten bleven er
+**9** over, van 107 provinciale berichten **6**. Het Waterschapsblad levert daarmee ook
+Leusdense bekendmakingen op.
+
+**Opgeruimd.** `officielebekendmakingen-split.js` en `officielebekendmakingen.js` zijn
+verwijderd; beide draaiden op het endpoint dat op alles 500 geeft en stonden niet in
+PM2. Item 1895 in `raw_items`, het enige dat de oude BGR-bron ooit opleverde en dat een
+stuk onverwerkte JSON als titel had, is verwijderd. `fast-xml-parser` is toegevoegd aan
+`scraper/node_modules` met toestemming van Jasper: acht pakketten erbij, van 46 naar 54
+mappen op het eerste niveau, `playwright` en `@libsql` ongemoeid.
+
+**Stand van de bronnentabel.** 127 bronnen, 103 actief, 48 actieve tier 1-bronnen,
+11 gemarkeerd als dubbel, 10 als eenmalig, 4 als dood.
+
+**Wat er nu nog open staat**, en dit keer met een reden per punt.
+
+- **Raadsinformatie en het subsidieregister van Leusden** zijn nieuwbouw op een
+  onbekende raadsinformatie-omgeving. De bekendmakingen waren gratis omdat het dezelfde
+  SRU-index is; dit is dat niet.
+- **Een opvolger voor IGJ.** De bron staat uit. IGJ publiceert inspectierapporten niet
+  per gemeente, dus dit vraagt eerst uitzoekwerk over hoe je zorginstellingen in
+  Amersfoort aan rapporten koppelt.
+- **De publicatiedatum als kolom in `raw_items`.** Dit komt nu bij drie bronnen terug:
+  de bekendmakingen, Nieuwsplein33 en de Raad van State. Zolang `scraped_at` het enige
+  datumveld is, kan de weegroutine geen betrouwbare tijdreeks maken. Dit raakt het
+  schema en de intake en hoort daarom besproken te worden voordat er iemand aan begint.
+- **De weegprompt.** Niet aangeraakt, zoals afgesproken. Drie dingen horen erin: EF29
+  is een gunning en geen datafout, de Raad van State staat nu op tier 1, en van de
+  RvS-bron zijn een paar treffers per jaar het juiste gedrag.
+- **De PM2-jobs `scrape-nieuw` en `scrape-subsidies`** staan op `stopped`. Beide
+  scrapers werken nu; ze weer aanzetten is een beslissing van Jasper omdat het de
+  dagelijkse volumes raakt.
+
+*Cowork-update: 2026-08-09 (Nieuwsplein33-account, openstaande punten)*
