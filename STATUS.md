@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **9 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Eén gedeeld wachtwoord vervangen door drie accounts (Jasper, Pien, Gideon)"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Uitloggen, sessie-indicator en Beheer-tab voor Jasper"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -1951,3 +1951,59 @@ bedoeld is. Waard om met Jasper recht te zetten voordat dat een keer wél tot ee
 conflict leidt.
 
 *Cowork-update: 2026-08-09 (Nieuwsplein33-account, inlog per gebruiker)*
+
+---
+
+### Cowork-update: 2026-08-09 — Uitloggen, sessie-indicator en Beheer-tab voor Jasper
+
+Vervolg op de vorige sectie, zelfde sessie. Jasper miste na de accounts-migratie drie
+dingen: zien wie er is ingelogd, kunnen uitloggen, en — apart verzoek — een eigen
+tabblad met een verslag van de laatste intake en de status van de bronnen.
+
+**Uitloggen en sessie-indicator.** `POST /api/auth/logout` maakt de `sg_sessie`-cookie
+leeg (`maxAge: 0`) en stuurt naar `/login`. De nav toont nu "Ingelogd als [gebruiker]"
+met een uitlogknop, voor alle drie accounts. Belangrijk om te weten: dit is een
+stateless, ondertekende sessie zonder server-side sessieregister — uitloggen wist de
+cookie in de browser, maar een kopie van het oude cookiewaarde blijft tot de
+vervaldatum (30 dagen) geldig als iemand hem apart bewaart en hergebruikt. Dat is
+geen regressie (was al zo vóór deze sessie) maar wel iets om te weten voor wie denkt
+dat uitloggen een sessie server-side intrekt. Voor deze schaal en testperiode is dat
+geaccepteerd; een echte revocatielijst zou een database-tabel en een extra query per
+paginabezoek kosten voor een dreiging die hier niet weegt.
+
+**Beheer-tab, alleen voor Jasper.** Nieuwe route `/nieuwsplein33/beheer`: laatste
+intake-run met trechter (binnengekomen → gefilterd → gematcht → nieuwe signalen) en
+foutmelding indien van toepassing, de vorige 9 runs in een inklapbare lijst, bronnen
+per tier, en een volledige bronnentabel met gezondheidsbadge, laatste item en
+opbrengst over 7/30 dagen/totaal. Zichtbaarheid zit op twee plekken: het nav-item
+verschijnt alleen als `sessieGebruiker() === 'jasper'`, én de pagina zelf checkt dat
+nog eens server-side en doet `redirect('/nieuwsplein33')` voor iedereen anders — dus
+niet alleen verstopt, ook echt afgeschermd voor wie de URL raadt.
+
+**De queries bestonden al.** `getIntakeRuns`, `getSourcesOverview` en
+`getTierAggregates` zijn teruggehaald uit `src/lib/dashboard/queries.ts` zoals dat er
+vóór commit 3a7926f (8 augustus) uitzag — de dashboardmigratie verwijderde die pagina's
+functioneel, niet de onderliggende queries uit de git-geschiedenis. Voordat ze zijn
+hergebruikt is het schema rechtstreeks tegen de productie-Turso gecontroleerd (los
+scriptje, direct verwijderd na gebruik): `intake_runs`, `sources` en `scrape_runs` zijn
+kolom-voor-kolom ongewijzigd. 23 intake-runs aanwezig, laatste op 9 augustus 06:00 UTC.
+Nieuw bestand `src/lib/dashboard/beheerQueries.ts`, bewust gescheiden van
+`tipQueries.ts` — andere doelgroep, andere schaal, geen reden om ze te laten groeien
+tot één bestand.
+
+**Live geverifieerd** tegen `https://stadsgeest.nl`: jasper krijgt 200 op `/beheer` met
+zichtbare inhoud, pien krijgt een 307 terug naar `/nieuwsplein33` op dezelfde route;
+beide zien "Ingelogd als [naam]" in de nav, alleen jasper ziet de Beheer-link;
+uitloggen geeft 303 naar `/login` met een geleegde cookie. `npm run build` en `eslint`
+op alle gewijzigde bestanden zijn schoon. Eén valkuil onderweg: de eerste testronde na
+het pushen gaf 404 op de nieuwe routes — dat was de Vercel-deploy die nog niet klaar
+was, geen bug. Rechtstreeks tegen de nieuwe deployment-URL testen (in plaats van tegen
+het domein) bevestigde dat de routes er wél waren; een halve minuut later gaf
+`stadsgeest.nl` zelf ook het juiste antwoord.
+
+**Niet gedaan, bewust.** Geen server-side sessieregister/revocatie (zie boven). Geen
+per-gebruiker instellingen anders dan de Beheer-tab zelf — Jasper vroeg concreet om dat
+ene tabblad, niet om een instellingenstelsel; als er meer rolverschillen komen (Pien en
+Gideon die iets anders nodig hebben dan elkaar) is dat een apart gesprek.
+
+*Cowork-update: 2026-08-09 (Nieuwsplein33-account, uitloggen en beheer-tab)*
