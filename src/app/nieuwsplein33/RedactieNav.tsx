@@ -10,21 +10,46 @@ const ITEMS = [
   { href: '/nieuwsplein33/archief', label: 'Archief', tel: ['gepubliceerd', 'niet_gebruikt', 'afgekeurd'] },
 ]
 
-export default function RedactieNav({ tellingen }: { tellingen: Record<string, number> }) {
+// Beheer is bewust alleen voor Jasper: cijfers over de pipeline zelf, niet over
+// tips. Andere redactieleden hebben daar niets aan en het maakt de rest van de
+// nav onnodig druk.
+const BEHEER_ITEM = { href: '/nieuwsplein33/beheer', label: 'Beheer', tel: [] as string[] }
+
+export default function RedactieNav({
+  tellingen,
+  gebruiker,
+}: {
+  tellingen: Record<string, number>
+  gebruiker: string | null
+}) {
   const pathname = usePathname()
+  const items = gebruiker === 'jasper' ? [...ITEMS, BEHEER_ITEM] : ITEMS
 
   return (
-    <nav className="np-nav">
-      {ITEMS.map((item) => {
-        const actief = item.href === '/nieuwsplein33' ? pathname === '/nieuwsplein33' : pathname.startsWith(item.href)
-        const aantal = item.tel.reduce((som, s) => som + (tellingen[s] ?? 0), 0)
-        return (
-          <Link key={item.href} href={item.href} className={`np-nav-item${actief ? ' np-nav-item-actief' : ''}`}>
-            {item.label}
-            {aantal > 0 && <span className="np-nav-tel">{aantal}</span>}
-          </Link>
-        )
-      })}
-    </nav>
+    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+      <nav className="np-nav">
+        {items.map((item) => {
+          const actief = item.href === '/nieuwsplein33' ? pathname === '/nieuwsplein33' : pathname.startsWith(item.href)
+          const aantal = item.tel.reduce((som, s) => som + (tellingen[s] ?? 0), 0)
+          return (
+            <Link key={item.href} href={item.href} className={`np-nav-item${actief ? ' np-nav-item-actief' : ''}`}>
+              {item.label}
+              {aantal > 0 && <span className="np-nav-tel">{aantal}</span>}
+            </Link>
+          )
+        })}
+      </nav>
+
+      {gebruiker && (
+        <div className="np-sessie">
+          <span className="np-sessie-tekst">
+            Ingelogd als <strong>{gebruiker}</strong>
+          </span>
+          <form method="POST" action="/api/auth/logout">
+            <button type="submit" className="np-sessie-uitloggen">Uitloggen</button>
+          </form>
+        </div>
+      )}
+    </div>
   )
 }

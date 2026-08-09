@@ -30,6 +30,16 @@ export function parseDbDate(iso: string | null | undefined): Date | null {
   return Number.isNaN(d.getTime()) ? null : d
 }
 
+export function formatDuration(ms: number | null | undefined): string {
+  if (ms === null || ms === undefined) return '—'
+  if (ms < 1000) return `${ms}ms`
+  const s = ms / 1000
+  if (s < 60) return `${s.toFixed(1)}s`
+  const m = Math.floor(s / 60)
+  const rem = Math.round(s - m * 60)
+  return `${m}m ${rem}s`
+}
+
 export function daysSince(iso: string | null | undefined): number | null {
   const d = parseDbDate(iso)
   if (!d) return null

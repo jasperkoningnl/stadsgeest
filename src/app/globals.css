@@ -853,6 +853,18 @@ body {
 }
 .np-nav-item-actief .np-nav-tel { background: var(--accent-dim); color: var(--accent); }
 
+.np-sessie {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 12px; font-family: var(--f-m); font-size: 12px; color: var(--t3);
+}
+.np-sessie-tekst strong { font-family: var(--f-d); color: var(--t2); font-weight: 600; }
+.np-sessie-uitloggen {
+  font-family: var(--f-m); font-size: 12px; color: var(--t3);
+  background: none; border: 1px solid var(--border-s); border-radius: var(--r-lg);
+  padding: 4px 10px; cursor: pointer; transition: color .16s ease, border-color .16s ease;
+}
+.np-sessie-uitloggen:hover { color: var(--t1); border-color: var(--t3); }
+
 .np-strook {
   display: flex; flex-wrap: wrap; gap: 8px 20px;
   padding: 12px 16px; margin-bottom: 20px;
@@ -1235,3 +1247,55 @@ body {
   margin-top: 64px; padding-top: 22px; border-top: 1px solid var(--border-s);
   font-family: var(--f-m); font-size: 12px; letter-spacing: 0.06em; color: var(--t3);
 }
+
+
+/* ── Beheer-tab (alleen Jasper) ─────────────────────────── */
+.np-beheer-kaart {
+  padding: 18px 20px; margin-bottom: 16px;
+  background: var(--bg-card); border: 1px solid var(--border-s); border-radius: var(--r-xl);
+}
+.np-beheer-kaart-kop {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  font-family: var(--f-d); font-size: 14px; color: var(--t2); margin-bottom: 12px;
+}
+.np-beheer-trechter {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  font-family: var(--f-m); font-size: 13px; color: var(--t2);
+}
+.np-beheer-trechter strong { color: var(--t1); }
+.np-beheer-fout {
+  margin-top: 12px; padding: 10px 14px;
+  background: rgba(255,180,171,0.10); border: 1px solid var(--error); color: var(--error);
+  border-radius: var(--r-lg); font-family: var(--f-m); font-size: 13px;
+}
+
+.np-beheer-history {
+  margin-bottom: 8px; font-family: var(--f-d); font-size: 13px; color: var(--t3);
+}
+.np-beheer-history summary { cursor: pointer; padding: 6px 0; }
+.np-beheer-history summary:hover { color: var(--t1); }
+
+.np-beheer-tabel-wrap { overflow-x: auto; margin-bottom: 8px; }
+.np-tabel {
+  width: 100%; border-collapse: collapse; font-family: var(--f-m); font-size: 13px;
+}
+.np-tabel th {
+  text-align: left; padding: 8px 12px; color: var(--t3); font-weight: 500;
+  font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase;
+  border-bottom: 1px solid var(--border-s); white-space: nowrap;
+}
+.np-tabel td {
+  padding: 8px 12px; color: var(--t1); border-bottom: 1px solid var(--border-s);
+  white-space: nowrap;
+}
+.np-tabel tbody tr:hover { background: var(--bg-raised); }
+.np-beheer-rij-inactief { opacity: 0.5; }
+
+.np-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 10px;
+  font-family: var(--f-m); font-size: 11px; text-transform: lowercase;
+  border: 1px solid var(--border-s); color: var(--t2);
+}
+.np-badge-groen { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.np-badge-amber { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+.np-badge-rood { border-color: var(--error); color: var(--error); background: rgba(255,180,171,0.10); }
