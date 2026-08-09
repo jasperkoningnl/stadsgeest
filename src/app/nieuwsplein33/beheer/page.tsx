@@ -5,10 +5,11 @@ import { hasTurso } from '@/lib/turso'
 import { AUTH_COOKIE, sessieGebruiker } from '@/lib/dashboardAuth'
 import {
   getIntakeRuns, getTierAggregates, getSourcesOverview,
-  type IntakeRun, type TierAggregate, type SourcesOverview,
+  type IntakeRun, type TierAggregate,
 } from '@/lib/dashboard/beheerQueries'
-import { formatDateTime, formatDuration, formatRelative } from '@/lib/dashboard/format'
+import { formatDateTime, formatDuration } from '@/lib/dashboard/format'
 import GeenDatabase from '../GeenDatabase'
+import BronnenTabel from './BronnenTabel'
 
 export const metadata: Metadata = {
   title: 'Beheer — Nieuwsplein33',
@@ -16,10 +17,6 @@ export const metadata: Metadata = {
 }
 
 export const dynamic = 'force-dynamic'
-
-const HEALTH_LABEL: Record<string, string> = {
-  ok: 'gezond', verdacht: 'verdacht', dood: 'dood', uitgeschakeld: 'uitgeschakeld',
-}
 
 export default async function BeheerPagina() {
   // Los van de proxy: deze pagina is alleen voor Jasper, andere ingelogde
@@ -130,43 +127,4 @@ function TierTabel({ tiers }: { tiers: TierAggregate[] }) {
   )
 }
 
-function BronnenTabel({ overzicht }: { overzicht: SourcesOverview }) {
-  return (
-    <div className="np-beheer-tabel-wrap">
-      <table className="np-tabel">
-        <thead>
-          <tr>
-            <th>Bron</th><th>Tier</th><th>Actief</th>
-            {overzicht.healthTracked && <th>Gezondheid</th>}
-            <th>Laatste item</th><th>7d</th><th>30d</th><th>Totaal</th>
-          </tr>
-        </thead>
-        <tbody>
-          {overzicht.rows.map((s) => (
-            <tr key={s.id} className={s.isActive ? undefined : 'np-beheer-rij-inactief'}>
-              <td>{s.name}</td>
-              <td>{s.tier ? <span className="np-tier">tier {s.tier}</span> : '—'}</td>
-              <td className="np-bron-rest">{s.isActive ? 'ja' : 'nee'}</td>
-              {overzicht.healthTracked && (
-                <td>
-                  {s.health && (
-                    <span
-                      className={`np-badge${s.health === 'ok' ? ' np-badge-groen' : s.health === 'verdacht' ? ' np-badge-amber' : ' np-badge-rood'}`}
-                      title={s.healthNote ?? undefined}
-                    >
-                      {HEALTH_LABEL[s.health] ?? s.health}
-                    </span>
-                  )}
-                </td>
-              )}
-              <td className="np-bron-rest">{formatRelative(s.lastItemAt)}</td>
-              <td>{s.items7d}</td>
-              <td>{s.items30d}</td>
-              <td className="np-bron-rest">{s.itemsTotal}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
+
