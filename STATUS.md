@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **8 augustus 2026**
+> ### Bijgewerkt tot en met **9 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-08 — Bronkant hersteld: een stille storing sinds 7 augustus, en de bronnentabel ontdubbeld"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Gemeenschappelijke regelingen: pakket geïnstalleerd bleek maar een derde van het probleem"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -1609,3 +1609,70 @@ door de intake.
 - `officielebekendmakingen-split.js` en `officielebekendmakingen.js` zijn niet verwijderd.
 
 *Cowork-update: 2026-08-08 (Nieuwsplein33-account, bronkant)*
+
+---
+
+### Cowork-update: 2026-08-09 — Gemeenschappelijke regelingen: pakket geïnstalleerd bleek maar een derde van het probleem
+
+Naschrift bij de sectie hierboven. Jasper gaf toestemming om `fast-xml-parser` in
+`scraper/node_modules` te installeren, zodat `scrapeGemeenschappelijkeRegelingen`
+weer kon draaien. Dat is gebeurd — `npm install fast-xml-parser` in `scraper/`,
+acht pakketten erbij, van 46 naar 54 mappen op het eerste niveau, met `playwright`
+en `@libsql` ongemoeid. `package.json` en `package-lock.json` staan als `.bak`
+ernaast. Maar de ontbrekende import was maar één van drie fouten.
+
+**Twee.** De functie zocht op `zoek.officielebekendmakingen.nl/sru/Search`, hetzelfde
+endpoint dat HTTP 500 geeft op elke query. Nu `repository.overheid.nl/sru`.
+
+**Drie.** De XML-paden klopten niet. De code zocht in `overheidop:meta`; het echte
+pad is `sru:recordData` → `gzd:gzd` → `gzd:originalData` → `overheidwetgeving:meta`
+→ `overheidwetgeving:owmskern`. Dat is uitgezocht op een echt antwoord, niet gegokt.
+Velden met een scheme-attribuut — `dcterms:type`, `dcterms:creator` — komen uit
+`fast-xml-parser` als object met een `#text`-sleutel en moeten dus uitgepakt worden.
+De publieke URL staat kant-en-klaar in `gzd:enrichedData.gzd:preferredUrl`.
+
+**En daaronder zat een denkfout.** Er werd gezocht op de vrije tekst "Amersfoort
+gemeenschappelijke regeling". Een blad gemeenschappelijke regeling wordt uitgegeven
+door de regeling zelf, niet door de gemeente, dus `dt.creator=="Amersfoort"` geeft
+nul treffers en vrije tekst levert juist regelingen uit Amsterdam en landelijke
+besluiten op. De juiste index is `w.publicatienaam=="Blad gemeenschappelijke
+regeling"` in combinatie met een vaste lijst opstellers. Getest op 8 augustus:
+Veiligheidsregio Utrecht 159 publicaties, Omgevingsdienst regio Utrecht 21,
+Afvalverwijdering Utrecht 2. De lijst staat als constante in de functie en is met
+één regel uit te breiden.
+
+Er zit een venster van dertig dagen op. Zonder venster is de eerste run een backfill
+van bijna tweehonderd items, en dat is precies de uitschieter waar START-HIER.md voor
+waarschuwt. Kanttekening: `dt.modified` blijkt bij oudere publicaties niet altijd
+gevuld — Veiligheidsregio Utrecht geeft 159 treffers zonder datumfilter maar één met
+`dt.modified>="2026-01-01"`. Het venster is dus geen betrouwbare tijdsafbakening maar
+wel een effectieve rem.
+
+**Resultaat.** `run-nieuw` draait nu volledig zonder fouten: 2 nieuw, 159
+overgeslagen, **0 fouten** over zestien bronnen. Dat was gisteren nog 1 nieuw, 158
+overgeslagen, 1 fout. De twee nieuwe items zijn het Besluit Aanwijzing
+archiefbewaarplaats en archivaris AVU en de Informatieverordening gemeenschappelijke
+regeling Afval Verwijdering Utrecht 2021, beide met een werkende URL naar
+`zoek.officielebekendmakingen.nl`.
+
+**Blijft staan.** Item 1895 in `raw_items` is het enige dat de oude bron ooit
+opleverde en heeft een stuk onverwerkte JSON als titel: `{"gzd":{"originalData"...`.
+Het verwijderen daarvan is geblokkeerd door de veiligheidscontrole; het staat er dus
+nog. Onschadelijk — het valt buiten het 48-uursfilter en komt niet opnieuw door de
+intake — maar het is rommel in een tier 1-bron en mag bij gelegenheid weg.
+
+**Nog een vondst die niet in deze taak zat.** Bron 112, `Officiële Bekendmakingen —
+Gemeenschappelijke regelingen`, bevat geen enkele gemeenschappelijke regeling. Wat
+erin staat zijn gewone Amersfoortse gemeentebladberichten: een schutting aan de
+Larixstraat, het Aanwijzingsbesluit betaald parkeren, tijdelijk cameratoezicht. De
+naam dekt de lading niet en de inhoud overlapt met de gemeenteblad-stroom. Dat is
+dezelfde soort fout als bij NVWA: het etiket klopt niet met wat er binnenkomt. Niet
+aangeraakt, want het raakt de indeling van de bekendmakingenstromen en dat verdient
+een eigen beslissing.
+
+En passant: de SRU-index van `repository.overheid.nl` kent zeven product-areas, en
+daar zit **`tuchtrecht`** bij. Dat is het gat "uitspraken die hen aangaan" uit
+`NIEUWSPLEIN33.md`, waarvan tot nu toe werd aangenomen dat er geen bron voor was.
+Niet uitgezocht, wel het noteren waard.
+
+*Cowork-update: 2026-08-09 (Nieuwsplein33-account, naschrift bronkant)*

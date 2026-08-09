@@ -172,32 +172,87 @@ async function scrapeGemeenschappelijkeRegelingen() {
       source_type: 'scrape', reliability: 'primary', category: 'government',
       scrape_frequency: 'weekly', tier: 1,
     });
-    // Zoek op staatscourant gepubliceerde gemeenschappelijke regelingen met Amersfoort
-    // OB SRU API — zoek in Staatscourant naar besluiten over Amersfoort die gemeenschappelijke regelingen betreffen
+    // Herschreven op 8 augustus 2026. Wat hier stond zocht op
+    // zoek.officielebekendmakingen.nl/sru/Search met de vrije tekst
+    // "Amersfoort gemeenschappelijke regeling". Drie dingen klopten daar niet:
+    //
+    //   1. Dat endpoint geeft HTTP 500 op elke query, ook op operation=explain.
+    //      Het werkende adres is repository.overheid.nl/sru.
+    //   2. `fast-xml-parser` stond niet in scraper/node_modules, dus de import
+    //      wierp elke run een fout. Nu geïnstalleerd.
+    //   3. De XML-paden klopten niet: het enige item dat de bron ooit opleverde
+    //      heeft een stuk onverwerkte JSON als titel — `{"gzd":{"originalData"...`.
+    //
+    // De bredere denkfout zat in het zoeken zelf. Een blad gemeenschappelijke
+    // regeling wordt uitgegeven door de regeling, niet door de gemeente, dus
+    // `dt.creator=="Amersfoort"` geeft nul. Zoeken op de vrije tekst "Amersfoort"
+    // geeft juist regelingen uit Amsterdam en landelijke besluiten. Daarom nu een
+    // vaste lijst opstellers: de gemeenschappelijke regelingen waar Amersfoort
+    // daadwerkelijk in deelneemt. Getest 8 augustus 2026: Veiligheidsregio Utrecht
+    // 159 publicaties, Omgevingsdienst regio Utrecht 21, Afvalverwijdering Utrecht 2.
+    // De lijst is met opzet kort en uitbreidbaar; een regeling erbij is één regel.
     const { XMLParser } = await import('fast-xml-parser');
-    const sruUrl = 'https://zoek.officielebekendmakingen.nl/sru/Search?query=Amersfoort+gemeenschappelijke+regeling&maximumRecords=20&x-connection=stcrt&sortKeys=score,,1';
-    const r = await fetch(sruUrl, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(12000) });
-    if (!r.ok) throw new Error(`SRU HTTP ${r.status}`);
-    const xml = await r.text();
+    const SRU = 'https://repository.overheid.nl/sru';
+    const REGELINGEN = [
+      'Veiligheidsregio Utrecht',
+      'Omgevingsdienst regio Utrecht',
+      'Afvalverwijdering Utrecht',
+    ];
+    // Alleen de laatste dertig dagen. Zonder venster is de eerste run een backfill
+    // van bijna tweehonderd items en dat is precies het soort uitschieter waar
+    // START-HIER.md voor waarschuwt.
+    const sinds = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
     const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@' });
-    const obj = parser.parse(xml);
-    const records = obj['searchRetrieveResponse']?.records?.record ?? [];
-    const arr = Array.isArray(records) ? records : [records];
-    for (const rec of arr) {
-      const data = rec?.recordData ?? {};
-      // Probeer verschillende XML-paden
-      const wetgeving = data?.['gzd:gzd']?.['gzd:originalData']?.['overheidwetgeving:wetgeving'] ?? {};
-      const title = wetgeving?.['dcterms:title'] ?? data?.['dcterms:title'] ?? JSON.stringify(data).substring(0, 80);
-      const identifier = wetgeving?.['dcterms:identifier'] ?? data?.['dcterms:identifier'] ?? '';
-      if (typeof title === 'string' && title.length > 5) {
-        const url = identifier ? `https://zoek.officielebekendmakingen.nl/${identifier}` : 'https://zoek.officielebekendmakingen.nl/';
-        insertItem(db, { source_id: sid, title: title.substring(0, 300), content: '', external_url: url, scraped_at: new Date().toISOString() })
-          .then(result => { if (result === true) stats.new++; else if (result === false) stats.skipped++; else stats.errors++; })
-          .catch(() => stats.errors++);
+
+    let gezien = 0;
+    for (const regeling of REGELINGEN) {
+      const query = `c.product-area==officielepublicaties AND w.publicatienaam=="Blad gemeenschappelijke regeling"`
+        + ` AND dt.creator=="${regeling}" AND dt.modified>="${sinds}"`;
+      const url = `${SRU}?operation=searchRetrieve&version=2.0&maximumRecords=50&query=${encodeURIComponent(query)}`;
+      const r = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(20000) });
+      if (!r.ok) { stats.errors++; continue; }
+      const obj = parser.parse(await r.text());
+
+      const antwoord = obj['sru:searchRetrieveResponse'] ?? obj.searchRetrieveResponse ?? {};
+      const records = antwoord['sru:records']?.['sru:record'] ?? antwoord.records?.record ?? [];
+      const arr = Array.isArray(records) ? records : [records].filter(Boolean);
+
+      // Het pad is nagelopen op een echt antwoord, niet gegokt: recordData ->
+      // gzd:gzd -> gzd:originalData -> overheidwetgeving:meta -> owmskern. De oude
+      // code zocht in `overheidop:meta`, dat bestaat hier niet. Velden met een
+      // scheme-attribuut komen uit fast-xml-parser als object met #text.
+      const tekst = (v) => (v && typeof v === 'object' ? v['#text'] : v) ?? '';
+
+      for (const rec of arr) {
+        const data = rec?.['sru:recordData'] ?? rec?.recordData ?? {};
+        const gzd = data?.['gzd:gzd'] ?? {};
+        const kern = gzd?.['gzd:originalData']?.['overheidwetgeving:meta']?.['overheidwetgeving:owmskern'] ?? {};
+        const titel = tekst(kern['dcterms:title']);
+        const identifier = tekst(kern['dcterms:identifier']);
+        const gewijzigd = tekst(kern['dcterms:modified']);
+        const rubriek = tekst(kern['dcterms:type']);
+        if (typeof titel !== 'string' || titel.length < 6) continue;
+
+        gezien++;
+        const itemUrl = gzd?.['gzd:enrichedData']?.['gzd:preferredUrl']
+          || (identifier ? `https://zoek.officielebekendmakingen.nl/${identifier}.html` : 'https://zoek.officielebekendmakingen.nl/');
+        const result = await insertItem(db, {
+          source_id: sid,
+          title: titel.substring(0, 300),
+          content: `Gemeenschappelijke regeling: ${regeling}.`
+            + `${rubriek ? ` Rubriek: ${rubriek}.` : ''}`
+            + ` Gepubliceerd in het Blad gemeenschappelijke regeling`
+            + `${gewijzigd ? `, laatst gewijzigd ${gewijzigd}` : ''}.`
+            + ` Amersfoort neemt aan deze regeling deel.`,
+          summary: [regeling, rubriek, gewijzigd].filter(Boolean).join(' | '),
+          external_url: itemUrl,
+          scraped_at: new Date().toISOString(),
+        });
+        if (result === true) stats.new++; else if (result === false) stats.skipped++; else stats.errors++;
       }
+      await new Promise(r => setTimeout(r, 800));
     }
-    await new Promise(r => setTimeout(r, 1500));
-    if (arr.length === 0) stats.skipped++;
+    if (gezien === 0) stats.skipped++;
   } catch (e) {
     stats.errors++;
     console.error(`  [${name}] ${e.message.substring(0, 120)}`);
