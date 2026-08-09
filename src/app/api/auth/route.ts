@@ -3,6 +3,7 @@ import { AUTH_COOKIE, isGeconfigureerd, maakSessie, wachtwoordKlopt } from '@/li
 
 export async function POST(request: Request) {
   const formData = await request.formData()
+  const gebruikersnaam = (formData.get('username') as string) ?? ''
   const wachtwoord = (formData.get('password') as string) ?? ''
   const from = (formData.get('from') as string) || '/nieuwsplein33'
 
@@ -14,9 +15,11 @@ export async function POST(request: Request) {
   }
 
   if (!isGeconfigureerd()) return terugNaarLogin('config')
-  if (!(await wachtwoordKlopt(wachtwoord))) return terugNaarLogin('1')
 
-  const sessie = await maakSessie()
+  const geldigeGebruiker = await wachtwoordKlopt(gebruikersnaam, wachtwoord)
+  if (!geldigeGebruiker) return terugNaarLogin('1')
+
+  const sessie = await maakSessie(geldigeGebruiker)
   if (!sessie) return terugNaarLogin('config')
 
   // Alleen paden binnen deze site toestaan, anders is dit een open redirect.

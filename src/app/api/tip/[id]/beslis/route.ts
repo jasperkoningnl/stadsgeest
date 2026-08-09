@@ -1,16 +1,12 @@
 import { NextResponse } from 'next/server'
 import { turso } from '@/lib/turso'
-import { isAuthedCookieHeader } from '@/lib/dashboardAuth'
-
-// Zolang er één gedeelde inlog is, weten we niet wie dit deed. Dat wordt hier
-// expliciet vastgelegd in plaats van een naam te verzinnen; zodra er per persoon
-// wordt ingelogd komt de echte gebruiker hier te staan.
-const GEBRUIKER_ONBEKEND = 'gedeelde-inlog'
+import { huidigeGebruiker } from '@/lib/dashboardAuth'
 
 const TOEGESTAAN = new Set(['goedgekeurd', 'geparkeerd', 'afgekeurd'])
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAuthedCookieHeader(request.headers.get('cookie')))) {
+  const gebruiker = await huidigeGebruiker(request.headers.get('cookie'))
+  if (!gebruiker) {
     return NextResponse.json({ fout: 'Niet ingelogd' }, { status: 401 })
   }
   if (!turso) return NextResponse.json({ fout: 'Geen database' }, { status: 503 })
@@ -40,12 +36,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     {
       sql: `INSERT INTO tip_feedback (tip_id, gebruiker, actie, reden_code, reden_tekst)
             VALUES (?, ?, ?, ?, ?)`,
-      args: [id, GEBRUIKER_ONBEKEND, actie, redenCode, redenTekst],
+      args: [id, gebruiker, actie, redenCode, redenTekst],
     },
     {
       sql: `INSERT INTO tip_events (tip_id, actor, event_type, status_from, status_to, reason)
             VALUES (?, ?, 'beslissing', ?, ?, ?)`,
-      args: [id, GEBRUIKER_ONBEKEND, vorigeStatus, actie, redenCode ?? redenTekst],
+      args: [id, gebruiker, vorigeStatus, actie, redenCode ?? redenTekst],
     },
   ], 'write')
 

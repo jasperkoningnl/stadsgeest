@@ -49,7 +49,7 @@ export default async function LoginPage({
           marginBottom: '28px',
           lineHeight: 1.6,
         }}>
-          Voer het wachtwoord in om verder te gaan.
+          Log in met je gebruikersnaam en wachtwoord.
         </p>
 
         {error && (
@@ -63,7 +63,7 @@ export default async function LoginPage({
             marginBottom: '20px',
             fontFamily: 'var(--f-d)',
           }}>
-            Onjuist wachtwoord. Probeer het opnieuw.
+            Onjuiste gebruikersnaam of wachtwoord. Probeer het opnieuw.
           </p>
         )}
 
@@ -78,13 +78,50 @@ export default async function LoginPage({
             marginBottom: '20px',
             fontFamily: 'var(--f-d)',
           }}>
-            De inlog is nog niet ingesteld op deze omgeving. Zet <code>DASHBOARD_WACHTWOORD_HASH</code> en{' '}
-            <code>DASHBOARD_SESSIE_SECRET</code> in de omgevingsvariabelen.
+            De inlog is nog niet ingesteld op deze omgeving. Zet <code>DASHBOARD_SESSIE_SECRET</code> en minimaal{' '}
+            één <code>DASHBOARD_WACHTWOORD_HASH_...</code> in de omgevingsvariabelen.
           </p>
         )}
 
         <form method="POST" action="/api/auth">
           <input type="hidden" name="from" value={from} />
+          <div style={{ marginBottom: '16px' }}>
+            <label
+              htmlFor="username"
+              style={{
+                display: 'block',
+                fontFamily: 'var(--f-m)',
+                fontSize: '11px',
+                fontWeight: 500,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                color: 'var(--t3)',
+                marginBottom: '8px',
+              }}
+            >
+              Gebruikersnaam
+            </label>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              autoFocus
+              autoComplete="username"
+              autoCapitalize="off"
+              required
+              style={{
+                width: '100%',
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--r-lg)',
+                color: 'var(--t1)',
+                fontFamily: 'var(--f-d)',
+                fontSize: '15px',
+                padding: '10px 14px',
+                outline: 'none',
+              }}
+            />
+          </div>
           <div style={{ marginBottom: '16px' }}>
             <label
               htmlFor="password"
@@ -105,7 +142,6 @@ export default async function LoginPage({
               id="password"
               name="password"
               type="password"
-              autoFocus
               autoComplete="current-password"
               required
               style={{

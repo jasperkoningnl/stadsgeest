@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import { turso } from '@/lib/turso'
-import { isAuthedCookieHeader } from '@/lib/dashboardAuth'
-
-const GEBRUIKER_ONBEKEND = 'gedeelde-inlog'
+import { huidigeGebruiker } from '@/lib/dashboardAuth'
 
 /**
  * De meetknop. Legt vast of een tip tot een artikel heeft geleid, en of dat
@@ -10,7 +8,8 @@ const GEBRUIKER_ONBEKEND = 'gedeelde-inlog'
  * testperiode wordt beoordeeld, dus het wordt op het moment zelf vastgelegd.
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAuthedCookieHeader(request.headers.get('cookie')))) {
+  const gebruiker = await huidigeGebruiker(request.headers.get('cookie'))
+  if (!gebruiker) {
     return NextResponse.json({ fout: 'Niet ingelogd' }, { status: 401 })
   }
   if (!turso) return NextResponse.json({ fout: 'Geen database' }, { status: 503 })
@@ -55,13 +54,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     },
     {
       sql: `INSERT INTO tip_feedback (tip_id, gebruiker, actie, reden_tekst) VALUES (?, ?, ?, ?)`,
-      args: [id, GEBRUIKER_ONBEKEND, nieuweStatus, url],
+      args: [id, gebruiker, nieuweStatus, url],
     },
     {
       sql: `INSERT INTO tip_events (tip_id, actor, event_type, status_from, status_to, reason, payload)
             VALUES (?, ?, 'meetknop', ?, ?, ?, ?)`,
       args: [
-        id, GEBRUIKER_ONBEKEND, vorigeStatus, nieuweStatus,
+        id, gebruiker, vorigeStatus, nieuweStatus,
         nietGebruikt ? 'geen artikel van gemaakt' : 'artikel gepubliceerd',
         JSON.stringify({ artikel_url: url, eigen_vondst: nietGebruikt ? null : eigenVondst }),
       ],
