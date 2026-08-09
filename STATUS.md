@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **9 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Openstaande punten afgewerkt: subsidieregister gevuld, Raad van State opnieuw gebouwd, twee bronnen die iets anders bevatten dan hun naam zegt"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Eén gedeeld wachtwoord vervangen door drie accounts (Jasper, Pien, Gideon)"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -1866,3 +1866,88 @@ mappen op het eerste niveau, `playwright` en `@libsql` ongemoeid.
   dagelijkse volumes raakt.
 
 *Cowork-update: 2026-08-09 (Nieuwsplein33-account, openstaande punten)*
+
+---
+
+### Cowork-update: 2026-08-09 — Eén gedeeld wachtwoord vervangen door drie accounts (Jasper, Pien, Gideon)
+
+Jasper vroeg om het dashboardwachtwoord te vervangen en Pien en Gideon toegang te
+geven, met de testperiode in het achterhoofd: drie maanden, drie gebruikers. Geen
+zelfservice-inlogscherm gebouwd — voor deze schaal meer werk dan het oplevert. Wel
+gekozen voor losse accounts per persoon in plaats van nóg een gedeeld wachtwoord,
+omdat de schrijvende tip-routes toch al moesten weten wie iets deed.
+
+**Uitgangspunt was al beter dan verwacht.** Bij aanvang bleek `src/lib/dashboardAuth.ts`
+al herschreven door een eerdere sessie (commits 3a7926f/a64ef33, 8 augustus): geen
+hardcoded token meer, wel een HMAC-ondertekende sessiecookie (`sg_sessie`) met
+vervaldatum, wachtwoord-hash en sessiegeheim in Vercel-omgevingsvariabelen. Dat was nog
+wél één gedeeld wachtwoord, met een comment die al aankondigde dat er "een magic link
+per persoon" overheen zou komen. Dat pad niet gevolgd — Jasper wilde expliciet zelf
+gekozen wachtwoorden, geen e-maillink — maar wel dezelfde sessielaag hergebruikt en
+alleen de manier waarop iemand zich bewijst uitgebreid naar drie accounts.
+
+**Wat is veranderd.** `DASHBOARD_WACHTWOORD_HASH` (enkelvoud) vervangen door
+`DASHBOARD_WACHTWOORD_HASH_JASPER`/`_PIEN`/`_GIDEON` (SHA-256, zoals de vorige sessie
+het al deed — niet gesalt, maar dat was al de gekozen aanpak, en de wachtwoorden zijn
+lang genoeg om dat te dragen voor een tussenstap). De login vraagt nu ook een
+gebruikersnaam. `maakSessie`/`sessieGebruiker` dragen de gebruikersnaam nu mee in de
+cookie. De twee schrijvende routes (`/api/tip/[id]/beslis` en `/api/tip/[id]/artikel`)
+schreven tot nu toe de vaste placeholder `gedeelde-inlog` weg als gebruiker in
+`tip_feedback` en `tip_events` — dat is nu de echte, ingelogde gebruikersnaam. Exact het
+moment dat de vorige sessie's eigen comment al aankondigde.
+
+**Wachtwoorden.** Jasper heeft ze zelf verzonnen en in de Cowork-chat geplakt, met het
+expliciete besluit dat de chat achteraf verwijderen voor hem voldoende is. Die
+wachtwoorden zijn alleen gebruikt om lokaal, via een tijdelijk Node-scriptje op zijn
+eigen machine, de SHA-256-hash te berekenen; het scriptje is direct daarna verwijderd.
+De wachtwoorden zelf staan nergens anders dan in die ene chat.
+
+**Live geverifieerd** tegen `https://stadsgeest.nl` (niet alleen `next build`): zonder
+cookie 307 naar `/login`; fout wachtwoord 303 met `error=1`; alle drie accounts
+(jasper/pien/gideon) loggen in en krijgen een cookie met drie delen
+(`gebruiker.verval.handtekening`); met die cookie 200 op `/nieuwsplein33`; een
+verzonnen sessiewaarde (`geraden.9999999999.abcdef`) wordt geweigerd — de
+oorspronkelijke kwetsbaarheid (cookie = leesbare hash in de publieke repo) blijft ook
+in deze uitbreiding dicht. `npm run build` en `eslint` op de gewijzigde bestanden zijn
+schoon. Bijwerking: oude sessiecookies (formaat `verval.handtekening`, twee delen)
+voldoen niet meer aan het nieuwe formaat van drie delen — iedereen die al was
+ingelogd moet opnieuw inloggen. Verwacht en onschadelijk.
+
+**Vercel bijgewerkt** (Production én Preview): de drie nieuwe hash-variabelen
+toegevoegd, de oude gedeelde `DASHBOARD_WACHTWOORD_HASH` verwijderd,
+`DASHBOARD_SESSIE_SECRET` ongemoeid gelaten.
+
+**Twee dingen bewust laten liggen:**
+
+- `Documents\Herstelsleutels\stadsgeest-dashboard-inlog.txt` bevat nog de oude, nu
+  ongeldige gedeelde inlog. Niet gelezen (geblokkeerd door de auto-mode classifier,
+  terecht — het is een geheimenbestand) en dus ook niet bijgewerkt. Jasper: dit
+  bestand verdient een update, of vervanging door iets dat drie wachtwoorden
+  documenteert in plaats van één.
+- Een `git stash` in `projects\stadsgeest033`
+  (`stash@{0}: oude auth-poging obv verouderde checkout, 9 aug`) — verouderde code op
+  basis van een lokale checkout die 12 commits achterliep, ingehaald voordat er
+  verder gebouwd is. Ongebruikt en veilig te verwijderen met `git stash drop
+  stash@{0}`; de classifier stond dat niet toe namens Jasper te doen.
+
+**Een systeemrisico dat ik onderweg tegenkwam, los van de auth-wijziging zelf.**
+`projects\stadsgeest033` meldde bij aanvang "up to date with origin/main" terwijl de
+branch feitelijk 12 commits achterliep — waaronder de hele auth-herschrijving van 8
+augustus. Pas een expliciete `git fetch` liet dat zien; `git status` alleen was hier
+misleidend (stale cache). Daardoor is eerst een tijd gebouwd op de oude
+bestandsstructuur (`/dashboard/...`, oude `AUTH_TOKEN`) voordat dat werd ontdekt en
+overnieuw begonnen op de actuele stand. Voor een volgende sessie: vertrouw in
+`stadsgeest033` niet op `git status` zonder eerst `git fetch` te draaien.
+
+**Nog een onduidelijkheid, niet opgelost.** De projectinstructies en deze skill zeggen
+dat `projects\stadsgeest033` buiten gebruik is gesteld en dat deze map (Nieuwssite
+Amersfoort) de enige werkkopie is. Maar `stadsgeest033` is duidelijk een actieve,
+regelmatig gepushte kloon van dezelfde GitHub-repo: deze sessie pushte er zelf
+naartoe, en onderweg kwamen er van een andere, gelijktijdig lopende sessie ook
+scraper-commits (subsidieregister, Raad van State) binnen via diezelfde remote. Beide
+mappen wijzen dus naar dezelfde `origin/main` en lopen niet uiteen zolang iedereen
+pullt vóór het schrijven, maar het staat nergens vast wélke map voor welk werk
+bedoeld is. Waard om met Jasper recht te zetten voordat dat een keer wél tot een
+conflict leidt.
+
+*Cowork-update: 2026-08-09 (Nieuwsplein33-account, inlog per gebruiker)*
