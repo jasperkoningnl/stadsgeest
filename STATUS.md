@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **9 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — `is_active` zet niets uit, en een werkafspraak over bronnen uitzetten"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Filters bronnentabel omgedraaid: default uit, aanklikken sluit in"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -2139,3 +2139,25 @@ inspectie 2 juli) staat bij alle vier "Voldoet niet". Bij de meeste andere staat
    Raad Amersfoort — Amendementen.
 
 *Cowork-update: 2026-08-09 (Nieuwsplein33-account, correcties en werkafspraak)*
+
+---
+
+### Cowork-update: 2026-08-09 — Filters bronnentabel omgedraaid: default uit, aanklikken sluit in
+
+Kleine correctie op de vorige sectie, zelfde dag. Jasper vond de filters
+contra-intuïtief: alle pillen stonden default aan, en op "verdacht" klikken sloot die
+categorie juist uit in plaats van erop te filteren.
+
+Omgedraaid: `tiers` en `healths` starten nu als lege Set in plaats van "alle opties".
+Leeg betekent geen filter (alles zichtbaar); zodra je op een of meer pillen klikt,
+blijft alleen wat aan al die aangevinkte pillen voldoet over — categorieën uit
+verschillende groepen combineren dus (bijv. "verdacht" + "tier 1") zonder dat je eerst
+iets hoeft uit te zetten. Bronnen zonder tier of zonder gezondheidsstatus vallen nu wél
+weg zodra het betreffende filter actief is — dat is nieuw gedrag t.o.v. de vorige
+versie (die liet ze altijd staan) en volgt logisch uit "leeg = alles, iets aan = alleen
+dat".
+
+Live geverifieerd: standaard staat geen enkele pil op `np-pil-actief`. `npm run build`
+en `eslint` schoon.
+
+*Cowork-update: 2026-08-09 (Nieuwsplein33-account, filtergedrag omgedraaid)*
