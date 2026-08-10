@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **9 augustus 2026**
+> ### Bijgewerkt tot en met **10 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-09 — Bronnen die wel draaiden maar niet leverden: zeven gerepareerd, vier uitgezocht"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-10 — Weger-run: 126 signalen gewogen, acht tips, twee nieuwe dossiers, en de ontdekking dat de weger de vorige dag al 102 van de 225 open signalen had gedaan"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -2578,3 +2578,163 @@ te riskant om er nu doorheen te fietsen. Dit is de eerstvolgende logische stap v
 de bronnentaak.
 
 *Cowork-update: 2026-08-09 (Nieuwsplein33-account, bronnen repareren)*
+
+---
+
+### Cowork-update: 2026-08-10 — Weger-run: 126 signalen gewogen, acht tips, twee nieuwe dossiers, en de ontdekking dat de weger de vorige dag al 102 van de 225 open signalen had gedaan
+
+Geplande weegroutine, gedraaid als scheduled task. Alles rechtstreeks in Turso, geen
+bestanden in de repo, geen code gewijzigd.
+
+**Wat de openstaande stapel werkelijk was.** Stap 1 van de routine levert 225 signalen
+op met status `new` of `watching` zonder tipkoppeling. Dat is niet het aantal dat nog
+beoordeeld moet worden. Van die 225 hadden er **102 al een `signal_events`-rij van
+actor `weger`**, geschreven op 8 en 9 augustus (112 respectievelijk 105 events). Die
+signalen blijven in de query staan omdat ze wél zijn beoordeeld maar géén tip hebben
+opgeleverd — de query filtert alleen op `tip_signals`. Wie dat niet controleert doet
+het werk van gisteren over en schrijft dubbele dossierfeiten weg. Concreet gevaar: de
+dertien NVWA-inspectiefeiten stonden al als `dossier_facts` 73 t/m 85 in dossier 7,
+weggeschreven op 9 augustus om 07:47.
+
+**Aanbeveling voor de routineprompt.** Stap 1 zou moeten uitsluiten wat al een
+weger-event heeft, of stap 9 (de controle op eerdere beoordelingen) zou vóór stap 1
+moeten komen in plaats van erna. Nu staat die controle onderaan de instructie, terwijl
+hij het materiaal bepaalt. Ik heb de prompt niet aangepast — dat is een ontwerpkeuze
+voor Jasper.
+
+**Wat er is weggeschreven, geteld in de database.**
+
+- 126 unieke signalen beoordeeld: de 123 nog niet gewogen signalen (id 903 t/m 1025)
+  plus 894, 895 en 896, waarop ik bewust afwijk van de beoordeling van 9 augustus.
+- 126 rijen in `signal_events`: 96 `reviewed` en 30 `tip_created`. Exact één per
+  signaal, geen afwijking tussen beoordeeld en weggeschreven.
+- 8 tips (id 5 t/m 12), 30 rijen in `tip_signals`, 8 in `tip_events`.
+- 39 `dossier_facts` (id 86 t/m 124), verdeeld over zes dossiers.
+- 2 nieuwe dossiers.
+- 4 signalen op `discarded` gezet (1022 t/m 1025).
+- Van de 126 beoordeelde signalen had 106 een dragende bron uit tier 1.
+- Resterend ongewogen na deze run: 0. Open signalen zonder tip: 191.
+
+**De acht tips.** 5 Bewoners vier parkeerzones krijgen binnen vijf maanden tweede
+factuur (verdieping, 7). 6 Isolatiesubsidie groeide in zeven maanden van drie naar
+tien miljoen (patroon, 12). 7 Drie Amersfoortse scholen staan als zeer zwak in het
+inspectieregister (patroon, 11). 8 Raad geeft 25,1 miljoen vrij voor rotonde De Nieuwe
+Poort (nieuwsfeit, 9). 9 Raad schrapt Hoogland-West en Stoutenburg-Noord voor
+woningbouw na 2040 (nieuwsfeit, 7). 10 Miljoen uit overschot Beschermd Wonen naar
+doorstroomwoningen (nieuwsfeit, 8). 11 Gemeente legt oude afspraken met Vathorst
+Beheer vast in nieuw contract (verdieping, 8). 12 Twee Amersfoortse eetzaken voldeden
+op geen enkel inspectieonderdeel (dossiersignaal, 8).
+
+**De vijf raadsstroom-scrapers die op 9 augustus zijn gerepareerd hebben geleverd, en
+hoe.** Vrijwel de hele stapel van 123 nieuwe signalen komt uit die reparatie: `Raad
+Amersfoort — Vergaderingen en overig`, `Moties`, `Amendementen`,
+`Raadsinformatiebrieven`, `Schriftelijke vragen`, iBabs, Onderwijsinspectie, GGD,
+Provinciaal blad en Waterschapsblad. Alle acht tips die op raadsmateriaal steunen
+komen daar vandaan; zonder die reparatie was deze run leeg geweest. Maar de opbrengst
+is scheef: van de 123 signalen zijn er ongeveer 38 losse agendapunten zonder
+onderliggend document ("Vaststelling agenda", "Start raadsvergadering", "Besluitenlijst
+10 juni 2026"). Die worden als zelfstandig signaal aangemaakt en moeten stuk voor stuk
+met een reden worden afgedaan. Het inhoudelijke materiaal zit in de bijbehorende
+notubiz-documenten, die wél binnenkomen maar in andere signalen belanden. De
+clustering knipt agendapunt en document uit elkaar.
+
+**Wat de bronnen niet leverden.**
+
+- `Officiële Bekendmakingen — Provinciaal blad` en `— Waterschapsblad` leveren alleen
+  rubriek, blad, datum en de gemeente die op de plaatsnaam in de titel is herkend. De
+  inhoud van het besluit staat er niet in. Dertien publicaties in deze run, geen
+  daarvan bruikbaar als feit zonder de onderliggende beschikking op te halen. Voor een
+  wateractiviteit of een flora- en fauna-vergunning is de kern juist wát er gebeurt.
+- `UWV ArbeidsmarktInZicht Amersfoort` levert twee soorten items: bruikbare
+  maandstanden mét cijfers in de tekst (WW april, mei, juni 2026 zijn nu als feit
+  vastgelegd), en dagelijkse pagina's met de titel "Transparante informatie over de
+  arbeidsmarkt" die volledig leeg zijn. Zeven lege in deze run. Dat euvel is op
+  9 augustus ook al gemeld; het is niet opgelost.
+- `GGD regio Utrecht nieuws` leverde twee berichten die ouder zijn dan een half jaar
+  (mazelen 11 juni 2025, vaccinatiegraad 18 november 2025) alsof ze nieuw waren. De
+  scraper leest de pagina's zonder publicatiedatum te controleren. Met de nieuwe kolom
+  `published_at` uit de sessie van 9 augustus zou dit te ondervangen zijn.
+- `Nextdoor — Amersfoort buurtberichten` levert structureel doorgeplaatste
+  Marktplaats-advertenties die als signaal worden aangemaakt: een damesfiets, vier
+  Efteling-kaarten, een ingelijste poster, internetkabels. Een filter op
+  `link.marktplaats.nl` in de URL en op een prijsaanduiding in de titel zou dit
+  scheelen. Vier signalen afgevoerd.
+
+**Eén tegenstrijdigheid, bewust niet opgelost.** Het openbare toezichtregister van de
+Onderwijsinspectie toont op 9 augustus 2026 voor Dr. M. v.d. Hoeve nog steeds "zeer
+zwak" als geldend oordeel, op grond van een rapport van 26 mei 2025. Nieuwsplein33
+meldde op 10 juni 2026 dat de school weer een voldoende kreeg, en De Stad Amersfoort
+schreef dezelfde dag over duidelijke verbetering. Beide beweringen staan naast elkaar
+in `dossier_facts` id 87, in het veld `tegenstrijdigheid`. Dit is een structureel punt,
+geen incident: het register toont het geldende oordeel en loopt achter op de
+werkelijkheid. Dat is als waarschuwing in de omschrijving van het nieuwe dossier gezet,
+omdat een volgende run anders een school ten onrechte zeer zwak noemt.
+
+**Twee nieuwe dossiers.** *Onderwijstoezicht Amersfoort* (id 8, 9 feiten): zestien
+inspectierapporten over Amersfoortse scholen en besturen, drie scholen met zeer zwak,
+waarvan twee onder Stichting Meerkring — dat op 11 juni 2026 bij een herstelonderzoek
+bij het bestuur juist "voldoende" kreeg. *Werk, inkomen en sociaal ontwikkelbedrijf*
+(id 9, 6 feiten): WW-standen per maand, RWA/Amfors en het rekenkameronderzoek
+inburgering. Beide voldeden aan de eis van minstens drie feiten voordat een dossier
+mag worden aangemaakt.
+
+**Waar ik van een eerdere beoordeling ben afgeweken, en waarom.** De run van 9 augustus
+hield de NVWA-reeks tegen met de reden "geen vergelijkingscijfers over eerdere maanden
+beschikbaar, dus geen aantoonbaar patroon". Dat oordeel klopt en die terughoudendheid
+heb ik overgenomen: er is geen noemer, dus geen trendtip. Maar twee zaken — Sushi
+Station aan de Emiclaerhof 42 en Huzur Lunchroom aan Leeghwater 4 — voldeden op geen
+van de vier inspectieonderdelen. Dat is een op zichzelf staand, controleerbaar feit dat
+geen vergelijking nodig heeft. Daarop is tip 12 gebouwd, als `dossiersignaal` en niet
+als patroon. De afwijking staat expliciet in de `score_motivatie` van die tip.
+
+**Twee praktische obstakels bij het schrijven.**
+
+- `tip_signals.rol` heeft een CHECK-constraint op `('dragend','bevestigend','context')`.
+  De routineprompt noemt die waarden niet en ik ben er met "ondersteunend" tegenaan
+  gelopen; tip 5 was toen half weggeschreven (tip-rij en tip_event wel, tweede
+  tip_signal niet) en is met de hand aangevuld. De prompt zou de toegestane waarden
+  moeten noemen, net als bij `zekerheid`.
+- Queries via `mcp__Windows-MCP__PowerShell` met inline `node -e` lopen stuk op
+  aanhalingstekens, en een lange here-string overschrijdt de commandolengte van de
+  MCP-aanroep ("De bestandsnaam of -extensie is te lang"). Werkende aanpak: scripts met
+  de Write-tool wegschrijven in de Cowork-scratchpad (`...\local_...\outputs`, dus
+  buiten de repo) en die met `node <pad>` aanroepen. `@libsql/client` moet daarbij met
+  het volledige pad naar `scraper\node_modules` worden gerequired, want de scratchpad
+  heeft geen eigen node_modules.
+
+**Niet geverifieerd.**
+
+- Of de raad het krediet van 25,1 miljoen euro voor rotonde De Nieuwe Poort heeft
+  vastgesteld. Alleen het commissiestuk van 1 juli is opgehaald; in tip 8 staat dit
+  expliciet onder "wat we niet weten".
+- Hoeveel Amersfoortse horecazaken in dezelfde periode zijn geïnspecteerd en wél
+  voldeden. Het openbare register bevat volgens een zoekopdracht enkele honderden
+  Amersfoortse inspecties, maar onze bron heeft alleen de dertien met verbeterpunten
+  opgehaald. Zonder die noemer is er geen percentage.
+- Vier documenten leverden alleen een inhoudsopgave: het rekenkamerrapport Inburgering,
+  de RWA-meerjarenbegroting 2027-2030, de DPU-factsheet bij raadsinformatiebrief
+  2026-047 en de zienswijzennota Hogeweg 227. De conclusies en bedragen daaruit zijn
+  dus niet vastgelegd.
+- De stemverhoudingen bij de aangenomen moties. De documenten vermelden alleen
+  "AANGENOMEN" of "VERWORPEN", niet wie voor was.
+- De spiegelcheck bij Nieuwsplein33 rust op koppen, URL's en zoekresultaten, niet op
+  gelezen artikelen — hun site is client-rendered en onze scraper slaat alleen titel en
+  URL op. Het punt uit NIEUWSPLEIN33.md dat hun RSS-feed een betere ingang zou zijn
+  staat nog open en werd hier voor het eerst echt hinderlijk: bij tip 5 moest een
+  zoekmachine uitkomst bieden om te ontdekken dat Nieuwsplein33 de parkeerfout al had
+  gebracht. Zonder die zoekopdracht was er een tip geschreven over iets wat de redactie
+  al had.
+- De 102 signalen die op 8 en 9 augustus zijn beoordeeld heb ik op hun eerdere oordeel
+  gelaten, met uitzondering van de drie genoemde. Of die oordelen kloppen is niet
+  opnieuw nagelopen.
+
+**Bewust laten liggen.** Signaal 960 ("Metingen parkeerdruk wijken t.b.v. formatie
+2026") is alleen een titel; de onderliggende meting zou een zelfstandig verhaal zijn en
+staat als vervolgvraag bij het parkeerdossier. Signaal 996 (Verklaring van geen
+bedenkingen Koedijkerweg 6, verdaagd) blijft op `watching`: er ligt een amendement van
+de Partij voor de Dieren met bedenkingen tegen het plan, dus het komt terug. De zeven
+Woo-besluiten (1015 t/m 1021) zijn als één feit vastgelegd maar de vrijgegeven
+documenten zijn niet opgehaald; de Woo-praktijk van de gemeente is een terugkerend
+onderwerp bij de redactie en verdient een eigen ronde.
+
+*Cowork-update: 2026-08-10 (Nieuwsplein33-account, weger-run)*
