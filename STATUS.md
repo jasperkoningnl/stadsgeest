@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **10 augustus 2026**
+> ### Bijgewerkt tot en met **11 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-10 — Weger-run: 126 signalen gewogen, acht tips, twee nieuwe dossiers, en de ontdekking dat de weger de vorige dag al 102 van de 225 open signalen had gedaan"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-11 — Weger-run: dertien nieuwe signalen, één tip, dertien dossierfeiten, en het inzicht dat stap 1 van de weegroutine elke dag de hele voorraad opnieuw voorschotelt"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -2738,3 +2738,180 @@ documenten zijn niet opgehaald; de Woo-praktijk van de gemeente is een terugkere
 onderwerp bij de redactie en verdient een eigen ronde.
 
 *Cowork-update: 2026-08-10 (Nieuwsplein33-account, weger-run)*
+
+---
+
+## Cowork-update: 2026-08-11 — Weger-run: dertien nieuwe signalen, één tip, dertien dossierfeiten, en het inzicht dat stap 1 van de weegroutine elke dag de hele voorraad opnieuw voorschotelt
+
+**Wat er stond.** De query uit stap 1 leverde 204 open signalen op (status `new` of
+`watching`, nog niet aan een tip gekoppeld). Daarvan waren er **191 al door de weger
+zelf beoordeeld** op 9 of 10 augustus. Genuinely nieuw waren er **dertien**: 1026 tot
+en met 1038.
+
+**De structurele vondst van deze run.** Stap 1 van `stadsgeest-weger.md` filtert wel op
+"nog geen tip", maar niet op "al eerder beoordeeld". Omdat een beoordeeld signaal op
+`watching` blijft staan — en dat is bewust, dossierwaarde verjaart niet — krijgt elke
+run de volledige voorraad opnieuw voorgeschoteld. De run van 10 augustus liep hier ook
+al tegenaan (102 van de 225). Het groeit mee: 102, dan 191, morgen meer. Zonder
+aanpassing wordt de routine op termijn onwerkbaar en gaat het grootste deel van de
+aandacht naar materiaal dat al een oordeel heeft.
+
+Voorstel voor overleg, niet zelf doorgevoerd: stap 1 uitbreiden met een uitsluiting van
+signalen die in de laatste X dagen een `reviewed`-event van de weger hebben, met een
+uitzondering voor signalen waarvan `last_seen_at` ná dat event ligt — dan is er nieuw
+materiaal bijgekomen en verdient het wél een herbeoordeling. Dit raakt de prompt, niet
+de code.
+
+**Bewuste afwijking.** Ik heb géén 191 nieuwe `reviewed`-events geschreven voor
+signalen die één of twee dagen geleden al een oordeel met reden kregen. Dat zou het
+gebeurtenissenlog vullen met duplicaten en het dashboard onbruikbaar maken. Er zijn
+**veertien** `signal_events` geschreven: dertien voor de nieuwe signalen en één voor
+signaal 1030 (`tip_created`), plus twee toelichtende events bij oudere clusters (783 en
+828) waaruit een feit is gelicht. Aantal beoordeelde nieuwe signalen: 13. Aantal
+weggeschreven eventrijen daarvoor: 13. Dat klopt op elkaar.
+
+### Wat er is weggeschreven — geteld, niet geschat
+
+| Wat | Aantal | Waar |
+|---|---|---|
+| Tips | 1 | tip 13 |
+| tip_signals | 1 | tip 13 → signaal 1030, rol `dragend` |
+| tip_events | 1 | tip 13, `created`, status `wachtrij` |
+| Dossierfeiten | 13 | 9 in dossier 4, 4 in dossier 10 |
+| Nieuwe dossiers | 1 | dossier 10 |
+| signal_events | 16 | 13 nieuwe signalen + 1 `tip_created` + 2 bij oudere clusters |
+| Signalen op `discarded` | 5 | 1034, 1035, 1036, 1037, 1038 |
+
+Open signalen na de run: 198.
+
+### Tip 13 — "Acht Amersfoortse panden krijgen woningen erbij sinds 24 juli"
+
+Soort `verdieping`, gemeente Amersfoort, dossier 4, score 13, status `wachtrij`.
+
+Aanleiding was signaal 1030: de gemeente besloot op 6 augustus dat het wijzigen van het
+gebruik van Zuidsingel 57 naar wonen géén omgevingsvergunning vereist. Dat gaf reden om
+de hele reeks uit te tellen. Tussen 24 juli en 11 augustus publiceerde de gemeente over
+**acht bestaande panden** een besluit of een aanvraag om er woningen in te maken:
+Walter Gropiuserf 10, Westsingel 14, Noordewierweg 119, Laurens Costerplein 14,
+Langestraat 88-92, Zuidsingel 57, Dirk Loogenstraat 10 en Arnhemseweg 37. Op de vier
+adressen waar een aantal staat gaat het om **twintig woningen**. Drie van de acht panden
+liggen binnen de singels (postcode 3811).
+
+**Waarom `verdieping` en niet `patroon`.** De spiegelcheck via zoekmachine leverde vier
+treffers bij Nieuwsplein33 over transformatie naar wonen — Stadsring, Hogeweg, De
+Hoef-West, Wonen in Eemland deel 8. Allemaal over grote leegstaande kantoorpanden.
+Gedeeltelijk gedekt dus, en volgens stap 5 wordt dat een `verdieping`. Wat zij niet
+brengen is de kleinschalige variant: gewone panden binnen de singels waar een of twee
+verdiepingen woningen worden.
+
+**Wat de tip nadrukkelijk níet claimt.** Dat het er meer worden. De
+bekendmakingen-scraper draait pas vanaf 4 juni 2026 en de dekking is op 24 juli
+uitgebreid met vier nieuwe deelscrapers — precies aan het begin van deze reeks. Vóór
+24 juli kwamen transformatie-items binnen via `Officiële Bekendmakingen —
+Gemeenschappelijke regelingen` (zie hieronder), en die bron ligt sinds 4 juli stil. Een
+vergelijking met eerdere maanden of met vorig jaar is met dit materiaal dus niet te
+maken. Dat staat expliciet in `score_motivatie`, in de briefing onder "wat we niet
+weten" en in "wat hier niet in mag". De acht adressen zijn geteld; de versnelling is
+niet aangetoond en is als eerste vervolgvraag bij de gemeente neergelegd.
+
+### Nieuw dossier 10 — Legalisatie achteraf Amersfoort
+
+Aangemaakt op grond van vier feiten, dus boven de drempel van drie: Databankweg 3 N
+(gevelreclame, 10 juni), Valutaboulevard 5 (veranda, aanvraag 29 juni), Walter
+Gropiuserf 10 (kamerverhuur, via beslissing op bezwaar, 24 juli) en Surinamelaan 73 C
+(dakkapel, besluit 6 augustus, uit signaal 1026).
+
+Waarom dit een dossier verdient: het is precies het genre uit `NIEUWSPLEIN33.md` §6.5 —
+de optelsom over vergunningen die de redactie zelf niet maakt. Vergunningen die achteraf
+verlenen wat er al staat, zeggen iets over handhaving. In de omschrijving staan vier
+waarschuwingen voor de opvolger: de telling is een ondergrens (alleen bekendmakingen
+waarin het woord letterlijk voorkomt), legalisatie is een normale bestuurlijke route en
+op zichzelf geen bewijs van iets, de datum is meestal de publicatiedatum en niet de
+besluitdatum, en er is geen vergelijkingsbasis met eerdere jaren.
+
+**Dit is een ontwerpkeuze die om een oordeel vraagt.** Vier gevallen in negen weken is
+mager. Als Jasper vindt dat dit geen zelfstandig dossier hoort te zijn, is het met één
+`DELETE` op dossier 10 en zijn vier feiten weer weg — er hangt verder niets aan.
+
+### Dossier 4 — negen feiten toegevoegd
+
+De acht panden uit tip 13, elk als eigen rij (één feit per rij), plus de bestuurswissel
+bij de Alliantie: Robin de Jongh start 15 september als bestuurder en directeur
+Bedrijfsvoering en volgt Roelien Ritsema van Eck op, die bestuursvoorzitter werd. Ad
+Melkert is voorzitter van de raad van commissarissen.
+
+Die bestuurswissel is bewust géén tip geworden. Eén bron, tier 2 en geen spiegel, maar
+de eigen bekendmaking van de corporatie; geen tweede bron, geen bedrag, geen Amersfoorts
+besluit eromheen. De weging kwam op 2 (alleen aansluiting op een lopend dossier) en dat
+is ver onder de drempel van 6. Wel vastgelegd, zodat een volgende wisseling of een
+jaarverslag er tegenaan gelegd kan worden.
+
+### Wat er niet doorheen kwam, en waarom
+
+- **1027, 1028, 1029** — kozijnen, een dakkapelaanvraag, gevelwijziging. Routine, geen
+  afwijking van het omgevingsplan.
+- **1033** — dubbel. Deze inspectie bij Vleesenzo Amersfoort (Meridiaan 34 A, 11 juni,
+  tekortkoming hygiëne) stond al als feit 76 in dossier 7 en is meegeteld in tip 12 van
+  10 augustus. Zie hieronder bij de bronnen: de NVWA-bron biedt hetzelfde bedrijf onder
+  twee webadressen aan. Geen tweede feit geschreven; een bestaand feit overschrijf ik
+  niet.
+- **1032** — vier arresten van het gerechtshof Arnhem-Leeuwarden van 10 augustus, binnen
+  zonder inhoudsindicatie. Alleen ECLI, datum en zaaknummer. Niet vast te stellen of er
+  een Amersfoortse partij in zit. Op `watching` gelaten, niet weggegooid.
+- **1034 t/m 1037** — op `discarded`: landelijke NVWA-pagina's over fytosanitaire
+  exporteisen naar Turkije, geleidebiljetten voor vleestransport, een technisch
+  configuratiebestand van de website en dierenwelzijn bij vleeskuikens in 2022. Geen
+  Amersfoortse partij of locatie.
+- **1038** — op `discarded`: een advertentie op een buurtplatform voor een kaart van
+  Amersfoort van vijf euro, geclusterd met een landelijk bericht over seizoenkaarten in
+  de eredivisie. Twee keer niets, en de koppeling is bovendien een clusterfout.
+
+### Bronnen die opvielen — drie technische punten voor het beheer
+
+1. **`NVWA — inspectieresultaten Amersfoort` haalt landelijke pagina's binnen.** Vier
+   van de dertien nieuwe signalen (1034-1037) kwamen hiervandaan en geen ervan raakt
+   Amersfoort. De bron die wél werkt is `NVWA — openbare inspectieresultaten horeca`;
+   die levert nette bedrijfsinspecties met adres en oordeel. De eerste bron lijkt op de
+   algemene NVWA-site te scrapen in plaats van op het inspectieregister.
+2. **De NVWA-horecabron ontdubbelt niet op bedrijf.** Vleesenzo Amersfoort staat er twee
+   keer in, als `/vleesenzo-amersfoort` en `/vleesenzo-amersfoort-0`, met dezelfde
+   inspectie van 11 juni. Dat leverde een volledig dubbel signaal op. Als het register
+   vaker een `-0`-variant aanmaakt, gaat dit zich herhalen.
+3. **`Officiële Bekendmakingen — Gemeenschappelijke regelingen` bevat items van de
+   gemeente Utrecht.** Bij het uittellen van de transformatievergunningen kwamen zes
+   items uit deze bron over Utrechtse adressen boven: Lucasbolwerk, Groeneweg,
+   Griftstraat, Marnixlaan, 1e Daalsedijk, Kanaalweg. Deze bron leverde óók drie
+   Amersfoortse transformatie-items en ligt sinds 4 juli stil. Dat betekent twee dingen:
+   het filter deugt niet, en de historische reeks vóór 24 juli hangt aan een bron die
+   niet meer draait. Precies daarom is de vergelijkingsbasis onder tip 13 onbruikbaar.
+
+### Wat ik niet heb kunnen controleren
+
+- **Of de 191 eerdere oordelen kloppen.** Die heb ik op hun eerdere beoordeling gelaten
+  en niet nagelopen. Bij twijfel is dat waar een controle zou moeten beginnen.
+- **De grondslag van het vergunningvrij-besluit voor Zuidsingel 57.** De bekendmaking
+  noemt alleen kenmerk CLZ-00038763 en niet welke bepaling van het omgevingsplan is
+  toegepast. Dat is de eerste vervolgvraag bij tip 13.
+- **Het aantal woningen op vier van de acht adressen** — Zuidsingel 57, Dirk
+  Loogenstraat 10, Walter Gropiuserf 10 en Noordewierweg 119. Staat niet in de
+  bekendmakingen.
+- **De eigenaren achter de acht panden.** Niet uit de bekendmakingen af te leiden; als
+  dezelfde partij achter meerdere adressen zit is dat het eigenlijke verhaal, en dat is
+  als vervolgvraag richting Kadaster en handelsregister neergelegd.
+- **De spiegelcheck rust opnieuw op koppen, URL's en zoekresultaten**, niet op gelezen
+  artikelen. Het punt uit `NIEUWSPLEIN33.md` dat hun RSS-feed een betere ingang is dan
+  onze Playwright-scraper op `/amersfoort` staat nog steeds open en is nu bij twee
+  opeenvolgende runs hinderlijk geweest.
+- **Of de vier arresten uit signaal 1032 een Amersfoortse partij hebben.** De
+  rechtspraakbron levert voor deze zaken geen inhoudsindicatie; ik heb de uitspraken
+  niet apart opgehaald.
+
+### Bewust laten liggen
+
+De 191 eerder beoordeelde signalen, inclusief de Leusdense bekendmakingen rond de
+Liniedijk (886) en de zeven Woo-besluiten (1015-1021). Die stonden in de vorige run al
+op de lijst met openstaande punten en zijn daar niet uit gelicht. Zolang stap 1 elke dag
+de hele voorraad teruggeeft, is dat de enige manier om de run bij het nieuwe materiaal
+te houden — en dat is precies het argument om de query aan te passen.
+
+*Cowork-update: 2026-08-11 (Nieuwsplein33-account, weger-run)*
