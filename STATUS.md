@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **13 augustus 2026**
+> ### Bijgewerkt tot en met **14 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-13 — Weger-run: 41 signalen beoordeeld, drie tips, nieuw dossier aanbestedingen, twee bronproblemen"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-14 — Weger-run: 38 signalen beoordeeld, drie tips, twee nieuwe dossiers, NVWA-bron levert ruis"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -3188,3 +3188,190 @@ pad naar `scraper\node_modules\@libsql\client`, want de scrapers hebben hun eige
 node_modules. Beide zijn hier geen bestanden in de repo geworden.
 
 *Cowork-update: 2026-08-13 (Nieuwsplein33-account, weger-run)*
+
+---
+
+### Cowork-update: 2026-08-14 — Weger-run: 38 signalen beoordeeld, drie tips, twee nieuwe dossiers, NVWA-bron levert ruis
+
+#### Wat er lag
+
+De query naar open signalen zonder tip gaf er 244. Daarvan waren er **28 nog nooit
+door de weger bekeken** — allemaal van 14 augustus, allemaal uit de
+bekendmakingen-, NVWA- en Nextdoor-bronnen. Nog eens 30 signalen hadden na hun
+vorige weging nieuw materiaal gekregen. Van die 30 heb ik er acht opnieuw
+beoordeeld (536, 540, 587, 634, 858, 923, 950, 951, 1032, 1041 — tien dus, waarvan
+858, 923, 950 en 951 niet in de nieuw-materiaal-lijst stonden maar via het
+patroononderzoek boven kwamen drijven). De overige 22 heb ik laten staan: bij
+steekproef ging het opnieuw om herhaalde scrapes van hetzelfde bekendmakingsitem,
+en hun weging van 9 tot 13 augustus staat nog. Ik heb voor die 22 **geen event
+geschreven** en dus ook niet gedaan alsof ik ze had beoordeeld. Dat is dezelfde
+keuze als op 13 augustus; het punt blijft dat de open stapel daardoor niet krimpt.
+
+#### Wat er is weggeschreven
+
+Geteld in de database, niet geschat:
+
+| Tabel | Rijen vandaag |
+|---|---|
+| `tips` | 3 |
+| `tip_signals` | 4 (na één correctie, zie hieronder) |
+| `tip_events` | 4 (3 × created, 1 × correction) |
+| `signal_events` (actor weger) | 38 — 33 reviewed/watching, 2 reviewed/discarded, 3 tip_created |
+| `dossier_facts` | 20 |
+| `dossiers` | 2 nieuw |
+
+**38 beoordeelde signalen, 38 events.** Geen afwijking. Open signalen zonder tip
+liep van 244 naar 238.
+
+#### De drie tips
+
+**Tip 17 — "Concept-gronddeal Bovenduist: 20 miljoen baggerafkoop uit 2006 in
+grondexploitatie"** (verdieping, score 17, dragend signaal 536). Dit is de vondst
+van de dag en hij lag verstopt. Signaal 536 heet naar het bovenliggende item "De
+Alliantie bereikt hoogste punt van plot 26", maar bevat de volledige set
+vergaderstukken van de raadscommissie omgeving van 1 juli: het concept van de
+samenwerkingsovereenkomst voor Bovenduist en Over de Laak (versie 1 april 2026,
+opgesteld door advocatenkantoor HabrakenRutten), de grondexploitatie 2026 van OBV,
+de presentatie en de beantwoording van de feitelijke vragen. Daarin staan twee
+afspraken uit een ander tijdperk: de gemeente mag de afkoop van de
+baggerproblematiek, boekwaarde 20 miljoen euro per ultimo 2006, als kosten
+inbrengen in de grondexploitatie Vathorst West, en Vathorst Beheer kreeg ooit in
+ruil voor de productierechten van 1.200 sociale koopwoningen in bestaand Vathorst
+het eerste recht om 1.200 marktwoningen te bouwen in uitleggebieden. Raadslid Chris
+Bruijnes (Amersfoort2014) vroeg waarom deze gebiedsontwikkeling niet Europees hoeft
+te worden aanbesteed; het college beroept zich op een onafhankelijke taxatie die
+niet openbaar is. De hoofdlijnenovereenkomst dateert van 4 september 2025.
+Nieuwsplein33 en De Stad Amersfoort hebben veel over Bovenduist geschreven — de
+haalbaarheid, de startdatum, de rijksbijdrage, en De Stad ook over "een dure
+gronddeal" in de fase van de hoofdlijnenovereenkomst — maar de inhoud van dit
+concept en de herkomst van deze afspraken heb ik nergens teruggevonden. Vandaar
+`verdieping` en niet `nieuwsfeit`.
+
+**Tip 18 — "Noordewierweg krijgt 23 woningen erbij en ontheffing voor
+kamerverhuur"** (patroon, score 13, dragend signaal 1081). Over de Noordewierweg
+zijn sinds 4 juni 23 documenten binnengekomen. Op een rij gezet: 18 appartementen
+met kinderdagopvang en wijkgebouw vergund op nummer 131 (24 juli), een aanvraag om
+nummer 231 A te transformeren tot 5 appartementen met een maatschappelijke functie
+(3 augustus, gepubliceerd 14 augustus), ontheffing van de parkeereis om kamerverhuur
+op nummer 119 in stand te houden (28 juli), een geweigerde kapvergunning op nummer
+205 (11 augustus), twee verkeersbesluiten over parkeren en laden, en op 9 juni een
+ingekomen stuk van bewoners bij de raad over overlast. De Stad Amersfoort schreef op
+11 juni over die overlast; over de vergunningenstroom in dezelfde weken niet.
+
+**Tip 19 — "Amersfoort telde 366 discriminatiemeldingen in 2025, Leusden 35"**
+(verdieping, score 10, dragend signaal 951). De jaarcijfers staan niet in de
+raadsinformatiebrief 2026-047 zelf maar in de bijlagen, en die kwamen als losse
+documenten binnen. Amersfoort: 366 meldingen door inwoners, 126 over een voorval in
+de gemeente, 114 bij de politie. Leusden: 35, 10 en 7. Provinciebreed loopt de reeks
+714 (2020), 601, 473, 624, 1.461 (2024), 2.891 (2025). Belangrijk voorbehoud, dat in
+de tip en in het nieuwe dossier expliciet staat: 1.824 van die 2.891 registraties
+zijn **geclusterde** meldingen, waarbij tientallen mensen los van elkaar hetzelfde
+incident melden. Zonder correctie blijven 1.067 individuele situaties over. Wie de
+stijging van 98 procent zonder die uitleg overneemt, meldt iets dat er niet is.
+Nieuwsplein33 publiceerde op 12 augustus de halfjaarcijfers over 2026 (119 meldingen
+Amersfoort, 8 Leusden); die zijn met deze jaarcijfers niet zonder meer te
+vergelijken, en dat is precies het verhaal.
+
+#### Twee nieuwe dossiers
+
+**Dossier 12, "Bomen en kapvergunningen Amersfoort"** (8 feiten). Reden: de zeven
+weigeringen van kapvergunningen sinds 4 juni zijn stuk voor stuk te klein voor een
+tip maar samen wel een reeks, en dit is precies het gat dat `NIEUWSPLEIN33.md` §6.5
+beschrijft — de optelsom van vergunningen maken zij niet. In de omschrijving staat
+de belangrijkste valkuil: **de meetperiode begint pas op 4 juni 2026**, want daarvoor
+leverde de scraper voor omgevingsvergunningen niets. De stijging van 9 kap-items in
+juni naar 46 in augustus is het aanlopen van de bron, niet de stad. Gebruik dus
+verhoudingen: van de 25 kapbesluiten sinds 4 juni zijn er 18 verleend en 7 geweigerd,
+en dat aandeel blijft per maand tussen de 20 en 50 procent. Dat is de reden dat ik er
+géén tip van heb gemaakt, hoewel de score van 8 boven de drempel uitkwam: het
+patroon dat je zou claimen is een artefact van de bron.
+
+**Dossier 13, "Discriminatiemeldingen Amersfoort en Leusden"** (5 feiten). De reeks
+2020–2025, de gemeentecijfers voor Amersfoort en Leusden, de raadsinformatiebrief en
+de halfjaarcijfers 2026 als tegenstrijdigheid vastgelegd. De omschrijving waarschuwt
+tegen drie fouten: meldingen gelijkstellen aan gevallen, de geclusterde meldingen
+vergeten, en de cijfers van meldpunt en politie optellen.
+
+De overige 7 feiten gingen naar dossier 4 (Woningbouw en wonen, 6) en dossier 11
+(Gemeentelijke opdrachten en aanbestedingen, 1: het standpunt van het college over
+de Europese aanbesteding, vastgelegd als `claim_belanghebbende`). Dossier 4 bleek al
+51 feiten te bevatten, waaronder de meeste transformatiepanden uit tip #851. Ik heb
+alleen toegevoegd wat er nog niet in stond en niets overschreven.
+
+#### Bronnen die opvielen
+
+- **De NVWA-bron levert ruis in plaats van inspectieresultaten.** Vier van de 28
+  nieuwe signalen (1095, 1096, 1097, 1098) bestaan volledig uit algemene
+  voorlichtingspagina's van nvwa.nl: hoe herken ik vogelgriep, reizen met huisdieren
+  binnen de EU, een teeltvoorschrift tegen ringrot in pootaardappelen, een
+  laboratoriumtoets voor zaaizaadexport, het jaarbeeld 2023 over importcontroles, en
+  zelfs een technisch configuratiebestand van de website. Geen enkele Amersfoortse
+  component. Let op: er zijn **twee** NVWA-bronnen. "NVWA — openbare
+  inspectieresultaten horeca" werkt wel (leverde op 8 en 11 augustus nog
+  verbeterpunten bij Hakze en Vleesenzo); het is "NVWA — inspectieresultaten
+  Amersfoort" die de site afgraast in plaats van het inspectieregister. Dit is een
+  ander probleem dan het NVWA-punt van 13 augustus en verdient een aparte reparatie.
+- **De Leusdense bekendmakingen-bron is aangesloten en werkt.** Bron 127, live sinds
+  8 augustus, 17 items. Signaal 1073 is het eerste inhoudelijke Leusdense
+  bekendmakingsitem: een wijziging van bedrijfs- naar woonbestemming in Achterveld.
+  Als feit vastgelegd. Dit vult een van de gaten uit `NIEUWSPLEIN33.md` §6.7.
+- **Clustering loopt uit de hand bij een aantal oude signalen.** Signaal 634
+  ("Coffeeshopbeleid Amersfoort 2025") heeft 35 bevestigingen en bevat inmiddels
+  verkeersbesluiten, de benoeming van wethouders, het rekenkameronderzoek inburgering
+  en de discriminatiecijfers — over coffeeshopbeleid zit er niets nieuws in. Signaal
+  540 ("Vandalisme op Sovjet Ereveld") heeft 18 items waarvan de meeste over
+  ijssalons, atletiek, wespen en een waterleidingbreuk gaan. Signaal 1041 voegt een
+  bestuursrechtelijke uitspraak samen met acht 112-meldingen over autobranden op de
+  A1 en een NVWA-importpagina. Dat de discriminatiestukken in 634 belandden had
+  betekend dat ze onvindbaar bleven; ze zijn nu via signaal 951 alsnog gewogen. **Dit
+  is een echt risico voor de opbrengst en niet alleen cosmetisch.**
+- **Rechtspraak levert uitspraken zonder inhoud.** Bij signalen 1032 en 1041 bevat
+  het `content`-veld alleen de metagegevens van de ECLI (instantie, datum,
+  zaaknummer, rechtsgebied) en niet de uitspraak zelf. Zonder tekst valt niet vast te
+  stellen of er een Amersfoortse partij in zit.
+
+#### Een correctie die ik zelf heb gemaakt
+
+Signaal 1094 (containervergunning Noordewierweg 106) had ik eerst als `context` aan
+tip 18 gekoppeld. Dat was fout: een vergunning voor tijdelijk gebruik van de weg
+draagt niets bij aan het verhaal, en de koppeling zou het signaal bovendien uit de
+open stapel halen. Losgekoppeld en vastgelegd in `tip_events` als `correction`.
+
+#### Wat ik niet heb kunnen controleren
+
+- **De onafhankelijke taxatie onder de Bovenduist-deal.** Die is niet openbaar; ik
+  heb alleen het antwoord van het college dat hij bestaat en dat de uitkomst
+  marktconform was. In de tip staat dat als `claim_belanghebbende`.
+- **Of de raad het voornemen tot de samenwerkingsovereenkomst inmiddels heeft
+  behandeld en met welke uitkomst.** Ik zie de commissiebehandeling van 1 juli en het
+  raadsvoorstel, niet het besluit.
+- **De financiële bijlagen van de grondexploitatie Bovenduist.** Alleen de
+  inhoudsopgave en het ontwikkelkader gelezen, niet het GREX-overzicht zelf. Daar
+  staat hoe de 20 miljoen doorwerkt.
+- **Het aandeel geclusterde meldingen voor Amersfoort afzonderlijk.** De toelichting
+  geeft dat percentage alleen provinciebreed. Zonder dat getal is niet te zeggen of
+  de 366 uit 2025 en de 119 uit het eerste halfjaar 2026 een daling betekenen. Als
+  `tegenstrijdigheid` vastgelegd bij het feit in dossier 13.
+- **De besluitdata van vier van de zeven kapweigeringen.** Voor Suzannapolder 29,
+  Hoveniersweg 9, Ronhaarstraat 6, Damespolder 10 en Bunschoterstraat 20 heb ik alleen
+  de publicatiedatum. Dat staat per feit in het `details`-veld.
+- **De tekst van het ingekomen stuk over overlast aan de Noordewierweg (9 juni).**
+  Alleen de registratieregel is beschikbaar, niet de inhoud.
+- **Waarom de kapvergunningen zijn geweigerd.** De publicaties noemen geen reden.
+  Dat maakt het dossier op termijn zwakker dan het lijkt; wie hier iets mee wil, moet
+  de besluiten opvragen.
+- **`pm2 jlist` en de healthcheck-log zijn opnieuw niet opgevraagd.** Dat de scrapers
+  draaien blijkt indirect uit verse bekendmakingen van 14 augustus, maar de daemon
+  zelf is niet geïnspecteerd. Dat punt staat nu twee runs open.
+
+#### Aandachtspunt voor de volgende run
+
+De open stapel groeit: 238 signalen zonder tip, waarvan ruim tweehonderd bekeken en
+op `watching` gelaten. Dat is bewust — dossierwaarde verjaart niet — maar het maakt
+de dagelijkse selectie wel steeds duurder, omdat de query elke dag dezelfde
+tweehonderd meesleept. Overweeg een vlag of een filter op "beoordeeld door weger en
+sindsdien geen inhoudelijk nieuw item", zodat een run alleen ziet wat echt nieuw is.
+Dat is een ontwerpkeuze en dus iets om eerst met Jasper te bespreken, niet zelf te
+bouwen.
+
+*Cowork-update: 2026-08-14 (Nieuwsplein33-account, weger-run)*
