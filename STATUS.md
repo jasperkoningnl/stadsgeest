@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **15 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Feedbackronde tippagina: merk in de kop, Eerdere berichtgeving, vervolgvragen bij het verhaal"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Verhaal-tabblad: submenu en vaste volgorde"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -3778,3 +3778,16 @@ Build en eslint schoon (één lintronde: de merk-link moest een next/link zijn).
 De ingelogde weergave is opnieuw niet zelf bekeken; Jasper kijkt live mee.
 
 *Cowork-update: 2026-08-15 (Nieuwsplein33-account, feedbackronde tippagina)*
+
+
+---
+
+### Cowork-update: 2026-08-15 — Verhaal-tabblad: submenu en vaste volgorde
+
+Op verzoek van Jasper heeft "Het verhaal" een submenuutje gekregen dat naar de
+blokken springt, en een vaste volgorde: Wat we weten → Wie hierin voorkomen →
+Wat we niet weten → Zo kom je verder → Let op (heette "Wat hier niet in mag")
+→ Eerdere berichtgeving. Het submenu toont alleen blokken die er echt zijn en
+verschijnt pas bij twee of meer. Commit 3cf4c69, build en eslint schoon.
+
+*Cowork-update: 2026-08-15 (Nieuwsplein33-account, submenu verhaal-tabblad)*
