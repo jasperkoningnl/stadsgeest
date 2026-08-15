@@ -1605,3 +1605,95 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
   padding: 1px 6px; border-radius: 10px;
   background: var(--np-grijs-z); color: var(--np-inkt2);
 }
+
+/* ── Logboek en feedback (2026-08-15) ───────────────────── */
+.np-nav-stip {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--np-accent); flex: none;
+}
+
+.np-logboek { list-style: none; padding: 0; margin: 0 0 36px; }
+.np-logboek-item {
+  display: flex; gap: 18px; flex-wrap: wrap;
+  padding: 18px 0; border-bottom: 1px solid var(--np-rand-z);
+}
+.np-logboek-item:last-child { border-bottom: none; }
+.np-logboek-datum {
+  flex: none; width: 96px; padding-top: 2px;
+  font-family: var(--f-d); font-size: 13px; font-weight: 600;
+  color: var(--np-inkt3); font-variant-numeric: tabular-nums;
+}
+.np-logboek-inhoud { flex: 1 1 320px; min-width: 0; }
+.np-logboek-kop {
+  font-family: var(--f-d); font-size: 16px; font-weight: 700;
+  color: var(--np-inkt); margin: 0 0 8px; line-height: 1.35;
+}
+.np-logboek-inhoud .np-tekst { margin: 0 0 10px; }
+.np-logboek-inhoud .np-tekst:last-child { margin-bottom: 0; }
+.np-logboek-lijst {
+  margin: 0 0 10px; padding-left: 20px;
+  font-family: var(--f-b); font-size: 15px; line-height: 1.6; color: var(--np-inkt2);
+}
+.np-logboek-lijst li { margin-bottom: 4px; }
+
+/* Formulier — deelt de knop- en tekstvlakstijl met de redenen onder een tip. */
+.np-fb-blok {
+  margin-top: 8px; padding: 20px 22px;
+  background: var(--np-kaart); border: 1px solid var(--np-rand-z);
+  border-radius: 14px; box-shadow: var(--np-schaduw);
+}
+.np-fb-blok .np-telling { margin-top: 0; }
+.np-fb-formulier { margin-top: 14px; }
+.np-fb-dank {
+  font-family: var(--f-b); font-size: 15px; color: var(--np-groen);
+  margin: 14px 0 0;
+}
+.np-fb-nogeens {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-family: var(--f-d); font-size: 14px; font-weight: 600;
+  color: var(--np-accent); text-decoration: underline;
+}
+
+.np-fb-lijst { list-style: none; padding: 0; margin: 0; }
+.np-fb-lijst li {
+  padding: 14px 0; border-bottom: 1px solid var(--np-rand-z);
+}
+.np-fb-lijst li:last-child { border-bottom: none; }
+.np-fb-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  font-size: 13px; color: var(--np-inkt3); margin-bottom: 6px;
+}
+.np-fb-meta strong { font-family: var(--f-d); color: var(--np-inkt); }
+.np-fb-lijst .np-tekst { margin: 0; }
+
+/* De balk die hoogstens één keer per dag onderin verschijnt. */
+.np-fb-balk {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  padding: 0 16px 16px;
+  pointer-events: none;
+}
+.np-fb-balk-binnen {
+  pointer-events: auto;
+  max-width: 560px; margin: 0 auto;
+  padding: 16px 20px 18px;
+  background: var(--np-kaart); border: 1px solid var(--np-rand);
+  border-radius: 14px;
+  box-shadow: 0 2px 6px rgba(35,39,43,.08), 0 12px 32px rgba(35,39,43,.14);
+}
+html[data-np-thema="donker"] .np-fb-balk-binnen { box-shadow: 0 12px 32px rgba(0,0,0,.5); }
+@media (prefers-color-scheme: dark) {
+  html:not([data-np-thema="licht"]) .np-fb-balk-binnen { box-shadow: 0 12px 32px rgba(0,0,0,.5); }
+}
+.np-fb-balk-kop {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  font-family: var(--f-d); font-size: 15px; color: var(--np-inkt);
+  margin-bottom: 6px;
+}
+.np-fb-balk-sluit {
+  background: none; border: none; cursor: pointer;
+  font-size: 22px; line-height: 1; padding: 0 4px;
+  color: var(--np-inkt3);
+}
+.np-fb-balk-sluit:hover { color: var(--np-inkt); }
+.np-fb-balk .np-tekst { margin: 0; font-size: 14px; }
+.np-fb-balk .np-fb-formulier { margin-top: 12px; }

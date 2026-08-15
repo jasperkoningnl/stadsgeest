@@ -3,8 +3,10 @@ import Link from 'next/link'
 import { cookies } from 'next/headers'
 import RedactieNav from './RedactieNav'
 import ThemaSchakelaar from './ThemaSchakelaar'
+import FeedbackBalk from './FeedbackBalk'
 import { hasTurso } from '@/lib/turso'
 import { getStatusTellingen } from '@/lib/dashboard/tipQueries'
+import { laatsteLogboekDatum } from '@/lib/dashboard/logboek'
 import { AUTH_COOKIE, sessieGebruiker } from '@/lib/dashboardAuth'
 
 export const metadata: Metadata = {
@@ -22,9 +24,10 @@ const THEMA_SCRIPT = `try{var t=localStorage.getItem('np-thema');if(t==='licht'|
 
 export default async function RedactieLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
-  const [tellingen, gebruiker] = await Promise.all([
+  const [tellingen, gebruiker, laatsteLogDatum] = await Promise.all([
     hasTurso() ? getStatusTellingen() : Promise.resolve({}),
     sessieGebruiker(cookieStore.get(AUTH_COOKIE)?.value),
+    laatsteLogboekDatum(),
   ])
 
   return (
@@ -57,9 +60,10 @@ export default async function RedactieLayout({ children }: { children: React.Rea
             )}
           </div>
         </header>
-        <RedactieNav tellingen={tellingen} gebruiker={gebruiker} />
+        <RedactieNav tellingen={tellingen} gebruiker={gebruiker} laatsteLogDatum={laatsteLogDatum} />
         {children}
       </div>
+      <FeedbackBalk />
     </div>
   )
 }

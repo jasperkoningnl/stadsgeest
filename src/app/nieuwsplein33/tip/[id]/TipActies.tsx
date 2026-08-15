@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { noteerBeslissing } from '../../feedbackTeller'
 
 type Actie = 'goedgekeurd' | 'geparkeerd' | 'afgekeurd' | 'wachtrij'
 
@@ -58,6 +59,10 @@ export default function TipActies({ tipId, status }: { tipId: number; status: st
       return
     }
     setOpen(null); setCode(''); setTekst('')
+    // Telt mee voor de vraag om feedback op het dashboard, die verschijnt zodra
+    // er die dag een paar tips zijn afgehandeld. Terugzetten telt niet: dat is
+    // een correctie, geen afgeronde beoordeling.
+    if (actie !== 'wachtrij') noteerBeslissing()
     startTransition(() => router.refresh())
   }
 

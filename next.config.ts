@@ -8,6 +8,13 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  // LOGBOEK.md wordt tijdens het verzoek van schijf gelezen (zie
+  // src/lib/dashboard/logboek.ts). Next spoort dat niet vanzelf op, dus het
+  // bestand moet hier expliciet worden meegegeven — anders is het op Vercel
+  // afwezig en blijft de logboekpagina leeg.
+  outputFileTracingIncludes: {
+    '/nieuwsplein33/**': ['./LOGBOEK.md'],
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'cdn.sanity.io' },
