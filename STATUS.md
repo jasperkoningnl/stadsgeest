@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **15 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Weger-feedback in de prompt verwerkt, dashboard herontworpen met licht en donker, NVWA-deel stilgelegd, mappen opgeruimd"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Pijplijn: published_at gevuld, spiegelbronnen ontkoppeld van clusters, notubiz-documenten alsnog binnen, TenderNed-gunningen leesbaar"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -3615,3 +3615,88 @@ Turso-sleutelrotatie en de gratis EP-online-key (alle drie alleen door Jasper te
 doen).
 
 *Cowork-update: 2026-08-15 (Nieuwsplein33-account, analysesessie met Jasper)*
+
+
+---
+
+### Cowork-update: 2026-08-15 — Pijplijn: published_at gevuld, spiegelbronnen ontkoppeld van clusters, notubiz-documenten alsnog binnen, TenderNed-gunningen leesbaar
+
+Vervolg op de sessie van vanmiddag; Jasper gaf akkoord op de punten
+published_at, clustering en de kleinere reparaties. Commit b0e7329.
+
+**published_at wordt nu gevuld.** `saveRawItem` (utils.js) en `insertItem`
+(lib.js) kennen een publicatiedatum-parameter met normalisatie (dd-mm-jjjj,
+ISO, RFC 2822; toekomstdatums worden geweigerd) en — belangrijk — een backfill:
+komt een bestaand item opnieuw langs als duplicaat, dan wordt een lege
+published_at alsnog ingevuld. Tien scrapers geven de datum mee: de twee
+bekendmakingenstromen (dcterms:modified), Nieuwsplein33 (pubDate uit de feed),
+GGD (WordPress-datum), Raad van State (uitspraakdatum), rechtspraak en
+TenderNed (atom updated), iBabs (laatst gewijzigd), Onderwijsinspectie
+(vaststellingsdatum) en Open Raadsinformatie (last_discussed_at). Geverifieerd
+met handmatige runs: de teller ging van 0 gevulde rijen naar 50 bij
+Nieuwsplein33 (24 juli-15 augustus, via de backfill op duplicaten) en 11 bij
+de GGD — waaronder de berichten uit 2024/2025 die eerder als vers
+binnenkwamen; precies het euvel van 10 augustus, nu meetbaar. UWV is bewust
+overgeslagen: een maandstand publiceert weken na de periode, en de periode als
+publicatiedatum zou verse cijfers ten onrechte als historisch bestempelen. De
+grote dekking komt vanzelf met de nachtruns; de eerste is die van 16 augustus.
+
+**Clustering: spiegelbronnen schuiven niet meer in bestaande clusters.** In
+`intake-run.mjs` worden items met `bronrol='spiegel'` niet langer via
+woordoverlap gematcht en maken ze ook geen eigen signaal meer aan — conform
+NIEUWSPLEIN33.md §5: spiegels zijn context- en ontdubbelingsbron. Bij een
+entiteitsmatch koppelen ze als bevestiging, maar zónder `last_seen_at` te
+verversen, zodat een signaal niet elke dag "vers" lijkt zonder inhoudelijk
+nieuws (de kostenpost uit de weger-runs van 14 en 15 augustus). Zonder match:
+`filtered` met reden, als naslag voor de spiegelcheck. Daarnaast is de
+woordoverlap-drempel van 2 naar 3 gegaan (de les van juni herhaalde zich in de
+clusterfouten van 13 augustus) en zijn gebiedsnamen en registerjargon
+('amersfoort', 'gemeente', 'besluit', enz.) stopwoorden geworden — die stonden
+in vrijwel elke titel en verbonden alles met alles.
+
+Geverifieerd met een handmatige intake-run (run 33, veertien items): vijf
+spiegelitems netjes naar naslag, de tier 3-filter deed zijn werk, en de
+Soerendonk-explosie van vanavond clusterde correct op drie gedeelde woorden.
+**Eén bijeffect eerlijk benoemd:** hetzelfde incident van 112-nu ("Politie —
+Explosie Soerendonk") en van Politie Amersfoort ("Amersfoort - Explosie aan de
+Soerendonk") werd twee signalen (1115, 1116) — na het schrappen van
+'amersfoort' als matchwoord delen die titels nog maar twee inhoudswoorden. De
+strakkere drempel splitst dus soms een gebeurtenis met dunne titels; de
+entiteitenroute zou dat moeten opvangen, maar de regex-extractie herkent zo'n
+adres nog niet. Bewust geaccepteerd: te ruim clusteren kostte de weger meer
+dan een enkele dubbeling.
+
+**De geweigerde notubiz-documenten zijn binnen.** Van de raadsdocumenten die
+sinds 9 augustus met HTTP 400 werden geweigerd ("Document kan niet gedownload
+worden") bleek de tekst gewoon te bestaan bij Open Raadsinformatie, met onze
+`external_url` als `original_url`. `fetch-fulltext.js` heeft die terugvalroute
+nu; de 31 gemarkeerde mislukkingen zijn gereset en opnieuw gedraaid:
+**27 opgehaald (gemiddeld 6.583 tekens), 4 leeg, 0 fout.** Daarmee hebben de
+raadsvoorstellen, amendementen en de Jaarstukken 2025 nu volledige tekst. De
+4 lege zijn scans en visuals zonder tekstlaag (verbeelding Hogeweg 227,
+organigram); daar valt niets te halen.
+
+**TenderNed-gunningen zijn leesbaar geworden.** De aankondigingspagina is
+client-rendered, maar er is een open JSON-API zonder sleutel:
+`/papi/tenderned-rs-tns/v2/publicaties/{id}` (opdrachtgever, beschrijving,
+procedure, publicatiedatum, publicatiecode) en `/{id}/pdf` (de volledige
+publicatie). De scraper haalt beide er nu bij; bij gunningen worden contractant
+en waarde uit de PDF-tekst gehaald en gaat een tekstfragment mee als vangnet.
+Getest op de gunning van 11 augustus: contractant **BDUlokalemedia B.V.**,
+maximumwaarde raamovereenkomst 1 euro (een symbolisch bedrag — die
+kanttekening zet de scraper er zelf bij). Daarmee is het gat uit de weger-run
+van 13 augustus gedicht: de huis-aan-huisblad-gunning zonder mededinging heeft
+nu een naam. De feed bevatte vandaag geen Amersfoortse items, dus de volledige
+keten draait pas bij de eerstvolgende Amersfoortse publicatie mee.
+
+**Niet geverifieerd.** De bekendmakingen-, RvS-, iBabs- en
+Onderwijsinspectie-scrapers zijn syntactisch gecontroleerd maar niet
+handmatig gedraaid; hun published_at loopt mee in de nachtrun van 16 augustus
+— controleer morgen de dekking per bron. De weger-run van morgen draait voor
+het eerst met de nieuwe prompt, het Nextdoor-filter én deze clusterregels;
+de tellingen daarvan zijn de echte toets. VERSHEID_DAGEN staat op 7; nu
+published_at echt gevuld raakt kan materiaal dat laat gepubliceerd wordt
+(RvS loopt een week achter) vaker als [HISTORISCH] binnenkomen — geen fout,
+wel iets om in de gaten te houden en zo nodig te verruimen.
+
+*Cowork-update: 2026-08-15 (Nieuwsplein33-account, pijplijnsessie na akkoord Jasper)*
