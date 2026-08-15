@@ -2,11 +2,13 @@
 
 > ### Bijgewerkt tot en met **15 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Leusden uitgezocht: geen subsidieregister, wel een gemeentefeed. Lees dit vóór de run van 16 augustus"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Logboek en algemene feedback in het dashboard"**.
 >
 > **Draai je de weegroutine?** Lees dan het blok "Voor de weger-run van
-> 16 augustus" onderaan dat bestand. Daar staat waarom er meer signalen dan
-> normaal liggen en welke intakeregels sinds 15 augustus anders werken.
+> 16 augustus". Dat staat niet meer onderaan maar in de op één na laatste
+> sectie, "Leusden uitgezocht: geen subsidieregister, wel een gemeentefeed".
+> Daar staat waarom er meer signalen dan normaal liggen en welke intakeregels
+> sinds 15 augustus anders werken.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -4020,3 +4022,88 @@ van het gebied van de redactie — twee freelancers. Materiaal uit deze twee
 bronnen is dus relatief veel waard, maar de gewone bronregel blijft gelden.
 
 *Cowork-update: 2026-08-15 (Nieuwsplein33-account, Leusden uitgezocht en klaargezet voor de weger)*
+
+
+---
+
+### Cowork-update: 2026-08-15 — Logboek en algemene feedback in het dashboard
+
+Vraag van Jasper: de feedbackmogelijkheden verbeteren en een logboek tonen, zodat
+de redactie ziet welke aanpassingen zijn gedaan. Vier ontwerpkeuzes vooraf met hem
+vastgelegd: een eigen nav-item Logboek (niet onder Beheer, want dat is alleen voor
+jasper en juist Pien en Gideon moeten het lezen), een markdownbestand in de repo
+als bron, de vraag om feedback ná een afgeronde beslisreeks, en de binnengekomen
+feedback alleen zichtbaar voor jasper.
+
+**Wat er stond.** Feedback zat uitsluitend per tip: de redencodes bij goedkeuren,
+parkeren en afkeuren, plus de meetknop. Over het dashboard zélf — dit is
+onduidelijk, dit ontbreekt, dit werkt niet — kon niemand iets kwijt, en er was
+geen plek waar zichtbaar werd dat er iets met een opmerking was gedaan.
+
+**Wat er nu is:**
+
+- `LOGBOEK.md` in de repowortel, gelezen door `src/lib/dashboard/logboek.ts`.
+  Gevuld met zeven regels over 9 en 15 augustus, geschreven voor de redactie en
+  niet voor de techniek. Bovenaan het bestand staat hoe je een regel toevoegt.
+- `/nieuwsplein33/logboek`: de wijzigingen bovenaan, daaronder het formulier
+  "Laat iets weten", en voor jasper de binnengekomen feedback met gebruiker,
+  tijd, soort en de pagina waarvandaan het is verstuurd.
+- Een stipje op het nav-item zolang de nieuwste logboekregel niet is gelezen
+  (localStorage, per browser).
+- Een balk onderin nadat iemand die dag drie tips heeft afgehandeld. Hoogstens
+  één keer per dag: het moment dat de balk verschijnt wordt de dag afgestempeld,
+  ongeacht of er iets wordt ingevuld. Niet op de tippagina zelf.
+- Tabel `dashboard_feedback` via `scraper/migrate-feedback-20260815.mjs`,
+  gedraaid en geverifieerd (7 kolommen, index op created_at). Bewust los van
+  `tip_feedback`: die tabel is het meetmateriaal van de testperiode en moet één
+  betekenis houden.
+
+**Op browser-close vragen kan niet, en dat is geen inschatting.** Browsers
+blokkeren dialogen tijdens `beforeunload` en kappen een verzoek af dat tijdens het
+sluiten wordt gestart; je kunt op dat moment niemand nog iets laten typen. Vandaar
+de koppeling aan het aantal afgehandelde tips.
+
+**Bug gevonden en gefixt in de eigen parser.** De gebruiksaanwijzing bovenaan
+`LOGBOEK.md` bevat een voorbeeldregel in een codeblok, met een verzonnen datum in
+de toekomst. De eerste versie van de parser las dat voorbeeld als een echte
+logboekregel en zette hem bovenaan de pagina, mét de instructietekst eronder.
+Gevonden door de parser los te compileren en tegen het echte bestand te draaien —
+niet door ernaar te kijken. De parser slaat codeblokken nu over; de controle geeft
+zeven regels in de juiste volgorde.
+
+**Wat is geverifieerd.** `npm run build` slaagt en `/nieuwsplein33/logboek`
+verschijnt in de routelijst. `npm run lint` levert geen enkele melding op de
+nieuwe bestanden (de 24 resterende fouten zijn `require()`-meldingen in bestaande
+`.cjs`-scrapers). De pagina is met een lokaal ondertekende sessiecookie echt
+opgehaald: status 200, alle zeven logboekregels aanwezig, formulier aanwezig. Een
+POST naar `/api/feedback` gaf 200 en de rij verscheen in de lijst; die testrij is
+daarna weer verwijderd, de tabel staat op 0. Met een cookie voor `pien` bevat
+dezelfde pagina geen "Binnengekomen feedback" en geen testregel, en `/beheer`
+geeft nog steeds een 307 naar de wachtrij. `LOGBOEK.md` staat in de
+`.nft.json`-tracering van alle acht `/nieuwsplein33`-routes, dus
+`outputFileTracingIncludes` doet zijn werk en het bestand is op Vercel aanwezig.
+
+**Wat niet is geverifieerd.** Het uiterlijk in een echte browser, in licht én
+donker, is niet bekeken — alleen de server-HTML. De feedbackbalk is niet met de
+hand doorlopen: de logica (drempel, één keer per dag, niet op de tippagina) is
+gelezen en beredeneerd, niet klikkend getest. Ook niet getest is wat er gebeurt
+als iemand het dashboard in twee tabbladen open heeft; de teller staat in
+localStorage en is dan gedeeld, wat hooguit betekent dat de balk in het verkeerde
+tabblad verschijnt.
+
+**Onderweg opgemerkt.** `next dev` herschrijft `tsconfig.json` (voegt
+`.next/dev/dev/types/**/*.ts` toe en herformatteert de arrays). Dat is
+teruggedraaid en zit niet in de commit, maar het komt terug zodra iemand de
+devserver start. Verder: lokaal kan niemand inloggen, want `.env.local` bevat
+alleen de Turso-sleutels — de wachtwoordhashes en het sessiegeheim staan
+uitsluitend in Vercel. Voor de controle hierboven is de devserver gestart met een
+tijdelijk sessiegeheim in de procesomgeving; er is niets aan `.env.local`
+gewijzigd.
+
+**Wat bewust is blijven liggen.** Er is geen manier om feedback af te vinken of te
+beantwoorden in het dashboard; de bedoelde lus is dat Jasper leest, iets aanpast
+en dat in `LOGBOEK.md` zet. Blijkt over een paar weken dat de lijst vervuilt, dan
+is een kolom `afgehandeld_op` een kleine toevoeging. Er gaat ook geen melding uit
+bij nieuwe feedback — Jasper ziet het pas als hij de logboekpagina opent.
+
+*Cowork-update: 2026-08-15 (Nieuwsplein33-account, logboek en feedback)*
