@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 
-type Actie = 'goedgekeurd' | 'geparkeerd' | 'afgekeurd'
+type Actie = 'goedgekeurd' | 'geparkeerd' | 'afgekeurd' | 'wachtrij'
 
 // De redenen zijn bewust kort en uitputtend genoeg om zonder typen te kunnen
 // afhandelen. Ze worden geteld bij het bijstellen van de selectie, dus ze
@@ -59,10 +59,33 @@ export default function TipActies({ tipId, status }: { tipId: number; status: st
     startTransition(() => router.refresh())
   }
 
+  // Elke beslissing is omkeerbaar (de geschiedenis is append-only en blijft
+  // onderaan de pagina staan), behalve bij een gepubliceerde tip — daar loopt
+  // de correctie via de meetknop, zodat de meetstand blijft kloppen.
+  const terugKnop = (
+    <button
+      type="button"
+      className="np-knop np-knop-stil"
+      disabled={bezig}
+      onClick={() => verstuur('wachtrij')}
+      title="De tip komt terug in de wachtrij; de eerdere beslissing blijft in de geschiedenis staan"
+    >
+      {bezig ? 'Bezig…' : 'Zet terug in de wachtrij'}
+    </button>
+  )
+
   if (status !== 'wachtrij' && status !== 'geparkeerd') {
     return (
-      <div className="np-acties np-acties-af">
-        Deze tip is afgehandeld. Hieronder staat wat er is besloten en waarom.
+      <div className="np-acties">
+        <div className="np-acties-af">
+          Deze tip is afgehandeld. Hieronder staat wat er is besloten en waarom.
+        </div>
+        {status !== 'gepubliceerd' && (
+          <div className="np-acties-knoppen" style={{ marginTop: 12 }}>
+            {terugKnop}
+          </div>
+        )}
+        {fout && <p className="np-fout" style={{ marginTop: 10 }}>{fout}</p>}
       </div>
     )
   }
@@ -70,7 +93,7 @@ export default function TipActies({ tipId, status }: { tipId: number; status: st
   return (
     <div className="np-acties">
       <div className="np-acties-knoppen">
-        {KNOPPEN.map((k) => (
+        {KNOPPEN.filter((k) => k.actie !== status).map((k) => (
           <button
             key={k.actie}
             type="button"
@@ -80,6 +103,7 @@ export default function TipActies({ tipId, status }: { tipId: number; status: st
             {k.label}
           </button>
         ))}
+        {status === 'geparkeerd' && terugKnop}
       </div>
 
       {open && (

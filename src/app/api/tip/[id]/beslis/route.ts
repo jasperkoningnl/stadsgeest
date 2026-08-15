@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server'
 import { turso } from '@/lib/turso'
 import { huidigeGebruiker } from '@/lib/dashboardAuth'
 
-const TOEGESTAAN = new Set(['goedgekeurd', 'geparkeerd', 'afgekeurd'])
+// 'wachtrij' is de terugzetactie: elke beslissing is omkeerbaar, behalve bij
+// een gepubliceerde tip — daar loopt de correctie via de meetknop ("toch niets
+// mee gedaan"), zodat de meetstand van de testperiode blijft kloppen.
+const TOEGESTAAN = new Set(['goedgekeurd', 'geparkeerd', 'afgekeurd', 'wachtrij'])
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const gebruiker = await huidigeGebruiker(request.headers.get('cookie'))
@@ -25,6 +28,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const huidig = await turso.execute({ sql: 'SELECT status FROM tips WHERE id = ?', args: [id] })
   if (huidig.rows.length === 0) return NextResponse.json({ fout: 'Tip bestaat niet' }, { status: 404 })
   const vorigeStatus = String(huidig.rows[0].status)
+
+  if (actie === vorigeStatus) {
+    return NextResponse.json({ fout: 'De tip heeft die status al' }, { status: 400 })
+  }
+  if (actie === 'wachtrij' && vorigeStatus === 'gepubliceerd') {
+    return NextResponse.json(
+      { fout: 'Een gepubliceerde tip zet je niet terug; gebruik "toch niets mee gedaan" bij het artikelveld' },
+      { status: 400 },
+    )
+  }
 
   // Feedback is append-only: er wordt nooit iets overschreven, zodat later terug
   // te zien is hoe het oordeel van de redactie zich heeft ontwikkeld.
