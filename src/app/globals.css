@@ -1591,3 +1591,17 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 }
 .np-submenu a:hover { color: var(--np-accent); border-color: var(--np-accent); }
 .np-anker { scroll-margin-top: 16px; }
+
+/* ── Dagkopjes in de wachtrij (2026-08-15) ──────────────── */
+.np-daggroep { margin-bottom: 24px; }
+.np-daggroep-kop {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--f-d); font-weight: 700; font-size: 14px;
+  color: var(--np-inkt2); margin-bottom: 10px;
+  padding-bottom: 6px; border-bottom: 1px solid var(--np-rand-z);
+}
+.np-daggroep-tel {
+  font-size: 12px; font-weight: 600; min-width: 20px; text-align: center;
+  padding: 1px 6px; border-radius: 10px;
+  background: var(--np-grijs-z); color: var(--np-inkt2);
+}

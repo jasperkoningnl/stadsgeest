@@ -51,6 +51,13 @@ function dagString(d: Date): string {
   return d.toLocaleDateString('sv-SE', { timeZone: TIJDZONE })
 }
 
+/** Kalenderdagen geleden in Nederlandse tijd (0 = vandaag, 1 = gisteren). */
+export function kalenderdagenGeleden(iso: string | null | undefined): number | null {
+  const d = parseDbDate(iso)
+  if (!d) return null
+  return Math.round((Date.parse(dagString(new Date())) - Date.parse(dagString(d))) / 86400000)
+}
+
 /**
  * "vandaag" en "gisteren" zijn in één oogopslag duidelijk; daarna is een echte
  * datum sneller te plaatsen dan "9 dagen geleden". Kalenderdagen in
