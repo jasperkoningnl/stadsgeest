@@ -1,9 +1,13 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Inloggen — Stadsgeest 033',
+  title: 'Inloggen — Stadsgeest',
   robots: { index: false, follow: false },
 }
+
+// Zelfde thematiek als het dashboard: opgeslagen keuze wint, anders volgt de
+// pagina de systeemvoorkeur. Zie globals.css (.np-vlak) en de dashboardlayout.
+const THEMA_SCRIPT = `try{var t=localStorage.getItem('np-thema');if(t==='licht'||t==='donker'){document.documentElement.setAttribute('data-np-thema',t)}}catch(e){}`
 
 export default async function LoginPage({
   searchParams,
@@ -12,158 +16,53 @@ export default async function LoginPage({
 }) {
   const params = await searchParams
   const error = params.error === '1'
-  // 'config' betekent: de omgevingsvariabelen DASHBOARD_WACHTWOORD_HASH en
-  // DASHBOARD_SESSIE_SECRET ontbreken. Dan komt niemand binnen — dat is opzet.
+  // 'config' betekent: de omgevingsvariabelen voor de inlog ontbreken.
+  // Dan komt niemand binnen — dat is opzet.
   const nietIngesteld = params.error === 'config'
   const from = params.from || '/nieuwsplein33'
 
   return (
-    <main style={{
-      minHeight: 'calc(100vh - var(--hh))',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '40px 20px',
-    }}>
-      <div style={{
-        background: 'var(--bg-card)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--r-xl)',
-        padding: '40px',
-        width: '100%',
-        maxWidth: '400px',
-      }}>
-        <h1 style={{
-          fontFamily: 'var(--f-d)',
-          fontWeight: 800,
-          fontSize: '22px',
-          letterSpacing: '-0.01em',
-          marginBottom: '8px',
-        }}>
-          Toegang vereist
-        </h1>
-        <p style={{
-          fontFamily: 'var(--f-b)',
-          fontSize: '15px',
-          color: 'var(--t2)',
-          marginBottom: '28px',
-          lineHeight: 1.6,
-        }}>
-          Log in met je gebruikersnaam en wachtwoord.
-        </p>
+    <main className="np-vlak np-inlog">
+      <script dangerouslySetInnerHTML={{ __html: THEMA_SCRIPT }} />
+      <div className="np-inlog-kaart">
+        <div className="np-inlog-merk">Stadsgeest<span>*</span></div>
+        <h1 className="np-inlog-kop">Redactie Nieuwsplein33</h1>
+        <p className="np-inlog-sub">Log in met je gebruikersnaam en wachtwoord.</p>
 
         {error && (
-          <p style={{
-            background: 'rgba(255,180,171,0.10)',
-            border: '1px solid var(--error)',
-            color: 'var(--error)',
-            borderRadius: 'var(--r-lg)',
-            padding: '10px 14px',
-            fontSize: '14px',
-            marginBottom: '20px',
-            fontFamily: 'var(--f-d)',
-          }}>
-            Onjuiste gebruikersnaam of wachtwoord. Probeer het opnieuw.
-          </p>
+          <p className="np-inlog-fout">Onjuiste gebruikersnaam of wachtwoord. Probeer het opnieuw.</p>
         )}
 
         {nietIngesteld && (
-          <p style={{
-            background: 'rgba(255,180,171,0.10)',
-            border: '1px solid var(--error)',
-            color: 'var(--error)',
-            borderRadius: 'var(--r-lg)',
-            padding: '10px 14px',
-            fontSize: '14px',
-            marginBottom: '20px',
-            fontFamily: 'var(--f-d)',
-          }}>
-            De inlog is nog niet ingesteld op deze omgeving. Zet <code>DASHBOARD_SESSIE_SECRET</code> en minimaal{' '}
-            één <code>DASHBOARD_WACHTWOORD_HASH_...</code> in de omgevingsvariabelen.
+          <p className="np-inlog-fout">
+            De inlog is nog niet ingesteld op deze omgeving. Zet <code>DASHBOARD_SESSIE_SECRET</code> en
+            minimaal één <code>DASHBOARD_WACHTWOORD_HASH_...</code> in de omgevingsvariabelen.
           </p>
         )}
 
         <form method="POST" action="/api/auth">
           <input type="hidden" name="from" value={from} />
-          <div style={{ marginBottom: '16px' }}>
-            <label
-              htmlFor="username"
-              style={{
-                display: 'block',
-                fontFamily: 'var(--f-m)',
-                fontSize: '11px',
-                fontWeight: 500,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'var(--t3)',
-                marginBottom: '8px',
-              }}
-            >
-              Gebruikersnaam
-            </label>
+          <label className="np-inlog-veld">
+            <span>Gebruikersnaam</span>
             <input
-              id="username"
               name="username"
               type="text"
               autoFocus
               autoComplete="username"
               autoCapitalize="off"
               required
-              style={{
-                width: '100%',
-                background: 'var(--bg)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--r-lg)',
-                color: 'var(--t1)',
-                fontFamily: 'var(--f-d)',
-                fontSize: '15px',
-                padding: '10px 14px',
-                outline: 'none',
-              }}
             />
-          </div>
-          <div style={{ marginBottom: '16px' }}>
-            <label
-              htmlFor="password"
-              style={{
-                display: 'block',
-                fontFamily: 'var(--f-m)',
-                fontSize: '11px',
-                fontWeight: 500,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'var(--t3)',
-                marginBottom: '8px',
-              }}
-            >
-              Wachtwoord
-            </label>
+          </label>
+          <label className="np-inlog-veld">
+            <span>Wachtwoord</span>
             <input
-              id="password"
               name="password"
               type="password"
               autoComplete="current-password"
               required
-              style={{
-                width: '100%',
-                background: 'var(--bg)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--r-lg)',
-                color: 'var(--t1)',
-                fontFamily: 'var(--f-d)',
-                fontSize: '15px',
-                padding: '10px 14px',
-                outline: 'none',
-              }}
             />
-          </div>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            style={{ width: '100%', padding: '12px' }}
-          >
-            Inloggen
-          </button>
+          </label>
+          <button type="submit" className="np-inlog-knop">Inloggen</button>
         </form>
       </div>
     </main>

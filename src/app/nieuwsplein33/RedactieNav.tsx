@@ -26,30 +26,17 @@ export default function RedactieNav({
   const items = gebruiker === 'jasper' ? [...ITEMS, BEHEER_ITEM] : ITEMS
 
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-      <nav className="np-nav">
-        {items.map((item) => {
-          const actief = item.href === '/nieuwsplein33' ? pathname === '/nieuwsplein33' : pathname.startsWith(item.href)
-          const aantal = item.tel.reduce((som, s) => som + (tellingen[s] ?? 0), 0)
-          return (
-            <Link key={item.href} href={item.href} className={`np-nav-item${actief ? ' np-nav-item-actief' : ''}`}>
-              {item.label}
-              {aantal > 0 && <span className="np-nav-tel">{aantal}</span>}
-            </Link>
-          )
-        })}
-      </nav>
-
-      {gebruiker && (
-        <div className="np-sessie">
-          <span className="np-sessie-tekst">
-            Ingelogd als <strong>{gebruiker}</strong>
-          </span>
-          <form method="POST" action="/api/auth/logout">
-            <button type="submit" className="np-sessie-uitloggen">Uitloggen</button>
-          </form>
-        </div>
-      )}
-    </div>
+    <nav className="np-nav">
+      {items.map((item) => {
+        const actief = item.href === '/nieuwsplein33' ? pathname === '/nieuwsplein33' : pathname.startsWith(item.href)
+        const aantal = item.tel.reduce((som, s) => som + (tellingen[s] ?? 0), 0)
+        return (
+          <Link key={item.href} href={item.href} className={`np-nav-item${actief ? ' np-nav-item-actief' : ''}`}>
+            {item.label}
+            {aantal > 0 && <span className="np-nav-tel">{aantal}</span>}
+          </Link>
+        )
+      })}
+    </nav>
   )
 }

@@ -10,9 +10,9 @@ export const SOORT_LABEL: Record<string, string> = {
 }
 
 /**
- * Eén regel in de wachtrij: de kop, waar hij vandaan komt, en hoe lang hij er
- * al ligt. Bewust één regel tekst — de redacteur beslist hier of hij verder
- * kijkt, niet of hij het verhaal maakt.
+ * Eén kaart in de lijst: etiketten, de kop, de kern in één of twee regels, en
+ * daaronder waar het vandaan komt. De redacteur beslist hier of hij verder
+ * kijkt, niet of hij het verhaal maakt — dus scanbaar boven volledig.
  */
 export default function TipRegel({ tip }: { tip: TipRij }) {
   const dragend = tip.bronnen.filter((b) => !b.spiegel)
@@ -20,10 +20,13 @@ export default function TipRegel({ tip }: { tip: TipRij }) {
 
   return (
     <Link href={`/nieuwsplein33/tip/${tip.id}`} className="np-regel">
-      <div className="np-regel-hoofd">
+      <div className="np-regel-labels">
         <span className={`np-soort np-soort-${tip.soort}`}>{SOORT_LABEL[tip.soort] ?? tip.soort}</span>
-        <span className="np-regel-titel">{tip.titel}</span>
+        {tip.gemeente !== 'Amersfoort' && <span className="np-gemeente">{tip.gemeente}</span>}
       </div>
+
+      <span className="np-regel-titel">{tip.titel}</span>
+      {tip.kern && <p className="np-regel-kern">{tip.kern}</p>}
 
       <div className="np-regel-meta">
         {dragend.slice(0, 3).map((b) => (
@@ -37,12 +40,6 @@ export default function TipRegel({ tip }: { tip: TipRij }) {
         )}
         <span className="np-regel-scheiding">·</span>
         <span>{tip.aantal_documenten} {tip.aantal_documenten === 1 ? 'document' : 'documenten'}</span>
-        {tip.gemeente !== 'Amersfoort' && (
-          <>
-            <span className="np-regel-scheiding">·</span>
-            <span className="np-gemeente">{tip.gemeente}</span>
-          </>
-        )}
         {tip.dossier_naam && (
           <>
             <span className="np-regel-scheiding">·</span>

@@ -15,15 +15,13 @@ const SOURCES = [
     reliability: 'primary',
     scrapeFrequency: 'weekly',
   },
-  {
-    name: 'NVWA — inspectieresultaten Amersfoort',
-    url: 'https://www.nvwa.nl/actueel/nieuws',
-    searchUrl: 'https://www.nvwa.nl/zoeken?trefwoord=amersfoort',
-    base: 'https://www.nvwa.nl',
-    category: 'registry',
-    reliability: 'primary',
-    scrapeFrequency: 'weekly',
-  },
+  // NVWA-deel stilgelegd op 15 augustus 2026, besluit Jasper. De zoekpagina van
+  // nvwa.nl leverde uitsluitend landelijke voorlichtingspagina's en zelfs
+  // configuratiebestanden op (zie STATUS.md, weger-runs 8 en 13-15 augustus) en
+  // vervuilde daarmee andere clusters. De werkende vervanger is
+  // nvwa-inspectieresultaten.js, die het openbare inspectieregister per
+  // postcode afloopt. Follow-up: bekijken of nvwa.nl/zoeken alsnog gericht op
+  // het inspectieregister te richten is; tot die tijd niets opslaan.
 ];
 
 async function fetchDetailContent(page, url) {

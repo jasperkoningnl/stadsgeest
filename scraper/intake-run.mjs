@@ -390,6 +390,23 @@ async function run() {
         continue;
       }
 
+      // Doorgeplaatste advertenties op Nextdoor zijn geen buurtnieuws. Het
+      // €-trefwoord in de opvallend-regex verderop maakte er signalen van
+      // ("4 Efteling kaarten te koop" werd signaal #1023) en de weger voerde er
+      // van 10 t/m 15 augustus elke run een paar af. Marktplaats-links en
+      // te-koop-taal gaan er hier uit; de reden staat per item in
+      // intake_decisions, dus niets is onvindbaar kwijt.
+      if (item.source_name && item.source_name.toLowerCase().includes('nextdoor')) {
+        const advertentie =
+          /marktplaats\.nl/i.test(`${item.content || ''} ${item.external_url || ''}`)
+          || /\bte koop\b|\bgratis af te halen\b|\bgezocht:|\baangeboden\b|€\s?\d/i.test(`${item.title || ''} ${item.summary || ''}`);
+        if (advertentie) {
+          stats.gefilterd++; stats.ids.push(item.id);
+          await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', 'Nextdoor-advertentie (Marktplaats-link of te-koop-taal), geen buurtnieuws'));
+          continue;
+        }
+      }
+
       // Het 48-uursfilter dat hier stond is op 2026-08-09 verwijderd. Oude items
       // worden nu hierboven als historisch aangemerkt in plaats van weggegooid.
 
