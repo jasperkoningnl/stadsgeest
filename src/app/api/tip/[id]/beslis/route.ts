@@ -49,7 +49,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     {
       sql: `INSERT INTO tip_feedback (tip_id, gebruiker, actie, reden_code, reden_tekst)
             VALUES (?, ?, ?, ?, ?)`,
-      args: [id, gebruiker, actie, redenCode, redenTekst],
+      // De CHECK op tip_feedback.actie kent geen 'wachtrij' maar wel
+      // 'heropend' — precies wat terugzetten is. De status op de tip zelf
+      // wordt wél gewoon 'wachtrij'.
+      args: [id, gebruiker, actie === 'wachtrij' ? 'heropend' : actie, redenCode, redenTekst],
     },
     {
       sql: `INSERT INTO tip_events (tip_id, actor, event_type, status_from, status_to, reason)
