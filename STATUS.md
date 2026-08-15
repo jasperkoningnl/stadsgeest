@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **14 augustus 2026**
+> ### Bijgewerkt tot en met **15 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-14 — Weger-run: 38 signalen beoordeeld, drie tips, twee nieuwe dossiers, NVWA-bron levert ruis"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 (weger-run) — 18 signalen beoordeeld, een tip, nieuw dossier asielopvang, bekendmakingen-scrapers blijken wel te draaien"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -3375,3 +3375,140 @@ Dat is een ontwerpkeuze en dus iets om eerst met Jasper te bespreken, niet zelf 
 bouwen.
 
 *Cowork-update: 2026-08-14 (Nieuwsplein33-account, weger-run)*
+
+---
+
+## Cowork-update: 2026-08-15 (weger-run) — 18 signalen beoordeeld, een tip, nieuw dossier asielopvang, bekendmakingen-scrapers blijken wel te draaien
+
+### Wat er is weggeschreven
+
+Geteld in de database, niet geschat: 1 tip (id 20), 1 koppeling in `tip_signals`,
+1 rij in `tip_events`, 6 feiten in `dossier_facts`, 1 nieuw dossier (id 14) en 18
+rijen in `signal_events` (17 `reviewed` plus 1 `tip_created`). Na afloop staan er
+nul open signalen die nog nooit door de weger zijn bekeken.
+
+De werkset was 18 signalen: de 14 die sinds de run van 14 augustus nieuw binnenkwamen
+(1101 tot en met 1114) plus vier eerder beoordeelde signalen met substantie en nieuwe
+bevestigingen sindsdien (540, 587, 901, 964). Van die 18 hadden er 11 een tier
+1-bron als dragende bron. Zes signalen zijn op `discarded` gezet: drie NVWA-signalen
+zonder lokale partij (1107, 1108, 1109), twee Nextdoor-clusters met
+tweedehandsadvertenties (1110, 1111) en een NS-storing op het traject
+Zwolle-Groningen (1113). De overige twaalf blijven op `watching`.
+
+### De tip
+
+Tip 20, `verdieping`, score 9: "Herontwikkeling azc Barchman Wuytierslaan: besluit
+voor 11 september". De gemeente ontving op 17 juli 2026 een aanvraag voor een
+omgevingsvergunning voor herontwikkeling van de COA-opvanglocatie aan de Barchman
+Wuytierslaan 53, kenmerk CLZ-00038769, en beslist daarover voor 11 september. De
+bekendmaking verscheen pas op 14 augustus, bijna vier weken na ontvangst.
+
+De reden om dit als `verdieping` te classificeren en niet als `nieuwsfeit`:
+Nieuwsplein33 volgt de asielopvang intensief, maar telkens via de zoektocht naar
+nieuwe locaties. Over een concrete vergunningstap op de bestaande locatie is bij hen
+en bij de partners niets te vinden — gecontroleerd in de spiegelbronnen in de
+database en via een gerichte zoekopdracht op nieuwsplein33.nl. Wat de
+herontwikkeling behelst staat niet in de bekendmaking; de stukken worden pas bij
+verlening openbaar. Dat is expliciet als "wat we niet weten" in de briefing gezet,
+met de waarschuwing dat er geen conclusie over uitbreiding of sluiting in mag.
+
+### Nieuw dossier 14: asielopvang en opvanglocaties
+
+Aangemaakt omdat er vier feiten uit verschillende maanden aan te wijzen waren die
+nergens bij elkaar stonden: de raadsvergadering over Barchman Wuytierslaan 53 van
+13 januari 2026, de uitspraak van de gemeente over Ter Apel van 29 mei, het voorstel
+voor de zoektocht naar nieuwe opvanglocaties van 29 juni en de vergunningaanvraag van
+17 juli. Asielopvang is bovendien een lopend dossier van Nieuwsplein33 zelf en een
+speerpunt in het coalitieakkoord, terwijl het bij ons over dossier 4 en het niets
+verspreid lag.
+
+In de omschrijving staan twee waarschuwingen voor de opvolger. Ten eerste: de
+maatschappelijke opvang van dak- en thuislozen (Westsingel, De Boeier) hoort hier
+niet in, ook al lijkt de terminologie erop — in de bronnen lopen die twee door
+elkaar. Ten tweede: het aantal opvangplekken wordt in verschillende bronnen
+verschillend geteld (300 permanent, 100 extra, 400 totaal, 500 opgave, 483
+resterend), dus noteer altijd welke bron welk getal noemt.
+
+Feit 149 in dossier 4 (Leusdense flexwoningen voor tijdelijke opvang, 8 augustus)
+hoort inhoudelijk in dossier 14 maar is daar bewust niet gedupliceerd; het is in de
+omschrijving als kruisverwijzing opgenomen. Dat is een keuze, geen regel: de routine
+zegt bestaande feiten alsnog in het nieuwe dossier te vullen, maar dat zou hier een
+dubbele rij opleveren. Als het de bedoeling is dat feiten in meerdere dossiers mogen
+staan, is een koppeltabel de nettere oplossing dan duplicatie. Iets om met Jasper te
+bespreken.
+
+### Wat er niet klopte
+
+**De bekendmakingen-scrapers draaien wel.** START-HIER.md en de projectcontext
+melden dat Officiële Bekendmakingen al ongeveer twee maanden niets levert. Dat is
+achterhaald: sinds 1 augustus 2026 leverde "Officiële Bekendmakingen —
+Omgevingsvergunningen Amersfoort" 230 items, laatste op 15 augustus, en het
+gemeenteblad-overig 34 items met dezelfde laatste datum. Leusden leverde er 17. De
+tip van vandaag komt uit precies die bron. Wat wél stilligt is `raadsinformatie`:
+laatste item 2 augustus, dertien dagen geleden. "Raad Amersfoort — Vergaderingen en
+overig" stopte op 9 augustus. Die twee verdienen aandacht, de bekendmakingen niet.
+
+**De NVWA-bron levert nog steeds landelijke voorlichting.** De vorige run meldde dit
+al; het is niet verbeterd. De bron heet "NVWA — inspectieresultaten Amersfoort" maar
+leverde vandaag een webpagina over vervoerdersvergunningen voor dierentransport, een
+landelijk rapport over etikettering bij 18 mengvoederbedrijven en een terugroepactie
+voor kipdijspiesjes. Geen van drieën heeft een Amersfoortse of Leusdense partij. Erger
+is dat deze items in andere clusters terechtkomen: signaal 964 (verordening Duurzaam
+Wonen Leningen) kreeg er pagina's over schelpdieren en invoerverboden bij.
+
+**Clusters drijven weg van hun onderwerp.** Signaal 540 begon als vandalisme op het
+Sovjet Ereveld en bevat nu ook berichten over ijssalons, atletiek, wespen, een wolf en
+een waterleidingbreuk. Signaal 587 begon bij een raadsagendapunt over de inloop bij De
+Boeier en kreeg er een artikel over het vertrek van De Katoendrukkerij bij. Het patroon
+is dat spiegelbronnen met veel volume — Nieuwsplein33 zelf, De Stad Amersfoort — in
+bestaande clusters worden geschoven in plaats van een eigen signaal te krijgen. Dit
+maakt de `last_seen_at` van zulke signalen elke dag vers, waardoor ze in elke
+herbeoordelingsquery terugkomen zonder dat er inhoudelijk iets is gebeurd. Dat is
+dezelfde kostenpost die de vorige run onderaan signaleerde, maar met een aanwijsbare
+oorzaak: niet de omvang van de stapel, maar de clusteraar die te ruim matcht op
+spiegelmateriaal.
+
+**Datumfout in een gemeentelijke bekendmaking.** Signaal 1106: vergunning voor een
+hoogwerker aan de Langestraat 137, zaaknummer CLZ-APV2026-08-11, besluit bekendgemaakt
+12 augustus 2026, vergunde periode 1 tot en met 4 september **2024**. Vrijwel zeker een
+verschrijving van de gemeente voor 2026. Genoteerd als datakwaliteitsobservatie, niet
+als tip — een losse typefout draagt geen verhaal. Wel bruikbaar als er meer van blijken
+te zijn.
+
+### Bewust laten liggen
+
+Signaal 901 (Zomerrapportage, geagendeerd voor de raadsvergadering van 9 september)
+blijft op `watching`. De onderliggende PDF's — raadsvoorstel, de rapportage zelf,
+advies van de auditcommissie — zitten nog steeds niet in de database, en zonder die
+stukken is er niets te wegen. Dit is het duidelijkste openstaande punt voor een
+volgende run.
+
+Signaal 964 (verordening Duurzaam Wonen Leningen) is niet opnieuw opgepakt als tip:
+Nieuwsplein33 bracht het op 3 augustus en het staat al als feit in dossier 4. Wel
+opgemerkt en in de reden vastgelegd: in de beantwoording van feitelijke vragen erkent
+het college dat het niet met cijfers kan onderbouwen hoe groot de groep inwoners is
+die door het maximum van 28.000 euro van het Warmtefonds onvoldoende wordt geholpen.
+Te dun voor een eigen tip, maar het is de vervolgvraag zodra de eerste leningcijfers er
+zijn.
+
+De 234 eerder beoordeelde signalen zijn niet opnieuw doorgelopen. Ze hebben allemaal
+een vastgelegde reden uit een eerdere run en er is sindsdien geen inhoudelijk nieuw
+materiaal bijgekomen — alleen bevestigingen uit spiegelbronnen. Ze stilzwijgend
+overrulen is expliciet niet de bedoeling.
+
+### Niet geverifieerd
+
+- **Wat de herontwikkeling aan de Barchman Wuytierslaan inhoudt.** De bekendmaking
+  noemt alleen de term. De gemeente zegt dat de aanvraag telefonisch op te vragen is
+  via 14033; dat is niet gedaan, omdat de weger geen contact met bronnen legt.
+- **Of de vier weken tussen ontvangst en bekendmaking afwijkend is.** Niet vergeleken
+  met andere bekendmakingen; het kan volstrekt regulier zijn.
+- **Waar het uitgebreide onttrekkingsverbod van Waterschap Vallei en Veluwe precies
+  geldt.** De paginatekst is niet meegescrapet — `content` is leeg voor beide
+  waterschapsitems — dus alleen de titel en het gebiedslabel (Terwolde, Wapenveld) zijn
+  bekend. Beide zijn als feit in dossier 3 vastgelegd met die beperking erbij, juist
+  omdat het verbod zich naar de Valleizijde kan uitbreiden.
+- **Of de raadsinformatie-scrapers werkelijk stilliggen of alleen niets te melden
+  hadden.** Alleen de laatste `scraped_at` per bron is bekeken, de PM2-logs niet.
+
+*Cowork-update: 2026-08-15 (Nieuwsplein33-account, weger-run)*
