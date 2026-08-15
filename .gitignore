@@ -46,3 +46,12 @@ studio/
 
 # Claude Code
 .claude/
+
+# Scraper-draaisporen en werkbestanden (opruiming 2026-08-15)
+scraper/*.log
+scraper/*.err
+scraper/node_modules/
+scraper/.nextdoor-session.json
+*.bak
+bronnenwacht/rapport-*.md
+dwarsverbanden/rapport-*.md
