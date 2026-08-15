@@ -8,7 +8,9 @@ type Actie = 'goedgekeurd' | 'geparkeerd' | 'afgekeurd' | 'wachtrij'
 // De redenen zijn bewust kort en uitputtend genoeg om zonder typen te kunnen
 // afhandelen. Ze worden geteld bij het bijstellen van de selectie, dus ze
 // moeten over maanden nog dezelfde betekenis hebben.
-const REDENEN: Record<Actie, { code: string; label: string }[]> = {
+// Terugzetten ('wachtrij') vraagt geen reden — de eerdere beslissing met reden
+// blijft in de geschiedenis staan.
+const REDENEN: Record<Exclude<Actie, 'wachtrij'>, { code: string; label: string }[]> = {
   goedgekeurd: [
     { code: 'zelf_niet_gevonden', label: 'Dit had ik zelf niet gevonden' },
     { code: 'concreet_gemaakt', label: 'Wist er iets van, dit maakt het concreet' },
@@ -30,7 +32,7 @@ const REDENEN: Record<Actie, { code: string; label: string }[]> = {
   ],
 }
 
-const KNOPPEN: { actie: Actie; label: string; klasse: string }[] = [
+const KNOPPEN: { actie: Exclude<Actie, 'wachtrij'>; label: string; klasse: string }[] = [
   { actie: 'goedgekeurd', label: 'Hier wil ik iets mee', klasse: 'np-knop-ja' },
   { actie: 'geparkeerd', label: 'Bewaar voor later', klasse: 'np-knop-later' },
   { actie: 'afgekeurd', label: 'Niets mee doen', klasse: 'np-knop-nee' },
@@ -38,7 +40,7 @@ const KNOPPEN: { actie: Actie; label: string; klasse: string }[] = [
 
 export default function TipActies({ tipId, status }: { tipId: number; status: string }) {
   const router = useRouter()
-  const [open, setOpen] = useState<Actie | null>(null)
+  const [open, setOpen] = useState<Exclude<Actie, 'wachtrij'> | null>(null)
   const [code, setCode] = useState('')
   const [tekst, setTekst] = useState('')
   const [fout, setFout] = useState<string | null>(null)
