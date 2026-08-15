@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **15 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Beslissingen omkeerbaar: terugzetten naar de wachtrij"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Fix terugzetknop: feedback-CHECK kent 'wachtrij' niet"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -3813,3 +3813,20 @@ herstelt dat; les: wacht op de volledige build-exitcode vóór de push. Live
 gecontroleerd na de deploy: login 200, dashboard 307 zonder cookie.
 
 *Cowork-update: 2026-08-15 (Nieuwsplein33-account, terugzetknop)*
+
+
+---
+
+### Cowork-update: 2026-08-15 — Fix terugzetknop: feedback-CHECK kent 'wachtrij' niet
+
+Jasper meldde dat "Zet terug in de wachtrij" bij het geparkeerde item niets
+deed. Oorzaak: `tip_feedback.actie` heeft een CHECK-constraint
+(goedgekeurd/geparkeerd/afgekeurd/heropend/gepubliceerd/niet_gebruikt/
+opmerking) en de terugzetactie schreef er 'wachtrij' in — de batch faalde
+server-side en de knop leek dood. De constraint kende met 'heropend' al de
+juiste waarde; terugzetten wordt nu als 'heropend' vastgelegd terwijl de
+tipstatus gewoon 'wachtrij' wordt. Commit cf79ad3. Les die vaker terugkomt:
+controleer bij een nieuwe schrijfactie eerst de CHECK-constraints van de
+tabel (zelfde valkuil als tip_signals.rol op 10 augustus).
+
+*Cowork-update: 2026-08-15 (Nieuwsplein33-account, fix terugzetknop)*
