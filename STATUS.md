@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **15 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Dagkopjes in de wachtrij"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Raadsinformatie Leusden aangesloten; stand van de Leusdense bronnen"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -3864,3 +3864,65 @@ helper `kalenderdagenGeleden` in format.ts. Alleen de wachtrij; de andere
 lijsten blijven vlak. Commit a0fd802, build en eslint schoon.
 
 *Cowork-update: 2026-08-15 (Nieuwsplein33-account, dagkopjes wachtrij)*
+
+
+---
+
+### Cowork-update: 2026-08-15 — Raadsinformatie Leusden aangesloten; stand van de Leusdense bronnen
+
+Vraag van Jasper: zijn de Leusdense bronnen al toegevoegd? Antwoord: grotendeels,
+en het grootste resterende gat is met deze sessie gedicht.
+
+**Wat er al was**, gemeten in de database:
+
+| Bron | Rij | Tier | Items | Laatste |
+|---|---|---|---|---|
+| Officiële Bekendmakingen — Leusden | 127 | 1 | 17 | 14 aug |
+| Officiële Bekendmakingen — Waterschapsblad | 114 | 1 | 102 | 9 aug |
+| Officiële Bekendmakingen — Provinciaal blad | 113 | 2 | 106 | 9 aug |
+| Raad van State — Amersfoort (filtert ook op Leusden) | 125 | 1 | 9 | 6 aug |
+| NVWA — openbare inspectieresultaten horeca | 126 | 1 | 14 | 10 aug |
+| Nieuwsplein33 (spiegel, dekt beide gemeenten) | 29 | 3 | 196 | 15 aug |
+
+Daarnaast komen er Leusdense items binnen via bredere bronnen: 16 bij
+Nieuwsplein33, 10 bij De Stad Amersfoort, 10 bij Nextdoor, 4 in het
+Waterschapsblad.
+
+**Nieuw: `Raadsinformatie Leusden` (rij 129, tier 1).** Open Raadsinformatie
+blijkt naast Amersfoort ook een Leusden-index te hebben
+(`ori_leusden_20250331055102`, ruim 21.000 documenten), dus dit was een tweede
+pass op de bestaande scraper en geen nieuwbouw — anders dan in de sectie van
+9 augustus werd aangenomen. Bewust één bron in plaats van zes stromen: Leusden
+vergadert minder vaak en zes vrijwel lege bronnen maken het overzicht
+onleesbaar (zelfde afweging als bij bron 127).
+
+**Eigen venster van 30 dagen.** Met de 14 dagen van Amersfoort levert de bron
+structureel nul: de laatste Leusdense raadsvergadering was 9 juli (reces).
+Gemeten: 0 documenten binnen 30 dagen, 46 binnen 45, 198 binnen 90. Instelbaar
+via `ORI_DAGEN_LEUSDEN`; 90 dagen is een backfill, geen venster.
+
+**Eenmalige inhaalslag gedraaid** met een venster van 45 dagen: **46 items,
+0 fouten**, alle 46 met een `published_at` van 9 juli, 38 met inhoudelijke
+tekst, nul overlap met andere bronnen. Een tweede run gaf 0 nieuw en 46
+overgeslagen — de dedup werkt. Inhoudelijk is dit precies waar de redactie
+dun zit: Jaarverslag en Jaarrekening 2025 met getekende controleverklaring,
+het concept-accountantsverslag, de Voorjaarsnota 2026 en de Kadernota
+2027-2030.
+
+**Let op bij de volgende weger-run:** die 46 documenten staan onverwerkt klaar
+en gaan vannacht door de intake. Er komen dus meer Leusdense signalen dan de
+gebruikelijke 17 tot 28 per dag; dat is deze inhaalslag en geen uitschieter in
+de stad.
+
+**Correctie op mezelf.** De bron kwam bij de eerste run op tier 2 binnen omdat
+de tier-update met `COALESCE` was geschreven. Dat is geen detail: op tier 2 is
+raadsinformatie geen dragende bron voor een tip (+3) en haalt een Leusdense tip
+de drempel van 6 vrijwel nooit — precies het gat dat deze bron moet dichten.
+Nu expliciet tier 1, geverifieerd in de database.
+
+**Wat voor Leusden nog open staat:** het subsidieregister (Amersfoort levert
+1.678 records; voor Leusden is niet uitgezocht of er een vergelijkbaar
+openbaar register is) en de gemeentelijke website als aparte bron. Beide zijn
+uitzoekwerk, geen tweede pass op iets bestaands.
+
+*Cowork-update: 2026-08-15 (Nieuwsplein33-account, Leusdense bronnen)*
