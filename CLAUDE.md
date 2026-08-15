@@ -34,7 +34,7 @@ Laat bestaande secties intact; voeg onderaan toe.
 - **De scrapers hebben hun eigen `scraper/node_modules`.** Een `npm install` in de hoofdmap raakt die niet, en dat moet zo blijven.
 - **`ConvertFrom-Json` faalt op `pm2 jlist` en `dump.pm2`** — de env-blokken bevatten sleutels die alleen in hoofdlettergebruik verschillen. Tel op naam.
 - **Normale signaalaanmaak is 17 tot 28 per dag.** Grote uitschieters zijn backfill of registerruis, geen doorbraak.
-- **De dashboard-inlog is lek**: de cookiewaarde staat hardcoded in `src/lib/dashboardAuth.ts`, in een publieke repo. Moet opgelost zijn voordat de redactie toegang krijgt; niet zelf oplossen zonder overleg.
+- **De dashboard-inlog is sinds 8-9 augustus 2026 gerepareerd**: HMAC-ondertekende sessiecookie, hashes en sessiegeheim alleen in Vercel-omgevingsvariabelen, drie persoonlijke accounts (jasper, pien, gideon). Bewust niet gebouwd: server-side sessie-intrekking; uitloggen wist alleen de cookie in de browser.
 
 ## Werkwijze
 

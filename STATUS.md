@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **15 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 (weger-run) — 18 signalen beoordeeld, een tip, nieuw dossier asielopvang, bekendmakingen-scrapers blijken wel te draaien"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Weger-feedback in de prompt verwerkt, dashboard herontworpen met licht en donker, NVWA-deel stilgelegd, mappen opgeruimd"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -3512,3 +3512,106 @@ overrulen is expliciet niet de bedoeling.
   hadden.** Alleen de laatste `scraped_at` per bron is bekeken, de PM2-logs niet.
 
 *Cowork-update: 2026-08-15 (Nieuwsplein33-account, weger-run)*
+
+---
+
+### Cowork-update: 2026-08-15 — Weger-feedback in de prompt verwerkt, dashboard herontworpen met licht en donker, NVWA-deel stilgelegd, mappen opgeruimd
+
+Analysesessie met Jasper, vanuit de cloud-Cowork met de mappen als koppeling.
+Vier blokken: de feedback uit de weger-runs doorgevoerd, openstaande bronpunten
+afgewerkt, het dashboard herontworpen en de mappenstructuur opgeruimd.
+
+**Weegroutineprompt bijgewerkt** (`Stadsgeest-documentatie\routines\stadsgeest-weger.md`),
+met de punten die de runs van 8 tot en met 15 augustus telkens opnieuw moesten
+ontdekken. Stap 1 haalt nu per signaal het laatste weger-event op en verdeelt de
+voorraad in nieuw, nieuw-materiaal en al-beoordeeld, zodat een run niet elke dag
+ruim tweehonderd beoordeelde signalen doorloopt. De werkwijze-sectie beschrijft de
+commandolengtevalkuil van PowerShell en het script-naar-bestand-patroon, plus dat
+raadvanstate.nl alleen via WebFetch te lezen is. Stap 2 kreeg een blokje
+broneigenaardigheden (Raad van State staat op tier 1 en weinig treffers is daar
+normaal; EF29 is een gunning en geen datafout; welke NVWA-bron de werkende is).
+Stap 3 waarschuwt voor de bron-aanloop: tel altijd de maandinstroom van de bron
+mee voordat je een trend claimt. Stap 7 noemt de drie toegestane waarden van
+`tip_signals.rol` en zet dragende signalen die nog op `new` staan op `watching`.
+
+**NVWA-deel van igj-nvwa.js stilgelegd**, op besluit van Jasper (follow-up
+genoteerd). De NVWA-ingang van die scraper stond op de algemene zoekpagina van
+nvwa.nl en leverde al een week uitsluitend landelijke voorlichtingspagina's die
+bovendien andere clusters vervuilden; de werkende vervanger
+(`nvwa-inspectieresultaten.js`, postcodes op het openbare inspectieregister)
+draait al. In de code staat het besluit als commentaar; bron 47 staat op
+`is_active=0`, `health='uitgeschakeld'` met de reden in `health_note`. Het
+IGJ-deel van de scraper draait ongewijzigd door. Follow-up: uitzoeken of
+nvwa.nl alsnog gericht op het inspectieregister te scrapen is.
+
+**Nextdoor-advertentiefilter in de intake** (`scraper/intake-run.mjs`): items van
+de Nextdoor-bron met een marktplaats.nl-link of te-koop-taal in de titel gaan nu
+naar `filtered` met een eigen reden, vóór de matching. Het €-trefwoord in de
+opvallend-regex maakte hier signalen van; de weger voerde er sinds 10 augustus
+elke run een paar af. **Niet in een echte run gezien**: er stonden vanmiddag nul
+onverwerkte Nextdoor-items klaar, de eerste toets is de nachtrun van 16 augustus.
+`node --check` is schoon op beide gewijzigde scraperbestanden.
+
+**Twee controles die een openstaand punt sluiten.** De lege UWV-items: het
+laatste lege item is van 9 augustus, de herbouw van die dag werkt dus en er is
+geen extra filter nodig. De raadsstromen: de scrapers draaien gewoon (laatste
+run 15 augustus 09:31, status `empty`; bron 31 vond op 14 augustus 6 items,
+0 nieuw) — nul nieuwe items is vrijwel zeker het zomerreces, geen storing. Na
+eind augustus opnieuw meten; dat stond al zo in BRONNEN.md en blijft staan.
+
+**Dashboard herontworpen** (commit ad405bb, live op stadsgeest.nl). Het dashboard
+heeft nu een eigen themasysteem, losgekoppeld van de donkere publiekssite: alle
+kleuren staan als `--np-tokens` op `.np-vlak`, standaard volgt het de
+systeemvoorkeur en de zon/maan-knop in de kop schakelt (keuze in localStorage
+`np-thema`, attribuut op `<html>` vóór de eerste render zodat er geen themaflits
+is). Tipkaarten zijn scanbaar gemaakt: soortetiket met eigen kleur per soort,
+kop, de kern in maximaal twee regels, en daaronder bronnen en context in leesbare
+tekst — het monospace-lettertype is uit de metadata verdwenen en alleen nog voor
+tabellen in gebruik. Leusden krijgt een eigen etiket, spiegelbronnen blijven
+amber gemarkeerd. De navigatie is een segmentbalk met tellers; de inlogpagina
+volgt dezelfde stijl. `npm run build` en eslint zijn schoon (eerste versie van de
+themaschakelaar sneuvelde op `react-hooks/set-state-in-effect`; herbouwd met
+`useSyncExternalStore`). Live geverifieerd: `/login` serveert de nieuwe pagina,
+`/nieuwsplein33` geeft zonder cookie een 307. **Niet geverifieerd: de ingelogde
+weergave met echte tips** — deze sessie heeft geen wachtwoorden; Jasper kijkt
+zelf. Voorbeeldschermen in licht en donker staan in de sessiechat.
+
+**Documentatie bijgewerkt.** START-HIER.md: twaalf PM2-processen in plaats van
+elf, punt 4 zegt nu dat de inlog gerepareerd is (met wat er bewust níét is:
+server-side intrekking), en "Wat er nu speelt" is herschreven — onder meer de
+achterhaalde bewering dat Officiële Bekendmakingen twee maanden niets leverde is
+weg, conform de weger-run van 15 augustus. CLAUDE.md: dezelfde inlog-valkuil
+bijgewerkt.
+
+**Mappen opgeruimd**, op verzoek van Jasper: drie nette plekken — de
+repo-werkkopie (deze map), `Stadsgeest-documentatie` en het archief.
+
+- `projects\stadsgeest033` is verwijderd. Vooraf gecontroleerd: schone werkboom
+  en nul ongepushte commits (origin/main stond er 9 vóór). De twee stashes zijn
+  eerst als patch bewaard in `Stadsgeest-archief\stadsgeest033-stashes\`.
+- `projects\stadsgeest033-design` staat nu in
+  `Stadsgeest-archief\ontwerp-stadsgeest033-design`.
+- `projects\amersfoort-lokaal` (Sanity Studio, 406 MB waarvan vrijwel alles
+  node_modules): de 18 bronbestanden staan in
+  `Stadsgeest-archief\amersfoort-lokaal-studio`; de map zelf staat in
+  `projects\_opruimen-mag-weg\` omdat de veiligheidslaag het verwijderen
+  blokkeerde. **Jasper: die map kan weg**, net als
+  `projects\stadsgeest-query.js` die er ook in staat (duplicaat van
+  `Stadsgeest-documentatie\scripts\stadsgeest-query.mjs`).
+- In de werkkopie: `.gitignore` aangevuld (logs, .err, .bak,
+  `.nextdoor-session.json`, bronnenwacht- en dwarsverbandenrapporten), 24
+  testscripts, oude beelden en .bak-bestanden naar
+  `Stadsgeest-archief\scraper-experimenten`, en drie dingen die ten onrechte
+  buiten git leefden alsnog gecommit: `scraper/package.json` met lockfile,
+  `scraper/src/scrapers/subsidieregister-records.js` (draait in PM2 en stond
+  nergens in versiebeheer) en drie weekreviews (commit 5e9b5a0).
+
+**Bewust laten liggen**, met het eindvoorstel bij Jasper: de clustering (grootste
+kostenpost aan de weegkant, drie runs op rij gemeld), `published_at` vullen
+vanuit de scrapers, TenderNed-detailpagina's (Playwright of open data),
+de notubiz-documenten die HTTP 400 geven, een koppeltabel voor dossierfeiten in
+meerdere dossiers, het Herstelsleutels-bestand met de oude gedeelde inlog, de
+Turso-sleutelrotatie en de gratis EP-online-key (alle drie alleen door Jasper te
+doen).
+
+*Cowork-update: 2026-08-15 (Nieuwsplein33-account, analysesessie met Jasper)*
