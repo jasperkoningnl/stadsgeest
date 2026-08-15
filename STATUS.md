@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **15 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Tippagina herzien: briefing in blokken, betrokkenen doorklikbaar, bronnen per spoor, en een verkenner"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Feedbackronde tippagina: merk in de kop, Eerdere berichtgeving, vervolgvragen bij het verhaal"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -3750,3 +3750,31 @@ bewuste keuze om de query licht te houden; als de redactie meer wil is
 zoeken in de volledige tekst een vervolgstap.
 
 *Cowork-update: 2026-08-15 (Nieuwsplein33-account, tippresentatie)*
+
+
+---
+
+### Cowork-update: 2026-08-15 — Feedbackronde tippagina: merk in de kop, Eerdere berichtgeving, vervolgvragen bij het verhaal
+
+Drie punten van Jasper na de herziening, alle drie doorgevoerd (commit 6505f58).
+
+**Vervolgvragen en "Wat we nog niet weten" overlapten.** Het aparte
+vervolgvragen-tabblad is weg; de vragen staan nu als "Zo kom je verder"
+(accentpaneel) direct onder "Wat we nog niet weten" — gat en handeling onder
+elkaar. Alleen bij een briefing buiten het vaste format komt het oude tabblad
+terug, zodat er nooit iets wegvalt. Daarnaast is de weegprompt aangescherpt:
+de vervolgvraag is de concrete stap om het gat te dichten, geen herhaling van
+het gat.
+
+**"Elders gebracht" is nu "Eerdere berichtgeving"**, met eigen (blauwe)
+opmaak zodat het niet meer op het niet-weten-paneel lijkt, en met artikellinks:
+naast wat de weger als elders-gebracht vastlegt staan nu ook de artikelen van
+Nieuwsplein33 en de partners die al aan de tip hangen (de spiegeldocumenten
+uit de onderliggende sporen, ontdubbeld op URL, met publicatiedatum en link).
+
+**Stadsgeest-merk in de kop**, klikbaar naar de voorpagina.
+
+Build en eslint schoon (één lintronde: de merk-link moest een next/link zijn).
+De ingelogde weergave is opnieuw niet zelf bekeken; Jasper kijkt live mee.
+
+*Cowork-update: 2026-08-15 (Nieuwsplein33-account, feedbackronde tippagina)*
