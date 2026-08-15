@@ -2,7 +2,11 @@
 
 > ### Bijgewerkt tot en met **15 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Raadsinformatie Leusden aangesloten; stand van de Leusdense bronnen"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Leusden uitgezocht: geen subsidieregister, wel een gemeentefeed. Lees dit vóór de run van 16 augustus"**.
+>
+> **Draai je de weegroutine?** Lees dan het blok "Voor de weger-run van
+> 16 augustus" onderaan dat bestand. Daar staat waarom er meer signalen dan
+> normaal liggen en welke intakeregels sinds 15 augustus anders werken.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -3926,3 +3930,93 @@ openbaar register is) en de gemeentelijke website als aparte bron. Beide zijn
 uitzoekwerk, geen tweede pass op iets bestaands.
 
 *Cowork-update: 2026-08-15 (Nieuwsplein33-account, Leusdense bronnen)*
+
+
+---
+
+### Cowork-update: 2026-08-15 — Leusden uitgezocht: geen subsidieregister, wel een gemeentefeed. Lees dit vóór de run van 16 augustus
+
+Vervolg op de vorige sectie. Twee openstaande Leusdense punten uitgezocht en
+één ervan meteen aangesloten.
+
+**Er is géén openbaar subsidieregister van Leusden.** Gecontroleerd langs vier
+wegen: gerichte zoekopdrachten (leveren alleen subsidie*regelingen* op —
+verordeningen in het CVDR, niet de verstrekte bedragen), de zoekfunctie van
+leusden.nl zelf, en de kansrijke paden `/subsidieregister`, `/open-data`,
+`/woo` en `/woo-verzoeken` — alle vier een 404. Anders dan Amersfoort, dat
+jaarlijks een PDF publiceert waaruit `subsidies` is gevuld met 1.678 records,
+publiceert Leusden dus geen jaaroverzicht met ontvangers en bedragen.
+
+**Wat er wél is, en dat is de bruikbare route:** individuele subsidiebesluiten
+komen binnen via de raadsinformatie. In de 46 stukken van 9 juli zitten onder
+meer `2026-1003 Subsidieverlening Lariks 2026`, `2026-1002 Subsidie bemoeizorg
+2026` en twee moties over DUMAVA-subsidie. Dat is een andere vorm — per besluit
+in plaats van een jaartabel — en dus niet geschikt voor de jaar-op-jaar
+vergelijking die bij Amersfoort wel kan. Wie hier een patroon wil claimen: dat
+kan niet met dit materiaal, en dat is geen scraperprobleem maar een verschil in
+wat de gemeente publiceert.
+
+**Nieuw: `Gemeente Leusden nieuws` (rij 130, tier 2).** De gemeentesite draait
+op TYPO3 en publiceert een gewone feed op `leusden.nl/rss.xml` — geen
+alternate-link in de HTML, dus hij is niet vindbaar via de gebruikelijke weg,
+maar hij werkt. Toegevoegd aan `org-rss.js` (één feed-entry, geen nieuw
+bestand). Eerste run: **32 items, 0 fouten**, alle 32 met publicatiedatum,
+bereik 7 september 2023 tot 10 augustus 2026 — ongeveer twee tot drie berichten
+per maand, dus een rustige maar echte stroom. Het nieuwste item gaat over extra
+subsidie voor eerder geïsoleerde woningen.
+
+En passant: `org-rss.js` gaf de publicatiedatum van feeds nog niet door aan
+`published_at`. Dat doet hij nu voor álle feeds daarin (Railcenter,
+Mondriaanhuis, KAdE, Kamp Amersfoort, Natuurmonumenten), niet alleen voor
+Leusden.
+
+**De Leusdense raadsstukken hebben nu volledige tekst.** `fetch-fulltext`
+matcht op `%raadsinformatie%` en pikte de nieuwe bron dus vanzelf op:
+**46 opgehaald, gemiddeld 10.363 tekens, 0 leeg, 0 fout.** De weger leest
+morgen dus echte documenten en niet alleen titels — bij dit materiaal
+(jaarrekening, accountantsverslag, kadernota) is dat het verschil tussen wel
+en niet kunnen wegen.
+
+#### Voor de weger-run van 16 augustus — vijf dingen die vandaag zijn veranderd
+
+Lees dit voordat je je werklijst beoordeelt; anders lees je een ongewone dag
+als een gewone.
+
+**1. Er staan 78 onverwerkte items klaar** (46 Leusdense raadsstukken van
+9 juli, 32 berichten van de gemeentefeed Leusden uit 2023-2026). Die gaan
+vannacht door de intake. Verwacht dus **meer signalen dan de normale 17 tot 28
+per dag, en veel Leusdens materiaal** — dat is deze inhaalslag, geen
+uitschieter in de stad en geen doorbraak. Het gemeentenieuws van 2023 tot 2025
+komt binnen als `[HISTORISCH]` op `watching`; dat is bedoeld gedrag.
+
+**2. De clustering is gewijzigd** (zie de pijplijnsectie van vandaag).
+Spiegelbronnen — Nieuwsplein33, De Stad Amersfoort en de andere partners —
+maken geen eigen signaal meer aan en schuiven niet meer via woordoverlap in
+bestaande clusters; ze koppelen alleen nog als bevestiging bij een
+entiteitsmatch, zonder `last_seen_at` te verversen. Woordoverlap heeft nu een
+drempel van 3 in plaats van 2, en gebiedsnamen en registerjargon
+('amersfoort', 'gemeente', 'besluit', 'aanvraag', 'bekendmaking',
+'vergadering', 'agenda', en de Leusdense varianten) tellen niet meer mee als
+matchwoord. **Gevolg dat je kunt zien:** minder vervuilde clusters, maar ook
+meer losse signalen — één gebeurtenis kan bij dunne titels in twee signalen
+uiteenvallen. Bij de testrun gebeurde dat met de explosie aan de Soerendonk
+(1115 en 1116). Behandel die als één zaak als je ze tegenkomt.
+
+**3. Twee bronnen zijn stilgelegd of gefilterd.** `NVWA — inspectieresultaten
+Amersfoort` (rij 47) levert niets meer; de landelijke voorlichtingspagina's die
+je vier runs achter elkaar hebt afgevoerd blijven dus weg. Gebruik `NVWA —
+openbare inspectieresultaten horeca`. Nextdoor-advertenties (Marktplaats-links
+en te-koop-taal) worden nu in de intake gefilterd.
+
+**4. `published_at` wordt gevuld** door tien scrapers. Dekking is nog laag
+(149 items) en groeit mee met de nachtruns. Waar hij gevuld is, is dát de
+datum om op te rekenen — niet het scrapemoment. Let op: de bron-aanloop blijft
+staan als valkuil, de kolom lost dat niet met terugwerkende kracht op.
+
+**5. Twee nieuwe Leusdense bronnen:** rij 129 `Raadsinformatie Leusden`
+(**tier 1**, dus dragend voor een tip) en rij 130 `Gemeente Leusden nieuws`
+(tier 2). Leusden levert +1 in de puntentelling en is het dunst bezette deel
+van het gebied van de redactie — twee freelancers. Materiaal uit deze twee
+bronnen is dus relatief veel waard, maar de gewone bronregel blijft gelden.
+
+*Cowork-update: 2026-08-15 (Nieuwsplein33-account, Leusden uitgezocht en klaargezet voor de weger)*
