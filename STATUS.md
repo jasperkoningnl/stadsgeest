@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **15 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Verhaal-tabblad: submenu en vaste volgorde"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Beslissingen omkeerbaar: terugzetten naar de wachtrij"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -3791,3 +3791,25 @@ Wat we niet weten → Zo kom je verder → Let op (heette "Wat hier niet in mag"
 verschijnt pas bij twee of meer. Commit 3cf4c69, build en eslint schoon.
 
 *Cowork-update: 2026-08-15 (Nieuwsplein33-account, submenu verhaal-tabblad)*
+
+
+---
+
+### Cowork-update: 2026-08-15 — Beslissingen omkeerbaar: terugzetten naar de wachtrij
+
+Vraag van Jasper: kan een geparkeerde (of anders afgehandelde) tip terug? Nu
+wel. De beslisroute accepteert 'wachtrij' als terugzetactie; de tippagina
+toont "Zet terug in de wachtrij" bij geparkeerde én afgehandelde tips. Twee
+uitzonderingen, bewust: een gepubliceerde tip zet je niet terug (de correctie
+loopt daar via de meetknop, zodat de meetstand van de testperiode klopt), en
+de knop voor de huidige status is verborgen — een tip opnieuw dezelfde status
+geven weigert de route ook server-side. Terugzetten vraagt geen reden: de
+eerdere beslissing met reden blijft in de append-only geschiedenis staan.
+
+Let op voor wie de historie leest: commit 59455d9 brak de Vercel-build (een
+typefout die pas in de typecheck-fase viel, ná "Compiled successfully" — en
+de commit was al gepusht voordat de build klaar was). Commit a1af74c
+herstelt dat; les: wacht op de volledige build-exitcode vóór de push. Live
+gecontroleerd na de deploy: login 200, dashboard 307 zonder cookie.
+
+*Cowork-update: 2026-08-15 (Nieuwsplein33-account, terugzetknop)*
