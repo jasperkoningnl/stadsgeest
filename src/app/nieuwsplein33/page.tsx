@@ -46,7 +46,7 @@ export default async function WachtrijPagina() {
       ) : (
         <>
           <p className="np-telling">
-            {tips.length} {tips.length === 1 ? 'tip' : 'tips'} — sterkste eerst
+            {tips.length} {tips.length === 1 ? 'tip' : 'tips'} — nieuwste eerst, per dag de sterkste bovenaan
           </p>
           <div className="np-lijst">
             {tips.map((tip) => <TipRegel key={tip.id} tip={tip} />)}

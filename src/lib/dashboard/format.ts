@@ -46,15 +46,33 @@ export function daysSince(iso: string | null | undefined): number | null {
   return Math.floor((Date.now() - d.getTime()) / 86400000)
 }
 
+/** yyyy-mm-dd in Nederlandse tijd — voor kalenderdagvergelijkingen. */
+function dagString(d: Date): string {
+  return d.toLocaleDateString('sv-SE', { timeZone: TIJDZONE })
+}
+
+/**
+ * "vandaag" en "gisteren" zijn in één oogopslag duidelijk; daarna is een echte
+ * datum sneller te plaatsen dan "9 dagen geleden". Kalenderdagen in
+ * Nederlandse tijd, dus iets van gisteravond heet ook 's ochtends "gisteren".
+ * Het jaartal verschijnt alleen buiten het lopende jaar.
+ */
 export function formatRelative(iso: string | null | undefined): string {
-  const dagen = daysSince(iso)
-  if (dagen === null) return 'nooit'
-  if (dagen <= 0) return 'vandaag'
-  if (dagen === 1) return 'gisteren'
-  if (dagen < 30) return `${dagen} dagen geleden`
-  const maanden = Math.floor(dagen / 30)
-  if (maanden < 12) return `${maanden} maand${maanden > 1 ? 'en' : ''} geleden`
-  return `${Math.floor(dagen / 365)} jaar geleden`
+  const d = parseDbDate(iso)
+  if (!d) return 'nooit'
+  const nu = new Date()
+  const dagVerschil = Math.round(
+    (Date.parse(dagString(nu)) - Date.parse(dagString(d))) / 86400000,
+  )
+  if (dagVerschil <= 0) return 'vandaag'
+  if (dagVerschil === 1) return 'gisteren'
+  const zelfdeJaar = dagString(d).slice(0, 4) === dagString(nu).slice(0, 4)
+  return d.toLocaleDateString('nl-NL', {
+    day: 'numeric',
+    month: 'short',
+    ...(zelfdeJaar ? {} : { year: 'numeric' }),
+    timeZone: TIJDZONE,
+  })
 }
 
 /**

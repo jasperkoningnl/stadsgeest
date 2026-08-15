@@ -130,7 +130,9 @@ export async function getTips(statussen: TipStatus[]): Promise<TipRij[]> {
     `SELECT ${TIP_KOLOMMEN}
      FROM tips t LEFT JOIN dossiers d ON d.id = t.dossier_id
      WHERE t.status IN (${gaten})
-     ORDER BY t.score DESC, t.created_at DESC`,
+     -- Chronologisch: nieuwste dag bovenaan. Binnen één dag (de weger schrijft
+     -- zijn tips in één run weg) staat de sterkste eerst.
+     ORDER BY substr(t.created_at, 1, 10) DESC, t.score DESC, t.created_at DESC`,
     statussen,
   )
   return verrijkMetBronnen(rijen)
