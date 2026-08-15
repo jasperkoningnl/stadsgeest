@@ -146,6 +146,7 @@ async function scrape() {
             title: entry.title,
             content: fullContent,
             summary: entry.updated ? `Gepubliceerd: ${entry.updated}` : '',
+            publishedAt: entry.updated || null,
           });
           if (result.saved) saved++; else skipped++;
         } catch (err) {

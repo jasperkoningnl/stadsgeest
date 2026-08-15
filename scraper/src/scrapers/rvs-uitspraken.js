@@ -184,6 +184,7 @@ async function scrape() {
         title: titel.substring(0, 290),
         content: inhoud,
         summary: (indicatie || volledig).substring(0, 500),
+        publishedAt: datum || null,
       });
       if (r.saved) opgeslagen++; else overgeslagen++;
     } catch (e) {

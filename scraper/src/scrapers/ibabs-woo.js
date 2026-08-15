@@ -104,6 +104,7 @@ async function scrape() {
           title: `${item.soort ? `${item.soort}: ` : ''}${item.titel}`.substring(0, 500),
           content: (detail || kop).substring(0, 8000),
           summary: kop.substring(0, 500),
+          publishedAt: item.datum || null,
         });
         if (result.saved) saved++; else skipped++;
       } catch (err) {

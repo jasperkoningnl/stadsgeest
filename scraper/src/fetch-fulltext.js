@@ -83,9 +83,39 @@ function cleanText(html) {
   return txt;
 }
 
+// Terugvalroute voor notubiz (toegevoegd 2026-08-15). Een deel van de
+// raadsdocumenten weigert de download met HTTP 400 ("Document kan niet
+// gedownload worden") — raadsvoorstellen, moties, de Jaarstukken. Open
+// Raadsinformatie indexeert dezelfde documenten mét geëxtraheerde tekst, en
+// `original_url` daar is exact onze external_url. Getest op 15 augustus:
+// document 17106654/2 gaf via notubiz een 400 en via ORI 14.659 tekens.
+async function oriTekst(url) {
+  try {
+    const r = await fetch('https://api.openraadsinformatie.nl/v1/elastic/ori_amersfoort_*/_search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'User-Agent': UA },
+      body: JSON.stringify({ size: 1, query: { term: { original_url: url } }, _source: ['text'] }),
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    const tekst = j.hits?.hits?.[0]?._source?.text;
+    if (!tekst || String(tekst).length < MIN_TEXT) return null;
+    return String(tekst).replace(/\s+/g, ' ').trim();
+  } catch {
+    return null;
+  }
+}
+
 async function fetchText(url) {
   const r = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(20000) });
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  if (!r.ok) {
+    if (url.includes('api.notubiz.nl/')) {
+      const tekst = await oriTekst(url);
+      if (tekst) return { text: tekst, reason: null };
+    }
+    throw new Error(`HTTP ${r.status}`);
+  }
   const ct = r.headers.get('content-type') || '';
   const buf = await r.arrayBuffer();
   const kop = Buffer.from(buf.slice(0, 5)).toString('latin1');

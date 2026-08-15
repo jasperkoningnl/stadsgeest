@@ -173,6 +173,7 @@ async function scrape() {
           summary,
           external_url: publicUrl,
           scraped_at: new Date().toISOString(),
+          published_at: rec.modified || null,
           full_text: doc ? doc.text : null,
         });
         const b = teller(route.source);
@@ -262,6 +263,7 @@ async function scrapeLeusden(since) {
           summary,
           external_url: `https://zoek.officielebekendmakingen.nl/${rec.identifier}.html`,
           scraped_at: new Date().toISOString(),
+          published_at: rec.modified || null,
           full_text: doc ? doc.text : null,
         });
         if (saved === true) s.new++;

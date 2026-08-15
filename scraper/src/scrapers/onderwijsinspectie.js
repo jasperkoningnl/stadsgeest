@@ -157,6 +157,7 @@ async function scrape() {
               title: titel.substring(0, 500),
               content: inhoud,
               summary: `${rap.publicatienaam} — ${el.naam}, vastgesteld ${rap.vaststellingsdatum}`,
+              publishedAt: datum,
             });
             if (result.saved) saved++; else skipped++;
           } catch (err) {

@@ -58,18 +58,40 @@ export async function ensureSource(db, { name, url, source_type, reliability, ca
   return r.lastInsertRowid;
 }
 
-export async function insertItem(db, { source_id, title, content, summary, external_url, scraped_at, is_historical = 0, full_text = null }) {
+// Publicatiedatum normaliseren naar ISO; onleesbaar of in de toekomst → null.
+// (Zelfde logica als naarPublicatieIso in utils.js; lib.js en utils.js zijn
+// bewust twee losse helperfamilies.)
+function naarPubIso(waarde) {
+  if (!waarde) return null;
+  const s = String(waarde).trim();
+  const nl = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  const d = nl ? new Date(`${nl[3]}-${nl[2]}-${nl[1]}T00:00:00Z`) : new Date(s);
+  if (Number.isNaN(d.getTime())) return null;
+  if (d.getTime() > Date.now() + 2 * 86400000) return null;
+  return d.toISOString();
+}
+
+export async function insertItem(db, { source_id, title, content, summary, external_url, scraped_at, is_historical = 0, full_text = null, published_at = null }) {
+  const pub = naarPubIso(published_at);
   try {
     const existing = await db.execute({
-      sql: 'SELECT id FROM raw_items WHERE external_url = ? OR (title = ? AND source_id = ?)',
+      sql: 'SELECT id, published_at FROM raw_items WHERE external_url = ? OR (title = ? AND source_id = ?)',
       args: [external_url ?? '', title, source_id],
     });
-    if (existing.rows.length > 0) return false; // skip duplicate
+    if (existing.rows.length > 0) {
+      // Bestaand item: publicatiedatum alsnog invullen als die nog leeg is.
+      if (pub && !existing.rows[0].published_at) {
+        try {
+          await db.execute({ sql: 'UPDATE raw_items SET published_at = ? WHERE id = ?', args: [pub, existing.rows[0].id] });
+        } catch { /* backfill is een extraatje */ }
+      }
+      return false; // skip duplicate
+    }
 
     await db.execute({
-      sql: `INSERT INTO raw_items (source_id, title, content, summary, external_url, scraped_at, is_processed, is_historical, full_text, fulltext_fetched_at)
-            VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
-      args: [source_id, title?.substring(0, 500) ?? '', content?.substring(0, 10000) ?? '', summary?.substring(0, 1000) ?? '', external_url ?? '', scraped_at ?? new Date().toISOString(), is_historical, full_text ? full_text.substring(0, 200000) : null, full_text ? new Date().toISOString() : null],
+      sql: `INSERT INTO raw_items (source_id, title, content, summary, external_url, scraped_at, is_processed, is_historical, full_text, fulltext_fetched_at, published_at)
+            VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?)`,
+      args: [source_id, title?.substring(0, 500) ?? '', content?.substring(0, 10000) ?? '', summary?.substring(0, 1000) ?? '', external_url ?? '', scraped_at ?? new Date().toISOString(), is_historical, full_text ? full_text.substring(0, 200000) : null, full_text ? new Date().toISOString() : null, pub],
     });
     return true;
   } catch (e) {

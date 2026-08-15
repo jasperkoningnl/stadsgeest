@@ -158,6 +158,7 @@ async function scrapeBron(bron, sinds) {
         summary: [bron.creator, rec.docType, rec.date].filter(Boolean).join(' | '),
         external_url: rec.url,
         scraped_at: new Date().toISOString(),
+        published_at: rec.date || null,
       });
       if (result === true) stats.new++;
       else if (result === false) stats.skipped++;

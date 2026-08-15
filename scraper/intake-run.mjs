@@ -44,7 +44,11 @@ function bronwereld(naam) {
   return 'anders';
 }
 
-const STOPWOORDEN = new Set(['de','het','een','en','van','in','te','dat','is','op','aan','met','er','maar','om','dan','ook','door','als','bij','dit','zijn','uit','noch','naar','tot','onder','over','worden','heeft','was','voor','nog','wel','niet','meer','ook','zo','nu','al','elke','alle','elk','die','wat','wie','hoe','waar','wanneer','welke','hoeveel','waarom','echter','omdat','want','toch','ja','nee','hier','daar','deze','dit','die','dat','zo','zeer','veel','meer','minder','andere','ieder','iedere','voor','door','naar','zijn','werd','worden','heeft','hebben','kunnen','zal','zou','mogen','willen','gaan']);
+const STOPWOORDEN = new Set(['de','het','een','en','van','in','te','dat','is','op','aan','met','er','maar','om','dan','ook','door','als','bij','dit','zijn','uit','noch','naar','tot','onder','over','worden','heeft','was','voor','nog','wel','niet','meer','ook','zo','nu','al','elke','alle','elk','die','wat','wie','hoe','waar','wanneer','welke','hoeveel','waarom','echter','omdat','want','toch','ja','nee','hier','daar','deze','dit','die','dat','zo','zeer','veel','meer','minder','andere','ieder','iedere','voor','door','naar','zijn','werd','worden','heeft','hebben','kunnen','zal','zou','mogen','willen','gaan',
+  // Gebiedsnamen en registerjargon (toegevoegd 2026-08-15): deze woorden staan
+  // in vrijwel elke titel in deze database en verbinden daardoor alles met
+  // alles — precies de clusterfouten uit de weger-runs van 13-15 augustus.
+  'amersfoort','amersfoortse','leusden','leusdense','gemeente','gemeentelijke','besluit','aanvraag','bekendmaking','vergadering','agenda']);
 
 function tokenize(text) {
   if (!text) return [];
@@ -260,7 +264,7 @@ async function run() {
     const itemsResult = await db.execute(`
       SELECT r.id, r.title, r.content, r.summary, r.external_url, r.scraped_at, r.is_historical,
              r.published_at,
-             s.name as source_name, s.reliability, s.category, s.tier, s.id as source_id
+             s.name as source_name, s.reliability, s.category, s.tier, s.bronrol, s.id as source_id
       FROM raw_items r JOIN sources s ON r.source_id = s.id
       WHERE r.is_processed = 0
       ORDER BY r.is_historical ASC, r.scraped_at DESC
@@ -407,6 +411,32 @@ async function run() {
         }
       }
 
+      // Spiegelbronnen (Nieuwsplein33 en zijn partners) zijn geen signaalbron
+      // maar een context- en ontdubbelingsbron (NIEUWSPLEIN33.md §5). Tot
+      // 15 augustus werden hun items via woordoverlap in bestaande clusters
+      // geschoven; clusters dreven daardoor van hun onderwerp weg (signaal 540
+      // begon bij het Sovjet Ereveld en eindigde bij ijssalons en wespen) en
+      // hun last_seen_at werd elke dag ververst zonder dat er iets gebeurde,
+      // waardoor de weger ze telkens opnieuw voorgeschoteld kreeg. Nu: alleen
+      // koppelen bij een entiteitsmatch, als bevestiging zonder last_seen_at
+      // te verversen; zonder match blijft het item naslag voor de spiegelcheck.
+      if (item.bronrol === 'spiegel') {
+        const sm = await entityMatchSignal(item.id);
+        if (sm) {
+          await db.execute({ sql: `UPDATE signals SET confirmations = confirmations + 1 WHERE id = ?`, args: [sm.sig.id] });
+          await db.execute({ sql: `INSERT OR IGNORE INTO signal_items (signal_id, raw_item_id) VALUES (?, ?)`, args: [sm.sig.id, item.id] });
+          sm.sig.confirmations = (sm.sig.confirmations || 0) + 1;
+          stats.bijgewerktSignaal++; stats.verwerkt++; stats.ids.push(item.id);
+          console.log(`  SPIEGEL [T${tier}] "${(item.title||'').substring(0,50)}" → #${sm.sig.id} (entiteiten:${sm.n})`);
+          await decisionBatcher.push(decisionStmt(runId, item, tier, 'matched', `spiegelbevestiging op gedeelde entiteiten voor signaal #${sm.sig.id}; last_seen_at bewust niet ververst`, { signal_id: sm.sig.id, match_score: sm.n }));
+          await eventBatcher.push(eventStmt(sm.sig.id, 'confirmed', { reason: `spiegelbron ${item.source_name || 'onbekend'} raakt dit onderwerp — bevestiging, geen nieuw materiaal` }));
+        } else {
+          stats.gefilterd++; stats.ids.push(item.id);
+          await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', 'spiegelbron: geen eigen signaal — alleen naslag voor ontdubbeling en bevestiging'));
+        }
+        continue;
+      }
+
       // Het 48-uursfilter dat hier stond is op 2026-08-09 verwijderd. Oude items
       // worden nu hierboven als historisch aangemerkt in plaats van weggegooid.
 
@@ -420,7 +450,12 @@ async function run() {
         for (const sig of activeSignals) {
           if (wereldenBotsen(itemWereld, sig.id)) continue;
           const score = matchScore(item, sig);
-          if (score >= 2 && score > bestScore) { bestScore = score; bestMatch = sig; }
+          // Drempel op 3 sinds 2026-08-15. Twee gedeelde woorden bleek opnieuw
+          // over-matchend (de les van juni herhaalde zich): signaal 1051 kreeg
+          // BRP-uitschrijvingen bij een gunning, 1041 meldkamerberichten bij een
+          // ECLI, 1067 advertenties bij een steigervergunning. Entiteitsmatching
+          // hierboven is de bedoelde route; woordoverlap is alleen nog vangnet.
+          if (score >= 3 && score > bestScore) { bestScore = score; bestMatch = sig; }
         }
       }
       // Bescherming: signalen met al veel items nooit verder voeden via woordoverlap

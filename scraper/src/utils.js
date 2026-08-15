@@ -6,18 +6,48 @@ export function contentHash(text) {
 }
 
 // Sla een item op in raw_items, sla over als het al bestaat (dedup op content_hash)
-export async function saveRawItem(db, { sourceId, externalUrl, title, content, summary }) {
+// Publicatiedatum normaliseren naar ISO. Accepteert een Date of een string
+// ("2026-08-14", "14-08-2026", RFC 2822 uit RSS). Onleesbare of toekomstige
+// datums leveren null op — dan valt de intake terug op scraped_at.
+export function naarPublicatieIso(waarde) {
+  if (!waarde) return null;
+  let d;
+  if (waarde instanceof Date) {
+    d = waarde;
+  } else {
+    const s = String(waarde).trim();
+    // Nederlandse notatie dd-mm-jjjj eerst, anders leest Date() hem Amerikaans.
+    const nl = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+    d = nl ? new Date(`${nl[3]}-${nl[2]}-${nl[1]}T00:00:00Z`) : new Date(s);
+  }
+  if (Number.isNaN(d.getTime())) return null;
+  if (d.getTime() > Date.now() + 2 * 86400000) return null;
+  return d.toISOString();
+}
+
+export async function saveRawItem(db, { sourceId, externalUrl, title, content, summary, publishedAt }) {
   const hash = contentHash(`${title}${externalUrl}`);
+  const pub = naarPublicatieIso(publishedAt);
 
   try {
     await db.execute({
-      sql: `INSERT INTO raw_items (source_id, external_url, title, content, summary, content_hash)
-            VALUES (?, ?, ?, ?, ?, ?)`,
-      args: [sourceId, externalUrl || null, title || null, content || null, summary || null, hash],
+      sql: `INSERT INTO raw_items (source_id, external_url, title, content, summary, content_hash, published_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      args: [sourceId, externalUrl || null, title || null, content || null, summary || null, hash, pub],
     });
     return { saved: true, hash };
   } catch (err) {
     if (err.message && err.message.includes('UNIQUE constraint failed')) {
+      // Bestaand item: vul de publicatiedatum alsnog in als die er nog niet is.
+      // Zo groeit de dekking van published_at vanzelf mee met herhaalde scrapes.
+      if (pub) {
+        try {
+          await db.execute({
+            sql: `UPDATE raw_items SET published_at = ? WHERE content_hash = ? AND published_at IS NULL`,
+            args: [pub, hash],
+          });
+        } catch { /* backfill is een extraatje, geen reden om de run te breken */ }
+      }
       return { saved: false, hash, reason: 'duplicate' };
     }
     throw err;

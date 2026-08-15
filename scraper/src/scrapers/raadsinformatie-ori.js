@@ -130,6 +130,7 @@ async function scrape() {
         title: naam.substring(0, 300),
         content: tekst,
         summary: `${src['@type'] || ''} — raadsinformatie Amersfoort, ${String(datum).substring(0, 10)}`,
+        publishedAt: datum,
       });
       if (r.saved) stats[stream.name].new++; else stats[stream.name].skipped++;
     } catch (e) {

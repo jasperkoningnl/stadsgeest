@@ -117,6 +117,7 @@ async function scrape() {
         title: item.titel,
         content: regels.join('\n'),
         summary: item.beschrijving.substring(0, 500),
+        publishedAt: item.gepubliceerd || null,
       });
       if (r.saved) opgeslagen++;
       else overgeslagen++;

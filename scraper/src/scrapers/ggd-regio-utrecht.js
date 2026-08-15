@@ -98,6 +98,7 @@ async function scrape() {
           title: titel.substring(0, 500),
           content: tekst.substring(0, 8000),
           summary: striptHtml(post.excerpt?.rendered).substring(0, 500),
+          publishedAt: post.date ?? null,
         });
         if (result.saved) saved++; else skipped++;
       } catch (err) {
