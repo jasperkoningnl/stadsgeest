@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **15 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Fix terugzetknop: feedback-CHECK kent 'wachtrij' niet"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Wachtrij chronologisch, datums in plaats van 'x dagen geleden'"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -3830,3 +3830,21 @@ controleer bij een nieuwe schrijfactie eerst de CHECK-constraints van de
 tabel (zelfde valkuil als tip_signals.rol op 10 augustus).
 
 *Cowork-update: 2026-08-15 (Nieuwsplein33-account, fix terugzetknop)*
+
+
+---
+
+### Cowork-update: 2026-08-15 — Wachtrij chronologisch, datums in plaats van "x dagen geleden"
+
+Twee puntjes van Jasper. De tiplijsten sorteren nu chronologisch (nieuwste
+dag bovenaan) met binnen één dag de sterkste eerst — de weger schrijft zijn
+tips per run weg, dus binnen een dag is score de zinvolle volgorde; daarvóór
+stond alles puur op score en leek de lijst willekeurig. En `formatRelative`
+toont nu "vandaag", "gisteren" en daarna een echte datum ("12 aug", met
+jaartal buiten het lopende jaar) in plaats van "9 dagen geleden" — een datum
+is sneller te plaatsen dan terugrekenen. Kalenderdagen in Nederlandse tijd,
+dus iets van gisteravond heet 's ochtends ook "gisteren" (de oude versie
+rekende in blokken van 24 uur). Geldt ook voor de bronnentabel op Beheer.
+Commit 4c94498, build en eslint schoon.
+
+*Cowork-update: 2026-08-15 (Nieuwsplein33-account, sortering en datums)*
