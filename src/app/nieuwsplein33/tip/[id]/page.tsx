@@ -63,7 +63,12 @@ interface EerderBericht {
   url: string | null
 }
 
-/** Het verhaal-tabblad: de briefing in leesbare blokken in plaats van platte tekst. */
+/**
+ * Het verhaal-tabblad: de briefing in leesbare blokken in plaats van platte
+ * tekst, met een submenuutje dat naar de aanwezige blokken springt. Volgorde
+ * vastgelegd met Jasper op 15 augustus: weten → wie → niet weten → verder →
+ * let op → eerdere berichtgeving.
+ */
 function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, vragen }: {
   briefing: GeparsedeBriefing
   eerder: EerderBericht[]
@@ -71,10 +76,46 @@ function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, vragen }: {
   toegevoegdeWaarde: string | null
   vragen: string[]
 }) {
+  const heeftEerder = eerder.length > 0 || Boolean(eldersTekst && !/^nee\.?$/i.test(eldersTekst))
+  const submenu = [
+    briefing.weten.length > 0 && { id: 'weten', label: 'Wat we weten' },
+    briefing.betrokkenen.length > 0 && { id: 'wie', label: 'Wie hierin voorkomen' },
+    briefing.nietWeten.length > 0 && { id: 'niet-weten', label: 'Wat we niet weten' },
+    vragen.length > 0 && { id: 'verder', label: 'Zo kom je verder' },
+    briefing.nietInMag.length > 0 && { id: 'let-op', label: 'Let op' },
+    heeftEerder && { id: 'eerder', label: 'Eerdere berichtgeving' },
+  ].filter(Boolean) as { id: string; label: string }[]
+
   return (
     <>
+      {submenu.length > 1 && (
+        <nav className="np-submenu" aria-label="Onderdelen van het verhaal">
+          {submenu.map((s) => (
+            <a key={s.id} href={`#${s.id}`}>{s.label}</a>
+          ))}
+        </nav>
+      )}
+
+      <section id="weten" className="np-anker">
+        <h3 className="np-kopje">Wat we weten</h3>
+        <ol className="np-feiten">
+          {briefing.weten.map((f, i) => (
+            <li key={i}>
+              <p>{f.tekst}</p>
+              {(f.bron || f.url) && (
+                <div className="np-feit-bron">
+                  {f.url
+                    ? <a href={f.url} target="_blank" rel="noreferrer">{f.bron || 'brondocument'}</a>
+                    : f.bron}
+                </div>
+              )}
+            </li>
+          ))}
+        </ol>
+      </section>
+
       {briefing.betrokkenen.length > 0 && (
-        <section className="np-betrokkenen">
+        <section id="wie" className="np-betrokkenen np-anker">
           <h3 className="np-kopje">Wie hierin voorkomen</h3>
           <ul>
             {briefing.betrokkenen.map((b, i) => (
@@ -96,24 +137,29 @@ function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, vragen }: {
         </section>
       )}
 
-      <h3 className="np-kopje">Wat we weten</h3>
-      <ol className="np-feiten">
-        {briefing.weten.map((f, i) => (
-          <li key={i}>
-            <p>{f.tekst}</p>
-            {(f.bron || f.url) && (
-              <div className="np-feit-bron">
-                {f.url
-                  ? <a href={f.url} target="_blank" rel="noreferrer">{f.bron || 'brondocument'}</a>
-                  : f.bron}
-              </div>
-            )}
-          </li>
-        ))}
-      </ol>
+      {briefing.nietWeten.length > 0 && (
+        <div id="niet-weten" className="np-paneel np-paneel-open np-anker">
+          <strong>Wat we niet weten</strong>
+          <ul>{briefing.nietWeten.map((r, i) => <li key={i}>{r}</li>)}</ul>
+        </div>
+      )}
 
-      {(eerder.length > 0 || (eldersTekst && !/^nee\.?$/i.test(eldersTekst))) && (
-        <div className="np-paneel np-paneel-eerder">
+      {vragen.length > 0 && (
+        <div id="verder" className="np-paneel np-paneel-verder np-anker">
+          <strong>Zo kom je verder</strong>
+          <ul>{vragen.map((v, i) => <li key={i}>{v}</li>)}</ul>
+        </div>
+      )}
+
+      {briefing.nietInMag.length > 0 && (
+        <div id="let-op" className="np-paneel np-paneel-nee np-anker">
+          <strong>Let op</strong>
+          <ul>{briefing.nietInMag.map((r, i) => <li key={i}>{r}</li>)}</ul>
+        </div>
+      )}
+
+      {heeftEerder && (
+        <div id="eerder" className="np-paneel np-paneel-eerder np-anker">
           <strong>Eerdere berichtgeving</strong>
           {eerder.length > 0 && (
             <ul>
@@ -129,27 +175,6 @@ function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, vragen }: {
           )}
           {eerder.length === 0 && eldersTekst && <p>{eldersTekst}</p>}
           {toegevoegdeWaarde && <p className="np-eerder-nieuw"><strong>Wat hier nieuw aan is:</strong> {toegevoegdeWaarde}</p>}
-        </div>
-      )}
-
-      {briefing.nietWeten.length > 0 && (
-        <div className="np-paneel np-paneel-open">
-          <strong>Wat we nog niet weten</strong>
-          <ul>{briefing.nietWeten.map((r, i) => <li key={i}>{r}</li>)}</ul>
-        </div>
-      )}
-
-      {vragen.length > 0 && (
-        <div className="np-paneel np-paneel-verder">
-          <strong>Zo kom je verder</strong>
-          <ul>{vragen.map((v, i) => <li key={i}>{v}</li>)}</ul>
-        </div>
-      )}
-
-      {briefing.nietInMag.length > 0 && (
-        <div className="np-paneel np-paneel-nee">
-          <strong>Wat hier niet in mag</strong>
-          <ul>{briefing.nietInMag.map((r, i) => <li key={i}>{r}</li>)}</ul>
         </div>
       )}
     </>

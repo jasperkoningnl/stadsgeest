@@ -1576,3 +1576,18 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 
 .np-paneel-verder { background: var(--np-accent-z); border: 1px solid var(--np-accent); }
 .np-paneel-verder strong { color: var(--np-accent); }
+
+/* ── Submenu binnen Het verhaal (2026-08-15) ────────────── */
+.np-submenu {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 18px;
+}
+.np-submenu a {
+  font-family: var(--f-d); font-size: 12.5px; font-weight: 600;
+  padding: 5px 12px; border-radius: 16px;
+  border: 1px solid var(--np-rand); background: var(--np-kaart);
+  color: var(--np-inkt2); text-decoration: none;
+  transition: color .16s ease, border-color .16s ease;
+}
+.np-submenu a:hover { color: var(--np-accent); border-color: var(--np-accent); }
+.np-anker { scroll-margin-top: 16px; }
