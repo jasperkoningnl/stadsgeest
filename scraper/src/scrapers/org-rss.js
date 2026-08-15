@@ -54,6 +54,23 @@ const FEEDS = [
     filter: 'amersfoort',
   },
   // RCE en Defensie: geen RSS beschikbaar (Next.js-site) → HTML in erfgoed-natuur.js
+  {
+    // Toegevoegd 2026-08-15. De gemeentesite van Leusden draait op TYPO3 en
+    // publiceert een gewone feed op /rss.xml ("Nieuws uit de gemeente
+    // Leusden"): 32 items, nieuwste 10 augustus 2026, ongeveer twee tot drie
+    // berichten per maand. Dit vult het Leusden-gat uit NIEUWSPLEIN33.md §6.7
+    // aan de gemeentekant; de raadsinformatie loopt via raadsinformatie-ori.js.
+    // Tier 2 (gemeente = corroboratiebron) en gemeente 'Leusden' worden na de
+    // lus gezet, want getOrCreateSource kent die kolommen niet.
+    name: 'Gemeente Leusden nieuws',
+    url: 'https://www.leusden.nl',
+    feedUrl: 'https://www.leusden.nl/rss.xml',
+    category: 'government',
+    reliability: 'primary',
+    filter: null,
+    tier: 2,
+    gemeente: 'Leusden',
+  },
 ];
 
 async function fetchFeed(feedUrl) {
@@ -78,6 +95,16 @@ async function scrape() {
       scrapeFrequency: 'weekly',
     });
 
+    // getOrCreateSource kent geen tier- en gemeentekolom; feeds die daar iets
+    // over zeggen zetten het hier zelf, zodat de weger en het dashboard de
+    // bron goed inschalen.
+    if (src.tier || src.gemeente) {
+      await db.execute({
+        sql: `UPDATE sources SET tier = COALESCE(?, tier), gemeente = COALESCE(?, gemeente) WHERE id = ?`,
+        args: [src.tier ?? null, src.gemeente ?? null, sourceId],
+      });
+    }
+
     let saved = 0, skipped = 0, errors = 0;
 
     try {
@@ -95,6 +122,10 @@ async function scrape() {
             title: item.title,
             content: item.contentSnippet || item.content || '',
             summary: item.contentSnippet?.slice(0, 250) || '',
+            // Feeds geven een echte publicatiedatum; die hoort in published_at
+            // zodat de weger op de datum van het bericht kan rekenen en niet op
+            // het scrapemoment (zie de pijplijnsessie van 15 augustus).
+            publishedAt: item.isoDate || item.pubDate || null,
           });
           if (r.saved) saved++; else skipped++;
         } catch (e) { errors++; console.error(`Item fout (${src.name}):`, e.message); }
