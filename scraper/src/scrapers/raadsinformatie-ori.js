@@ -140,6 +140,100 @@ async function scrape() {
   for (const s of STREAMS) {
     await logResult(db, sourceIds[s.name], s.name, stats[s.name].new, stats[s.name].skipped, stats[s.name].errors);
   }
+
+  // ── Leusden (toegevoegd 2026-08-15, besluit Jasper) ──────────────────────
+  // Open Raadsinformatie heeft ook een Leusden-index (ori_leusden_*), dus de
+  // Leusdense raadsinformatie is een tweede pass op dezelfde API — geen
+  // nieuwbouw. Bewust één bron in plaats van zes stromen: Leusden vergadert
+  // minder vaak en zes vrijwel lege bronnen maken het overzicht onleesbaar
+  // (zelfde afweging als bij Officiële Bekendmakingen — Leusden, bron 127).
+  // De bron-url is de ORI-ingang zelf: uniek, en getOrCreateSource matcht op
+  // url — een gedeelde url was precies de labelfout van 9 augustus.
+  //
+  // Leusden krijgt een eigen venster (standaard 30 dagen): de raad vergadert
+  // daar ongeveer maandelijks, dus met de 14 dagen van Amersfoort levert de
+  // bron structureel nul. Gemeten op 15 augustus 2026: 0 documenten binnen
+  // 30 dagen, 46 binnen 45 dagen (de raadsvergadering van 9 juli over de
+  // kadernota), 198 binnen 90 dagen. Verruim dit dus met mate — 90 dagen is
+  // een backfill, geen venster.
+  try {
+    await leusdenPass(parseInt(process.env.ORI_DAGEN_LEUSDEN || '30', 10));
+  } catch (e) {
+    console.error('raadsinformatie-ori (Leusden):', e.message);
+  }
+}
+
+async function leusdenPass(dagen) {
+  const ES_LEUSDEN = 'https://api.openraadsinformatie.nl/v1/elastic/ori_leusden*/_search';
+  const naam = 'Raadsinformatie Leusden';
+  const sourceId = await getOrCreateSource(db, {
+    name: naam,
+    url: 'https://api.openraadsinformatie.nl/v1/elastic/ori_leusden*',
+    sourceType: 'api',
+    reliability: 'primary',
+    category: 'government',
+    scrapeFrequency: 'daily',
+  });
+  // getOrCreateSource uit utils.js kent geen tier- of gemeentekolom; zet die
+  // hier, zodat de weger en het dashboard de bron goed inschalen. Tier 1 is
+  // geen detail: raadsinformatie is volgens de weegregels een publicatiebron
+  // die op eigen kracht dragend mag zijn (+3). Op tier 2 haalt een Leusdense
+  // tip de drempel van 6 vrijwel nooit — precies het gat dat deze bron dicht.
+  // Bij de eerste run kwam de rij op tier 2 binnen; daarom expliciet zetten
+  // en niet met COALESCE.
+  await db.execute({
+    sql: `UPDATE sources SET tier = 1, gemeente = 'Leusden' WHERE id = ?`,
+    args: [sourceId],
+  });
+
+  const since = new Date(Date.now() - dagen * 864e5).toISOString();
+  const body = {
+    size: 250,
+    sort: [{ last_discussed_at: { order: 'desc', unmapped_type: 'date' } }],
+    query: {
+      bool: {
+        must: [{ terms: { '@type': ['Meeting', 'MediaObject', 'AgendaItem'] } }],
+        should: [
+          { range: { last_discussed_at: { gte: since } } },
+          { range: { start_date: { gte: since } } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  };
+  const resp = await fetch(ES_LEUSDEN, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'User-Agent': UA },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(30000),
+  });
+  if (!resp.ok) throw new Error(`ORI Leusden HTTP ${resp.status}`);
+  const json = await resp.json();
+  const hits = (json.hits && json.hits.hits) || [];
+
+  let nieuw = 0, overgeslagen = 0, fouten = 0;
+  for (const h of hits) {
+    const src = h._source || {};
+    const titel = String(src.name || '').trim();
+    if (!titel) continue;
+    const url = src.original_url || (Array.isArray(src.sources) && src.sources[0] && src.sources[0].url) || `https://api.openraadsinformatie.nl/v1/elastic/${h._index}/_doc/${encodeURIComponent(h._id)}`;
+    const tekst = String(src.text || src.description || '').substring(0, 8000);
+    const datum = src.last_discussed_at || src.start_date || src['@timestamp'] || new Date().toISOString();
+    try {
+      const r = await saveRawItem(db, {
+        sourceId,
+        externalUrl: url,
+        title: titel.substring(0, 300),
+        content: tekst,
+        summary: `${src['@type'] || ''} — raadsinformatie Leusden, ${String(datum).substring(0, 10)}`,
+        publishedAt: datum,
+      });
+      if (r.saved) nieuw++; else overgeslagen++;
+    } catch {
+      fouten++;
+    }
+  }
+  await logResult(db, sourceId, naam, nieuw, overgeslagen, fouten, hits.length);
 }
 
 scrape().catch(e => { console.error('raadsinformatie-ori:', e.message); process.exit(1); });
