@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **15 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Pijplijn: published_at gevuld, spiegelbronnen ontkoppeld van clusters, notubiz-documenten alsnog binnen, TenderNed-gunningen leesbaar"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Tippagina herzien: briefing in blokken, betrokkenen doorklikbaar, bronnen per spoor, en een verkenner"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -3700,3 +3700,53 @@ published_at echt gevuld raakt kan materiaal dat laat gepubliceerd wordt
 wel iets om in de gaten te houden en zo nodig te verruimen.
 
 *Cowork-update: 2026-08-15 (Nieuwsplein33-account, pijplijnsessie na akkoord Jasper)*
+
+
+---
+
+### Cowork-update: 2026-08-15 — Tippagina herzien: briefing in blokken, betrokkenen doorklikbaar, bronnen per spoor, en een verkenner
+
+Derde blok van vandaag, op verzoek van Jasper: kritisch naar de
+tippresentatie kijken vanuit de redacteur. Commit 2e5cb64, live geverifieerd
+voor zover dat zonder inloggegevens kan (routes bestaan en zitten achter de
+inlog; de parser is tegen alle echte briefings getest, zie onder).
+
+**De bevinding.** De weger schrijft keurig gestructureerde briefings — alle
+twintig tips hebben dezelfde zes koppen, met per feit een bron-URL en per
+betrokkene naam, rol en relevantie — maar het dashboard toonde dat als één
+lap platte tekst met onklikbare URL's. Betrokkenen stonden verstopt midden in
+het verhaal, doorklikken kon nergens, de bronnen-tab toonde de scrapedatum in
+plaats van de publicatiedatum, en welke signalen onder een tip liggen was
+onzichtbaar.
+
+**Wat er is gebouwd.**
+
+- **`src/lib/dashboard/briefing.ts`** — parser voor het vaste briefingformat.
+  Tolerant: valt de structuur niet te herkennen, dan toont de pagina de platte
+  tekst zoals voorheen. Getest tegen alle twintig echte briefings: 6/6 secties
+  herkend, 4 tot 11 feiten en 2 tot 6 betrokkenen per tip, nul terugvallers.
+- **Het verhaal-tabblad** toont nu: een blok "Wie hierin voorkomen" (naam
+  vet en klikbaar, rol erachter, relevantie eronder), de feiten als genummerde
+  kaartjes met een klikbare bronregel, "Wat we nog niet weten" als
+  open-vragenpaneel (amber), "Wat hier niet in mag" als waarschuwingspaneel
+  (rood), en de elders-gebracht-melding zoals die er al was.
+- **De bronnen-tab** groepeert documenten per onderliggend signaal ("spoor" in
+  redactietaal), met de rol van dat spoor als etiket (dragend/bevestigend/
+  context), de publicatiedatum voorop (terugval: binnenkomstdatum) en de tier
+  als kleurbadge. Daarmee is ook zichtbaar uit welke signalen een tip bestaat.
+- **De verkenner** (`/nieuwsplein33/verkenner?q=…`, ook als nav-item): alles
+  wat Stadsgeest over een naam of onderwerp heeft — tips, sporen, dossier-
+  feiten, het subsidieregister (met jaartotalen per ontvanger) en documenten.
+  Puur lezend. Klik op een betrokkene bij een tip komt hier uit; de zoekterm
+  wordt geschoond op LIKE-jokers en bij nul treffers op een meerwoordige naam
+  wordt automatisch op het langste woord gezocht ("W. Stegeman" → "Stegeman"
+  gebeurt al bij de klik, via `verkennerTerm`).
+
+**Niet geverifieerd.** De ingelogde weergave is niet live bekeken (geen
+wachtwoorden in deze sessie); de parser en queries zijn wel tegen de
+productiedata getest en `npm run build` en eslint zijn schoon. Jasper kijkt
+zelf. De verkenner zoekt in documenttitels, niet in `full_text` — dat is een
+bewuste keuze om de query licht te houden; als de redactie meer wil is
+zoeken in de volledige tekst een vervolgstap.
+
+*Cowork-update: 2026-08-15 (Nieuwsplein33-account, tippresentatie)*
