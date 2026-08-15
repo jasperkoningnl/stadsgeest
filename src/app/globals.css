@@ -1472,3 +1472,86 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
   font-family: var(--f-m); font-size: 12px; letter-spacing: 0.06em; color: var(--t3);
 }
 
+
+/* ── Tipdetail: gestructureerde briefing (2026-08-15) ────── */
+.np-betrokkenen {
+  margin-bottom: 20px; padding: 16px 18px;
+  background: var(--np-kaart); border: 1px solid var(--np-rand-z); border-radius: 12px;
+}
+.np-betrokkenen .np-kopje { margin-top: 0; }
+.np-betrokkenen ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.np-betrokkene-naam { font-weight: 700; color: var(--np-accent); text-decoration: none; }
+.np-betrokkene-naam:hover { text-decoration: underline; }
+.np-betrokkene-rol { margin-left: 8px; font-size: 13px; color: var(--np-inkt2); }
+.np-betrokkene-toel {
+  font-family: var(--f-b); font-size: 13.5px; color: var(--np-inkt3);
+  line-height: 1.55; margin-top: 2px;
+}
+
+.np-feiten {
+  list-style: none; counter-reset: feit;
+  display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px;
+}
+.np-feiten > li {
+  counter-increment: feit; position: relative; padding: 12px 16px 12px 48px;
+  background: var(--np-kaart); border: 1px solid var(--np-rand-z); border-radius: 10px;
+}
+.np-feiten > li::before {
+  content: counter(feit); position: absolute; left: 14px; top: 13px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--np-accent-z); color: var(--np-accent);
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.np-feiten p { font-family: var(--f-b); font-size: 15px; line-height: 1.6; color: var(--np-inkt); }
+.np-feit-bron { margin-top: 6px; font-size: 12.5px; color: var(--np-inkt3); }
+.np-feit-bron a { color: var(--np-accent); text-decoration: none; }
+.np-feit-bron a:hover { text-decoration: underline; }
+
+.np-paneel {
+  padding: 14px 16px; margin: 16px 0; border-radius: 10px;
+  font-family: var(--f-b); font-size: 14px; color: var(--np-inkt2);
+}
+.np-paneel strong { font-family: var(--f-d); display: block; margin-bottom: 6px; }
+.np-paneel ul { margin: 0 0 0 18px; display: flex; flex-direction: column; gap: 5px; }
+.np-paneel-open { background: var(--np-amber-z); border: 1px solid var(--np-amber); }
+.np-paneel-open strong { color: var(--np-amber); }
+.np-paneel-nee { background: var(--np-rood-z); border: 1px solid var(--np-rood); }
+.np-paneel-nee strong { color: var(--np-rood); }
+
+/* Bronnen gegroepeerd per spoor */
+.np-doc-groep { margin-bottom: 18px; }
+.np-doc-groep-kop { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.np-rol { font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+.np-rol-dragend { background: var(--np-accent); color: var(--np-accent-io); }
+.np-rol-bevestigend { background: var(--np-accent-z); color: var(--np-accent); }
+.np-rol-context { background: var(--np-grijs-z); color: var(--np-inkt2); }
+.np-doc-groep-titel { font-weight: 600; font-size: 14px; color: var(--np-inkt); }
+.np-doc-groep-tel { font-size: 12.5px; color: var(--np-inkt3); }
+.np-tier-1 { border-color: var(--np-groen); color: var(--np-groen); background: var(--np-groen-z); }
+.np-tier-2 { border-color: var(--np-blauw); color: var(--np-blauw); background: var(--np-blauw-z); }
+.np-tier-3 { border-color: var(--np-rand); color: var(--np-inkt3); }
+
+/* ── Verkenner ──────────────────────────────────────────── */
+.np-verkenner { max-width: 860px; }
+.np-zoekbalk { display: flex; gap: 8px; margin-bottom: 20px; }
+.np-zoekbalk input {
+  flex: 1; padding: 11px 16px;
+  background: var(--np-kaart); border: 1px solid var(--np-rand); border-radius: 22px;
+  color: var(--np-inkt); font-family: var(--f-d); font-size: 15px; outline: none;
+}
+.np-zoekbalk input:focus { border-color: var(--np-accent); }
+.np-zoekbalk button {
+  padding: 11px 22px; border-radius: 22px;
+  border: 1px solid var(--np-accent); background: var(--np-accent); color: var(--np-accent-io);
+  font-family: var(--f-d); font-weight: 700; font-size: 14px; cursor: pointer;
+}
+.np-verkenner-blok { margin-bottom: 26px; }
+.np-verkenner-signalen { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.np-verkenner-signalen li {
+  padding: 10px 14px; background: var(--np-kaart);
+  border: 1px solid var(--np-rand-z); border-radius: 10px;
+}
+.np-verkenner-signaal-titel { display: block; font-weight: 600; font-size: 14.5px; margin-bottom: 3px; }
+.np-verkenner-signalen .np-regel-meta { margin-top: 0; }
+.np-cel-lang { white-space: normal; min-width: 220px; }

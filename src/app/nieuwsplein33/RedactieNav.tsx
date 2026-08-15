@@ -8,6 +8,7 @@ const ITEMS = [
   { href: '/nieuwsplein33/behandeling', label: 'Mee bezig', tel: ['goedgekeurd', 'in_behandeling'] },
   { href: '/nieuwsplein33/geparkeerd', label: 'Geparkeerd', tel: ['geparkeerd'] },
   { href: '/nieuwsplein33/archief', label: 'Archief', tel: ['gepubliceerd', 'niet_gebruikt', 'afgekeurd'] },
+  { href: '/nieuwsplein33/verkenner', label: 'Verkenner', tel: [] as string[] },
 ]
 
 // Beheer is bewust alleen voor Jasper: cijfers over de pipeline zelf, niet over

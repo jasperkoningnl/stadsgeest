@@ -3,8 +3,10 @@ import { notFound } from 'next/navigation'
 import { hasTurso } from '@/lib/turso'
 import {
   getTipDetail, getTipDocumenten, getTipFeedback, getDossierTijdlijn,
+  type TipDocument,
 } from '@/lib/dashboard/tipQueries'
 import { formatDate, formatDateTime, safeParseJson, safeParseJsonArray } from '@/lib/dashboard/format'
+import { parseBriefing, verkennerTerm, type GeparsedeBriefing } from '@/lib/dashboard/briefing'
 import GeenDatabase from '../../GeenDatabase'
 import { SOORT_LABEL } from '../../TipRegel'
 import TipTabs, { type Tab } from './TipTabs'
@@ -31,6 +33,12 @@ const TIER_UITLEG: Record<number, string> = {
   3: 'Signaalbron — meldingen, buurtplatforms, sociale media',
 }
 
+const ROL_LABEL: Record<string, string> = {
+  dragend: 'Dragend',
+  bevestigend: 'Bevestigend',
+  context: 'Context',
+}
+
 interface HerkomstBron { naam?: string; tier?: number; url?: string; datum?: string; bijdrage?: string }
 interface EldersItem { medium?: string; url?: string; datum?: string }
 
@@ -43,6 +51,145 @@ function Alinea({ tekst }: { tekst: string }) {
             <span key={j}>{regel}{j < blok.split('\n').length - 1 && <br />}</span>
           ))}
         </p>
+      ))}
+    </>
+  )
+}
+
+/** Het verhaal-tabblad: de briefing in leesbare blokken in plaats van platte tekst. */
+function Verhaal({ briefing, elders, toegevoegdeWaarde }: {
+  briefing: GeparsedeBriefing
+  elders: EldersItem[]
+  toegevoegdeWaarde: string | null
+}) {
+  return (
+    <>
+      {briefing.betrokkenen.length > 0 && (
+        <section className="np-betrokkenen">
+          <h3 className="np-kopje">Wie hierin voorkomen</h3>
+          <ul>
+            {briefing.betrokkenen.map((b, i) => (
+              <li key={i}>
+                <div>
+                  <Link
+                    href={`/nieuwsplein33/verkenner?q=${encodeURIComponent(verkennerTerm(b.naam))}`}
+                    className="np-betrokkene-naam"
+                    title={`Alles wat Stadsgeest heeft over ${b.naam}`}
+                  >
+                    {b.naam}
+                  </Link>
+                  {b.rol && <span className="np-betrokkene-rol">{b.rol}</span>}
+                </div>
+                {b.toelichting && <div className="np-betrokkene-toel">{b.toelichting}</div>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <h3 className="np-kopje">Wat we weten</h3>
+      <ol className="np-feiten">
+        {briefing.weten.map((f, i) => (
+          <li key={i}>
+            <p>{f.tekst}</p>
+            {(f.bron || f.url) && (
+              <div className="np-feit-bron">
+                {f.url
+                  ? <a href={f.url} target="_blank" rel="noreferrer">{f.bron || 'brondocument'}</a>
+                  : f.bron}
+              </div>
+            )}
+          </li>
+        ))}
+      </ol>
+
+      {briefing.nietWeten.length > 0 && (
+        <div className="np-paneel np-paneel-open">
+          <strong>Wat we nog niet weten</strong>
+          <ul>{briefing.nietWeten.map((r, i) => <li key={i}>{r}</li>)}</ul>
+        </div>
+      )}
+
+      {briefing.nietInMag.length > 0 && (
+        <div className="np-paneel np-paneel-nee">
+          <strong>Wat hier niet in mag</strong>
+          <ul>{briefing.nietInMag.map((r, i) => <li key={i}>{r}</li>)}</ul>
+        </div>
+      )}
+
+      {elders.length > 0 ? (
+        <div className="np-let-op">
+          <strong>Hier is elders al over geschreven.</strong>
+          <ul>
+            {elders.map((e, i) => (
+              <li key={i}>
+                {e.medium ?? 'onbekend medium'}
+                {e.datum && `, ${formatDate(e.datum)}`}
+                {e.url && <> — <a href={e.url} target="_blank" rel="noreferrer">bekijk</a></>}
+              </li>
+            ))}
+          </ul>
+          {toegevoegdeWaarde && <p className="np-tekst"><strong>Wat hier nieuw aan is:</strong> {toegevoegdeWaarde}</p>}
+        </div>
+      ) : (
+        briefing.elders && !/^nee\.?$/i.test(briefing.elders) && (
+          <div className="np-let-op">
+            <strong>Elders gebracht:</strong> {briefing.elders}
+          </div>
+        )
+      )}
+    </>
+  )
+}
+
+/** Bronnen-tabblad: documenten gegroepeerd per signaal, met de rol van dat signaal. */
+function Bronnen({ documenten }: { documenten: TipDocument[] }) {
+  if (documenten.length === 0) {
+    return <p className="np-tekst np-stil">Geen onderliggende documenten gevonden.</p>
+  }
+
+  const groepen: { signalId: number; titel: string | null; rol: string; docs: TipDocument[] }[] = []
+  for (const d of documenten) {
+    const laatste = groepen[groepen.length - 1]
+    if (laatste && laatste.signalId === d.signal_id) laatste.docs.push(d)
+    else groepen.push({ signalId: d.signal_id, titel: d.signaal_titel, rol: d.rol, docs: [d] })
+  }
+
+  return (
+    <>
+      <p className="np-tekst np-stil">
+        Een tip is opgebouwd uit een of meer sporen die Stadsgeest heeft gebundeld. Per spoor
+        staat hieronder wat de rol ervan is en welke documenten erin zitten.
+      </p>
+      {groepen.map((g) => (
+        <section key={g.signalId} className="np-doc-groep">
+          <div className="np-doc-groep-kop">
+            <span className={`np-rol np-rol-${g.rol}`}>{ROL_LABEL[g.rol] ?? g.rol}</span>
+            <span className="np-doc-groep-titel">{g.titel ?? `spoor ${g.signalId}`}</span>
+            <span className="np-doc-groep-tel">{g.docs.length} {g.docs.length === 1 ? 'document' : 'documenten'}</span>
+          </div>
+          <ol className="np-doclijst">
+            {g.docs.map((d, i) => (
+              <li key={i} className="np-doc">
+                <div className="np-doc-kop">
+                  {d.url ? <a href={d.url} target="_blank" rel="noreferrer">{d.titel}</a> : <span>{d.titel}</span>}
+                </div>
+                <div className="np-doc-meta">
+                  <span className="np-bron">{d.bron}</span>
+                  {d.tier && <span className={`np-tier np-tier-${d.tier}`} title={TIER_UITLEG[d.tier]}>tier {d.tier}</span>}
+                  {d.bronrol === 'spiegel' && <span className="np-bron np-bron-spiegel">samenwerkingspartner</span>}
+                  <span className="np-regel-scheiding">·</span>
+                  <span>
+                    {d.gepubliceerd
+                      ? `gepubliceerd ${formatDate(d.gepubliceerd)}`
+                      : `binnengekomen ${formatDate(d.gescrapet)}`}
+                  </span>
+                </div>
+                {d.fragment && <p className="np-doc-fragment">{d.fragment}…</p>}
+              </li>
+            ))}
+          </ol>
+        </section>
       ))}
     </>
   )
@@ -68,57 +215,26 @@ export default async function TipPagina({ params }: Props) {
   const weging = safeParseJson<Record<string, number>>(tip.weging)
   const herkomst = safeParseJsonArray<HerkomstBron>(tip.herkomst) ?? []
   const elders = safeParseJsonArray<EldersItem>(tip.elders_gebracht) ?? []
+  const briefing = tip.briefing ? parseBriefing(tip.briefing) : null
 
   const tabs: Tab[] = [
     {
       id: 'verhaal',
       label: 'Het verhaal',
-      inhoud: (
-        <>
-          {tip.briefing ? <Alinea tekst={tip.briefing} /> : <p className="np-tekst np-stil">Nog geen uitgebreide beschrijving.</p>}
-          {elders.length > 0 && (
-            <div className="np-let-op">
-              <strong>Hier is elders al over geschreven.</strong>
-              <ul>
-                {elders.map((e, i) => (
-                  <li key={i}>
-                    {e.medium ?? 'onbekend medium'}
-                    {e.datum && `, ${formatDate(e.datum)}`}
-                    {e.url && <> — <a href={e.url} target="_blank" rel="noreferrer">bekijk</a></>}
-                  </li>
-                ))}
-              </ul>
-              {tip.toegevoegde_waarde && <p className="np-tekst"><strong>Wat hier nieuw aan is:</strong> {tip.toegevoegde_waarde}</p>}
-            </div>
-          )}
-        </>
+      inhoud: briefing?.volledig ? (
+        <Verhaal briefing={briefing} elders={elders} toegevoegdeWaarde={tip.toegevoegde_waarde} />
+      ) : tip.briefing ? (
+        // Terugval: briefing zonder het vaste format toont als platte tekst.
+        <Alinea tekst={tip.briefing} />
+      ) : (
+        <p className="np-tekst np-stil">Nog geen uitgebreide beschrijving.</p>
       ),
     },
     {
       id: 'bronnen',
       label: 'Bronnen',
       aantal: documenten.length,
-      inhoud: documenten.length === 0 ? (
-        <p className="np-tekst np-stil">Geen onderliggende documenten gevonden.</p>
-      ) : (
-        <ol className="np-doclijst">
-          {documenten.map((d, i) => (
-            <li key={i} className="np-doc">
-              <div className="np-doc-kop">
-                {d.url ? <a href={d.url} target="_blank" rel="noreferrer">{d.titel}</a> : <span>{d.titel}</span>}
-              </div>
-              <div className="np-doc-meta">
-                <span className="np-bron">{d.bron}</span>
-                {d.tier && <span className="np-tier" title={TIER_UITLEG[d.tier]}>{TIER_UITLEG[d.tier]?.split('—')[0].trim()}</span>}
-                {d.bronrol === 'spiegel' && <span className="np-bron-spiegel">samenwerkingspartner</span>}
-                <span className="np-regel-scheiding">·</span>
-                <span>binnengekomen {formatDate(d.gescrapet)}</span>
-              </div>
-              {d.fragment && <p className="np-doc-fragment">{d.fragment}…</p>}
-            </li>
-          ))}
-        </ol>
-      ),
+      inhoud: <Bronnen documenten={documenten} />,
     },
     {
       id: 'gevonden',
@@ -126,6 +242,7 @@ export default async function TipPagina({ params }: Props) {
       inhoud: (
         <>
           <p className="np-tekst">{tip.score_motivatie}</p>
+          {briefing?.gevonden && <p className="np-tekst">{briefing.gevonden}</p>}
 
           {herkomst.length > 0 && (
             <>

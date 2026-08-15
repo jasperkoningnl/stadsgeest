@@ -45,10 +45,13 @@ export interface TipDocument {
   titel: string
   url: string | null
   gescrapet: string
+  gepubliceerd: string | null
   bron: string
   tier: number | null
   bronrol: string | null
   rol: string
+  signal_id: number
+  signaal_titel: string | null
   fragment: string | null
 }
 
@@ -145,18 +148,28 @@ export async function getTipDetail(id: number): Promise<TipDetail | null> {
   return { ...rij, ...verrijkt } as TipDetail
 }
 
-/** De documenten onder een tip, oudste eerst — de redacteur moet de ontwikkeling zien. */
+/**
+ * De documenten onder een tip, gegroepeerd op signaal (dragend eerst) en
+ * binnen een signaal oudste eerst — de redacteur moet de ontwikkeling zien.
+ * `gepubliceerd` is de publicatiedatum van het document zelf (gevuld sinds
+ * 15 augustus); `gescrapet` blijft de terugval.
+ */
 export async function getTipDocumenten(tipId: number): Promise<TipDocument[]> {
   return q<TipDocument>(
     `SELECT ri.title AS titel, ri.external_url AS url, ri.scraped_at AS gescrapet,
+            ri.published_at AS gepubliceerd,
             src.name AS bron, src.tier, src.bronrol, ts.rol,
+            si.signal_id, sig.title AS signaal_titel,
             substr(COALESCE(NULLIF(ri.summary,''), ri.content), 1, 320) AS fragment
      FROM tip_signals ts
+     JOIN signals sig ON sig.id = ts.signal_id
      JOIN signal_items si ON si.signal_id = ts.signal_id
      JOIN raw_items ri ON ri.id = si.raw_item_id
      JOIN sources src ON src.id = ri.source_id
      WHERE ts.tip_id = ?
-     ORDER BY ri.scraped_at ASC`,
+     ORDER BY CASE ts.rol WHEN 'dragend' THEN 0 WHEN 'bevestigend' THEN 1 ELSE 2 END,
+              si.signal_id,
+              COALESCE(ri.published_at, ri.scraped_at) ASC`,
     [tipId],
   )
 }
