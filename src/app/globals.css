@@ -1555,3 +1555,24 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 .np-verkenner-signaal-titel { display: block; font-weight: 600; font-size: 14.5px; margin-bottom: 3px; }
 .np-verkenner-signalen .np-regel-meta { margin-top: 0; }
 .np-cel-lang { white-space: normal; min-width: 220px; }
+
+/* ── Merk in de dashboardkop (2026-08-15) ───────────────── */
+.np-merk {
+  display: inline-block; margin-bottom: 6px;
+  font-size: 12px; font-weight: 800; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--np-inkt3); text-decoration: none;
+  transition: color .16s ease;
+}
+.np-merk span { color: var(--np-accent); }
+.np-merk:hover { color: var(--np-inkt); }
+
+/* ── Eerdere berichtgeving en vervolgstappen ────────────── */
+.np-paneel-eerder { background: var(--np-blauw-z); border: 1px solid var(--np-blauw); }
+.np-paneel-eerder strong { color: var(--np-blauw); }
+.np-paneel-eerder a { color: var(--np-blauw); font-weight: 600; text-decoration: underline; }
+.np-eerder-medium { font-family: var(--f-d); font-weight: 700; color: var(--np-inkt); }
+.np-eerder-nieuw { margin-top: 10px; }
+.np-eerder-nieuw strong { display: inline; margin: 0; color: var(--np-inkt); }
+
+.np-paneel-verder { background: var(--np-accent-z); border: 1px solid var(--np-accent); }
+.np-paneel-verder strong { color: var(--np-accent); }

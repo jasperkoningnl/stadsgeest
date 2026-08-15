@@ -56,11 +56,20 @@ function Alinea({ tekst }: { tekst: string }) {
   )
 }
 
+interface EerderBericht {
+  medium: string
+  titel: string | null
+  datum: string | null
+  url: string | null
+}
+
 /** Het verhaal-tabblad: de briefing in leesbare blokken in plaats van platte tekst. */
-function Verhaal({ briefing, elders, toegevoegdeWaarde }: {
+function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, vragen }: {
   briefing: GeparsedeBriefing
-  elders: EldersItem[]
+  eerder: EerderBericht[]
+  eldersTekst: string | null
   toegevoegdeWaarde: string | null
+  vragen: string[]
 }) {
   return (
     <>
@@ -103,10 +112,37 @@ function Verhaal({ briefing, elders, toegevoegdeWaarde }: {
         ))}
       </ol>
 
+      {(eerder.length > 0 || (eldersTekst && !/^nee\.?$/i.test(eldersTekst))) && (
+        <div className="np-paneel np-paneel-eerder">
+          <strong>Eerdere berichtgeving</strong>
+          {eerder.length > 0 && (
+            <ul>
+              {eerder.map((e, i) => (
+                <li key={i}>
+                  <span className="np-eerder-medium">{e.medium}</span>
+                  {e.datum && <span className="np-stil">, {formatDate(e.datum)}</span>}
+                  {e.titel && <> — {e.titel}</>}
+                  {e.url && <> — <a href={e.url} target="_blank" rel="noreferrer">lees het artikel</a></>}
+                </li>
+              ))}
+            </ul>
+          )}
+          {eerder.length === 0 && eldersTekst && <p>{eldersTekst}</p>}
+          {toegevoegdeWaarde && <p className="np-eerder-nieuw"><strong>Wat hier nieuw aan is:</strong> {toegevoegdeWaarde}</p>}
+        </div>
+      )}
+
       {briefing.nietWeten.length > 0 && (
         <div className="np-paneel np-paneel-open">
           <strong>Wat we nog niet weten</strong>
           <ul>{briefing.nietWeten.map((r, i) => <li key={i}>{r}</li>)}</ul>
+        </div>
+      )}
+
+      {vragen.length > 0 && (
+        <div className="np-paneel np-paneel-verder">
+          <strong>Zo kom je verder</strong>
+          <ul>{vragen.map((v, i) => <li key={i}>{v}</li>)}</ul>
         </div>
       )}
 
@@ -115,28 +151,6 @@ function Verhaal({ briefing, elders, toegevoegdeWaarde }: {
           <strong>Wat hier niet in mag</strong>
           <ul>{briefing.nietInMag.map((r, i) => <li key={i}>{r}</li>)}</ul>
         </div>
-      )}
-
-      {elders.length > 0 ? (
-        <div className="np-let-op">
-          <strong>Hier is elders al over geschreven.</strong>
-          <ul>
-            {elders.map((e, i) => (
-              <li key={i}>
-                {e.medium ?? 'onbekend medium'}
-                {e.datum && `, ${formatDate(e.datum)}`}
-                {e.url && <> — <a href={e.url} target="_blank" rel="noreferrer">bekijk</a></>}
-              </li>
-            ))}
-          </ul>
-          {toegevoegdeWaarde && <p className="np-tekst"><strong>Wat hier nieuw aan is:</strong> {toegevoegdeWaarde}</p>}
-        </div>
-      ) : (
-        briefing.elders && !/^nee\.?$/i.test(briefing.elders) && (
-          <div className="np-let-op">
-            <strong>Elders gebracht:</strong> {briefing.elders}
-          </div>
-        )
       )}
     </>
   )
@@ -217,12 +231,40 @@ export default async function TipPagina({ params }: Props) {
   const elders = safeParseJsonArray<EldersItem>(tip.elders_gebracht) ?? []
   const briefing = tip.briefing ? parseBriefing(tip.briefing) : null
 
+  // "Eerdere berichtgeving": wat de weger als elders-gebracht vastlegde, plus
+  // de artikelen van Nieuwsplein33 en de partners die al aan deze tip hangen
+  // (de spiegeldocumenten uit de onderliggende sporen). Ontdubbeld op URL.
+  const eerder: EerderBericht[] = elders.map((e) => ({
+    medium: e.medium ?? 'onbekend medium',
+    titel: null,
+    datum: e.datum ?? null,
+    url: e.url ?? null,
+  }))
+  const bekendeUrls = new Set(eerder.map((e) => e.url).filter(Boolean))
+  for (const d of documenten) {
+    if (d.bronrol !== 'spiegel') continue
+    if (d.url && bekendeUrls.has(d.url)) continue
+    if (d.url) bekendeUrls.add(d.url)
+    eerder.push({
+      medium: d.bron,
+      titel: d.titel,
+      datum: d.gepubliceerd ?? d.gescrapet,
+      url: d.url,
+    })
+  }
+
   const tabs: Tab[] = [
     {
       id: 'verhaal',
       label: 'Het verhaal',
       inhoud: briefing?.volledig ? (
-        <Verhaal briefing={briefing} elders={elders} toegevoegdeWaarde={tip.toegevoegde_waarde} />
+        <Verhaal
+          briefing={briefing}
+          eerder={eerder}
+          eldersTekst={briefing.elders}
+          toegevoegdeWaarde={tip.toegevoegde_waarde}
+          vragen={vragen}
+        />
       ) : tip.briefing ? (
         // Terugval: briefing zonder het vaste format toont als platte tekst.
         <Alinea tekst={tip.briefing} />
@@ -286,19 +328,23 @@ export default async function TipPagina({ params }: Props) {
         </>
       ),
     },
-    {
+  ]
+
+  // De vervolgvragen staan op het verhaal-tabblad ("Zo kom je verder"), direct
+  // onder wat we nog niet weten — die twee horen bij elkaar. Alleen als de
+  // briefing niet in het vaste format staat, krijgen ze een eigen tabblad.
+  if (!briefing?.volledig && vragen.length > 0) {
+    tabs.push({
       id: 'vragen',
       label: 'Vervolgvragen',
-      aantal: vragen.length || undefined,
-      inhoud: vragen.length === 0 ? (
-        <p className="np-tekst np-stil">Geen vervolgvragen vastgelegd.</p>
-      ) : (
+      aantal: vragen.length,
+      inhoud: (
         <ul className="np-vragen">
           {vragen.map((v, i) => <li key={i}>{v}</li>)}
         </ul>
       ),
-    },
-  ]
+    })
+  }
 
   if (tip.dossier_id && tijdlijn.length > 0) {
     tabs.push({

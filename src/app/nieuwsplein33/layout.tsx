@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { cookies } from 'next/headers'
 import RedactieNav from './RedactieNav'
 import ThemaSchakelaar from './ThemaSchakelaar'
@@ -32,6 +33,9 @@ export default async function RedactieLayout({ children }: { children: React.Rea
       <div className="np-kolom page-in">
         <header className="np-top">
           <div>
+            <Link href="/" className="np-merk" title="Naar de voorpagina van Stadsgeest">
+              Stadsgeest<span>*</span>
+            </Link>
             <div className="np-hdr-titel">Nieuwstips</div>
             <p className="np-hdr-sub">
               Stadsgeest doorzoekt dagelijks de openbare bronnen van Amersfoort en Leusden —
