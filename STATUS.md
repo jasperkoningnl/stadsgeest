@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **15 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Wachtrij chronologisch, datums in plaats van 'x dagen geleden'"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Dagkopjes in de wachtrij"**.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -3848,3 +3848,19 @@ rekende in blokken van 24 uur). Geldt ook voor de bronnentabel op Beheer.
 Commit 4c94498, build en eslint schoon.
 
 *Cowork-update: 2026-08-15 (Nieuwsplein33-account, sortering en datums)*
+
+
+---
+
+### Cowork-update: 2026-08-15 — Dagkopjes in de wachtrij
+
+Idee van Jasper: de wachtrij is nu gegroepeerd onder Vandaag, Gisteren en
+Eerder, met een teller per groep. Sluit aan op het ochtendritme van de weger
+("wat is er nieuw sinds gisteren?"). "Eerder" is bewust één groep — kopjes
+per datum zouden bij een handvol tips vooral losse eenregelige groepjes
+opleveren, en de kaarten tonen daar hun eigen datum al. Lege groepen worden
+overgeslagen; de kalenderdaggrens loopt in Nederlandse tijd via de nieuwe
+helper `kalenderdagenGeleden` in format.ts. Alleen de wachtrij; de andere
+lijsten blijven vlak. Commit a0fd802, build en eslint schoon.
+
+*Cowork-update: 2026-08-15 (Nieuwsplein33-account, dagkopjes wachtrij)*
