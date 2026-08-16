@@ -1,14 +1,17 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **15 augustus 2026**
+> ### Bijgewerkt tot en met **16 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-15 — Logboek en algemene feedback in het dashboard"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-16 (weger-run) — 78 signalen beoordeeld, vijf tips, nieuw dossier Gemeentefinancien Leusden, en de Leusdense raadsstukken bleken in Amersfoortse clusters te zijn beland"**.
 >
-> **Draai je de weegroutine?** Lees dan het blok "Voor de weger-run van
-> 16 augustus". Dat staat niet meer onderaan maar in de op één na laatste
-> sectie, "Leusden uitgezocht: geen subsidieregister, wel een gemeentefeed".
-> Daar staat waarom er meer signalen dan normaal liggen en welke intakeregels
-> sinds 15 augustus anders werken.
+> **Draai je de weegroutine?** Lees dan die laatste sectie. Daar staat wat de
+> inhaalslag van de Leusdense bronnen heeft opgeleverd, welke clusterfout
+> daarbij aan het licht kwam en welke drie bronnen ruis blijven produceren
+> (NS Verstoringen, de lege agendapunten van Raadsinformatie Leusden, en de
+> afkaplengte van 5.000 respectievelijk 8.000 tekens bij rechtspraak en
+> raadsstukken). De sectie "Leusden uitgezocht: geen subsidieregister, wel een
+> gemeentefeed" daarboven beschrijft de intakeregels die sinds 15 augustus
+> anders werken; die gelden nog steeds.
 >
 > **Zie je een oudere einddatum, dan lees je een gecachete kopie en niet dit bestand.**
 > Dat gebeurt aantoonbaar: `raw.githubusercontent.com` en de GitHub-webinterface leveren
@@ -4107,3 +4110,193 @@ is een kolom `afgehandeld_op` een kleine toevoeging. Er gaat ook geen melding ui
 bij nieuwe feedback — Jasper ziet het pas als hij de logboekpagina opent.
 
 *Cowork-update: 2026-08-15 (Nieuwsplein33-account, logboek en feedback)*
+
+---
+
+## Cowork-update: 2026-08-16 (weger-run) — 78 signalen beoordeeld, vijf tips, nieuw dossier Gemeentefinancien Leusden, en de Leusdense raadsstukken bleken in Amersfoortse clusters te zijn beland
+
+### Wat er is weggeschreven
+
+Geteld in de database, niet geschat: 5 tips (id 21 tot en met 25), 21 koppelingen in
+`tip_signals`, 5 rijen in `tip_events`, 27 feiten in `dossier_facts`, 1 nieuw dossier
+(id 15) en 78 rijen in `signal_events` (59 `reviewed` plus 19 `tip_created`), verdeeld
+over 78 unieke signalen. Werkset en weggeschreven rijen komen exact op elkaar uit; geen
+afwijking. Negen signalen zijn op `discarded` gezet, 69 blijven op `watching`. Na afloop
+staan er nul open signalen die nog nooit door de weger zijn bekeken.
+
+De werkset was 78 signalen: alle 71 die nog nooit waren beoordeeld, plus zeven eerder
+beoordeelde signalen waarin de intake van vannacht wel degelijk nieuw dragend materiaal
+had geschoven (540, 634, 832, 867, 950, 958, 994). De inhaalslag van 15 augustus is
+zichtbaar: 34 van de 71 nieuwe signalen komen uit `Raadsinformatie Leusden` (rij 129,
+tier 1) en 27 uit `Gemeente Leusden nieuws` (rij 130, tier 2). Dat is precies wat de
+sectie van gisteren aankondigde en het is dus geen uitschieter in de stad.
+
+### De vijf tips
+
+Alle vijf hebben een dragende bron uit tier 1 die geen spiegelbron is. Vier gaan over
+Leusden, en dat is geen toeval: de nieuwe raadsbron levert materiaal waar de redactie
+het dunst bezet is.
+
+**Tip 21, `verdieping`, score 7 — "Leusden dekt tekort van 4,2 miljoen met OZB en
+reserve".** Nieuwsplein33 was bij het kadernotadebat van 9 juli en publiceerde op
+17 juli een goed stuk van Daan Bleuel over de botsing tussen Lokaal Belangrijk en
+Pro-Leusden. Dat stuk bevat geen enkel getal. De documenten wel: structureel tekort
+4,161 miljoen euro in 2027 oplopend tot 4,537 miljoen in 2029; collegevoorstel 1,9
+miljoen uit de algemene reserve plus 2.261.000 euro extra OZB-opbrengst; amendement
+A.6.1 aangenomen met 20 stemmen voor en 3 tegen, waarmee 510.000 euro nieuw beleid
+sneuvelt, een bezuiniging van 670.000 euro wordt uitgesteld en het OZB-bedrag uit het
+besluit verdwijnt. Twee feiten zijn nergens gebracht. Ten eerste schrijft het college
+in zijn preadvies letterlijk dat het schrappen van nieuw beleid kan leiden tot
+problemen in de uitvoering van wettelijke taken. Ten tweede staat in de kadernota dat
+de begroting 2026 niet compleet was — het meerjaren onderhoudsprogramma (357.000 euro)
+en het dagelijks onderhoud buitenruimte (603.000 euro) ontbraken — en dat de provincie
+daar als toezichthouder een kritische opmerking over maakte. Dat laatste is precies het
+verwijt dat Lokaal Belangrijk in dat debat maakte, en het is nu met een gemeentelijk
+document te onderbouwen.
+
+**Tip 22, `nieuwsfeit`, score 7 — "Leusden liet 64.662 euro rijkssubsidie voor De Til
+onaangeroerd".** De RVO kende de gemeente op 18 januari 2024 een DUMAVA-subsidie toe van
+64.662,70 euro voor verduurzaming van Hamersveldseweg 30, en betaalde 45.263,89 euro als
+voorschot. De originele beschikkingsbrief kwam mee als bijlage bij een motie. Op 9 juli
+2026 constateert die motie, bevestigd in het preadvies van het college, dat er geen
+enkele uitgave ten laste van de subsidie is gedaan. De realisatietermijn loopt af op
+18 januari 2027. Het college raadt de motie af en rekent op begrip van het ministerie;
+de indieners wijzen op de voorwaarde in de beschikking dat uitstel alleen kan als de
+vertraging buiten de schuld van de gemeente ligt. Die tegenstelling is als
+`tegenstrijdigheid` bij het dossierfeit vastgelegd in plaats van opgelost.
+
+**Tip 23, `nieuwsfeit`, score 6 — "Leusden meldt 10,3 miljoen euro onrechtmatig in
+jaarrekening 2025".** Staat in het concept-accountantsverslag van Eshuis
+Registeraccountants en niet in het raadsvoorstel; wie alleen het voorstel leest, komt
+het niet tegen. Het college verantwoordt 10,3 miljoen euro aan onrechtmatige baten,
+lasten en balansmutaties op 130,9 miljoen euro aan lasten, waarvan 8,6 miljoen als
+acceptabel geldt volgens door de raad vastgestelde afspraken, bij een verantwoordingsgrens
+van 2,1 miljoen. De accountant tekent goedkeurend. In de briefing staat expliciet dat dit
+geen schandaal is en niet als schandaal mag worden gebracht.
+
+**Tip 24, `nieuwsfeit`, score 6 — "Leusden gunt personeelssoftware aan AFAS uit eigen
+gemeente".** Implementatie 212.200 euro uit de algemene bedrijfsreserve, daarna 27.150
+euro per jaar. AFAS zit aan de Inspiratielaan 1 in Leusden. Neutraal geformuleerd: er is
+geen aanwijzing dat de vestigingsplaats een rol speelde, en dat staat ook zo in "wat hier
+niet in mag". Wat de tip draagt is dat over de procedure niets openbaar is, omdat Leusden
+geen opdrachtenregister publiceert.
+
+**Tip 25, `nieuwsfeit`, score 6 — "Aanvraag voor acht indoor padelbanen aan De
+Zonnecel".** Amersfoort, precies op de drempel. De score_motivatie zegt eerlijk dat dit
+zonder antwoord op de vraag wie de aanvrager is een kort bericht blijft.
+
+### Nieuw dossier 15: Gemeentefinancien Leusden
+
+Aangemaakt met twintig feiten ineens, ruim boven de drempel van drie. Het dekt gat 3
+(geldstromen over tijd) en gat 7 (Leusden) uit NIEUWSPLEIN33.md tegelijk. In de
+omschrijving staan vier waarschuwingen voor de opvolger: Leusden publiceert geen
+openbaar subsidieregister zodat een jaar-op-jaar vergelijking met dit materiaal niet
+te maken is; de bron loopt pas sinds 15 augustus 2026 en begint met een inhaalslag over
+een enkele vergadering, dus claim geen reeks; onderscheid altijd collegevoorstel,
+geamendeerd raadsbesluit en uitvoering, want die drie verschillen bij de kadernota
+aantoonbaar; en het structurele tekort wordt in verschillende documenten verschillend
+genoemd (4,2 miljoen in de inleiding, 4,161 miljoen in de tabel).
+
+Zeven feiten gingen naar bestaande dossiers: één naar Explosies Amersfoort (de explosie
+aan de Soerendonk van 15 augustus, met tijdstip, fatbike en politiezaaknummer), één naar
+Droogte en waterbeheer, drie naar Woningbouw en wonen (Tabaksteeg-Zuid, Achterveld
+Noordoost, Mastenbroek 2 fase 3), één naar Asielopvang en één naar Werk en inkomen. Die
+laatste is bewust vastgelegd met `zekerheid = claim_belanghebbende`: de gemeente Leusden
+zegt zelf dat haar inburgeringsaanpak werkt, zonder cijfers, meetperiode of
+vergelijkingsgroep.
+
+### Wat er niet klopte
+
+**De gewijzigde clustering doet wat was voorspeld, maar er is een nieuw probleem
+bijgekomen.** De sectie van gisteren waarschuwde dat één gebeurtenis bij dunne titels in
+twee signalen uiteen kan vallen. Dat gebeurde: de explosie aan de Soerendonk werd 1115
+(112-nu) en 1116 (politie), en de reviewuitspraak van het gerechtshof werd 1119 met de
+eerste aanleg als 1120. Beide zijn als één zaak behandeld en dat staat in de reden.
+Maar het omgekeerde gebeurde ook, en dat is ernstiger: **de nieuwe Leusdense
+raadsstukken zijn in bestaande Amersfoortse clusters geschoven.** De Kadernota
+2027-2030 belandde in signaal 540 (Vandalisme Sovjet Ereveld), het Leusdense Jaarverslag
+2025 in 634 (Coffeeshopbeleid Amersfoort), amendement A.6.1 en motie M.6.1 in 950
+(Amfors), de DUMAVA-motie in 958 (windturbines Isselt) en het agendapunt over het
+kadernotadebat in 994. Vier van de vijf tips van vandaag steunen mede op documenten die
+in een cluster zitten waar ze inhoudelijk niets te zoeken hebben. Ze waren alleen te
+vinden door de nieuw toegevoegde items per signaal langs te lopen in plaats van op de
+titel af te gaan. De drempelverhoging naar drie matchwoorden en het uitsluiten van
+gebiedsnamen zijn dus niet genoeg: er wordt kennelijk nog steeds gematcht op woorden die
+in vrijwel elk raadsstuk voorkomen. Advies voor de volgende pijplijnsessie: laat de
+clusteraar niet matchen over gemeentegrenzen heen als de bron een gemeentespecifieke
+registerbron is (127, 129, 130 tegenover de Amersfoortse stromen).
+
+**De Leusdense raadsbron levert vijf lege procedurele signalen per vergadering.**
+Opening, Vaststelling agenda, Schorsing, Besluitvorming en Sluiting kregen elk een eigen
+signaal zonder tekst en zonder document (1154, 1170 tot en met 1173). Die zijn op
+`discarded` gezet. Bij elke volgende Leusdense vergadering komen er weer vijf bij; dat
+verdient een filter in de intake op agendapunten zonder onderliggend document.
+
+**NS Verstoringen Amersfoort filtert niet op traject.** Vier signalen (1121 tot en met
+1124) gingen over één aanrijding bij Schiphol: Schiphol-Utrecht, Hoofddorp-Lelystad,
+Schiphol-Rotterdam en Schiphol-Leiden. Geen van vieren raakt Amersfoort. Alle vier
+gediscard. Dit is dezelfde bron die in eerdere runs al een storing op het traject
+Zwolle-Groningen aanleverde. De bron zou moeten filteren op trajecten die Amersfoort
+aandoen.
+
+**Rechtspraak-items worden afgekapt op 5.000 tekens, raadsstukken op 8.000.** Bij de
+vier nieuwe uitspraken (1117 tot en met 1120) staat in de opgeslagen tekst geen
+Amersfoortse of Leusdense partij, maar de tekst is afgekapt, dus dat is een ondergrens
+en geen vaststelling. Bij het accountantsverslag van Leusden is hetzelfde probleem
+zwaarder: de hoofdstukken 4 (kernpunten van de controle) en 5 (controleverschillen)
+vallen buiten de opgeslagen 8.000 tekens, waardoor niet te achterhalen is waar de 10,3
+miljoen euro onrechtmatigheid precies op ziet. Dat is als "wat we niet weten" in tip 23
+gezet en als eerste vervolgvraag. Voor documenten van dit type is 8.000 tekens te weinig.
+
+### Wat de vorige run openliet en nu deels beantwoord is
+
+De run van 15 augustus noemde als niet geverifieerd waar het onttrekkingsverbod van
+Waterschap Vallei en Veluwe precies geldt, omdat `content` leeg was voor beide
+waterschapsitems. De nieuwe gemeentefeed van Leusden beantwoordt dat voor de Leusdense
+zijde: vanaf 12 juni 2026 is onttrekking uit sloten en watergangen verboden voor
+onbepaalde tijd. Vastgelegd als feit in dossier Droogte en waterbeheer, met de
+verwijzing naar het openstaande punt erbij.
+
+### Bewust laten liggen
+
+**Vijfendertig van de 41 eerder beoordeelde signalen met een verse `last_seen_at` zijn
+niet opnieuw doorgelopen.** Bij die 35 bestaat al het nieuwe materiaal uit NVWA-ruis,
+Nextdoor-advertenties, spiegelberichten of routinebekendmakingen (dakkapellen,
+containers, hoogwerkers). Stap 1 van de routine zegt alleen bij echt nieuw materiaal
+opnieuw te beoordelen; daar is hier geen sprake van. De zeven die wel zijn meegenomen,
+zijn de signalen waarin een Leusdens raadsstuk of een niet-routinematige bekendmaking
+terechtkwam.
+
+**De NVWA-bron rij 47 is inderdaad stil.** Er kwamen deze run geen landelijke
+voorlichtingspagina's meer binnen via die bron. De items die nog in de clusters van
+1095, 1098, 603, 622, 623, 636 en 728 zitten dateren van vóór het stilleggen. De
+maatregel van gisteren werkt.
+
+**Signaal 901 (Zomerrapportage Amersfoort, raadsvergadering 9 september) is niet
+opnieuw opgepakt.** De onderliggende PDF's zitten nog steeds niet in de database. Dat
+blijft het duidelijkste openstaande punt, nu voor de derde run op rij.
+
+**Signaal 1081 (transformatie van Noordewierweg 231 A naar vijf appartementen,
+bekendgemaakt 14 augustus) is niet in de werkset opgenomen** omdat het al eerder is
+beoordeeld en `last_seen_at` sindsdien niet is ververst. Het past wel in het
+transformatiepatroon van #851; de volgende run kan overwegen dat patroon opnieuw uit te
+tellen nu er nieuwe adressen bijkomen.
+
+### Niet geverifieerd
+
+- **Of de motie over de DUMAVA-subsidie is aangenomen.** Het statusvakje op het
+  motieformulier is niet ingevuld en het besluit staat niet in de beschikbare stukken.
+  Eerste vervolgvraag bij tip 22.
+- **Of AFAS de opdracht via een Europese aanbesteding heeft gekregen.** De
+  begrotingswijziging noemt geen procedure, geen inschrijvers en geen contractduur. Niet
+  op TenderNed gecontroleerd; dat is als vervolgvraag bij tip 24 gezet.
+- **Wie de aanvrager is van de acht indoor padelbanen aan De Zonnecel 4.** Staat niet in
+  de bekendmaking en is niet nagetrokken; de weger legt geen contact met bronnen.
+- **Of de vier nieuwe rechtspraakuitspraken werkelijk geen Amersfoortse partij hebben.**
+  Alleen de eerste 5.000 tekens zijn gecontroleerd.
+- **Of de kritische opmerking van de provincie over de begroting 2026 schriftelijk is
+  vastgelegd.** Alleen de zin van het college hierover is bekend.
+- **De vestigingsplaats van AFAS is via een webzoekopdracht bevestigd** (Inspiratielaan 1,
+  3833 AV Leusden), niet via het Handelsregister.
+
+*Cowork-update: 2026-08-16 (Nieuwsplein33-account, weger-run)*
