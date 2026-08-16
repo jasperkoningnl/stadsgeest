@@ -4382,11 +4382,20 @@ hercheck op het moment dat een redacteur een tip opent of goedkeurt. Dat tweede 
 het moment waarop ingehaald worden echt pijn doet, en het kost niets als de
 wachtrij stilligt. Allebei dashboardwerk, dus eerst overleggen.
 
-**Niet geverifieerd.** Of de Cowork scheduled task op het Nieuwsplein33-account de
-promptfile leest of een eigen kopie van de tekst bevat. `list_triggers` geeft nul
-omdat Cowork die taken lokaal bewaart, en een zoekopdracht op de tekst van de
-prompt vond alleen het `.md`-bestand zelf. Bevat de taak een kopie, dan verandert
-er morgenochtend niets en moet stap 7 daar met de hand in. Jasper checkt dat.
+**Hoe de scheduled task aan de prompt komt — uitgezocht, want daar hing de hele
+wijziging van af.** `list_triggers` geeft nul: Cowork bewaart deze taken lokaal,
+niet op het account. De taak draait als skill en die skill is een korte stub van
+44 regels die per run wordt meegestuurd. Een kopie daarvan staat onder
+`AppData\Local\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\local-agent-mode-sessions\...\uploads\SKILL.md`.
+Die stub bevat geen werkinstructie maar drie leesopdrachten, waarvan de tweede
+luidt: `routines\stadsgeest-weger.md` — "dit is je volledige werkinstructie. Voer
+die stap voor stap uit, van stap 1 tot en met stap 10." Er staat geen tweede
+`INSERT` in en geen kopie van de stappen.
+
+**Dat betekent: het `.md`-bestand is de werkende instructie, ook tijdens een run.**
+Wie de routine wil wijzigen, wijzigt dat bestand en verder niets. De stub hoeft
+alleen aangeraakt te worden als de leesvolgorde of de databasetoegang verandert.
+De wijziging van vandaag pakt de run van 17 augustus dus vanzelf op.
 
 **Geen logboekregel.** De redactie ziet niets van deze wijziging: het veld staat
 niet in het dashboard, de weging verandert niet en welke tips bovenkomen verandert
