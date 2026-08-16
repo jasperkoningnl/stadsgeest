@@ -2,9 +2,12 @@
 
 > ### Bijgewerkt tot en met **16 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-16 (weger-run) — 78 signalen beoordeeld, vijf tips, nieuw dossier Gemeentefinancien Leusden, en de Leusdense raadsstukken bleken in Amersfoortse clusters te zijn beland"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-16 — Trefwoorden bij tips: de spiegelcheck bleek een momentopname"**.
 >
-> **Draai je de weegroutine?** Lees dan die laatste sectie. Daar staat wat de
+> **Draai je de weegroutine?** Lees dan die laatste sectie (stap 7 heeft er een
+> veld bij) én de sectie daarboven, **"Cowork-update: 2026-08-16 (weger-run) —
+> 78 signalen beoordeeld, vijf tips, nieuw dossier Gemeentefinancien Leusden, en
+> de Leusdense raadsstukken bleken in Amersfoortse clusters te zijn beland"**. Daar staat wat de
 > inhaalslag van de Leusdense bronnen heeft opgeleverd, welke clusterfout
 > daarbij aan het licht kwam en welke drie bronnen ruis blijven produceren
 > (NS Verstoringen, de lege agendapunten van Raadsinformatie Leusden, en de
@@ -4310,3 +4313,87 @@ tellen nu er nieuwe adressen bijkomen.
   3833 AV Leusden), niet via het Handelsregister.
 
 *Cowork-update: 2026-08-16 (Nieuwsplein33-account, weger-run)*
+
+---
+
+### Cowork-update: 2026-08-16 — Trefwoorden bij tips: de spiegelcheck bleek een momentopname
+
+Analysesessie met Jasper vanuit de cloud-Cowork, naar aanleiding van een vraag van
+hem: de weger controleert bij het maken van een tip of er elders al over is
+geschreven, maar staat die tip een paar dagen in de wachtrij, dan kan dat intussen
+alsnog gebeurd zijn. Klopt. `elders_gebracht` wordt in stap 5/7 een keer gevuld en
+daarna raakt niets het meer aan; stap 1 haalt alleen signalen op die nog niet aan
+een tip hangen, dus een bestaande tip komt nooit meer langs de weger.
+
+**Hoe groot dat probleem werkelijk is, gemeten.** Er staan 25 tips en ze staan
+alle 25 op `wachtrij` — er is er nog nooit een afgehandeld, want de redactie heeft
+geen toegang. De oudste is van 7 augustus. Dat is dus de bovengrens van het
+probleem en niet de normale situatie. Voor elke tip is gezocht naar spiegelitems
+die na het aanmaken van die tip zijn binnengehaald (272 items sinds 1 augustus:
+RTV Utrecht 120, Nieuwsplein33 76, De Stad Amersfoort 62, amersfoort.nieuws.nl 13,
+Eemland1 1). Matchen op woorden uit de titel gaf drie treffers, alle drie vals.
+Matchen op titel plus content gaf er veertien, vrijwel allemaal ruis. De enige
+inhoudelijk relevante was "Staat van de Keistad: nieuwe coalitie gooit het
+parkeerbeleid om" (De Stad Amersfoort, 12 augustus) bij tip 5 over de
+parkeertarieven, en die zat in de ruis. Conclusie: het risico bestaat, maar het
+treedt zelden op — de tips komen uit registers waar de lokale media niet komen.
+Waar het wel speelt zijn de `verdieping`-tips, want die gaan per definitie over
+onderwerpen die de media al hebben.
+
+**Wat er is gebouwd.** Een kolom `tips.trefwoorden` (TEXT, JSON-array), in Turso
+toegevoegd en in `scraper/migrate-tips.cjs` opgenomen: in het `CREATE TABLE` voor
+een verse database en met een idempotente `ALTER` achter een `PRAGMA`-guard voor
+de bestaande, in hetzelfde patroon als `sources.bronrol` daar al gebruikte.
+`node --check` is schoon; het script zelf is niet gedraaid omdat de live database
+al is bijgewerkt en het script ook de spiegelmarkeringen aanraakt. Stap 7 van
+`Stadsgeest-documentatie\routines\stadsgeest-weger.md` schrijft het veld nu mee in
+de `INSERT` en beschrijft wat er in moet. De weger doet de hercheck uitdrukkelijk
+niet — dat staat er expliciet bij, anders gaat de eerstvolgende run 25 tips zitten
+nakijken.
+
+**Waarom de trefwoorden bij het maken van de tip worden vastgelegd en niet
+achteraf afgeleid:** achteraf werkt aantoonbaar niet, zie de meting hierboven. De
+weger weet op het moment van schrijven waar de tip over gaat.
+
+**Backfill van de 25 bestaande tips**, met de hand per tip gekozen uit titel, kern
+en scoremotivatie. Alle 25 gevuld, alle arrays geldige JSON met minstens drie
+woorden. Daarna dezelfde zoektest opnieuw gedraaid, en dat leverde twee valkuilen
+op die nu in de routineprompt staan:
+
+- **Het zoeken gaat op deelstrings.** `coa` bij de azc-tip matchte
+  `coalitieakkoord`. Afkortingen korter dan vier tekens zijn onbruikbaar.
+- **Wijk- en gebiedsnamen matchen alles.** `soesterkwartier` matchte een
+  FIXbrigade-bericht, `langs eem en spoor` een verhaal over ijssalons. Na het
+  weghalen van dat soort woorden bij zeven tips bleef er van de vijf treffers nog
+  een over, en die is ook vals: de ijssalonroute begint nu eenmaal bij Langs Eem
+  en Spoor.
+
+Dat laatste is meteen de ondergrens van deze aanpak: een enkel trefwoord is niet
+genoeg om een treffer op te baseren. Wie hier ooit iets automatisch mee doet, moet
+minstens twee trefwoorden eisen.
+
+**Bewust niet gebouwd.** Geen losse scheduled task voor de hercheck: die
+dupliceert de bronrol- en spiegellogica van de weger, kan stil uitvallen zoals de
+PM2-daemon dat al drie keer deed, en levert bij deze trefkans vrijwel niets op.
+Ook geen hercheckstap in de weger zelf. Twee alternatieven zijn besproken en
+liggen bij Jasper: de datum van de spiegelcheck tonen in het dashboard, zodat een
+redacteur ziet dat "niet elders gebracht" van zes dagen geleden is, en een
+hercheck op het moment dat een redacteur een tip opent of goedkeurt. Dat tweede is
+het moment waarop ingehaald worden echt pijn doet, en het kost niets als de
+wachtrij stilligt. Allebei dashboardwerk, dus eerst overleggen.
+
+**Niet geverifieerd.** Of de Cowork scheduled task op het Nieuwsplein33-account de
+promptfile leest of een eigen kopie van de tekst bevat. `list_triggers` geeft nul
+omdat Cowork die taken lokaal bewaart, en een zoekopdracht op de tekst van de
+prompt vond alleen het `.md`-bestand zelf. Bevat de taak een kopie, dan verandert
+er morgenochtend niets en moet stap 7 daar met de hand in. Jasper checkt dat.
+
+**Geen logboekregel.** De redactie ziet niets van deze wijziging: het veld staat
+niet in het dashboard, de weging verandert niet en welke tips bovenkomen verandert
+ook niet.
+
+Terzijde: in de werkkopie stond bij aanvang al een gewijzigde
+`bronnenwacht/rapport-2026-08-02.md`. Die is niet van deze sessie en is niet
+aangeraakt of meegecommit.
+
+*Cowork-update: 2026-08-16 (Nieuwsplein33-account, analysesessie trefwoorden)*

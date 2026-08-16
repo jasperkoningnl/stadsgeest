@@ -37,10 +37,23 @@ const db = createClient({ url: process.env.TURSO_URL, authToken: process.env.TUR
     eigen_vondst INTEGER,                -- meetknop: 1 = zonder Stadsgeest niet gevonden
     actor TEXT NOT NULL,                 -- welke routine deze tip maakte
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    trefwoorden TEXT                     -- JSON-array van 3 tot 5 zoekwoorden, zie hieronder
   )`);
   await db.execute("CREATE INDEX IF NOT EXISTS idx_tips_status ON tips(status, score DESC)");
   await db.execute("CREATE INDEX IF NOT EXISTS idx_tips_dossier ON tips(dossier_id)");
+
+  // ─── trefwoorden (2026-08-16) ────────────────────────────────────────────
+  // De spiegelcheck van de weger is een momentopname: `elders_gebracht` wordt bij
+  // het maken van de tip één keer gevuld en daarna nooit meer aangeraakt. Een tip
+  // die dagen in de wachtrij staat kan intussen alsnog elders zijn gebracht.
+  // Om dat later te kunnen nakijken legt de weger bij het maken van de tip vast
+  // waar de tip over gáát. Achteraf woorden uit de titel afleiden is gemeten en
+  // levert alleen ruis op: op 25 wachtrijtips gaf dat drie treffers, alle drie vals.
+  const tipCols = await db.execute("PRAGMA table_info(tips)");
+  if (!tipCols.rows.some((r) => r.name === 'trefwoorden')) {
+    await db.execute("ALTER TABLE tips ADD COLUMN trefwoorden TEXT");
+  }
 
   // ─── koppeling tip ↔ signaal (een tip bundelt een of meer signalen) ──────
   await db.execute(`CREATE TABLE IF NOT EXISTS tip_signals (
