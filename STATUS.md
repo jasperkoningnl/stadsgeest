@@ -4109,6 +4109,16 @@ en dat in `LOGBOEK.md` zet. Blijkt over een paar weken dat de lijst vervuilt, da
 is een kolom `afgehandeld_op` een kleine toevoeging. Er gaat ook geen melding uit
 bij nieuwe feedback — Jasper ziet het pas als hij de logboekpagina opent.
 
+**Het logboek wordt niet vanzelf bijgewerkt, en dat is met opzet geregeld.** Een
+bestand dat op geheugen aankomt valt na drie weken stil. Daarom staat er nu in
+twee dingen een stap over `LOGBOEK.md`: in de skill `stadsgeest-sessie-afronden`
+(stap 5 — merkt de redactie er iets van, dan een regel; refactors en migraties
+niet) en in `Stadsgeest-documentatie\START-HIER.md`, bij de werkafspraken en
+onderaan bij "twee geheugens". START-HIER is aangepast; de skill is als
+`.skill`-bestand aan Jasper geleverd en werkt pas als hij hem opslaat. Doet hij
+dat niet, dan is START-HIER het enige anker — dat wordt wel elke taak gelezen,
+maar de afrondstap zelf komt dan uit de oude skill zonder logboekstap.
+
 *Cowork-update: 2026-08-15 (Nieuwsplein33-account, logboek en feedback)*
 
 ---
