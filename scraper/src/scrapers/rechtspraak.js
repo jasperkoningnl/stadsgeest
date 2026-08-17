@@ -6,12 +6,19 @@
 import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
 
-// Strategie: twee feeds combineren
-// 1. Rechtbank Midden-Nederland (RBMNE) — alle uitspraken, ongeacht zoekterm.
-//    Dit is de bevoegde rechtbank voor Amersfoort.
-// 2. Gerechtshof Arnhem-Leeuwarden (GHARL) — hoger beroep voor de regio.
-// Aanvullend: uitspraken van andere rechtscolleges worden alleen opgeslagen
-// als "Amersfoort" substantieel aanwezig is (meerdere keren in de tekst).
+// Strategie: drie feeds combineren
+// 1. Rechtbank Midden-Nederland (RBMNE) — alle uitspraken. Dit is de bevoegde
+//    rechtbank voor Amersfoort. Wordt ongefilterd opgeslagen: woonplaatsen zijn
+//    geanonimiseerd, dus een tekstfilter op "Amersfoort" mist elke zaak tussen
+//    particulieren uit Amersfoort.
+// 2. Gerechtshof Arnhem-Leeuwarden (GHARL) — hoger beroep. Sinds 2026-08-17
+//    NIET meer ongefilterd: het ressort beslaat naast Midden-Nederland ook
+//    Gelderland, Overijssel, Friesland, Groningen en Drenthe. Van 213 opgeslagen
+//    uitspraken bevatte er slechts één "Amersfoort" of "Leusden". GHARL-
+//    uitspraken die Amersfoort of Leusden noemen komen alsnog binnen via de
+//    q=Amersfoort-feed of via het relevantiefilter.
+// 3. Vrije zoekterm "Amersfoort" — vangt colleges buiten RBMNE op die
+//    Amersfoort in de tekst noemen.
 const FEEDS = [
   'https://data.rechtspraak.nl/uitspraken/zoeken?creator=RBMNE&max=20&sort=desc',
   'https://data.rechtspraak.nl/uitspraken/zoeken?creator=GHARL&max=10&sort=desc',
@@ -20,8 +27,9 @@ const FEEDS = [
 const SOURCE_URL = 'https://data.rechtspraak.nl/uitspraken/zoeken';
 const CONTENT_URL = 'https://data.rechtspraak.nl/uitspraken/content';
 
-// Lokale rechtbanken — uitspraken worden altijd opgeslagen
-const LOCAL_COURTS = new Set(['RBMNE', 'GHARL']);
+// Alleen RBMNE wordt ongefilterd opgeslagen. GHARL is bewust verwijderd
+// (zie toelichting hierboven).
+const LOCAL_COURTS = new Set(['RBMNE']);
 
 // Extraheer de rechtbankcode uit een ECLI (bijv. ECLI:NL:RBMNE:2026:716 → RBMNE)
 function extractCourt(ecli) {
@@ -29,15 +37,18 @@ function extractCourt(ecli) {
   return parts.length >= 4 ? parts[2] : null;
 }
 
-// Controleer of de uitspraak voldoende betrekking heeft op Amersfoort
+// Controleer of de uitspraak voldoende betrekking heeft op Amersfoort of Leusden
 function isAmersfoortRelevant(ecli, content) {
   const court = extractCourt(ecli);
-  // Lokale rechtbank: altijd relevant
+  // Lokale rechtbank (RBMNE): altijd relevant — woonplaatsen zijn geanonimiseerd,
+  // dus een tekstfilter mist per definitie elke zaak tussen particulieren.
   if (LOCAL_COURTS.has(court)) return true;
-  // Andere rechtbanken: "Amersfoort" moet minimaal 2x voorkomen in de tekst
-  // (1x kan een toevallige vermelding zijn; 2x duidt op een partij of locatie)
-  const matches = (content || '').match(/\bamersfoort\b/gi);
-  return matches && matches.length >= 2;
+  // Andere rechtbanken (incl. GHARL): "Amersfoort" of "Leusden" moet minimaal
+  // 1x voorkomen in de tekst. Drempel verlaagd van 2 naar 1 omdat woonplaatsen
+  // geanonimiseerd zijn — als een van beide namen überhaupt voorkomt, is dat
+  // vrijwel altijd een instelling, straat of gemeente en geen toeval.
+  const matches = (content || '').match(/\b(?:amersfoort|leusden)\b/gi);
+  return matches && matches.length >= 1;
 }
 
 
