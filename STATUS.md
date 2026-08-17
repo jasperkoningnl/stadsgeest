@@ -1,11 +1,14 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **16 augustus 2026**
+> ### Bijgewerkt tot en met **17 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-16 — Trefwoorden bij tips: de spiegelcheck bleek een momentopname"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-17 (weger-run) — drie signalen beoordeeld, geen tips, en de bron Rechtspraak — Amersfoort blijkt vrijwel alleen uitspraken zonder Amersfoortse band te leveren"**.
 >
-> **Draai je de weegroutine?** Lees dan die laatste sectie (stap 7 heeft er een
-> veld bij) én de sectie daarboven, **"Cowork-update: 2026-08-16 (weger-run) —
+> **Draai je de weegroutine?** Lees die laatste sectie (daar staat wat er met de
+> rechtspraakbron aan de hand is en waarom een stille maandag geen storing is),
+> plus **"Cowork-update: 2026-08-16 — Trefwoorden bij tips: de spiegelcheck bleek
+> een momentopname"** (stap 7 heeft er een veld bij) én
+> **"Cowork-update: 2026-08-16 (weger-run) —
 > 78 signalen beoordeeld, vijf tips, nieuw dossier Gemeentefinancien Leusden, en
 > de Leusdense raadsstukken bleken in Amersfoortse clusters te zijn beland"**. Daar staat wat de
 > inhaalslag van de Leusdense bronnen heeft opgeleverd, welke clusterfout
@@ -4406,3 +4409,131 @@ Terzijde: in de werkkopie stond bij aanvang al een gewijzigde
 aangeraakt of meegecommit.
 
 *Cowork-update: 2026-08-16 (Nieuwsplein33-account, analysesessie trefwoorden)*
+---
+
+## Cowork-update: 2026-08-17 (weger-run) — drie signalen beoordeeld, geen tips, en de bron Rechtspraak — Amersfoort blijkt vrijwel alleen uitspraken zonder Amersfoortse band te leveren
+
+### Wat er is weggeschreven
+
+Geteld in de database, niet geschat: 3 rijen in `signal_events` (alle drie
+`reviewed`, actor `weger`), verdeeld over 3 unieke signalen. Nul tips, nul
+koppelingen in `tip_signals`, nul rijen in `tip_events`, nul dossierfeiten, geen
+nieuw dossier. Het aantal beoordeelde signalen en het aantal weggeschreven rijen
+komen exact op elkaar uit; geen afwijking. De teller van `tips` staat na afloop
+nog steeds op 25 en die van `dossier_facts` op 203, allebei met 16 augustus als
+laatste schrijfmoment. Twee signalen zijn op `discarded` gezet (1186, 1187), één
+blijft op `watching` (906). Na afloop staan er nul open signalen die nog nooit
+door de weger zijn bekeken.
+
+### Waarom de werkset zo klein was
+
+Dit is de dunste run tot nu toe, en dat is een echte zondag en geen storing. De
+intake van vannacht (`intake_runs` id 35) kreeg 45 items binnen, filterde er 41
+weg en maakte 2 signalen. Ter vergelijking: 116 items in en 9 signalen op
+16 augustus, 76 items in en 14 signalen op 15 augustus. Van de instroom sinds
+zondagmiddag kwam vrijwel alles uit tier 3: 27 Nextdoor-berichten, 10 meldingen
+van 112-nu, 6 van amersfoort.nieuws.nl en 6 van RTV Utrecht — die laatste twee
+spiegelbronnen, en van de zes RTV-berichten gaan er vier over Baarn, Vianen en
+Odijk. Aan tier 1 kwam er in dat hele venster precies twee items binnen: één
+uitspraak en één bekendmaking van een gemeenschappelijke regeling. De
+bekendmakingenstromen en de raadsbronnen publiceren in het weekend niet.
+
+Naast de twee nieuwe signalen stonden er 34 eerder beoordeelde signalen met een
+verse `last_seen_at` in de lijst. Daarvan heeft er precies één materiaal
+gekregen ná de vorige weger-run: 906. Bij de andere 33 ligt `last_seen_at` op
+15 augustus of eerder — dat zijn dezelfde signalen die de run van gisteren al
+bewust heeft laten liggen. Die zijn niet opnieuw doorgelopen en hebben geen
+nieuw event gekregen.
+
+### De drie beoordelingen
+
+**1186 — gediscard.** Een uitspraak van het gerechtshof Arnhem-Leeuwarden,
+locatie Leeuwarden, over een grensoverschrijdende schutting, carport en
+beukenhaag tussen buren in het buitengebied; eerste aanleg rechtbank Overijssel,
+zittingsplaats Zwolle. De opgeslagen tekst is afgekapt op 5.000 tekens, dus is
+de volledige uitspraak alsnog bij `data.rechtspraak.nl` opgehaald en nagelezen.
+Daarin komt geen Amersfoortse of Leusdense partij, adres of organisatie voor.
+Aantoonbaar buiten het gebied, dus `discarded` in plaats van `watching`.
+
+**1187 — gediscard.** Een bijbeltekst op Nextdoor, zonder gebeurtenis, plaats,
+bedrag of betrokkene.
+
+**906 — blijft op watching, geen tip.** Het dagelijks bestuur van de
+gemeenschappelijke regeling Afval Verwijdering Utrecht beperkt de openbaarheid
+van één inventarisnummer uit het archief 1982-1995 tot 1 januari 2060, ter
+bescherming van de persoonlijke levenssfeer, op advies van de archivaris van
+Archief Eemland. Standaardhandeling bij overbrenging naar de archiefbewaarplaats
+en geen afwijking. Eén detail wel genoteerd in de reden: het besluit is genomen
+op 20 november 2024 en pas op 14 augustus 2026 bekendgemaakt.
+
+### De bevinding van deze run: Rechtspraak — Amersfoort filtert niet op Amersfoort
+
+Signaal 1186 was aanleiding om de hele bron door te tellen. Van de **213
+uitspraken die deze bron sinds de start heeft opgeslagen, bevat er precies
+één het woord Amersfoort of Leusden in de opgeslagen tekst.** Sinds
+1 augustus zijn er 21 uitspraken binnengekomen en daarvan noemt er nul een van
+beide plaatsen.
+
+De oorzaak staat in `scraper/src/scrapers/rechtspraak.js`. De scraper haalt drie
+feeds op: alles van RBMNE, alles van GHARL, en een zoekopdracht op "Amersfoort".
+De functie `isAmersfoortRelevant` (regel 33) laat uitspraken van RBMNE en GHARL
+er onvoorwaardelijk door; alleen bij andere colleges wordt geëist dat
+"Amersfoort" minstens tweemaal in de tekst staat. Rechtbank Midden-Nederland is
+inderdaad de bevoegde rechtbank voor Amersfoort, maar beslaat ook Utrecht,
+Flevoland en het Gooi. Het gerechtshof Arnhem-Leeuwarden is weliswaar het
+ressort waar Amersfoort onder valt, maar beslaat daarnaast Gelderland,
+Overijssel, Friesland, Groningen en Drenthe. In de praktijk levert die tweede
+feed vooral Arnhemse strafzaken (zaaknummers 21-00xxxx) en Friese en
+Overijsselse civiele zaken op.
+
+Twee dingen om niet te verwarren voordat hier iemand aan gaat sleutelen. Ten
+eerste: uitspraken op rechtspraak.nl zijn geanonimiseerd, ook de woonplaats
+(`[woonplaats]`). Een tekstfilter op "Amersfoort" mist dus per definitie elke
+zaak tussen particulieren uit Amersfoort en vindt alleen zaken waarin een
+bedrijf, een instelling, een straat of de gemeente zelf wordt genoemd. Strenger
+filteren maakt de bron dus niet beter, alleen kleiner. Ten tweede: 41 van de 213
+opgeslagen uitspraken zitten op precies 5.000 tekens en zijn dus afgekapt, dus
+"één treffer op 213" is een ondergrens en geen exacte telling.
+
+Een richting die wél iets kan opleveren zonder de bron blind te maken: bij GHARL
+niet de hele feed opslaan maar alleen de uitspraken waarvan het veld "Eerste
+aanleg" naar een ECLI van RBMNE verwijst. Dat is metadata en geen tekst, dus de
+anonimisering zit niet in de weg. Dat is werk voor een pijplijnsessie; deze run
+heeft niets aan de scraper gewijzigd.
+
+### Bewust laten liggen
+
+**Het transformatiepatroon is niet opnieuw uitgeteld.** De vorige run gaf mee dat
+dat kon, nu er adressen bijkomen. Bij nazoeken blijkt het al gedekt: signaal 1081
+(Noordewierweg 231 A) hangt als dragend signaal onder tip 18, en tip 13 ("Acht
+Amersfoortse panden krijgen woningen erbij sinds 24 juli") dekt de reeks
+daarvoor. Een derde telling zou dezelfde adressen opnieuw aan de wachtrij
+aanbieden. Er staan sindsdien twee nieuwe adressen in de bekendmakingen die nog
+niet in een tip zitten: Arnhemseweg 37 (transformatie begane grond naar vier
+woningen, verleend 8 augustus) en Arnhemseweg-Zuid 149 (gebruikswijziging voor
+drie woningen, aanvraag 15 augustus). Beide zitten in signalen die al beoordeeld
+zijn. Zodra daar een derde adres bij komt is dat het moment om de reeks opnieuw
+uit te tellen.
+
+**Signaal 901 (Zomerrapportage Amersfoort, raadsvergadering 9 september) is
+opnieuw niet opgepakt.** De onderliggende PDF's zitten nog steeds niet in de
+database. Vierde run op rij dat dit blijft staan.
+
+### Niet geverifieerd
+
+- **Of de 212 overige uitspraken van de rechtspraakbron werkelijk geen
+  Amersfoortse band hebben.** Alleen de opgeslagen tekst is doorzocht, en 41
+  daarvan zijn afgekapt op 5.000 tekens. Alleen bij 1186 is de volledige tekst
+  bij de bron opgehaald en nagelezen.
+- **Of de AVU-bekendmaking op `zoek.officielebekendmakingen.nl` hetzelfde zegt
+  als de versie die is gelezen.** Die host gaf drie keer een time-out; de tekst
+  komt van `repository.overheid.nl`, de officiële bronopslag van dezelfde
+  publicatie. Opvallend genoeg draagt die pagina in de linkjes onderaan het
+  nummer gmb-2015-16426 terwijl de publicatie bgr-2026-1767 is; dat lijkt een
+  sjabloonfout aan de kant van overheid.nl en niet aan de onze.
+- **Waarom de intake 41 van de 45 items wegfilterde.** Dat aantal is uit
+  `intake_runs` gelezen, niet per item nagelopen in `intake_decisions`.
+- **Of er later op 17 augustus alsnog materiaal binnenkomt.** De run draaide om
+  07:33; de scrape-rondes van 13:00 en 19:00 moesten nog komen.
+
+*Cowork-update: 2026-08-17 (Nieuwsplein33-account, weger-run)*

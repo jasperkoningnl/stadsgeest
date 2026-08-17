@@ -23,6 +23,17 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-08-17 — Maandag zonder nieuwe tips
+
+Er zijn vanochtend geen tips aan de wachtrij toegevoegd. Dat komt niet doordat
+er iets stukging: gemeentelijke bekendmakingen, raadsstukken en registers
+publiceren in het weekend niets, en wat er wel binnenkwam waren buurtberichten,
+112-meldingen en stukken die jullie zelf al hebben. Er is één rechterlijke
+uitspraak binnengekomen en die bleek over een burenruzie in Overijssel te gaan.
+
+Na een weekend is een lege of nauwelijks gegroeide wachtrij dus het normale
+beeld. Dinsdag tot en met zaterdag komt het materiaal weer binnen.
+
 ## 2026-08-15 — Dit logboek, en een plek om iets te laten weten
 
 Onder Logboek staat vanaf nu wat er aan het dashboard is veranderd. Onderaan
