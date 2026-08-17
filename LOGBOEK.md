@@ -1,4 +1,4 @@
-# Logboek
+﻿# Logboek
 
 Wat er aan het dashboard is veranderd, in gewone taal. Dit bestand wordt
 getoond op `/nieuwsplein33/logboek`. Het is bedoeld voor de redactie, niet voor
@@ -22,6 +22,16 @@ weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
+
+## 2026-08-17 — Minder irrelevante rechtszaken in de lijst
+
+Een deel van de binnengekomen rechterlijke uitspraken ging over zaken in
+Friesland, Overijssel of Gelderland zonder enige band met Amersfoort. Die
+kwamen binnen omdat het gerechtshof Arnhem-Leeuwarden als lokaal hof werd
+meegenomen, maar dat hof beslaat half Nederland. Dat filter is aangescherpt:
+uitspraken van dat hof komen nu alleen nog binnen als Amersfoort of Leusden in
+de tekst wordt genoemd. Uitspraken van de Rechtbank Midden-Nederland blijven
+ongewijzigd binnenkomen.
 
 ## 2026-08-17 — Maandag zonder nieuwe tips
 

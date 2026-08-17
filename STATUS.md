@@ -1,8 +1,8 @@
-# STATUS.md — Stadsgeest 033
+﻿# STATUS.md — Stadsgeest 033
 
 > ### Bijgewerkt tot en met **17 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-17 (weger-run) — drie signalen beoordeeld, geen tips, en de bron Rechtspraak — Amersfoort blijkt vrijwel alleen uitspraken zonder Amersfoortse band te leveren"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-17 (Nieuwsplein33-account, twee fixes na weger-run) — rechtspraak-scraper gefilterd en Zomerrapportage-PDF's in de database gezet"**.
 >
 > **Draai je de weegroutine?** Lees die laatste sectie (daar staat wat er met de
 > rechtspraakbron aan de hand is en waarom een stille maandag geen storing is),
@@ -4537,3 +4537,81 @@ database. Vierde run op rij dat dit blijft staan.
   07:33; de scrape-rondes van 13:00 en 19:00 moesten nog komen.
 
 *Cowork-update: 2026-08-17 (Nieuwsplein33-account, weger-run)*
+
+---
+
+## Cowork-update: 2026-08-17 (Nieuwsplein33-account, twee fixes na weger-run) — rechtspraak-scraper gefilterd en Zomerrapportage-PDF's in de database gezet
+
+### Rechtspraak-scraper: GHARL niet meer ongefilterd
+
+De weger-run van vandaag meldde dat van 213 opgeslagen uitspraken er slechts
+een het woord Amersfoort of Leusden bevatte. Oorzaak: de functie
+`isAmersfoortRelevant` in `scraper/src/scrapers/rechtspraak.js` liet alles van
+RBMNE en GHARL ongecontroleerd door. RBMNE (Rechtbank Midden-Nederland) is de
+bevoegde rechtbank en blijft ongefilterd — woonplaatsen zijn geanonimiseerd, dus
+een tekstfilter mist elke zaak tussen particulieren. Maar GHARL (Gerechtshof
+Arnhem-Leeuwarden) beslaat naast Midden-Nederland ook Gelderland, Overijssel,
+Friesland, Groningen en Drenthe. Die feed leverde vooral Arnhemse strafzaken en
+Friese civiele zaken.
+
+Twee wijzigingen in `rechtspraak.js` (commit ab7eb13, gepusht naar main):
+
+1. GHARL uit `LOCAL_COURTS` verwijderd. Uitspraken van het hof komen alleen
+   nog binnen als ze Amersfoort of Leusden in de tekst noemen — via de
+   `q=Amersfoort`-feed of via het relevantiefilter.
+2. "Leusden" toegevoegd aan de regex in `isAmersfoortRelevant`, en de drempel
+   verlaagd van 2 naar 1 vermelding. Redenering: als een van beide
+   plaatsnamen uberhaupt voorkomt in een geanonimiseerde uitspraak, is dat
+   vrijwel altijd een instelling, straat of gemeente — geen toeval.
+
+De GHARL-feed zelf (`creator=GHARL&max=10`) staat nog in `FEEDS` zodat
+uitspraken die de tekstcheck wél halen niet gemist worden. Het enige dat
+verandert is dat ze niet meer blind worden opgeslagen.
+
+Syntax gevalideerd met `node --check`. Niet gedraaid tegen de echte database
+(geen scraperomgeving in deze sandbox). Wordt opgepakt bij de eerstvolgende
+`scrape-wekelijks`-run.
+
+### Signaal 901 — Zomerrapportage nu met inhoud
+
+Signaal 901 (Zomerrapportage, raadsvergadering 9 september) lag al vier
+weger-runs te wachten omdat raw_item 5003 `content: null` had — de scraper
+had alleen de agendapaginatitel opgeslagen, niet de documenten.
+
+Drie PDF's opgehaald van raadsinformatie.nl en in de database gezet:
+
+1. **raw_item 5003** (bestaand) bijgewerkt met de tekst van het raadsvoorstel
+   (13.568 tekens, opgeslagen als 8.000). Portefeuillehouder W.J. Stegeman,
+   B&W 23 juni, commissie 9 september, raad 23 september. Prognose 5,6 mln
+   voordelig t.o.v. gewijzigde begroting. Drie begrotingswijzigingen
+   voorgesteld: 370.000 reserve Meridiaan, 1,6 mln reserve Mobiliteitstransitie,
+   592.000 ESF-middelen naar reserve Regionale participatiegelden.
+2. **raw_item 6124** (nieuw) — de Zomerrapportage zelf, 73.651 tekens
+   (opgeslagen als 8.000). Vier programma's, inhoudsopgave met afwijkingen per
+   deelprogramma.
+3. **raw_item 6125** (nieuw) — advies auditcommissie, 3.728 tekens (volledig
+   opgeslagen). Vijf verbeterpunten, waaronder onduidelijke gevolgen
+   onderbesteding wijkteams en structurele patronen sociaal domein.
+
+Beide nieuwe items zijn gekoppeld aan signaal 901 via `signal_items`.
+`last_seen_at` is bijgewerkt naar het huidige tijdstip, zodat de volgende
+weger-run het signaal opnieuw oppakt en nu wél kan beoordelen.
+
+Verificatie: `SELECT r.id, r.title, length(r.content) FROM raw_items r JOIN
+signal_items si ON si.raw_item_id = r.id WHERE si.signal_id = 901` levert 5
+rijen, alle vijf met gevulde content. De twee eerder aanwezige moties (5320 en
+5358 over efficiente sturing gemeenschappelijke regelingen) waren al gevuld.
+
+### Niet geverifieerd
+
+- **Of de PDF-teksten correct zijn geextraheerd.** `pdftotext` levert soms
+  gebroken diacrieten op (in het raadsvoorstel staat `financiële` met
+  vervangingsteken). De inhoud is leesbaar maar niet gegarandeerd perfect.
+- **Of de 8.000-tekenlimiet voldoende is voor de weger.** Het raadsvoorstel is
+  13.568 tekens en de Zomerrapportage 73.651 — er is dus materiaal afgesneden.
+  De 5.000-tekenlimiet van de rechtspraak-scraper was al als te krap
+  geidentificeerd door de weger; hier is 8.000 gekozen als compromis.
+- **Of de build na de commit slaagt op Vercel.** De wijziging raakt alleen
+  `scraper/`, niet de frontend, dus de build zou niet mogen falen.
+
+*Cowork-update: 2026-08-17 (Nieuwsplein33-account, twee fixes na weger-run)*
