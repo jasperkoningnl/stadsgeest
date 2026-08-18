@@ -4790,3 +4790,22 @@ account verwijderen.
   ongecommitte wijzigingen in de repo.
 
 *Cowork-update: 2026-08-18 (Nieuwsplein33-account, weger-fix sessie)*
+
+### Summary-veld geïmplementeerd (commit 6df7b6d)
+
+`makeSummary(text, maxLen=500)` toegevoegd aan lib.js en utils.js. Pakt de
+eerste ~500 tekens van de inhoudelijke content, afgebroken op een zins- of
+woordgrens. Wordt automatisch gebruikt als fallback wanneer een scraper geen
+eigen summary meegeeft.
+
+Aangepaste bestanden:
+- **lib.js**: makeSummary() functie + insertItem content-limiet 10k→25k
+- **utils.js**: makeSummary() functie + saveRawItem fallback
+- **rechtspraak.js**: metadata-summary vervangen door makeSummary(fullContent)
+- **raadsinformatie.js**: summary 300→500 tekens, fallback naar makeSummary
+- **raadsinformatie-types.js**: idem
+- **raadsinformatie-ori.js**: makeSummary als primair, metadata als fallback
+- **officielebekendmakingen-split.js**: makeSummary bij fullContent, metadata
+  als fallback, summary 300→500
+- **officielebekendmakingen-repo.js**: makeSummary(doc.text) i.p.v. metadata
+- **officielebekendmakingen.js**: NIET aangepast (deprecated/broken)
