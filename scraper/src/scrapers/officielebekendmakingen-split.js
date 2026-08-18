@@ -13,7 +13,7 @@
 // Die scraper is feitelijk broken. Dit bestand vervangt de brede dekking.
 
 import * as cheerio from 'cheerio';
-import { createDb, ensureSource, insertItem, log } from '../lib.js';
+import { createDb, ensureSource, insertItem, log, makeSummary } from '../lib.js';
 
 const db = createDb();
 const GET_URL = 'https://zoek.officielebekendmakingen.nl/sru/Search';
@@ -165,13 +165,13 @@ async function runTypedSource(sourceDef) {
         await new Promise(r => setTimeout(r, 800));
 
         const content = fullContent || [rec.docType, rec.date, rec.description].filter(Boolean).join(' | ');
-        const summary = [rec.docType, rec.date].filter(Boolean).join(' | ');
+        const summary = fullContent ? makeSummary(fullContent) : [rec.docType, rec.date].filter(Boolean).join(' | ');
 
         const saved = await insertItem(db, {
           source_id: sourceId,
           title: rec.title,
           content: content.substring(0, 25000),
-          summary: summary.substring(0, 300),
+          summary: summary.substring(0, 500),
           external_url: rec.url,
           scraped_at: new Date().toISOString(),
         });
@@ -221,11 +221,12 @@ async function runOverig() {
         await new Promise(r => setTimeout(r, 800));
 
         const content = fullContent || [rec.docType, rec.date, rec.description].filter(Boolean).join(' | ');
+        const summary = fullContent ? makeSummary(fullContent) : [rec.docType, rec.date].filter(Boolean).join(' | ');
         const saved = await insertItem(db, {
           source_id: sourceId,
           title: rec.title,
           content: content.substring(0, 25000),
-          summary: [rec.docType, rec.date].filter(Boolean).join(' | ').substring(0, 300),
+          summary: summary.substring(0, 500),
           external_url: rec.url,
           scraped_at: new Date().toISOString(),
         });

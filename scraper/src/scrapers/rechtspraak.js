@@ -4,7 +4,7 @@
 // Documentatie: https://www.rechtspraak.nl/Uitspraken/Paginas/Open-Data.aspx
 
 import db from '../db.js';
-import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
+import { saveRawItem, getOrCreateSource, logResult, makeSummary } from '../utils.js';
 
 // Strategie: drie feeds combineren
 // 1. Rechtbank Midden-Nederland (RBMNE) — alle uitspraken. Dit is de bevoegde
@@ -156,7 +156,7 @@ async function scrape() {
             externalUrl: entry.id.startsWith('ECLI:') ? ecliLink : entry.link,
             title: entry.title,
             content: fullContent,
-            summary: entry.updated ? `Gepubliceerd: ${entry.updated}` : '',
+            summary: makeSummary(fullContent),
             publishedAt: entry.updated || null,
           });
           if (result.saved) saved++; else skipped++;

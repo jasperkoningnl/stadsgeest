@@ -17,7 +17,7 @@
 //   raad-vergaderingen         — vergaderingen en overige documenten (catch-all)
 
 import { withBrowser } from '../browser.js';
-import { createDb, ensureSource, insertItem, log } from '../lib.js';
+import { createDb, ensureSource, insertItem, log, makeSummary } from '../lib.js';
 
 const db = createDb();
 const BASE_URL = 'https://amersfoort.raadsinformatie.nl';
@@ -166,7 +166,7 @@ async function scrape() {
         source_id: sourceId,
         title: item.title,
         content,
-        summary: item.description?.substring(0, 300) || '',
+        summary: item.description?.substring(0, 500) || makeSummary(content),
         external_url: item.url,
         scraped_at: new Date().toISOString(),
       });

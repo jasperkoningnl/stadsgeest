@@ -4,7 +4,7 @@
 
 import { withBrowser } from '../browser.js';
 import db from '../db.js';
-import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
+import { saveRawItem, getOrCreateSource, logResult, makeSummary } from '../utils.js';
 
 const SOURCE_URL = 'https://amersfoort.raadsinformatie.nl/';
 
@@ -80,7 +80,7 @@ async function scrape() {
         externalUrl: item.url,
         title: item.title,
         content,
-        summary: item.description ? item.description.substring(0, 300) : '',
+        summary: item.description ? item.description.substring(0, 500) : makeSummary(content),
       });
       if (result.saved) saved++; else skipped++;
     } catch (err) {

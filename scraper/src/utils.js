@@ -25,6 +25,21 @@ export function naarPublicatieIso(waarde) {
   return d.toISOString();
 }
 
+// Genereer een inhoudelijke samenvatting (~500 tekens) uit de content.
+// Pakt de eerste ~500 tekens, afgebroken op een zins- of woordgrens.
+export function makeSummary(text, maxLen = 500) {
+  if (!text) return '';
+  const clean = text.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+  if (clean.length <= maxLen) return clean;
+  const chunk = clean.substring(0, maxLen + 50);
+  const lastDot = chunk.lastIndexOf('. ', maxLen);
+  const lastNewline = chunk.lastIndexOf('\n', maxLen);
+  const breakAt = Math.max(lastDot + 1, lastNewline);
+  if (breakAt > maxLen * 0.4) return chunk.substring(0, breakAt).trim();
+  const lastSpace = chunk.lastIndexOf(' ', maxLen);
+  return (lastSpace > 0 ? chunk.substring(0, lastSpace) : chunk.substring(0, maxLen)).trim() + '…';
+}
+
 export async function saveRawItem(db, { sourceId, externalUrl, title, content, summary, publishedAt }) {
   const hash = contentHash(`${title}${externalUrl}`);
   const pub = naarPublicatieIso(publishedAt);
@@ -33,7 +48,7 @@ export async function saveRawItem(db, { sourceId, externalUrl, title, content, s
     await db.execute({
       sql: `INSERT INTO raw_items (source_id, external_url, title, content, summary, content_hash, published_at)
             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      args: [sourceId, externalUrl || null, title || null, content || null, summary || null, hash, pub],
+      args: [sourceId, externalUrl || null, title || null, content || null, (summary || makeSummary(content)) || null, hash, pub],
     });
     return { saved: true, hash };
   } catch (err) {

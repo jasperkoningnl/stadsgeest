@@ -4,7 +4,7 @@
 // ORI: https://api.openraadsinformatie.nl/v1/elastic/ori_amersfoort*/_search
 // Classificeert op naam naar de bestaande substromen (zelfde bronnamen, historie loopt door).
 import db from '../db.js';
-import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
+import { saveRawItem, getOrCreateSource, logResult, makeSummary } from '../utils.js';
 
 const ES = 'https://api.openraadsinformatie.nl/v1/elastic/ori_amersfoort*/_search';
 const UA = 'Stadsgeest033/1.0 (redactie@stadsgeest.nl)';
@@ -129,7 +129,7 @@ async function scrape() {
         externalUrl: url,
         title: naam.substring(0, 300),
         content: tekst,
-        summary: `${src['@type'] || ''} — raadsinformatie Amersfoort, ${String(datum).substring(0, 10)}`,
+        summary: makeSummary(tekst) || `${src['@type'] || ''} — raadsinformatie Amersfoort, ${String(datum).substring(0, 10)}`,
         publishedAt: datum,
       });
       if (r.saved) stats[stream.name].new++; else stats[stream.name].skipped++;
@@ -225,7 +225,7 @@ async function leusdenPass(dagen) {
         externalUrl: url,
         title: titel.substring(0, 300),
         content: tekst,
-        summary: `${src['@type'] || ''} — raadsinformatie Leusden, ${String(datum).substring(0, 10)}`,
+        summary: makeSummary(tekst) || `${src['@type'] || ''} — raadsinformatie Leusden, ${String(datum).substring(0, 10)}`,
         publishedAt: datum,
       });
       if (r.saved) nieuw++; else overgeslagen++;

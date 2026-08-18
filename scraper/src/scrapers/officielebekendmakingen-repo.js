@@ -18,7 +18,7 @@
 // Getest 24-07-2026: 262 Amersfoortse publicaties in de laatste 9 dagen.
 
 import * as cheerio from 'cheerio';
-import { createDb, ensureSource, insertItem, log } from '../lib.js';
+import { createDb, ensureSource, insertItem, log, makeSummary } from '../lib.js';
 
 const db = createDb();
 const SRU = 'https://repository.overheid.nl/sru';
@@ -165,11 +165,12 @@ async function scrape() {
 
         if (doc) stats.fulltext++; else stats.nofulltext++;
 
-        const summary = [rec.docTypes.join(' / '), rec.modified].filter(Boolean).join(' | ');
+        const meta = [rec.docTypes.join(' / '), rec.modified].filter(Boolean).join(' | ');
+        const summary = doc ? makeSummary(doc.text) : meta;
         const saved = await insertItem(db, {
           source_id: sourceIds[route.source],
           title: rec.title,
-          content: doc ? doc.text.substring(0, 25000) : summary,
+          content: doc ? doc.text.substring(0, 25000) : meta,
           summary,
           external_url: publicUrl,
           scraped_at: new Date().toISOString(),
@@ -255,11 +256,12 @@ async function scrapeLeusden(since) {
       try {
         const doc = await fetchDocument(rec);
         await new Promise(r => setTimeout(r, FETCH_DELAY_MS));
-        const summary = [rec.docTypes.join(' / '), rec.modified].filter(Boolean).join(' | ');
+        const meta = [rec.docTypes.join(' / '), rec.modified].filter(Boolean).join(' | ');
+        const summary = doc ? makeSummary(doc.text) : meta;
         const saved = await insertItem(db, {
           source_id: sourceId,
           title: rec.title,
-          content: doc ? doc.text.substring(0, 25000) : summary,
+          content: doc ? doc.text.substring(0, 25000) : meta,
           summary,
           external_url: `https://zoek.officielebekendmakingen.nl/${rec.identifier}.html`,
           scraped_at: new Date().toISOString(),

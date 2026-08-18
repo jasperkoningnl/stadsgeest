@@ -71,6 +71,26 @@ function naarPubIso(waarde) {
   return d.toISOString();
 }
 
+// Genereer een inhoudelijke samenvatting (~500 tekens) uit de content.
+// Pakt de eerste alinea of de eerste ~500 tekens, afgebroken op een woordgrens.
+// Stript lege regels en witruimte. Wordt gebruikt als fallback wanneer een
+// scraper geen eigen summary meegeeft.
+export function makeSummary(text, maxLen = 500) {
+  if (!text) return '';
+  // Normaliseer witruimte, maar behoud alinea-einden
+  const clean = text.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+  if (clean.length <= maxLen) return clean;
+  // Probeer op een zinsgrens af te breken
+  const chunk = clean.substring(0, maxLen + 50);
+  const lastDot = chunk.lastIndexOf('. ', maxLen);
+  const lastNewline = chunk.lastIndexOf('\n', maxLen);
+  const breakAt = Math.max(lastDot + 1, lastNewline);
+  if (breakAt > maxLen * 0.4) return chunk.substring(0, breakAt).trim();
+  // Geen goede zinsgrens gevonden: breek op woordgrens
+  const lastSpace = chunk.lastIndexOf(' ', maxLen);
+  return (lastSpace > 0 ? chunk.substring(0, lastSpace) : chunk.substring(0, maxLen)).trim() + '…';
+}
+
 export async function insertItem(db, { source_id, title, content, summary, external_url, scraped_at, is_historical = 0, full_text = null, published_at = null }) {
   const pub = naarPubIso(published_at);
   try {
@@ -91,7 +111,7 @@ export async function insertItem(db, { source_id, title, content, summary, exter
     await db.execute({
       sql: `INSERT INTO raw_items (source_id, title, content, summary, external_url, scraped_at, is_processed, is_historical, full_text, fulltext_fetched_at, published_at)
             VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?)`,
-      args: [source_id, title?.substring(0, 500) ?? '', content?.substring(0, 10000) ?? '', summary?.substring(0, 1000) ?? '', external_url ?? '', scraped_at ?? new Date().toISOString(), is_historical, full_text ? full_text.substring(0, 200000) : null, full_text ? new Date().toISOString() : null, pub],
+      args: [source_id, title?.substring(0, 500) ?? '', content?.substring(0, 25000) ?? '', (summary || makeSummary(content))?.substring(0, 1000) ?? '', external_url ?? '', scraped_at ?? new Date().toISOString(), is_historical, full_text ? full_text.substring(0, 200000) : null, full_text ? new Date().toISOString() : null, pub],
     });
     return true;
   } catch (e) {
