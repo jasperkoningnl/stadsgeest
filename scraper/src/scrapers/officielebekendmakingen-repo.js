@@ -169,7 +169,7 @@ async function scrape() {
         const saved = await insertItem(db, {
           source_id: sourceIds[route.source],
           title: rec.title,
-          content: doc ? doc.text.substring(0, 10000) : summary,
+          content: doc ? doc.text.substring(0, 25000) : summary,
           summary,
           external_url: publicUrl,
           scraped_at: new Date().toISOString(),
@@ -259,7 +259,7 @@ async function scrapeLeusden(since) {
         const saved = await insertItem(db, {
           source_id: sourceId,
           title: rec.title,
-          content: doc ? doc.text.substring(0, 10000) : summary,
+          content: doc ? doc.text.substring(0, 25000) : summary,
           summary,
           external_url: `https://zoek.officielebekendmakingen.nl/${rec.identifier}.html`,
           scraped_at: new Date().toISOString(),

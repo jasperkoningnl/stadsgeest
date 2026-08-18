@@ -132,7 +132,7 @@ async function fetchFullContent(url) {
     const $ = cheerio.load(html);
     $('nav, footer, aside, script, style, .sidebar, .navigation, .menu').remove();
     const content = $('article, .documentbody, main, .content').first().text().trim();
-    return (content || $('body').text().trim()).substring(0, 5000);
+    return (content || $('body').text().trim()).substring(0, 25000);
   } catch {
     return null;
   }
@@ -170,7 +170,7 @@ async function runTypedSource(sourceDef) {
         const saved = await insertItem(db, {
           source_id: sourceId,
           title: rec.title,
-          content: content.substring(0, 5000),
+          content: content.substring(0, 25000),
           summary: summary.substring(0, 300),
           external_url: rec.url,
           scraped_at: new Date().toISOString(),
@@ -224,7 +224,7 @@ async function runOverig() {
         const saved = await insertItem(db, {
           source_id: sourceId,
           title: rec.title,
-          content: content.substring(0, 5000),
+          content: content.substring(0, 25000),
           summary: [rec.docType, rec.date].filter(Boolean).join(' | ').substring(0, 300),
           external_url: rec.url,
           scraped_at: new Date().toISOString(),

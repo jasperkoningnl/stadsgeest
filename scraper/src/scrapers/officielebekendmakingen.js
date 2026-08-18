@@ -109,7 +109,7 @@ async function fetchFullContent(url) {
     const $ = cheerio.load(html);
     $('nav, footer, aside, script, style, .sidebar, .navigation, .menu').remove();
     const content = $('article, .documentbody, main, .content').first().text().trim();
-    return content || $('body').text().trim().substring(0, 5000);
+    return content || $('body').text().trim().substring(0, 25000);
   } catch (err) {
     console.error(`Content fetch failed voor ${url}:`, err.message);
     return null;
@@ -148,7 +148,7 @@ async function scrape() {
           sourceId,
           externalUrl: rec.url,
           title: rec.title,
-          content: content.substring(0, 5000),
+          content: content.substring(0, 25000),
           summary: rec.type || '',
         });
         if (result.saved) saved++; else skipped++;

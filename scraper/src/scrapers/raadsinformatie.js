@@ -73,7 +73,7 @@ async function scrape() {
       if (item.attachments?.length) {
         parts.push('Bijlagen: ' + item.attachments.join(', '));
       }
-      const content = parts.join('\n\n').substring(0, 5000);
+      const content = parts.join('\n\n').substring(0, 25000);
 
       const result = await saveRawItem(db, {
         sourceId,

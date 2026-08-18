@@ -140,7 +140,7 @@ async function scrape() {
           if (entry.id.startsWith('ECLI:')) {
             const ecliText = await fetchEcliContent(entry.id);
             if (ecliText && ecliText.length > fullContent.length) {
-              fullContent = ecliText.substring(0, 5000);
+              fullContent = ecliText.substring(0, 25000);
             }
             await new Promise(r => setTimeout(r, 800));
           }

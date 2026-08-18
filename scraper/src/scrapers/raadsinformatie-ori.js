@@ -120,7 +120,7 @@ async function scrape() {
     if (!naam) continue;
     const stream = STREAMS.find(s => s.re.test(naam)) || STREAMS[STREAMS.length - 1];
     const url = src.original_url || (Array.isArray(src.sources) && src.sources[0] && src.sources[0].url) || `https://api.openraadsinformatie.nl/v1/elastic/${h._index}/_doc/${encodeURIComponent(h._id)}`;
-    const tekst = String(src.text || src.description || '').substring(0, 8000);
+    const tekst = String(src.text || src.description || '').substring(0, 25000);
     const datum = src.last_discussed_at || src.start_date || src['@timestamp'] || new Date().toISOString();
     try {
       if (await elders(url)) { stats[stream.name].skipped++; continue; }
@@ -217,7 +217,7 @@ async function leusdenPass(dagen) {
     const titel = String(src.name || '').trim();
     if (!titel) continue;
     const url = src.original_url || (Array.isArray(src.sources) && src.sources[0] && src.sources[0].url) || `https://api.openraadsinformatie.nl/v1/elastic/${h._index}/_doc/${encodeURIComponent(h._id)}`;
-    const tekst = String(src.text || src.description || '').substring(0, 8000);
+    const tekst = String(src.text || src.description || '').substring(0, 25000);
     const datum = src.last_discussed_at || src.start_date || src['@timestamp'] || new Date().toISOString();
     try {
       const r = await saveRawItem(db, {

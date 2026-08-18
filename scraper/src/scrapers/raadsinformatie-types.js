@@ -161,7 +161,7 @@ async function scrape() {
     const sourceId = sourceMap[typeKey];
 
     try {
-      const content = [item.description].filter(Boolean).join('\n').substring(0, 5000);
+      const content = [item.description].filter(Boolean).join('\n').substring(0, 25000);
       const saved = await insertItem(db, {
         source_id: sourceId,
         title: item.title,
