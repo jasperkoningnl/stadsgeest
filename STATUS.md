@@ -1,18 +1,16 @@
 ﻿# STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **17 augustus 2026**
+> ### Bijgewerkt tot en met **18 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-17 (Nieuwsplein33-account, twee fixes na weger-run) — rechtspraak-scraper gefilterd en Zomerrapportage-PDF's in de database gezet"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-18 (weger-run) — negen signalen beoordeeld, één tip (Zomerrapportage), zes dossierfeiten"**.
 >
-> **Draai je de weegroutine?** Lees die laatste sectie (daar staat wat er met de
-> rechtspraakbron aan de hand is en waarom een stille maandag geen storing is),
-> plus **"Cowork-update: 2026-08-16 — Trefwoorden bij tips: de spiegelcheck bleek
-> een momentopname"** (stap 7 heeft er een veld bij) én
-> **"Cowork-update: 2026-08-16 (weger-run) —
-> 78 signalen beoordeeld, vijf tips, nieuw dossier Gemeentefinancien Leusden, en
-> de Leusdense raadsstukken bleken in Amersfoortse clusters te zijn beland"**. Daar staat wat de
-> inhaalslag van de Leusdense bronnen heeft opgeleverd, welke clusterfout
-> daarbij aan het licht kwam en welke drie bronnen ruis blijven produceren
+> **Draai je de weegroutine?** Lees die laatste sectie (daar staat de
+> CHECK-constraint op `fact_type` en de status van het transformatiepatroon),
+> plus **"Cowork-update: 2026-08-17 (twee fixes na weger-run)"** (rechtspraak-
+> scraper gefilterd, Zomerrapportage-PDF's in de database) én
+> **"Cowork-update: 2026-08-16 (weger-run)"** (78 signalen, vijf tips, dossier
+> Gemeentefinancien Leusden, clusterfout Leusdense raadsstukken, drie
+> ruisbronnen)
 > (NS Verstoringen, de lege agendapunten van Raadsinformatie Leusden, en de
 > afkaplengte van 5.000 respectievelijk 8.000 tekens bij rechtspraak en
 > raadsstukken). De sectie "Leusden uitgezocht: geen subsidieregister, wel een
@@ -4615,3 +4613,120 @@ rijen, alle vijf met gevulde content. De twee eerder aanwezige moties (5320 en
   `scraper/`, niet de frontend, dus de build zou niet mogen falen.
 
 *Cowork-update: 2026-08-17 (Nieuwsplein33-account, twee fixes na weger-run)*
+
+---
+
+## Cowork-update: 2026-08-18 (weger-run) — negen signalen beoordeeld, één tip (Zomerrapportage), zes dossierfeiten
+
+### Wat er is weggeschreven
+
+Geteld in de database, niet geschat: 9 rijen in `signal_events` (1× `tip_created`
+voor signaal 901, 8× `reviewed`), verdeeld over 9 unieke signalen. 1 tip
+aangemaakt (id 26, score 13, soort `nieuwsfeit`), 1 koppeling in `tip_signals`,
+1 rij in `tip_events`, 6 dossierfeiten. 4 signalen op `discarded` gezet
+(1188, 1189, 1190, 1193), 4 op `watching` gebleven (1191, 1192, 1194, 1195).
+
+Na afloop: 26 tips totaal, 209 dossierfeiten totaal. Nul open signalen die nog
+nooit door de weger zijn bekeken.
+
+### De werkset
+
+Acht nieuwe signalen (1188–1195) en één herbeoordeling (901, Zomerrapportage).
+Daarnaast stonden 39 eerder beoordeelde signalen in de lijst met een verse
+`last_seen_at`, maar bij geen ervan is er inhoudelijk nieuw materiaal bijgekomen
+— het zijn herhaalde scrapes van dezelfde bekendmakingen. Die zijn niet opnieuw
+doorgelopen en hebben geen nieuw event gekregen.
+
+Signaal 901 was expliciet gemarkeerd voor herbeoordeling nadat de vorige sessie
+(17 augustus) de drie PDF's van de Zomerrapportage in de database had gezet. De
+twee eerdere weger-runs (9 en 15 augustus) konden het signaal niet beoordelen
+omdat de PDF-inhoud ontbrak.
+
+### Tip 26 — Zomerrapportage 2026
+
+**Titel:** Amersfoort verwacht 5,6 miljoen voordelig maar moet 1,6 miljoen
+bijpassen voor mobiliteitstransitie
+
+**Score 13.** Drie tier 1-documenten (raadsvoorstel, volledige rapportage, advies
+auditcommissie), concrete bedragen (5,6 mln voordeel, 1,6 mln tekort
+mobiliteitstransitie, 24 mln ombuigingen, 370k afwaardering Meridiaan-panden,
+592k ESF), entiteit SRO in drie signalen, raadslid Frits van Dasselaar (CDA) als
+mede-indiener van de aangenomen motie over gemeenschappelijke regelingen, dossier
+Lokale politiek, sluit aan op de agenda van de redactie. Niet door spiegelbronnen
+gedekt. Commissievergadering 9 september, raadsvergadering 23 september.
+
+De auditcommissie constateert structurele patronen van onderbesteding in het
+sociaal domein en signaleert dat bij de wijkteams onduidelijk is welke
+doelstellingen niet worden gehaald. Dat is een politiek relevante observatie die
+de redactie kan oppakken voorafgaand aan de commissievergadering.
+
+**Beperking:** de volledige Zomerrapportage is 73.651 tekens; in de database staat
+8.000. De opsomming van de belangrijkste afwijkingen op pagina 4 is afgekapt. De
+tip bevat een vervolgvraag om het volledige document op te vragen.
+
+### De acht nieuwe signalen
+
+- **1188** (pakketautomaat Sportpark Zielhorst, buiten behandeling): gediscard,
+  routinehandeling.
+- **1189** (twee alcoholwet-ontheffingen evenementen): gediscard, routine.
+- **1190** (raam naar deur Almeerderhout 6): gediscard, standaardvergunning.
+- **1191** (kapaanvragen Peter van Anrooystraat 24 en Hogeweg 81): watching,
+  twee dossierfeiten in dossier Bomen en kapvergunningen.
+- **1192** (twee kassen circulaire stadslandbouw Middelhoefseweg 12): watching.
+  Ongebruikelijk concept. Opvallend: dubbele verzenddatum (13 aug 2026 en 3 nov
+  2025) in de bekendmaking, vermoedelijk hernieuwde publicatie. Geen patroon.
+- **1193** (eregalerij Amersfoortse fotografie, Archief Eemland): gediscard,
+  alleen tier 2 zonder dragende tier 1-bron.
+- **1194** (perspectiefnota 2027 Waterschap Vallei en Veluwe): watching,
+  dossierfeit in dossier Droogte en waterbeheer. Gaat over het hele werkgebied,
+  geen Amersfoort-specifieke besluiten of bedragen.
+- **1195** (participatietraject uitwerking coalitieakkoord): watching, dossierfeit
+  in dossier Lokale politiek. Alleen tier 2, volledig gedekt door De Stad
+  Amersfoort (13 aug) en amersfoort.nieuws.nl (16 aug).
+
+### Dossierfeiten per dossier
+
+- **Lokale politiek en college (5):** 3 feiten — Zomerrapportage prognose,
+  auditcommissie-advies, participatietraject coalitieakkoord.
+- **Droogte en waterbeheer (3):** 1 feit — perspectiefnota waterschap.
+- **Bomen en kapvergunningen (12):** 2 feiten — kapaanvragen.
+
+### Bewust laten liggen
+
+**Het transformatiepatroon is niet opnieuw uitgeteld.** De vorige run meldde dat
+er twee nieuwe adressen staan (Arnhemseweg 37 en Arnhemseweg-Zuid 149) en dat een
+derde adres het moment zou zijn om de reeks opnieuw uit te tellen. Er is vandaag
+geen derde adres bijgekomen.
+
+**De 39 eerder beoordeelde signalen met verse `last_seen_at` zijn niet opnieuw
+doorgelopen.** Steekproefsgewijs gecontroleerd: de verse timestamp komt van
+herhaalde scrapes, niet van nieuw materiaal.
+
+### CHECK-constraint `fact_type` op `dossier_facts`
+
+Bij het wegschrijven bleek de kolom `fact_type` een CHECK-constraint te hebben met
+een gesloten lijst: `incident`, `besluit`, `bedrag`, `contract`, `subsidie`,
+`claim`, `plan`, `realisatie`, `maatregel`, `correctie`, `overig`. De waarden
+`financieel`, `advies` en `aanvraag` die de eerste poging gebruikte werden
+geweigerd. Opgelost door `bedrag` te gebruiken voor de financiële rapportage en
+`overig` voor het advies en de kapaanvragen. Eerdere runs zijn hier blijkbaar niet
+tegenaan gelopen, maar het beperkt de beschrijvende kracht van het veld. Als dat
+een probleem wordt: de constraint uitbreiden of de omschrijving in `details`
+zetten (wat nu al gebeurt).
+
+Bij de eerste mislukte poging is een duplicate tip (id 27) aangemaakt die direct is
+opgeruimd. Tip 26 is de enige die blijft staan.
+
+### Niet geverifieerd
+
+- **Of de afgekapte Zomerrapportage-tekst alle relevante afwijkingen bevat.** De
+  opsomming van de belangrijkste afwijkingen op pagina 4 is afgekapt op de 8.000-
+  tekenlimiet. De tip bevat een vervolgvraag hierover.
+- **Of de motie over gemeenschappelijke regelingen (2026-080) in de Zomerrapportage
+  zelf wordt behandeld.** De motie zit als apart raw_item aan signaal 901 gekoppeld
+  maar de inhoudelijke relatie is niet geverifieerd in het volledige document.
+- **Of SRO inhoudelijk in de Zomerrapportage voorkomt.** De entiteitsextractie
+  heeft SRO gevonden, maar dat kan uit de moties komen (die ook aan signaal 901
+  hangen). Het is niet nagelopen in de afgekapte tekst.
+
+*Cowork-update: 2026-08-18 (Nieuwsplein33-account, weger-run)*
