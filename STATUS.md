@@ -4730,3 +4730,63 @@ opgeruimd. Tip 26 is de enige die blijft staan.
   hangen). Het is niet nagelopen in de afgekapte tekst.
 
 *Cowork-update: 2026-08-18 (Nieuwsplein33-account, weger-run)*
+
+---
+
+## 2026-08-18 — Sessie: weger-prompt, scraperlimieten, PowerShell-fix
+
+### Aanleiding
+
+Drie problemen met de weger-run van vandaag:
+1. "Input te groot" — de volledige werkset paste niet in de context
+2. De Zomerrapportage (raw_item 5003) was afgekapt op 8.000 tekens
+3. Cryptische kop: "Amersfoort verwacht 5,6 miljoen voordelig"
+
+### Wat is gedaan
+
+**Weger-prompt (stadsgeest-weger.md) — drie aanpassingen:**
+- Batching: maximaal 15 signalen per groep, nieuwste eerst. Voorkomt
+  contextoverloop bij een grote achterstand.
+- Afgekapte content herkennen: bij tier 1-documenten die midden in een zin
+  stoppen, het brondocument openen via external_url. Geen patroonpunten
+  toekennen op afgekapte tekst.
+- Geen jargon: concrete vertaalregels met voorbeelden. "Voordelig resultaat"
+  wordt "minder uitgegeven dan begroot", etc.
+
+**Scrapers — contentlimiet verhoogd (commit ca60458):**
+Zeven scrapers verhoogd van substring(0, 5000/8000/10000) naar
+substring(0, 25000):
+- rechtspraak.js (1 plek)
+- raadsinformatie.js (1 plek)
+- raadsinformatie-types.js (1 plek)
+- raadsinformatie-ori.js (2 plekken, was 8000)
+- officielebekendmakingen.js (2 plekken)
+- officielebekendmakingen-split.js (3 plekken)
+- officielebekendmakingen-repo.js (2 plekken, was 10000)
+
+Summary-velden (substring 300) zijn bewust niet aangepast.
+
+**PowerShell-probleem opgelost:**
+Windows-MCP stond dubbel geconfigureerd in claude_desktop_config.json:
+handmatig in mcpServers én als extensie, keer twee accounts = vier instances.
+Handmatige entry verwijderd. Jasper moet nog: Claude herstarten en het tweede
+account verwijderen.
+
+### Nog te doen
+
+- `git push` op de notebook (commit ca60458 staat klaar maar kon niet gepusht
+  worden vanuit Cowork)
+- PM2-scrapers herstarten zodat de nieuwe limieten actief worden
+- Summary-veld vullen bij opslag (langere-termijnverbetering)
+- Claude herstarten en tweede account verwijderen (PowerShell-fix)
+
+### Niet geverifieerd
+
+- Of 25.000 tekens voldoende is voor de langste gemeentelijke publicaties.
+  De Zomerrapportage-PDF is ~70.000 tekens; die wordt sowieso afgekapt, maar
+  het brondocument is nu via de weger-prompt opvraagbaar via external_url.
+- Of de eerder bewerkte drie bestanden (rechtspraak, raadsinformatie,
+  raadsinformatie-types) correct zijn overgekomen — ze hadden al eerdere
+  ongecommitte wijzigingen in de repo.
+
+*Cowork-update: 2026-08-18 (Nieuwsplein33-account, weger-fix sessie)*
