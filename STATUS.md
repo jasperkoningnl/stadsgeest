@@ -1,16 +1,14 @@
-﻿# STATUS.md — Stadsgeest 033
+# STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **18 augustus 2026**
+> ### Bijgewerkt tot en met **20 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-18 (weger-run) — negen signalen beoordeeld, één tip (Zomerrapportage), zes dossierfeiten"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-20 (weger-prompt hersteld voor cloud-sandbox)"**.
 >
-> **Draai je de weegroutine?** Lees die laatste sectie (daar staat de
-> CHECK-constraint op `fact_type` en de status van het transformatiepatroon),
-> plus **"Cowork-update: 2026-08-17 (twee fixes na weger-run)"** (rechtspraak-
-> scraper gefilterd, Zomerrapportage-PDF's in de database) én
-> **"Cowork-update: 2026-08-16 (weger-run)"** (78 signalen, vijf tips, dossier
-> Gemeentefinancien Leusden, clusterfout Leusdense raadsstukken, drie
-> ruisbronnen)
+> **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
+> pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
+> staat in `stadsgeest-weger.md` en als projectdocument. Lees ook de runs
+> van 19 en 20 augustus (databasetoegang hersteld) en 16-18 augustus (CHECK-
+> constraint fact_type, transformatiepatroon, rechtspraak-scraper)
 > (NS Verstoringen, de lege agendapunten van Raadsinformatie Leusden, en de
 > afkaplengte van 5.000 respectievelijk 8.000 tekens bij rechtspraak en
 > raadsstukken). De sectie "Leusden uitgezocht: geen subsidieregister, wel een
@@ -4966,3 +4964,57 @@ De eerste poging om dossierfeiten te schrijven mislukte op een CHECK-constraint 
 De Turso HTTP pipeline API (`https://<host>/v2/pipeline`) werkt als alternatief voor `@libsql/client` in de sandbox. Python `urllib.request` met `ssl.create_default_context()` volstaat. Parameters meegeven als `args`-array met `{"type":"text","value":"..."}` of `{"type":"null"}`. Resultaten zitten in `results[i].response.result.rows`, elke cel als `{"type":"text|integer|null","value":"..."}`.
 
 *Cowork-update: 2026-08-20 (Nieuwsplein33-account, weger-run — geslaagd)*
+
+---
+
+### Cowork-update: 2026-08-20 — Weger-prompt herschreven voor cloud-sandbox
+
+De weger-routine (scheduled task) liep op 19 en 20 augustus vast omdat de
+cloud-sandbox van Anthropic geen toegang heeft tot PowerShell of het libsql-protocol.
+De routine probeerde de database te bereiken via `mcp__Windows-MCP__PowerShell` en
+`@libsql/client`, maar beide zijn niet beschikbaar in een scheduled task.
+
+**Wat er is veranderd in de prompt (`stadsgeest-weger.md`):**
+
+1. De openingssectie verwijst niet meer naar "de notebook van Jasper" maar naar de
+   cloud-sandbox. Bestanden die de routine nodig heeft (NIEUWSPLEIN33.md, STATUS.md)
+   worden nu via `project_read` en WebFetch opgehaald in plaats van via lokale paden.
+
+2. De database-toegang is herschreven van PowerShell + @libsql/client naar de Turso
+   HTTP Pipeline API (`/v2/pipeline`). Die is bereikbaar via gewone HTTPS en werkt in
+   de sandbox. De URL en het token staan in de prompt zelf (niet in een .env-bestand,
+   want de sandbox heeft daar geen toegang toe).
+
+3. Paginascraping is veranderd van `mcp__Windows-MCP__Scrape` naar `WebFetch`.
+
+**Wat ik heb gevonden:**
+
+- De Turso HTTP API op `https://amersfoort-lokaal-jasperkoningnl.aws-eu-west-1.turso.io/v2/pipeline`
+  is bereikbaar vanuit de sandbox (bevestigd met curl, HTTP 200 op een SELECT-query).
+- `npm install @libsql/client` geeft een 403 in de sandbox — het npm-register is
+  geblokkeerd. Daarom is de HTTP API de enige werkende route.
+- De weger-run van 20 augustus (op Jaspers account) heeft zelf dezelfde oplossing
+  gevonden en succesvol gedraaid: 19 signalen beoordeeld, 1 tip aangemaakt, 4
+  dossierfeitjes toegevoegd.
+- Er lag een `.git/HEAD.lock` in de repo die pushes blokkeerde. Die is verwijderd.
+
+**NIEUWSPLEIN33.md als projectdocument opgeslagen.** De weger-prompt verwees naar
+een lokaal pad dat in de sandbox niet bestaat. Het document is nu beschikbaar via
+`project_read` als `claude/NIEUWSPLEIN33.md`.
+
+**Niet geverifieerd:**
+
+- Of de scheduled task op Jaspers account nu structureel blijft werken. De run van
+  vandaag was succesvol, maar dat was een eenmalige observatie. Morgen controleren.
+- Of de prompt volledig correct is voor alle tien stappen van de weegroutine. Alleen
+  de database-toegang en bestandsreferenties zijn aangepast; de weeglogica zelf is
+  niet gewijzigd en niet opnieuw getest.
+
+**Bewust laten liggen:**
+
+- De scheduled task staat op Jaspers persoonlijke account, niet op het
+  Nieuwsplein33-account. Vanuit dit account kan ik de task niet aanmaken of wijzigen.
+- De dashboardbeveiliging (hardcoded cookie) is niet aangepakt — dat is een apart
+  vraagstuk dat samenhangt met het dashboardontwerp.
+
+*Cowork-update: 2026-08-20 (weger-prompt herschreven voor cloud-sandbox)*
