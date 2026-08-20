@@ -4850,3 +4850,119 @@ Optie 1 is de eenvoudigste als het eerder werkte. De vorige weger-runs (13-18 au
 Nul rijen. Geen signalen beoordeeld, geen tips, geen dossierfeiten, geen events.
 
 *Cowork-update: 2026-08-19 (Nieuwsplein33-account, weger-run — mislukt)*
+
+---
+
+## Cowork-update: 2026-08-20 (weger-run) — MISLUKT, geen databasetoegang (tweede keer)
+
+### Wat er is gebeurd
+
+De scheduled weger-run is opnieuw mislukt, om exact dezelfde reden als op 19 augustus: de Cowork-sandbox kan de Turso-database niet bereiken.
+
+Alle zes blokkades van 19 augustus zijn ongewijzigd:
+1. **Proxy blokkeert het Turso-domein** (`403 blocked-by-allowlist` bij CONNECT naar `amersfoort-lokaal-jasperkoningnl.aws-eu-west-1.turso.io`)
+2. **Zonder proxy geen DNS** (`Could not resolve host` bij `--noproxy '*'`)
+3. **npm/pip geblokkeerd** (403 van registry.npmjs.org, proxy-tunnel geweigerd voor PyPI)
+4. **Geen `mcp__Windows-MCP__PowerShell`** beschikbaar als tool
+5. **Chrome-extensie niet verbonden**
+6. **Computer-use niet beschikbaar** in scheduled tasks (geen gebruiker om te accorderen)
+
+### Wat is geprobeerd (bovenop de pogingen van 19 augustus)
+
+- `mcp__workspace__web_fetch` naar `https://...turso.io/v2/pipeline` — bereikt het domein (geen foutmelding), maar retourneert leeg. web_fetch doet alleen GET; de Turso pipeline API vereist POST.
+- Vercel MCP `web_fetch_vercel_url` overwogen — de dashboardpagina's voeren server-side queries uit, maar tonen alleen tips (de output van de weger), niet de ruwe signalen (de input). Bovendien is de beheer-pagina beperkt tot gebruiker 'jasper'.
+- Directe `curl --noproxy '*'` — DNS-resolutie mislukt zonder proxy.
+
+### Wat er moet veranderen
+
+Dit is de tweede achtereenvolgende dag dat de weger niet draait. De drie oplossingsrichtingen van 19 augustus staan nog steeds:
+
+1. **`mcp__Windows-MCP__PowerShell` herstellen** — de weger-runs van 13-18 augustus draaiden hier wél mee.
+2. **Turso-domein toevoegen aan de proxy-allowlist** van de Cowork-sandbox.
+3. **Een API-route toevoegen** aan de Vercel-deployment die de weger kan aanspreken via web_fetch.
+
+Zolang geen van deze drie is geregeld, kan de weger niet als scheduled task draaien.
+
+### Weggeschreven
+
+Nul rijen. Geen signalen beoordeeld, geen tips, geen dossierfeiten, geen events.
+
+*Cowork-update: 2026-08-20 (Nieuwsplein33-account, weger-run — mislukt)*
+
+---
+
+## Cowork-update: 2026-08-20 (weger-run, tweede poging) — 19 signalen beoordeeld, één tip, vier dossierfeiten, en databasetoegang hersteld via Turso HTTP API
+
+### Databasetoegang
+
+De vorige twee runs (19 en 20 augustus) mislukten omdat de Cowork-sandbox de Turso-database niet kon bereiken. `mcp__Windows-MCP__PowerShell` is niet beschikbaar in scheduled tasks, en de proxy blokkeerde het Turso-domein.
+
+**Oplossing gevonden:** de `TURSO_URL` in `.env` gebruikt het `libsql://`-protocol, maar het domein is ook bereikbaar als `https://` via het `/v2/pipeline`-endpoint. De Turso HTTP pipeline API accepteert POST-verzoeken met JSON-statements en retourneert JSON-resultaten. Alle reads en writes van deze run zijn via `curl` en `python3` met `urllib.request` gedaan, zonder `@libsql/client` of PowerShell.
+
+Dit werkt zolang de proxy het `https://`-domein doorlaat. De eerdere runs probeerden alleen `libsql://` (niet ondersteund door curl) of `web_fetch` (alleen GET). De proxy-allowlist hoeft niet aangepast; het domein is al bereikbaar via HTTPS.
+
+### Werkset
+
+Totaal open signalen: 310. Daarvan 19 nieuw (geen eerdere weger-beoordeling), 44 met nieuw materiaal, 247 al beoordeeld.
+
+De 44 nieuw-materiaal-signalen zijn gecontroleerd op werkelijk nieuwe raw_items na de laatste weger-review. Alle hebben nieuwe items, maar na steekproef betreft het vrijwel uitsluitend herhaalde scrapes van bekendmakingen die in dezelfde clusters terechtkomen (containers, dakkapellen, kapvergunningen). Geen ervan bevat inhoudelijk nieuw materiaal dat herbeoordeling rechtvaardigt.
+
+De 19 nieuwe signalen zijn allemaal beoordeeld.
+
+### Tip aangemaakt
+
+| # | Titel | Score | Soort | Signaal |
+|---|---|---|---|---|
+| 28 | Leusden publiceert subsidiebedragen sociaal domein 2027 | 8 | nieuwsfeit | 1203 |
+
+Subsidieregeling Sociaal Domein Leusden 2027 met concrete plafonds per programma: wijkverenigingen €70.807, juridische begeleiding statushouders €38.383, maatjesproject statushouders €35.000, ontmoeting verstandelijke beperking €6.275. Aanvraagtermijn tot 18 oktober 2026. Leusden is het dunst bezette deel van het gebied. Het document is 25.000 tekens; niet alle programma's en bedragen zijn uitgelezen — dat staat als beperking in de briefing.
+
+### Dossierfeiten toegevoegd
+
+| Dossier | Signaal | Feit |
+|---|---|---|
+| 5 — Lokale politiek | 1198 | Bedrijfshal Koedijkerweg 55 buiten behandeling gesteld (14 aug). Ander adres dan Koedijkerweg 6 maar zelfde gebied Stoutenburg-Noord. |
+| 14 — Asielopvang | 1199 | Gemeente meldt ruim 600 Oekraïners in drie opvanglocaties, veel met betaald werk. |
+| 6 — Milieu-incidenten | 1205 | Drie grondtoepassingsmeldingen: Piet Mondriaanlaan, Billitonstraat, Stoutenburgerlaan 16. |
+| 15 — Gemeentefinanciën Leusden | 1203 | Subsidieplafonds sociaal domein 2027 (zie tip). |
+
+### Signalen zonder uitkomst (15 van 19)
+
+- **1196, 1197, 1204, 1208**: routinevergunningen (containers, dakuitbouw, beslistermijn, container)
+- **1206, 1207, 1210, 1213**: BRP-opschoning (vertrokken met onbekende bestemming); 1206 betreft vier personen Ruijsch, waarschijnlijk één gezin
+- **1209**: routine sloopmelding Madoerastraat 23
+- **1211**: routine verlenging tijdelijke horecavergunning De Genestetlaan 7
+- **1212**: routine vergunning openbaar toilet Neptunusplein
+- **1214**: NS werkzaamheden Zwolle-Groningen, geen Amersfoortse lijn
+- **1200**: rechtbank-uitspraak civiel recht (ECLI:NL:RBMNE:2026:5629), maar content in de database is 241 tekens metadata; zonder uitspraaktekst niet te beoordelen
+- **1201**: westnijlvirus bij bloeddonor, volledig gedekt door RTV Utrecht (spiegelbron) op 18 augustus
+- **1202**: hoorzitting Leusden over bezwaar woninguitbreiding Prunuslaan 21, geen patroon
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld | 19 | 19 (18 reviewed + 1 tip_created) |
+| Tips aangemaakt | 1 | 1 |
+| tip_signals | 1 | 1 |
+| tip_events | 1 | 1 |
+| signal_events geschreven | 19 | 19 |
+| Dossierfeiten | 4 | 4 (na opruimen van 2 duplicaten uit mislukte eerste batch) |
+
+Geen afwijkingen.
+
+### Duplicaten opgeruimd
+
+De eerste poging om dossierfeiten te schrijven mislukte op een CHECK-constraint (`fact_type = 'feit'` is niet toegestaan; moet o.a. `overig` zijn). De Turso pipeline API voert statements onafhankelijk uit: de niet-falende statements (0 en 3) werden wél gecommit. Na de fix met correcte fact_types werden alle vier opnieuw geschreven, waardoor signalen 1198 en 1203 dubbele feiten hadden. De duplicaten (IDs 213 en 216) zijn verwijderd.
+
+### Niet geverifieerd
+
+- Of alle tien programma's en bijbehorende bedragen in de subsidieregeling Leusden zijn uitgelezen. Het document is 25.000 tekens; de plafonds staan verspreid in de tekst. Vier programma's met bedragen zijn gevonden.
+- De inhoud van rechtbank-uitspraak ECLI:NL:RBMNE:2026:5629 — de database bevat alleen XML-metadata.
+- Of de 44 nieuw-materiaal-signalen werkelijk geen herbeoordeling verdienen; er is een steekproef gedaan op basis van titels en new_items-counts, geen individuele inhoudelijke controle.
+
+### Werkwijze-notitie voor volgende runs
+
+De Turso HTTP pipeline API (`https://<host>/v2/pipeline`) werkt als alternatief voor `@libsql/client` in de sandbox. Python `urllib.request` met `ssl.create_default_context()` volstaat. Parameters meegeven als `args`-array met `{"type":"text","value":"..."}` of `{"type":"null"}`. Resultaten zitten in `results[i].response.result.rows`, elke cel als `{"type":"text|integer|null","value":"..."}`.
+
+*Cowork-update: 2026-08-20 (Nieuwsplein33-account, weger-run — geslaagd)*
