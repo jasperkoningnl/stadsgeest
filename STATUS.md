@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **20 augustus 2026**
+> ### Bijgewerkt tot en met **21 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-20 (weger-prompt hersteld voor cloud-sandbox)"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-21 (weger-run) — 22 signalen beoordeeld, geen tips, één dossierfeit"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5018,3 +5018,58 @@ een lokaal pad dat in de sandbox niet bestaat. Het document is nu beschikbaar vi
   vraagstuk dat samenhangt met het dashboardontwerp.
 
 *Cowork-update: 2026-08-20 (weger-prompt herschreven voor cloud-sandbox)*
+
+---
+
+## Cowork-update: 2026-08-21 (weger-run) — 22 signalen beoordeeld, geen tips, één dossierfeit
+
+### Werkset
+
+Totaal open signalen: 331. Daarvan 22 nieuw (geen eerdere weger-beoordeling), 46 met nieuw materiaal, 263 al beoordeeld.
+
+De 46 nieuw-materiaal-signalen zijn steekproefsgewijs gecontroleerd. De signalen met de meeste nieuwe items (728, 622, 636, 887, 1112, 1032) bevatten uitsluitend herhaalde scrapes of geclusterde items van dezelfde bron zonder inhoudelijk nieuw materiaal. Signaal 1112 (onttrekkingsverbod, waterschap) heeft zeven items maar dat zijn allemaal verschillende waterschapsberichten die in hetzelfde cluster zijn beland; het vorige oordeel (geen Amersfoortse band) blijft geldig. Signaal 1032 (gerechtshof) is al drie keer beoordeeld en bevat opnieuw alleen XML-metadata zonder uitspraaktekst.
+
+Alle 22 nieuwe signalen zijn beoordeeld.
+
+### Geen tips
+
+Geen van de 22 signalen haalt de drempel van 6 punten. De werkset bestond uit:
+
+- 13 routinevergunningen (containers, steigers, dakkapellen, kozijnen, airco, koelcontainer, nokverhoging, terrasvergunning)
+- 6 kapvergunningen voor losse bomen → dossierfeit
+- 1 functiewijziging (schuur tot massagepraktijk, Wildemanskruid 66) — geen patroon
+- 1 agendabericht Museum Amersfoort (modellen gezocht voor fotoshoot)
+- 1 scraper-afval (CSS-fragmenten Vereniging Eigen Huis) → discarded
+- 1 landelijk bericht zonder Amersfoortse band (Erfgoed Duurzaamheidsprijs, genomineerden uit Groningen, Utrecht, Leiden, Zeist) → discarded
+
+### Dossierfeit toegevoegd
+
+| Dossier | Feit |
+|---|---|
+| 12 — Bomen en kapvergunningen | Zes kapvergunningen voor losse bomen op 21 augustus: Zuidsingel 33, Sint Ansfridusstraat 23, Amsterdamseweg 41, Oranjelaan 29, Havenweg 19R en Meijepolder 1. Totaal augustus: 23 kapvergunningen. Geen vergelijkingsmateriaal van eerdere maanden (bron actief sinds begin augustus). |
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld | 22 | 22 |
+| Tips aangemaakt | 0 | 0 |
+| signal_events geschreven | 22 | 22 |
+| Dossierfeiten | 1 | 1 (ID 217) |
+| Signalen op discarded | 2 | 2 (1235, 1236) |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Databasetoegang via Turso HTTP API werkt stabiel.** Derde succesvolle run op rij via curl en python3 urllib. Geen proxy-problemen.
+- **fact_type CHECK-constraint**: `vergunning` is niet toegestaan; `besluit` wel. De vorige run (20 augustus) had dezelfde fout met `feit`. De toegestane waarden zijn: incident, besluit, bedrag, contract, subsidie, claim, plan, realisatie, maatregel, correctie, overig.
+- **Clusterprobleem bevestigd**: signaal 1217 clustert drie ongerelateerde bekendmakingen (hoogwerker Stationsplein, terrasvergunning Krommestraat 18, lift/bus Binnen de Veste 74). Signaal 1225 clustert airco en koelcontainer op verschillende adressen. Signaal 1222 clustert twee dakkapellen op verschillende adressen. Dit is het bekende clusterprobleem (woordoverlap/binnenkomsttijd).
+- **Signaal 1112 illustreert het clusterprobleem aan de bronkant**: zeven waterschapsberichten over uiteenlopende onderwerpen (stuw, onttrekkingsverbod, Gulbroek, CO2) in één signaal. Elk bericht is inhoudelijk onafhankelijk.
+
+### Niet geverifieerd
+
+- Of de 46 nieuw-materiaal-signalen werkelijk geen herbeoordeling verdienen; er is een top-15 op nieuwe-items-telling bekeken, geen individuele inhoudelijke controle van alle 46.
+- De inhoud van de URL's van signaal 1234 (Museum Amersfoort modellen) — de pagina redirectte naar de hoofdpagina van museumamersfoort.nl; de oorspronkelijke nieuwspagina is mogelijk al verwijderd of verplaatst na de naamswijziging van Museum Flehite naar Museum Amersfoort.
+
+*Cowork-update: 2026-08-21 (Nieuwsplein33-account, weger-run)*
