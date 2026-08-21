@@ -61,7 +61,7 @@ async function scrape() {
     console.error(`raadsinformatie-ori: ${STREAMS.length} stromen lossen op naar ${uniek.size} bronrijen — controleer de url's`);
   }
 
-  const dagen = parseInt(process.env.ORI_DAGEN || '14', 10); // 14: raad vergadert niet wekelijks (reces)
+  const dagen = parseInt(process.env.ORI_DAGEN || '45', 10); // 45: verruimd 2026-08-21, raad op zomerreces (14 dagen was te krap — 0 hits sinds half juli)
   const since = new Date(Date.now() - dagen * 864e5).toISOString();
   // size 100 zonder sortering leverde willekeurig welke honderd documenten ES als
   // eerste teruggaf. Daardoor bleven op 9 augustus de losse amendementen van de
