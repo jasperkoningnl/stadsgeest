@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **21 augustus 2026**
+> ### Bijgewerkt tot en met **22 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-21 (weger-run) — 22 signalen beoordeeld, geen tips, één dossierfeit"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-22 (weger-run) — 15 signalen beoordeeld, één tip (score 5, onder drempel), één dossierfeit, en de B&W besluitenlijsten-scraper leverde een backfill van januari t/m juli 2026"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5073,3 +5073,80 @@ Geen afwijkingen.
 - De inhoud van de URL's van signaal 1234 (Museum Amersfoort modellen) — de pagina redirectte naar de hoofdpagina van museumamersfoort.nl; de oorspronkelijke nieuwspagina is mogelijk al verwijderd of verplaatst na de naamswijziging van Museum Flehite naar Museum Amersfoort.
 
 *Cowork-update: 2026-08-21 (Nieuwsplein33-account, weger-run)*
+
+---
+
+## Cowork-update: 2026-08-22 (weger-run) — 15 signalen beoordeeld, één tip (score 5, onder drempel), één dossierfeit, en de B&W besluitenlijsten-scraper leverde een backfill van januari t/m juli 2026
+
+### Werkset
+
+Totaal open signalen: 344. Daarvan 15 nieuw (geen eerdere weger-beoordeling), 52 met nieuw materiaal, 277 al beoordeeld.
+
+De 52 nieuw-materiaal-signalen zijn steekproefsgewijs gecontroleerd (top 15 op nieuwe-items-telling). De signalen met de meeste nieuwe items (728, 861, 1112, 622, 636, 852, 887, 1217) bevatten uitsluitend herhaalde scrapes van routinevergunningen of eerder beoordeeld materiaal zonder inhoudelijk nieuwe informatie. Geen van de steekproef rechtvaardigt herbeoordeling.
+
+Alle 15 nieuwe signalen zijn beoordeeld.
+
+### B&W besluitenlijsten-backfill
+
+De B&W besluitenlijsten-scraper haalde op 21 augustus in één keer de agenda's op van alle collegevergaderingen van 6 januari t/m 7 juli 2026. Dit leverde 7 nieuwe signalen op (1245-1251), waarvan signaal 1245 negen ongerelateerde agenda's van januari t/m mei clustert in één signaal (clusterprobleem). De content van deze signalen bevat uitsluitend agendapunttitels, geen besluitdetails of onderbouwende stukken.
+
+Inhoudelijk bevatten de agenda's meerdere potentieel interessante items (samenwerkingsovereenkomst Bovenduist, Woo-verzoek WhatsApp-correspondentie, Eindrapport Taskforce Wachttijden Jeugdhulp, resultaten slavernijverleden-onderzoek, Wind op Isselt, Zwembad Hoogland, Jaarstukken 2025). Na spiegelcheck blijkt het overgrote deel al gedekt door Nieuwsplein33 of spiegelbronnen (De Stad Amersfoort, RTV Utrecht):
+
+- Wind op Isselt: eigen NP33-dossier, uitgebreid gedekt
+- Jericho/Jeruzalem betaald parkeren: door NP33 bericht op 1 oktober-invoering
+- Wachttijden Jeugdhulp/MetMaya: minimaal zes NP33-artikelen
+- Slavernijverleden: excuses Bolsius bij Keti Koti 30 juni, gedekt door De Stad en RTV Utrecht
+- Zwembad Hoogland: meerdere NP33-artikelen
+- Bovenduist: intensief gevolgd door NP33, maar het specifieke raadsvoorstel samenwerkingsovereenkomst niet als apart bericht gevonden
+
+### Tip aangemaakt
+
+| ID | Titel | Score | Soort |
+|---|---|---|---|
+| 29 | College bracht samenwerkingsovereenkomst Bovenduist en Over de Laak naar de raad | 5 | nieuwsfeit |
+
+Score onder drempel van 6; geselecteerd als beste beschikbare signaal van de dag. Het raadsvoorstel van 12 mei 2026 is een formele stap in het grootste woningbouwproject van Amersfoort. NP33 volgt Bovenduist intensief maar heeft dit specifieke raadsvoorstel niet afzonderlijk bericht. Dragende bron: B&W besluitenlijsten gemeente Amersfoort (tier 2).
+
+### Dossierfeit toegevoegd
+
+| Dossier | Feit |
+|---|---|
+| 4 — Woningbouw en wonen | Raadsvoorstel samenwerkingsovereenkomst Bovenduist en Over de Laak op B&W-agenda 12 mei 2026. In juli 2025 was al besloten tot een raamsamenwerkingsovereenkomst met Vathorst Beheer B.V. inclusief grondaankoop van meer dan 50 hectare. |
+
+### Overige signalen
+
+- 4 routinevergunningen (standplaats hotdogs, container Vondellaan, container+kraan Binckesstraat/Weverssingel, hoogwerker Ariaplein)
+- 2 NS-verstoringen (Utrecht-Rotterdam: geen onderscheidende lokale waarde; Hengelo-Bielefeld: geen Amersfoortse band → discarded)
+- 1 PR-bericht Meander MC (zomerserie OK kleurt groen, content leeg)
+- 1 verwijderde beleidsregel (Uitvoerings- en handhavingsstrategie 2025-2027, gepubliceerd 30-12-2025, verwijderd van officielebekendmakingen.nl)
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld | 15 | 15 |
+| Tips aangemaakt | 1 | 1 (ID 29) |
+| signal_events geschreven | 15 | 15 (14 reviewed + 1 tip_created) |
+| Tip_signals | 1 | 1 |
+| Tip_events | 1 | 1 |
+| Dossierfeiten | 1 | 1 (ID 218) |
+| Signalen op discarded | 1 | 1 (1244) |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Databasetoegang via Turso HTTP API v3/pipeline.** De v2/pipeline endpoint gaf HTTP 400 Bad Request; de v3/pipeline werkt. Dit is een verschil met de vorige runs die v2 gebruikten. Mogelijk is het v2-endpoint uitgefaseerd of is er iets veranderd aan de Turso-kant. De v3 vereist een `{"type":"close"}` als laatste request in de batch.
+- **B&W besluitenlijsten-scraper levert alleen agendalabels, geen besluitinhoud.** De content bevat de titels van de agendapunten maar niet de besluiten zelf, de raadsinformatiebrieven of de onderliggende stukken. Daardoor zijn de signalen inhoudelijk te dun voor sterke tips. Als de scraper ook de besluitdetails zou ophalen (of de PDF's van de raadsinformatiebrieven), zou de nieuwswaarde van deze bron aanzienlijk stijgen.
+- **Clusterprobleem bij B&W-backfill.** Signaal 1245 clustert negen ongerelateerde B&W-agenda's van januari t/m mei in één signaal. Dit is het bekende clusterprobleem (woordoverlap in identieke paginastructuur).
+- **Signaal 1238 (Handhavingsstrategie): publicatie verwijderd.** De beleidsregel "Uitvoerings- en handhavingsstrategie 2025-2027" (gmb-2025-574299) is gepubliceerd op 30-12-2025 en vervolgens verwijderd van officielebekendmakingen.nl met de melding "Deze publicatie is verwijderd in afstemming met de publicerende organisatie." Zonder de inhoud is niet te beoordelen of dit een correctie, een intrekking of een administratieve fout is. Op zichzelf opmerkelijk maar onvoldoende voor een tip.
+
+### Niet geverifieerd
+
+- Of de 52 nieuw-materiaal-signalen werkelijk geen herbeoordeling verdienen; alleen de top 15 op nieuwe-items-telling is bekeken.
+- Of het raadsvoorstel samenwerkingsovereenkomst Bovenduist inmiddels door de raad is behandeld en aangenomen.
+- Of de Woo-verzoek WhatsApp-correspondentie (B&W-agenda 30 juni, agendapunt 7) inhoudelijk nieuwswaardig is; alleen het agendalabel is beschikbaar.
+- Of de Uitvoerings- en handhavingsstrategie 2025-2027 daadwerkelijk is ingetrokken of alleen administratief is verwijderd.
+- Of het v2 Turso API-endpoint definitief niet meer werkt of dat het een tijdelijk probleem was.
+
+*Cowork-update: 2026-08-22 (Nieuwsplein33-account, weger-run)*

@@ -23,6 +23,10 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-08-22 — Collegeagenda's als nieuwe bron
+
+De agenda's van de collegevergaderingen van januari tot en met juli 2026 zijn voor het eerst binnengekomen. De besluiten zelf staan er nog niet bij, alleen de titels van de agendapunten. Het meeste daaruit kennen jullie al (Wind op Isselt, Jeugdhulp, slavernijverleden, Bovenduist). Er staat vandaag een tip in de wachtrij over het raadsvoorstel samenwerkingsovereenkomst Bovenduist; die is met een opmerking gemarkeerd dat het materiaal dunner is dan normaal.
+
 ## 2026-08-17 — Minder irrelevante rechtszaken in de lijst
 
 Een deel van de binnengekomen rechterlijke uitspraken ging over zaken in
