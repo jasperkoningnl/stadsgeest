@@ -5318,3 +5318,45 @@ De huidige filter vangt alles wat "amersfoort", "eemland" of "meander medisch" e
 - Of de scraper correct draait binnen PM2 (handmatig getest met `node`, niet via PM2-cron).
 - Of er in de afgelopen maanden daadwerkelijk Amersfoort-aanbestedingen zijn gemist die de oude RSS-scraper niet had gevangen — de API-listing ondersteunt geen zoekfilter, dus dit is niet eenvoudig te controleren zonder alle ~50 items per dag te pagineren.
 - Of de keywords "eemland" en "meander medisch" in de praktijk relevante extra hits opleveren of juist valse positieven geven.
+
+## Cowork-update: 2026-08-23 (Raadsinformatie-fix + bronnenwacht reces-bewustheid)
+
+### Probleem
+
+De vier Raad Amersfoort-modules (Schriftelijke vragen, Moties, Raadsinformatiebrieven, Ingekomen stukken) leverden sinds medio juli 0 items per run. Twee onafhankelijke oorzaken:
+
+1. **Cloudflare Turnstile** — amersfoort.notubiz.nl staat sinds juli achter een JS-challenge die headless browsers blokkeert (HTTP 403). `headless: false` passeert de challenge automatisch.
+2. **Maandfilter** — de Notubiz-modulepagina's tonen standaard alleen de huidige maand. Tijdens het zomerreces (geen raadsvergaderingen) is de huidige maand leeg. `?month=all` toont alle items van het lopende jaar.
+
+De ORI-API (Elasticsearch, `api.openraadsinformatie.nl`) is aanvullend gecheckt: die bevat 9.672 documenten maar is sinds 10 juli niet meer geïndexeerd. ORI levert documenttekst; Notubiz levert titels en detectie. Beide bronnen blijven als complementair paar draaien.
+
+### Fixes (4 bestanden)
+
+| Bestand | Actie |
+|---|---|
+| `scraper/src/browser.js` | `headless`-parameter toegevoegd aan `withBrowser()` (default `true`, `false` voor Cloudflare-sites) |
+| `scraper/src/scrapers/raadsinformatie-api.js` | Herschreven: `headless: false` + `?month=all` in URL. Cloudflare-wachtlogica (30s voor `table.overview_list`), celomschrijvingen extraheren, `published_at` uit datumkolom, 3s pauze tussen modules, 120s browser-timeout |
+| `scraper/src/run-browser.js` | `raadsinformatie-api.js` heringeschakeld. `raadsinformatie.js` en `raadsinformatie-types.js` blijven uitgeschakeld (Cloudflare + vervangen door ORI en deze herschreven versie) |
+| `scraper/src/bronnenwacht.cjs` | Reces-bewustheid: raadsbronnen (naam bevat 'raad amersfoort' of 'raadsinformatie') krijgen in juli/augustus `health='reces'` i.p.v. 'verdacht'/'dood' wanneer ze leeg zijn zonder fouten. Rapport vermeldt reces-bronnen apart |
+
+### Ontwerp raadsinformatie-api.js
+
+- **Vier modules** met bestaande Notubiz module-IDs: Schriftelijke vragen (4), Moties (6), Raadsinformatiebrieven (5), Ingekomen stukken (1).
+- **Registratie** via `ensureSource` (lib.js) — matcht op naam of URL, geen nieuwe bronrecords tenzij de naam/URL is veranderd.
+- **Deduplicatie** via `insertItem` (lib.js) — op `external_url` of `(title + source_id)`. Samen met de ORI-scraper geen dubbele items verwacht: ORI linkt naar `api.openraadsinformatie.nl`-URLs, Notubiz naar `amersfoort.notubiz.nl`-URLs.
+- **Vereist** een actieve Windows-sessie op de laptop (`headless: false` opent een zichtbaar Chromium-venster dat automatisch sluit).
+
+### Bronnenwacht reces-logica
+
+De raad vergadert niet in juli en augustus (schoolvakanties). Bronnen die alleen raadsstukken leveren zijn dan structureel leeg — dat is geen storing. De bronnenwacht herkent dit nu:
+- `isRaadsbron()` checkt of de bronnaam 'raad amersfoort' of 'raadsinformatie' bevat.
+- `isReces()` checkt of het juli of augustus is.
+- Als een raadsbron leeg is (geen fouten) tijdens het reces, krijgt hij `health='reces'` met een verklarende note.
+- In september pikt de bronnenwacht ze automatisch weer op als 'verdacht' of 'dood' als ze dan nog leeg zijn.
+
+### Niet geverifieerd
+
+- Of de scraper daadwerkelijk items ophaalt in de PM2-omgeving (bestanden zijn geschreven, niet gedraaid — PM2-run volgt bij volgende `run-browser` uitvoering).
+- Of Cloudflare Turnstile de `headless: false` browser op Jaspers laptop doorlaat (getest in een andere chat, bevestigd werkend).
+- Of de Notubiz-paginastructuur (`table.overview_list tbody tr`) na het reces nog identiek is.
+- Overige dode bronnen uit de oorspronkelijke lijst (officielebekendmakingen, waaroverheid, onderwijsinspectie, provincie-utrecht) zijn niet aangepakt in deze sessie.

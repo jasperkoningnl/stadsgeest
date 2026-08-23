@@ -1,20 +1,29 @@
 // raadsinformatie-api.js — Amersfoort raadsinformatie per documenttype via Notubiz
 //
-// Aanpak (2026-06-04):
-//   - amersfoort.notubiz.nl/modules/{id}/{slug}/view via Playwright + networkidle
-//   - Items worden geladen via get_data_for_overview_js (zelfde patroon als bw-besluiten.js)
-//   - Extractie uit table.overview_list tbody tr
+// Herschreven 2026-08-23: twee fixes voor de 0-items sinds juli.
 //
-// Module-IDs (gevonden 2026-06-04):
+// 1. Cloudflare Turnstile blokkeert headless browsers op amersfoort.notubiz.nl.
+//    Oplossing: headless: false (zichtbare browser). Vereist dat Jasper is
+//    ingelogd op Windows. PM2 draait de job 1x per dag; het Chromium-venster
+//    opent en sluit automatisch.
+//
+// 2. De modulepagina filtert standaard op de huidige maand. In maanden zonder
+//    activiteit (zomerreces) levert dat 0 resultaten. Oplossing: ?month=all
+//    in de URL, zodat alle items van het lopende jaar zichtbaar zijn.
+//
+// De ORI-scraper (raadsinformatie-ori.js in run-all.js) blijft als complementaire
+// bron draaien — die levert documenttekst, deze levert titels en detectie.
+// Deduplicatie loopt via insertItem (titel + source_id).
+//
+// Module-IDs (gevonden 2026-06-04, bevestigd 2026-08-23):
 //   1 = ingekomen_stukken     4 = schriftelijke_vragen
 //   5 = raadsinformatiebrieven   6 = moties_en_toezeggingen
 
 import { withBrowser } from '../browser.js';
-import { createDb, ensureSource, insertItem, log } from '../lib.js';
+import { createDb, ensureSource, insertItem, log, makeSummary } from '../lib.js';
 
 const db = createDb();
 const BASE = 'https://amersfoort.notubiz.nl';
-const UA_NOTUBIZ = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 const MODULES = [
   {
@@ -68,25 +77,36 @@ async function registerSources() {
 }
 
 async function scrapeModule(mod, sourceId) {
-  const pageUrl = `${BASE}/modules/${mod.moduleId}/${mod.slug}/view`;
+  // month=all toont alle items van het jaar, niet alleen de huidige maand.
+  // Zonder dit filter levert de pagina 0 resultaten in maanden zonder activiteit.
+  const pageUrl = `${BASE}/modules/${mod.moduleId}/${mod.slug}/view?month=all`;
 
   try {
     const items = await withBrowser(async (page) => {
-      // De overview-data wordt via get_data_for_overview_js lazily geladen na pageload.
-      // Aanpak: lees ALLE response-bodies (zoals de table-test die werkte), waardoor
-      // Playwright de pagina langer "actief" houdt en networkidle langer duurt.
-      page.on('response', async (resp) => {
-        try { await resp.text(); } catch { /* ignore */ }
-      });
+      // Notubiz zit achter Cloudflare Turnstile. De challenge wordt automatisch
+      // opgelost in een zichtbare browser (headless: false). Wacht tot de
+      // challenge klaar is door te kijken of de echte pagina-inhoud verschijnt.
+      await page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 50000 });
 
-      await page.goto(pageUrl, { waitUntil: 'networkidle', timeout: 50000 })
-        .catch(() => {}); // timeout normaal — doorgaan
+      // Wacht tot Cloudflare-challenge is afgerond: óf de tabel verschijnt,
+      // óf de pagina-body bevat 'overview_list' (teken dat de SPA geladen is).
+      // Maximaal 30 seconden voor de challenge + SPA-render.
+      try {
+        await page.waitForSelector('table.overview_list', { timeout: 30000 });
+      } catch {
+        // Mogelijk geen tabel (lege maand) of challenge mislukt — doorgaan
+        // en kijken wat er is.
+      }
 
-      // Wacht tot de tabel daadwerkelijk gevuld is
-      await page.waitForSelector('table.overview_list tbody tr td', { timeout: 20000 })
-        .catch(() => {});
+      // Extra wacht voor AJAX-data die na pageload wordt opgehaald
+      await page.waitForTimeout(2000);
 
-      await page.waitForTimeout(500);
+      // Wacht op daadwerkelijke rijen als de tabel er is
+      try {
+        await page.waitForSelector('table.overview_list tbody tr td', { timeout: 10000 });
+      } catch {
+        // Geen rijen — kan legitiem leeg zijn
+      }
 
       return await page.$$eval(
         'table.overview_list tbody tr',
@@ -106,25 +126,43 @@ async function scrapeModule(mod, sourceId) {
                           row.textContent?.replace(/\s+/g,' ').trim().substring(0,120) || '');
             if (!title || title.length < 3) continue;
             const dateMatch = row.textContent.match(/(\d{2}-\d{2}-\d{4})/);
-            results.push({ title: title.substring(0,300), url: href, date: dateMatch?.[1] || '' });
+
+            // Probeer ook de omschrijving/samenvatting uit de rij te halen
+            const cells = Array.from(row.querySelectorAll('td'));
+            const descParts = cells.map(c => c.textContent?.trim()).filter(Boolean);
+            const description = descParts.join(' — ').substring(0, 500);
+
+            results.push({
+              title: title.substring(0, 300),
+              url: href,
+              date: dateMatch?.[1] || '',
+              description,
+            });
           }
           return results;
         },
       );
-    }, { timeout: 90000 }); // 90s browser-timeout (network-idle kan lang duren)
+    }, {
+      timeout: 120000,    // 2 min browser-timeout (Cloudflare + SPA-laden)
+      headless: false,     // Nodig tegen Cloudflare Turnstile
+    });
 
     const stats = { new: 0, skipped: 0, errors: 0 };
     for (const item of items || []) {
       try {
+        const content = item.description || mod.name;
         const saved = await insertItem(db, {
           source_id: sourceId,
           title: item.title.substring(0, 500),
-          content: mod.name,
-          summary: '',
+          content: content.substring(0, 25000),
+          summary: makeSummary(content) || '',
           external_url: item.url,
           scraped_at: item.date
             ? new Date(item.date.split('-').reverse().join('-')).toISOString()
             : new Date().toISOString(),
+          published_at: item.date
+            ? item.date.split('-').reverse().join('-')
+            : null,
         });
         if (saved === true) stats.new++;
         else if (saved === false) stats.skipped++;
@@ -137,7 +175,7 @@ async function scrapeModule(mod, sourceId) {
     await log(db, sourceId, mod.name, stats);
     return stats;
   } catch (err) {
-    console.error(`[RAAD-API] Browser-fout bij ${mod.key}: ${err.message.substring(0, 80)}`);
+    console.error(`[RAAD-API] Browser-fout bij ${mod.key}: ${err.message.substring(0, 120)}`);
     await log(db, sourceId, mod.name, { new: 0, skipped: 0, errors: 1 });
     return { new: 0, skipped: 0, errors: 1 };
   }
@@ -148,7 +186,8 @@ async function scrape() {
   const sourceMap = await registerSources();
   for (const mod of MODULES) {
     await scrapeModule(mod, sourceMap[mod.key]);
-    await new Promise(r => setTimeout(r, 2000));
+    // Pauze tussen modules — niet te snel achter elkaar naar Notubiz
+    await new Promise(r => setTimeout(r, 3000));
   }
 }
 

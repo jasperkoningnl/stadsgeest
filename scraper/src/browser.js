@@ -5,13 +5,19 @@
 //   await page.goto('https://...');
 //   return await page.$$eval('...');
 // });
+//
+// Opties:
+//   timeout    — standaard 30000ms
+//   headless   — standaard true. Zet op false voor sites achter Cloudflare
+//                Turnstile (zoals Notubiz), die headless-browsers blokkeren.
+//                Vereist een actieve Windows-sessie op de laptop.
 
 import { chromium } from 'playwright';
 
 const BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
-export async function withBrowser(fn, { timeout = 30000 } = {}) {
-  const browser = await chromium.launch({ headless: true });
+export async function withBrowser(fn, { timeout = 30000, headless = true } = {}) {
+  const browser = await chromium.launch({ headless });
   const context = await browser.newContext({
     userAgent: BROWSER_UA,
     locale: 'nl-NL',

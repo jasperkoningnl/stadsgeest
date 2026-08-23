@@ -17,7 +17,7 @@ const scrapers = [
   'rtvutrecht.js',              // C2: RTV Utrecht (filter Amersfoort) — fix 2026-05-28
   // 'raadsinformatie.js',      // UITGESCHAKELD 2026-08-21: Notubiz geblokkeerd door Cloudflare Turnstile sinds juli; vervangen door raadsinformatie-ori.js in run-all.js (ORI API)
   // 'raadsinformatie-types.js', // UITGESCHAKELD 2026-08-21: idem — dagelijkse 0-runs vertroebelden de bronnenwacht-health
-  // 'raadsinformatie-api.js', // UITGESCHAKELD 2026-08-02: Notubiz-modulepagina's achter Cloudflare Turnstile; vervangen door raadsinformatie-ori.js in run-all.js (ORI API)
+  'raadsinformatie-api.js',     // HERINGESCHAKELD 2026-08-23: headless:false + month=all omzeilt Cloudflare Turnstile en datumfilter. Levert titels/detectie; ORI in run-all.js levert documenttekst.
   'nextdoor.js',                // Nextdoor buurtberichten Amersfoort (login vereist)
   'igj-nvwa.js',                // IGJ + NVWA. LET OP: haalt op dit moment het verkeerde
                                 //   binnen — zie BRONNEN.md. Blijft draaien; het streven is
