@@ -1,25 +1,32 @@
 // tenderned.js — TenderNed aanbestedingen gefilterd op Amersfoort
-// TenderNed levert een Atom-feed (niet RSS) — handmatige fetch + regex-parsing,
-// net als rechtspraak.js. rss-parser kan het atom:-namespace formaat niet parsen.
+// Herzien 2026-08-23. De RSS-feed (/rss/laatste-publicatie.rss) bevat slechts
+// ~31 landelijke items en roteert Amersfoort-publicaties er binnen uren af.
+// Overgestapt op de paginated JSON API met datumfiltering: alle publicaties van
+// de laatste 3 dagen worden opgehaald en client-side gefilterd op Amersfoort-
+// gerelateerde trefwoorden.
 //
-// Herzien 2026-08-15. De aankondigingspagina op tenderned.nl is client-rendered
-// en leverde via een kale fetch één woord op ("Aankondigingen"), waardoor
-// opdrachtnemer, bedrag en looptijd van elke gunning onbekend bleven — de
-// directe reden dat gunningen geen tip konden worden (STATUS.md, weger-run
-// 13 augustus). Er is wél een open JSON-API zonder sleutel:
+// De open JSON-API (geen sleutel nodig):
+//   /papi/tenderned-rs-tns/v2/publicaties?page=0&size=100&publicatieDatumVanaf=...
 //   /papi/tenderned-rs-tns/v2/publicaties/{publicatieId}        → metadata
 //   /papi/tenderned-rs-tns/v2/publicaties/{publicatieId}/pdf    → de publicatie-PDF
 // De metadata geeft opdrachtgever, beschrijving, procedure en publicatiedatum;
-// de PDF bevat bij gunningen de contractant en de waarde. Beide worden hier
-// meegenomen, en de publicatiedatum vult published_at.
+// de PDF bevat bij gunningen de contractant en de waarde.
 
 import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
 
-const FEED_URL = 'https://www.tenderned.nl/papi/tenderned-rs-tns/rss/laatste-publicatie.rss';
-const PAPI = 'https://www.tenderned.nl/papi/tenderned-rs-tns/v2/publicaties';
-const KEYWORDS = ['amersfoort', 'gemeente amersfoort', 'regio amersfoort'];
+const API_BASE = 'https://www.tenderned.nl/papi/tenderned-rs-tns/v2/publicaties';
 const UA = 'Stadsgeest033/1.0 (nieuwssite; contact@stadsgeest.nl)';
+const PAGE_SIZE = 100;
+const DAGEN_TERUG = 3; // vangt weekenden op
+
+// Trefwoorden waarmee we publicaties filteren. Alles lowercase.
+// 'amersfoort' vangt ook 'gemeente amersfoort' en 'regio amersfoort' op.
+const KEYWORDS = [
+  'amersfoort',       // gemeente, regio, stad
+  'eemland',          // Archief Eemland, Bibliotheek Eemland, regionaal
+  'meander medisch',  // Meander Medisch Centrum
+];
 
 // pdfjs alleen laden als er echt een gunnings-PDF langskomt (zelfde patroon
 // als fetch-fulltext.js: legacy build, dynamische import want ESM).
@@ -48,42 +55,75 @@ async function pdfNaarTekst(buffer, maxPaginas = 20) {
   return delen.join('\n').replace(/\s+/g, ' ').trim();
 }
 
-async function fetchFeed() {
-  const response = await fetch(FEED_URL, {
-    headers: {
-      'User-Agent': UA,
-      'Accept': 'application/atom+xml, application/xml, text/xml, */*',
-    },
-    signal: AbortSignal.timeout(15000),
-  });
-  if (!response.ok) throw new Error(`TenderNed HTTP ${response.status}`);
-  return response.text();
+// Datumstring YYYY-MM-DD voor n dagen geleden
+function datumMinDagen(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().split('T')[0];
 }
 
-function parseAtomEntries(xml) {
-  const entries = [];
-  const blocks = xml.match(/<atom:entry>([\s\S]*?)<\/atom:entry>/g) || [];
+// Haal alle publicaties op van de laatste DAGEN_TERUG dagen via de paginated API.
+// Retourneert een array van publicatie-objecten.
+async function fetchAllePublicaties() {
+  const vanaf = datumMinDagen(DAGEN_TERUG);
+  const tot = new Date().toISOString().split('T')[0];
+  const alle = [];
+  let page = 0;
+  let laatstePagina = false;
 
-  for (const block of blocks) {
-    const title = (block.match(/<atom:title>([^<]+)<\/atom:title>/) || [])[1] || '';
-    const linkMatch = block.match(/<atom:link[^>]+href="([^"]+)"/);
-    const link = linkMatch ? linkMatch[1] : '';
-    const summaryRaw = (block.match(/<atom:summary[^>]*>([\s\S]*?)<\/atom:summary>/) || [])[1] || '';
-    const summary = summaryRaw.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-    const updated = (block.match(/<atom:updated>([^<]+)<\/atom:updated>/) || [])[1] || '';
+  while (!laatstePagina) {
+    const url = `${API_BASE}?page=${page}&size=${PAGE_SIZE}`
+      + `&publicatieDatumVanaf=${vanaf}&publicatieDatumTot=${tot}`;
 
-    if (!title || !link) continue;
-    entries.push({ title, link, summary, updated });
+    const response = await fetch(url, {
+      headers: { 'User-Agent': UA, Accept: 'application/json' },
+      signal: AbortSignal.timeout(20000),
+    });
+
+    if (!response.ok) {
+      throw new Error(`TenderNed API HTTP ${response.status} (pagina ${page})`);
+    }
+
+    const data = await response.json();
+    const items = data.content || [];
+    alle.push(...items);
+
+    laatstePagina = data.last === true || items.length < PAGE_SIZE;
+    page++;
+
+    // Veiligheidsklep: nooit meer dan 30 pagina's (3000 items)
+    if (page >= 30) {
+      console.warn('TenderNed: veiligheidsklep na 30 pagina\'s');
+      break;
+    }
+
+    // Kort wachten tussen pagina's om de API niet te overbelasten
+    if (!laatstePagina) await new Promise(r => setTimeout(r, 500));
   }
 
-  return entries;
+  console.log(`TenderNed: ${alle.length} publicaties opgehaald (${vanaf} t/m ${tot}, ${page} pagina's)`);
+  return alle;
 }
 
-// Metadata van de open publicatie-API. Geeft null als de API niet antwoordt;
-// de scraper valt dan terug op de feedgegevens.
+// Filter publicaties op Amersfoort-gerelateerde trefwoorden.
+// Controleert opdrachtgeverNaam, aanbestedingNaam en opdrachtBeschrijving.
+function filterOpAmersfoort(publicaties) {
+  return publicaties.filter(p => {
+    const tekst = [
+      p.opdrachtgeverNaam || '',
+      p.aanbestedingNaam || '',
+      p.opdrachtBeschrijving || '',
+    ].join(' ').toLowerCase();
+
+    return KEYWORDS.some(kw => tekst.includes(kw));
+  });
+}
+
+// Metadata van de individuele publicatie-API. Geeft null als de API niet
+// antwoordt; de scraper valt dan terug op de lijstgegevens.
 async function fetchPapi(publicatieId) {
   try {
-    const r = await fetch(`${PAPI}/${publicatieId}`, {
+    const r = await fetch(`${API_BASE}/${publicatieId}`, {
       headers: { 'User-Agent': UA, Accept: 'application/json' },
       signal: AbortSignal.timeout(15000),
     });
@@ -95,12 +135,8 @@ async function fetchPapi(publicatieId) {
 }
 
 // Contractant en waarde uit de tekst van een gunnings-PDF (eForms-opmaak).
-// Best effort: de PDF-opmaak wisselt per formulier, dus alles wat we vinden is
-// winst en de ruwe tekst gaat als vangnet mee in het item.
 function gunningUitTekst(tekst) {
   const uit = [];
-  // De PDF-tekst is tot één regel platgeslagen; het volgende "Label :" markeert
-  // dus het einde van de naam. Getest op publicatie 436079 (BDUlokalemedia B.V.).
   const winnaar = tekst.match(/(?:Officiële naam|Naam van de winnaar|De winnaar)\s*:\s*(.{3,120}?)(?=\s+(?:Inschrijving|Identificatiecode|Postadres|Plaats|Postcode|NUTS|Land|E-mail|Telefoon|Website|Rol|Winnaar|Onderaanneming|De omvang)\b|$)/i);
   if (winnaar) uit.push(`Contractant volgens de publicatie: ${winnaar[1].replace(/[|:]+\s*$/, '').trim()}`);
   const waarde = tekst.match(/(?:Maximumwaarde van de raamovereenkomst|Waarde van de aanbesteding|Totale waarde(?: van de aanbesteding)?|Waarde van de resultaten|Waarde van alle contracten)\s*:?\s*([\d.,]+)\s*(?:Euro|EUR|€)/i);
@@ -108,21 +144,22 @@ function gunningUitTekst(tekst) {
   return uit;
 }
 
-// De EF-codes van TenderNed. Alleen de types die in Amersfoortse berichten
-// voorkomen; onbekende codes laten de titel ongemoeid.
+// De EF-codes van TenderNed.
 const EF_SOORTEN = {
   EF29: 'Gunning',
   EF16: 'Aanbesteding',
   EFE3: 'Aanbesteding',
   EF02: 'Vooraankondiging',
   EF03: 'Gunning',
+  EF04: 'Marktconsultatie',
+  EF25: 'Rectificatie',
 };
 
 async function scrape() {
   const sourceId = await getOrCreateSource(db, {
     name: 'TenderNed (Amersfoort)',
-    url: FEED_URL,
-    sourceType: 'rss',
+    url: API_BASE,
+    sourceType: 'api',
     reliability: 'primary',
     category: 'registry',
     scrapeFrequency: 'daily',
@@ -130,42 +167,53 @@ async function scrape() {
 
   let saved = 0, skipped = 0, errors = 0;
 
-  const xml = await fetchFeed();
-  const entries = parseAtomEntries(xml);
+  const allePublicaties = await fetchAllePublicaties();
+  const matches = filterOpAmersfoort(allePublicaties);
 
-  for (const entry of entries) {
-    const text = `${entry.title} ${entry.summary}`.toLowerCase();
-    if (!KEYWORDS.some(kw => text.includes(kw))) continue;
+  console.log(`TenderNed: ${matches.length} Amersfoort-gerelateerde publicaties gevonden`);
 
+  for (const pub of matches) {
     try {
-      const publicatieId = (entry.link.match(/(\d{5,})\s*$/) || [])[1] || null;
+      const publicatieId = pub.publicatieId || pub.kenmerk;
       const papi = publicatieId ? await fetchPapi(publicatieId) : null;
       await new Promise(r => setTimeout(r, 1000));
 
-      const efType = papi?.publicatieCode
-        || (entry.summary.match(/Type publicatie:\s*(EF[A-Z0-9]+)/i) || [])[1] || '';
-      const soort = EF_SOORTEN[efType.toUpperCase()] || '';
-      const titel = soort ? `${soort}: ${entry.title}` : entry.title;
+      const efCode = pub.publicatiecode?.code
+        || papi?.publicatieCode
+        || '';
+      const soort = EF_SOORTEN[efCode.toUpperCase()] || pub.typePublicatie?.omschrijving || '';
+      const titel = soort ? `${soort}: ${pub.aanbestedingNaam}` : pub.aanbestedingNaam;
 
-      const regels = [entry.summary];
+      const externalUrl = pub.link?.href
+        || `https://www.tenderned.nl/aankondigingen/overzicht/${publicatieId}`;
+
+      const regels = [pub.opdrachtBeschrijving || ''];
       if (papi) {
         regels.push(
           '',
-          `Opdrachtgever: ${papi.opdrachtgeverNaam || 'onbekend'}.`,
-          papi.typePublicatie ? `Type publicatie: ${papi.typePublicatie} (${efType}).` : '',
+          `Opdrachtgever: ${papi.opdrachtgeverNaam || pub.opdrachtgeverNaam || 'onbekend'}.`,
+          papi.typePublicatie ? `Type publicatie: ${papi.typePublicatie} (${efCode}).` : '',
           papi.procedureCode?.omschrijving ? `Procedure: ${papi.procedureCode.omschrijving}.` : '',
           papi.typeOpdrachtCode?.omschrijving ? `Soort opdracht: ${papi.typeOpdrachtCode.omschrijving}.` : '',
           papi.cpvCodes?.length ? `CPV: ${papi.cpvCodes.map(c => `${c.code} ${c.omschrijving}`).join('; ')}.` : '',
           papi.opdrachtBeschrijving ? `Beschrijving: ${papi.opdrachtBeschrijving}` : '',
         );
+      } else {
+        // Fallback: gebruik de gegevens uit de lijstrespons
+        regels.push(
+          '',
+          `Opdrachtgever: ${pub.opdrachtgeverNaam || 'onbekend'}.`,
+          pub.typePublicatie?.omschrijving ? `Type publicatie: ${pub.typePublicatie.omschrijving}.` : '',
+          pub.procedure?.omschrijving ? `Procedure: ${pub.procedure.omschrijving}.` : '',
+          pub.typeOpdracht?.omschrijving ? `Soort opdracht: ${pub.typeOpdracht.omschrijving}.` : '',
+        );
       }
 
-      // Bij een gunning zit het eigenlijke nieuws — wie kreeg de opdracht, voor
-      // hoeveel — alleen in de publicatie-PDF. Die halen we erbij.
+      // Bij een gunning: PDF ophalen voor contractant en waarde
       const isGunning = soort === 'Gunning' || papi?.isGegund === true;
       if (isGunning && publicatieId) {
         try {
-          const p = await fetch(`${PAPI}/${publicatieId}/pdf`, {
+          const p = await fetch(`${API_BASE}/${publicatieId}/pdf`, {
             headers: { 'User-Agent': UA },
             signal: AbortSignal.timeout(25000),
           });
@@ -181,7 +229,7 @@ async function scrape() {
       }
 
       const toelichting = soort
-        ? `\n\nToelichting Stadsgeest: publicatietype ${efType} betekent "${soort.toLowerCase()}". `
+        ? `\n\nToelichting Stadsgeest: publicatietype ${efCode} betekent "${soort.toLowerCase()}". `
           + (soort === 'Gunning'
             ? 'Bij een gunningsaankondiging ligt de sluitingsdatum per definitie in het verleden; '
               + 'dat is geen datafout. De opdracht is gegund, en de vraag is aan wie.'
@@ -190,20 +238,20 @@ async function scrape() {
 
       const result = await saveRawItem(db, {
         sourceId,
-        externalUrl: entry.link,
+        externalUrl,
         title: titel,
-        content: (regels.filter(r => r !== '').length ? regels.join('\n') : entry.summary).substring(0, 9000) + toelichting,
-        summary: entry.summary.substring(0, 500),
-        publishedAt: papi?.publicatieDatum || entry.updated || null,
+        content: (regels.filter(r => r !== '').length ? regels.join('\n') : pub.opdrachtBeschrijving || '').substring(0, 9000) + toelichting,
+        summary: (pub.opdrachtBeschrijving || '').substring(0, 500),
+        publishedAt: papi?.publicatieDatum || pub.publicatieDatum || null,
       });
       if (result.saved) saved++; else skipped++;
     } catch (err) {
       errors++;
-      console.error(`Fout bij item "${entry.title}":`, err.message);
+      console.error(`Fout bij item "${pub.aanbestedingNaam}":`, err.message);
     }
   }
 
-  await logResult(db, sourceId, 'TenderNed (Amersfoort)', saved, skipped, errors);
+  await logResult(db, sourceId, 'TenderNed (Amersfoort)', saved, skipped, errors, matches.length);
 }
 
 scrape().catch(console.error);
