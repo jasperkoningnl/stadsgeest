@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **22 augustus 2026**
+> ### Bijgewerkt tot en met **23 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-22 (weger-run) — 15 signalen beoordeeld, één tip (score 5, onder drempel), één dossierfeit, en de B&W besluitenlijsten-scraper leverde een backfill van januari t/m juli 2026"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-23 (weger-run) — één tip (score 8, droogte-escalatie waterschap), twee dossierfeiten, geen nieuwe signalen"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5150,3 +5150,76 @@ Geen afwijkingen.
 - Of het v2 Turso API-endpoint definitief niet meer werkt of dat het een tijdelijk probleem was.
 
 *Cowork-update: 2026-08-22 (Nieuwsplein33-account, weger-run)*
+
+---
+
+## Cowork-update: 2026-08-23 (weger-run) — één tip (score 8, droogte-escalatie waterschap), twee dossierfeiten, geen nieuwe signalen
+
+### Werkset
+
+Totaal open signalen (niet aan tip gekoppeld): 342. Daarvan 0 nieuw (geen eerdere weger-beoordeling), 52 met nieuw materiaal, 290 al beoordeeld.
+
+De 52 nieuw-materiaal-signalen zijn systematisch gecontroleerd op inhoudelijk nieuw materiaal. De top 15 op nieuwe-items-telling (signalen 728, 1112, 861, 852, 1217, 887, 636, 622, 1221, 868, 891, 1068, 788, 1032, 855) is individueel bekeken. Bevindingen per categorie:
+
+- **Routinevergunningen** (containers, kranen, hoogwerkers, dakkapellen, bomen): herhaalde scrapes van eerder beoordeeld materiaal. Geen inhoudelijk nieuwe informatie.
+- **Clusterruis**: signalen 728, 636, 623, 658, 915, 766, 525, 603 bevatten nieuwe items die niet bij het signaalonderwerp horen — Nextdoor-berichten, NVWA-voorlichtingspagina's, De Stad Amersfoort-sportartikelen, en NOS-berichten die door woordoverlap of gelijktijdig binnenkomen in het verkeerde signaal terechtkomen. Dit is het bekende clusterprobleem.
+- **Signaal 1032** (gerechtshof): 4 nieuwe uitspraken zonder inhoud (alleen ECLI-metadata), geen Amersfoortse partij detecteerbaar. Zelfde patroon als vorige drie beoordelingen.
+- **Signaal 1112** (waterschap): 6 nieuwe items van Waterschap Vallei en Veluwe, waarvan twee inhoudelijk nieuw en gerelateerd aan het signaalonderwerp. Dit is het enige signaal dat herbeoordeling rechtvaardigde.
+
+Signalen met items gescraped na 22 augustus: 18, waarvan geen enkele met inhoudelijk nieuw materiaal (routinevergunningen, herhaalde scrapes, NS-verstoringen, spiegel-artikelen).
+
+### Herbeoordeling signaal 1112
+
+Signaal 1112 bevatte zes nieuwe berichten van Waterschap Vallei en Veluwe (gescraped 17-21 augustus). Twee daarvan zijn inhoudelijk nieuw:
+
+1. **"Extra maatregel tegen droogte"** (17 aug): verbod op grondwater oppompen binnen 200 meter van kwetsbare beeklopen met waardevolle natuur, ingaand 18 augustus.
+2. **"Tijdelijk onttrekkingsverbod grondwater natte landnatuur"** (21 aug): verbod op grondwater oppompen bij natte landnatuur (moerassen, natte graslanden, broekbossen, rietvelden, veengebieden), ingaand 22 augustus.
+
+De vorige weger (15 aug) beoordeelde de waterschapsberichten als "gelabeld aan de Veluwezijde". De twee nieuwe berichten spreken echter over het hele werkgebied van het waterschap, dat Amersfoort en Leusden omvat. De pagina's zijn via directe fetch opgehaald en de tekst bevestigt het werkgebied-brede karakter.
+
+Samen met de eerdere maatregelen (onttrekkingsverbod oppervlaktewater 12 juni, uitbreiding 14 augustus) vormt dit een escalatiepatroon: vier opschalingen in tien weken, van oppervlaktewater naar grondwater.
+
+### Tip aangemaakt
+
+| ID | Titel | Score | Soort |
+|---|---|---|---|
+| 30 | Waterschap schaalde vier keer op: van slootwater tot grondwater | 8 | patroon |
+
+Dragende bron: Waterschap Vallei en Veluwe (tier 1). Weging: +3 (tier 1), +4 (aantoonbaar patroon met vier gedateerde stappen), +2 (concreet gegeven), +2 (lopend dossier), +1 (Leusden), −4 (individuele maatregelen gedekt door amersfoort.nieuws.nl en RTV Utrecht). Toegevoegde waarde: de escalatietijdlijn en de verschuiving van oppervlaktewater naar grondwater is niet als patroon samengebracht door spiegelbronnen.
+
+### Dossierfeiten toegevoegd
+
+| ID | Dossier | Feit |
+|---|---|---|
+| 219 | 3 — Droogte en waterbeheer | Verbod grondwater oppompen bij kwetsbare beeklopen, ingaand 18 augustus 2026 |
+| 220 | 3 — Droogte en waterbeheer | Verbod grondwater oppompen bij natte landnatuur, ingaand 22 augustus 2026 |
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld (herbeoordeling) | 1 | 1 |
+| Tips aangemaakt | 1 | 1 (ID 30) |
+| signal_events geschreven | 1 | 1 (tip_created) |
+| Tip_signals | 1 | 1 |
+| Tip_events | 1 | 1 |
+| Dossierfeiten | 2 | 2 (ID 219, 220) |
+| Signalen op discarded | 0 | 0 |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Databasetoegang via v3/pipeline.** De .env bevat een `libsql://`-URL die curl niet ondersteunt; het HTTPS-equivalent (`https://amersfoort-lokaal-jasperkoningnl.aws-eu-west-1.turso.io`) werkt met v3/pipeline en `{"type":"close"}` als laatste request.
+- **Clusterprobleem blijft dominant.** Van de 52 nieuw-materiaal-signalen bevatten er 50+ uitsluitend clusterruis of herhaalde scrapes. Alleen signaal 1112 had inhoudelijk nieuw materiaal dat bij het signaalonderwerp hoorde.
+- **Waterschap-scraper slaat geen paginatekst op.** De content van alle waterschapsberichten in raw_items is leeg; alleen de titel en URL worden bewaard. De tekst is via directe fetch opgehaald. Dit beperkt de mogelijkheid om waterschapsberichten automatisch te screenen — de weger moet ze handmatig ophalen.
+- **Droogte-escalatie loopt door ondanks regen.** Het waterschap stelt expliciet in het bericht van 21 augustus dat "de regen van de afgelopen dagen onvoldoende is om de lage grondwaterstanden te herstellen." Dossier 3 bevat nu 17 feiten.
+
+### Niet geverifieerd
+
+- Of de grondwaterverboden specifiek gelden voor zones in Amersfoort of Leusden; het waterschap spreekt van "delen van het werkgebied" zonder gemeenten te noemen.
+- Of er beeklopen in Amersfoort zijn die als "kwetsbaar met waardevolle natuur" zijn geclassificeerd.
+- Of de 51 overige nieuw-materiaal-signalen werkelijk geen inhoudelijk nieuw materiaal bevatten; de top 15 is individueel bekeken, de overige 37 zijn op basis van itemtype en bronrol als clusterruis of routine beoordeeld.
+- De inhoud van het NP33-artikel "Misschien toch meer mediterrane soorten" (20 aug) over droogte — de site is client-rendered.
+
+*Cowork-update: 2026-08-23 (Nieuwsplein33-account, weger-run)*

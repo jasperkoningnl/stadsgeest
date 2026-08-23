@@ -23,6 +23,10 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-08-23 — Tip over droogtemaatregelen waterschap
+
+Er staat een tip in de wachtrij over de oplopende droogtemaatregelen van Waterschap Vallei en Veluwe: vier verboden in tien weken, van oppervlaktewater naar grondwater. De losse maatregelen zijn al door anderen bericht, maar de escalatielijn als geheel niet. De tip benoemt ook wat we nog niet weten, namelijk of de grondwaterverboden specifiek voor zones in Amersfoort en Leusden gelden.
+
 ## 2026-08-22 — Collegeagenda's als nieuwe bron
 
 De agenda's van de collegevergaderingen van januari tot en met juli 2026 zijn voor het eerst binnengekomen. De besluiten zelf staan er nog niet bij, alleen de titels van de agendapunten. Het meeste daaruit kennen jullie al (Wind op Isselt, Jeugdhulp, slavernijverleden, Bovenduist). Er staat vandaag een tip in de wachtrij over het raadsvoorstel samenwerkingsovereenkomst Bovenduist; die is met een opmerking gemarkeerd dat het materiaal dunner is dan normaal.

@@ -30,7 +30,7 @@ const SOURCE_URL = `https://amersfoort.raadsinformatie.nl/modules/12/Besluitenli
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 const PAUZE_MS = 1500;
 const PDF_DOWNLOAD_TIMEOUT = 30000;  // 30s — sommige PDF's zijn groot
-const MAX_PDF_BYTES = 10 * 1024 * 1024;  // 10 MB — grotere bestanden overslaan
+const MAX_PDF_BYTES = 50 * 1024 * 1024;  // 50 MB — grotere bestanden overslaan (geheugen)
 
 const pauze = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -76,6 +76,7 @@ async function scrape() {
   });
 
   let saved = 0, skipped = 0, errors = 0, gevonden = 0;
+  const overslagenPdfs = [];  // signalering: welke PDF's zijn te groot
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bw-pdf-'));
 
   const browser = await chromium.launch({ headless: true });
@@ -163,7 +164,17 @@ async function scrape() {
             // Grootte-check: heel grote PDF's overslaan (geheugen)
             const stat = await fs.stat(tmpPath);
             if (stat.size > MAX_PDF_BYTES) {
-              console.log(`[B&W]   PDF te groot (${(stat.size/1024/1024).toFixed(1)} MB), overgeslagen: ${doc.label}`);
+              const sizeMB = (stat.size / 1024 / 1024).toFixed(1);
+              console.warn(`[B&W]   ⚠ PDF OVERGESLAGEN (${sizeMB} MB, limiet ${MAX_PDF_BYTES/1024/1024} MB): ${doc.label}`);
+              console.warn(`[B&W]     URL: ${doc.href}`);
+              console.warn(`[B&W]     Besluitenlijst: ${rij.titel} (${rij.datum})`);
+              overslagenPdfs.push({
+                besluitenlijst: rij.titel,
+                datum: rij.datum,
+                document: doc.label,
+                url: doc.href,
+                sizeMB: parseFloat(sizeMB),
+              });
               await fs.unlink(tmpPath).catch(() => {});
               continue;
             }
@@ -189,7 +200,7 @@ async function scrape() {
           sourceId,
           externalUrl: rij.href,
           title: `B&W besluitenlijst: ${rij.titel} — ${rij.datum}`.substring(0, 500),
-          content: content.substring(0, 50000),
+          content: content.substring(0, 500000),
           summary: detailTekst.substring(0, 500),
           publishedAt: rij.datum || null,
         });
@@ -206,6 +217,33 @@ async function scrape() {
     await browser.close();
     // Temp-map opruimen
     await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+  }
+
+  // ---- Signalering overgeslagen PDF's ----
+  if (overslagenPdfs.length > 0) {
+    console.warn(`\n[B&W] ⚠ ${overslagenPdfs.length} PDF('s) overgeslagen wegens grootte (limiet: ${MAX_PDF_BYTES/1024/1024} MB):`);
+    for (const p of overslagenPdfs) {
+      console.warn(`  ${p.sizeMB} MB | ${p.datum} | ${p.document}`);
+      console.warn(`    ${p.url}`);
+    }
+    console.warn(`[B&W] Controleer of deze documenten handmatig verwerkt moeten worden.\n`);
+
+    // Sla de overgeslagen PDF's op in scrape_runs zodat ze achteraf te reviewen zijn
+    try {
+      await db.execute({
+        sql: `INSERT INTO scrape_runs (job_name, source_id, source_name, items_found, items_new, items_duplicate, items_error, status)
+              VALUES (?, ?, ?, ?, 0, ?, 0, 'skipped_pdfs')`,
+        args: [
+          process.env.SCRAPE_JOB_NAME || null,
+          sourceId,
+          'B&W overgeslagen PDF\'s: ' + overslagenPdfs.map(p => `${p.document} (${p.sizeMB}MB)`).join(', ').substring(0, 400),
+          overslagenPdfs.length,
+          overslagenPdfs.length,
+        ],
+      });
+    } catch (logErr) {
+      console.warn(`[B&W] Kon overgeslagen PDF's niet opslaan in scrape_runs: ${logErr.message}`);
+    }
   }
 
   await logResult(db, sourceId, 'B&W besluitenlijsten gemeente Amersfoort', saved, skipped, errors, gevonden);
