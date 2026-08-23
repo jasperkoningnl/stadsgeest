@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **23 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-23 (weger-run) — één tip (score 8, droogte-escalatie waterschap), twee dossierfeiten, geen nieuwe signalen"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-23 (TenderNed-fix) — RSS vervangen door paginated API"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -145,7 +145,7 @@ De scheduled tasks en scrapers liggen bewust regelmatig stil om tokens te bespar
 
 ## Bronnen live
 
-**Dagelijks (run-all.js):** gemeente-amersfoort, vru, de-stad-amersfoort, eemland1, nos-amersfoort, rijksoverheid, tenderned, cbs-statline, reddit-amersfoort, amersfoort-nieuws, waterschap, politie-amersfoort, 112nu-amersfoort, officielebekendmakingen (BROKEN — fallback), **officielebekendmakingen-split** (Omgevingsvergunning/Verkeersbesluit/overig), ns-verstoringen, bluesky
+**Dagelijks (run-all.js):** gemeente-amersfoort, vru, de-stad-amersfoort, eemland1, nos-amersfoort, rijksoverheid, **tenderned** (hersteld 2026-08-23, RSS→API), cbs-statline, reddit-amersfoort, amersfoort-nieuws, waterschap, politie-amersfoort, 112nu-amersfoort, officielebekendmakingen (BROKEN — fallback), **officielebekendmakingen-split** (Omgevingsvergunning/Verkeersbesluit/overig), ns-verstoringen, bluesky
 
 **Browser dagelijks (run-browser.js):** nieuwsplein33, rtvutrecht, raadsinformatie (fallback), raadsinformatie-types (vergaderingen catch-all), **raadsinformatie-api** (Notubiz modules: schriftelijke vragen/moties/RIB/ingekomen stukken — 4+0+2+9 items eerste run), nextdoor, igj-nvwa, omthuis
 
@@ -5223,3 +5223,98 @@ Geen afwijkingen.
 - De inhoud van het NP33-artikel "Misschien toch meer mediterrane soorten" (20 aug) over droogte — de site is client-rendered.
 
 *Cowork-update: 2026-08-23 (Nieuwsplein33-account, weger-run)*
+
+## Cowork-update: 2026-08-23 (clustervervuiling-fix) — drie fixes in intake-run.mjs, opruimscript gedraaid
+
+### Probleem
+
+De stadsweger meldde continu clustervervuiling: signalen met >10 ongerelateerde items. Oorzaak: drie samenhangende problemen in `intake-run.mjs`.
+
+### Oorzaakanalyse
+
+1. **Ruis-entiteiten als matchbasis.** Wethouders en de burgemeester komen in vrijwel elk raadsdocument voor. "Gemeente Amersfoort" stond al in de hardcoded filter, maar personen niet. "Lucas Bolsius" zat in 25 signalen, andere wethouders in 7-13. Twee gedeelde wethouders = entity-score 4, boven de drempel van 2 — elk B&W-stuk matcht met elk signaal dat een wethouder noemt.
+2. **Geen cap op entity-matches.** De confirmations-cap op regel 462 gold alleen voor woordoverlapmatches (`> 10`). Entity-matches passeerden ongelimiteerd, waardoor signaal #634 (coffeeshopbeleid) kon groeien naar 64 items.
+3. **Omnibus-documenten.** B&W-besluitenlijsten behandelen 10-20 onderwerpen maar worden als een document verwerkt. De entity-extractor vindt alle genoemde namen, die bij verschillende agendapunten horen.
+
+### Fixes (in `scraper/intake-run.mjs`)
+
+**Fix 1 — Dynamisch ruis-entiteitenfilter.** Bij het opstarten van de intake wordt een `RUIS_ENTITEITEN`-set opgebouwd: alle entiteiten die in >8 verschillende signalen voorkomen, plus de hardcoded "gemeente amersfoort". Deze entiteiten worden niet meer als matchbasis gebruikt in `entityMatchSignal()`, noch aan de item-kant noch aan de signaal-kant.
+
+**Fix 2 — Confirmations-cap uitgebreid naar entity-matches.** De cap is nu gedifferentieerd: 15 voor entity-matches, 10 voor woordoverlapmatches. Een signaal dat de cap bereikt krijgt geen nieuwe items meer.
+
+**Fix 3 — Omnibus-documenthandler.** B&W-besluitenlijsten (herkend op `source_name`) worden apart behandeld: ze worden alleen op niet-generieke entiteiten gematcht, en als er een match is wordt `last_seen_at` bewust niet ververst (een besluitenlijst is bevestiging, geen nieuw materiaal). Zonder entity-match valt het item door naar normale signaalcreatie.
+
+### Opruimactie
+
+Script `scraper/opruim-clusters.mjs` gedraaid (eerst dry-run, daarna `--commit`):
+- 21 signalen opgeruimd (van >10 items teruggebracht naar 1)
+- 211 fout-geclusterde items ontkoppeld en teruggezet naar `is_processed=0`
+- 10 signalen met tip-koppelingen overgeslagen (o.a. #634, #540, #536)
+- Per signaal een `signal_event` geschreven (actor `opruimscript`, event_type `cleanup`)
+- Losgekoppelde items worden bij de eerstvolgende intake-run opnieuw verwerkt, nu met de drie fixes actief
+
+### Bestanden gewijzigd
+
+| Bestand | Actie |
+|---|---|
+| `scraper/intake-run.mjs` | Drie fixes doorgevoerd (ruis-filter, cap, omnibus-handler) |
+| `scraper/opruim-clusters.mjs` | Nieuw — eenmalig opruimscript, herbruikbaar bij toekomstige problemen |
+
+### Wat niet is opgeruimd
+
+Signalen met tip-koppelingen zijn bewust ongemoeid gelaten. Signaal #634 (64 items, coffeeshopbeleid) is het ergste geval maar hangt aan een tip en is daarom overgeslagen. Als die tip niet meer actueel is, kan het script opnieuw gedraaid worden na het verwijderen van de tip-koppeling.
+
+### Niet geverifieerd
+
+- Of de eerstvolgende intake-run de 211 losgekoppelde items correct herverwerkt (de fixes zijn syntactisch gevalideerd met `node --check`, niet live getest).
+- Of de ruis-entiteitendrempel van >8 signalen de juiste grens is; bij een groeiende database kan die bijgesteld moeten worden.
+- Of er andere omnibus-achtige bronnen zijn dan B&W-besluitenlijsten die dezelfde behandeling nodig hebben.
+
+*Cowork-update: 2026-08-23 (Nieuwsplein33-account, bronreparatie)*
+
+## Cowork-update: 2026-08-23 (TenderNed-fix) — RSS vervangen door paginated API
+
+### Probleem
+
+TenderNed leverde 0 items in 6+ runs (bronnenwacht 2 aug). De Atom-feed (`/rss/laatste-publicatie.rss`) bevat slechts ~31 landelijke publicaties en roteert Amersfoort-items er binnen uren af. Met ~50 publicaties per dag landelijk en 2-5 per maand uit Amersfoort miste de dagelijkse scraper ze structureel.
+
+### Oorzaakanalyse
+
+De feed is een nationaal venster op de nieuwste publicaties, geen Amersfoort-filter. De scraper draaide dagelijks maar de Amersfoort-items waren dan al verdwenen. De open JSON-API (`/papi/tenderned-rs-tns/v2/publicaties`) ondersteunt datumfiltering via `publicatieDatumVanaf`/`publicatieDatumTot` en paginering via `page`/`size` (max 100). Geen authenticatie vereist.
+
+### Fix (commit 411feb1)
+
+Scraper herschreven: RSS-feed vervangen door de paginated JSON API. Haalt alle publicaties van de laatste 3 dagen op (vangt weekenden op, typisch 150-250 items in 2-3 pagina's), filtert client-side op trefwoorden in `opdrachtgeverNaam`, `aanbestedingNaam` en `opdrachtBeschrijving`.
+
+**Keywords uitgebreid:**
+- `amersfoort` — vangt ook "gemeente amersfoort", "regio amersfoort" etc.
+- `eemland` — Archief Eemland, Bibliotheek Eemland, regionaal
+- `meander medisch` — Meander Medisch Centrum (met "medisch" erbij om valse matches te voorkomen)
+
+Bestaande verrijking (individuele publicatie-API + PDF-extractie bij gunningen) ongewijzigd — die werkte al goed.
+
+### Testresultaat
+
+Eerste run: 237 publicaties opgehaald (3 pagina's), 1 Amersfoort-match gevonden en opgeslagen ("Openbare Europese aanbesteding W-installaties Vechtstreek&Venen, VSU, PCBO Amersfoort en Monton", 20 aug). Tweede run: 0 nieuw, 1 overgeslagen — deduplicatie correct.
+
+### Verwachting
+
+0-2 items per run is normaal voor een stad als Amersfoort. TenderNed is een bron die soms dagenlang niets oplevert, maar als er wél iets is, is het tier 1 nieuws (aanbestedingen, gunningen).
+
+### To-do: regionale organisaties zonder "Amersfoort" in de beschrijving
+
+De huidige filter vangt alles wat "amersfoort", "eemland" of "meander medisch" expliciet noemt. Niet gevangen worden aanbestedingen van regionale organisaties die Amersfoort raken maar de plaatsnaam niet noemen — bijv. Provincie Utrecht die een weg door Amersfoort aanlegt onder de naam "N199", of Waterschap Vallei en Veluwe dat een zuivering uitbreidt. Relevante aanbestedende diensten die dit zouden kunnen doen: Provincie Utrecht, Waterschap Vallei en Veluwe, Veiligheidsregio Utrecht, Politie Midden-Nederland, ProRail, Rijkswaterstaat, De Alliantie, Portaal (woningcorporaties).
+
+**Uitzoeken:** concreet voorbeeld vinden van een aanbesteding die Amersfoort raakt maar nu niet gevonden wordt — bijv. via de individuele publicatie-API de NUTS-codes checken van Provincie Utrecht-aanbestedingen, of via de TenderNed-website handmatig zoeken op combinaties als "Provincie Utrecht" + Amersfoortse straatnamen. Als in de praktijk "Amersfoort" altijd wél in de beschrijving staat, is de huidige filter voldoende. Prioriteit: laag — eerst de andere dode bronnen (Raad Amersfoort-modules, officielebekendmakingen) repareren.
+
+### Bestanden gewijzigd
+
+| Bestand | Actie |
+|---|---|
+| `scraper/src/scrapers/tenderned.js` | Herschreven: RSS→API, keywords uitgebreid |
+
+### Niet geverifieerd
+
+- Of de scraper correct draait binnen PM2 (handmatig getest met `node`, niet via PM2-cron).
+- Of er in de afgelopen maanden daadwerkelijk Amersfoort-aanbestedingen zijn gemist die de oude RSS-scraper niet had gevangen — de API-listing ondersteunt geen zoekfilter, dus dit is niet eenvoudig te controleren zonder alle ~50 items per dag te pagineren.
+- Of de keywords "eemland" en "meander medisch" in de praktijk relevante extra hits opleveren of juist valse positieven geven.
