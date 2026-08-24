@@ -23,6 +23,12 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-08-24 — Twee tips in de wachtrij: parkeerbeleid en SRO
+
+Er staan twee nieuwe tips klaar. De eerste gaat over parkeerbeleid: in zeven maanden hebben acht raadsfracties zeven keer schriftelijke vragen gesteld en vijf moties ingediend over parkeren, dwars door coalitie en oppositie heen. De afzonderlijke stukken zijn bekend, maar het patroon als geheel niet. De tweede gaat over SRO: Burgerpartij Amersfoort heeft formele vragen gesteld over waarom de raad achter gesloten deuren werd bijgepraat over SRO, en of die geheimhouding gerechtvaardigd was. RTV Utrecht berichtte over het besloten overleg, maar de vragen over de rechtmatigheid ervan zijn een apart punt.
+
+Daarnaast zijn er twee nieuwe dossiers aangemaakt (SRO Amersfoort en Parkeerbeleid Amersfoort), zodat toekomstige tips over deze onderwerpen automatisch worden gekoppeld aan wat er al eerder over is binnengekomen.
+
 ## 2026-08-23 — Tip over droogtemaatregelen waterschap
 
 Er staat een tip in de wachtrij over de oplopende droogtemaatregelen van Waterschap Vallei en Veluwe: vier verboden in tien weken, van oppervlaktewater naar grondwater. De losse maatregelen zijn al door anderen bericht, maar de escalatielijn als geheel niet. De tip benoemt ook wat we nog niet weten, namelijk of de grondwaterverboden specifiek voor zones in Amersfoort en Leusden gelden.

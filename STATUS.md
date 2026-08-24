@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **23 augustus 2026**
+> ### Bijgewerkt tot en met **24 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-23 (TenderNed-fix) — RSS vervangen door paginated API"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-24 (weger-run) — twee tips, twee dossiers, 350 signalen beoordeeld"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5360,3 +5360,54 @@ De raad vergadert niet in juli en augustus (schoolvakanties). Bronnen die alleen
 - Of Cloudflare Turnstile de `headless: false` browser op Jaspers laptop doorlaat (getest in een andere chat, bevestigd werkend).
 - Of de Notubiz-paginastructuur (`table.overview_list tbody tr`) na het reces nog identiek is.
 - Overige dode bronnen uit de oorspronkelijke lijst (officielebekendmakingen, waaroverheid, onderwijsinspectie, provincie-utrecht) zijn niet aangepakt in deze sessie.
+
+---
+
+## Cowork-update: 2026-08-24 (weger-run) — twee tips, twee dossiers, 350 signalen beoordeeld
+
+### Werkset
+
+350 signalen (ID 1252–1601), allemaal aangemaakt op 23 augustus. Het overgrote deel is raadsinformatie-backfill: de gerepareerde raadsinformatie-scraper van 23 augustus haalde 335 raadsstukken op die sinds het reces waren opgelopen. De overige 15 signalen zijn reguliere intake van andere bronnen.
+
+89 signalen hadden nieuw materiaal (updated_at recenter dan created_at); bij handmatige controle bleek dit clusterruis en reguliere updates, geen nieuw tipwaardig materiaal.
+
+### Tips aangemaakt
+
+**Tip 31 — Parkeerbeleid patroon (score 12, soort: patroon, dossier 17)**
+Titel: "Zeven schriftelijke vragen en vijf moties over parkeren in zeven maanden, van acht partijen". Dragende signalen: #1503, #1504, #1505 (DENK-vragen). Bevestigend: #1366 (moties), #1365 (PvdD-vragen). Context: #1270 (Woo-verzoek parkeervergunningen). Spiegelcheck: De Stad schreef over de coalitiewijziging, NP33 volgt het dossier, maar het systematische telwerk (zeven vragensets, vijf moties, acht partijen) is nergens zo bijeengebracht.
+
+**Tip 32 — SRO geheim overleg (score 8, soort: verdieping, dossier 16)**
+Titel: "BPA stelt vragen over geheim SRO-overleg gemeenteraad op 15 juli". Dragend: #1289 (BPA schriftelijke vragen 2026-081). Context: #1286 (verworpen motie). Spiegelcheck: RTV Utrecht berichtte over het besloten overleg zelf; de formele vragen over de rechtmatigheid van de geheimhouding zijn niet elders beschreven.
+
+### Dossiers aangemaakt
+
+- **Dossier 16: SRO Amersfoort** — vier dossierfeiten: klokkenluider dec 2025, onderzoeksrapport juni 2026, geheim overleg 15 juli, verworpen motie.
+- **Dossier 17: Parkeerbeleid Amersfoort** — vier dossierfeiten: motie parkeerdrukmeting, DENK drie vragensets, PvdD-vragen gevolgen opschorten, motie parkeerhulp aangenomen.
+
+### Weggeschreven rijen (geteld, niet geschat)
+
+| Tabel | Rijen |
+|---|---|
+| tips | 2 |
+| tip_signals | 8 |
+| tip_events | 2 |
+| signal_events | 350 (8 individueel + 342 batch) |
+| dossiers | 2 |
+| dossier_facts | 8 |
+
+Wachtrij bevat nu 30 tips totaal.
+
+### Bevindingen en valkuilen
+
+- **fact_type CHECK-constraint**: de tabel `dossier_facts` accepteert geen `gebeurtenis` als fact_type. Geldige waarden beginnen met `incident`, `besluit`, `bedrag`, `contract`, `subsidie`, `claim`, `plan`, `realisatie`, `maatregel`, `correctie`. Drie inserts faalden hierop en zijn gecorrigeerd met `incident`.
+- **Dossiers-tabel heeft geen `actor`-kolom**, anders dan dossier_facts. De query `SELECT ... WHERE actor='weger'` op dossiers faalde.
+- **Signalen 1503, 1504, 1505, 1289 stonden al niet meer op status `new`** — vermoedelijk door een eerdere run of door de intake. De UPDATE naar `watching` raakte 0 rijen.
+- **Turso v3/pipeline werkt betrouwbaar**; v2/pipeline geeft HTTP_CODE 000 (connectie geweigerd). De hardcoded URL uit de weger-instructie is de juiste.
+- **Clustervervuiling blijft een probleem.** Meerdere signalen bevatten items uit totaal verschillende onderwerpen (bijv. een SRO-motie geclusterd met een parkeerbeleid-besluit). Dit kost beoordelingstijd en kan tipwaardig materiaal verbergen. Eerder gemeld, nog niet opgelost.
+
+### Niet geverifieerd
+
+- Of de dossierfeiten-URLs allemaal nog werken (notubiz-links zijn niet allemaal volledig ingevuld).
+- Of er tussen de 342 batch-beoordeelde signalen nog individueel tipwaardig materiaal zit dat door de snelle beoordeling is gemist. Het gros is ingekomen stukken (routinecorrespondentie); steekproeven bevestigden dit, maar een volledige handmatige controle is niet uitgevoerd.
+
+*Cowork-update: 2026-08-24 (weger-run)*
