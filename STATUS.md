@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **24 augustus 2026**
+> ### Bijgewerkt tot en met **25 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-24 (weger-run) — twee tips, twee dossiers, 350 signalen beoordeeld"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-25 (weger-run) — één tip, één dossier, tien signalen beoordeeld"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5411,3 +5411,67 @@ Wachtrij bevat nu 30 tips totaal.
 - Of er tussen de 342 batch-beoordeelde signalen nog individueel tipwaardig materiaal zit dat door de snelle beoordeling is gemist. Het gros is ingekomen stukken (routinecorrespondentie); steekproeven bevestigden dit, maar een volledige handmatige controle is niet uitgevoerd.
 
 *Cowork-update: 2026-08-24 (weger-run)*
+
+---
+
+## Cowork-update: 2026-08-25 (weger-run) — één tip, één dossier, tien signalen beoordeeld
+
+### Werkset
+
+10 nieuwe signalen (ID 1602–1611), aangemaakt op 25 augustus. 94 signalen met nieuw materiaal (last_seen_at > weger_laatst); bij controle van de top 15 bleek dit in alle gevallen clusterruis (ongerelateerde bekendmakingen of Nextdoor-berichten die door het cluster-algoritme aan bestaande signalen zijn toegevoegd). 589 eerder beoordeelde signalen overgeslagen.
+
+### Tip aangemaakt
+
+**Tip 33 — Zorginspectie patroon (score 15, soort: patroon, dossier 18)**
+Titel: "Deadline verscherpt toezicht GGz Centraal Kastanjehof verstreken, vierde zorgaanbieder in twee jaar". Dragende signalen: #1609 (Hamber Zorg items, nieuw), #1610 (Kastanjehof, L Zorg, Mazazorg items). Context: #1608 (Wmo-toezicht rapporten).
+
+Kern: vier zorgaanbieders in Amersfoort kregen in twee jaar (mrt 2024 – feb 2026) een IGJ-maatregel. De deadline voor de meest recente (GGz Centraal Kastanjehof, 10 augustus 2026) is verstreken zonder dat de inspectie een vervolgbesluit heeft gepubliceerd. NP33 en De Stad schreven in februari over het verscherpt toezicht; het patroon en de verstreken deadline zijn niet elders beschreven. Zorg en toezicht is een geïdentificeerd gat in de dekking van NP33 (NIEUWSPLEIN33.md §6.2).
+
+### Dossier aangemaakt
+
+- **Dossier 18: Zorginspectie en zorgtoezicht Amersfoort** — acht dossierfeiten: L Zorg/De Forel bevel (mei 2024), L Zorg/Reaal Zorg aanwijzing (okt 2024), Hamber Zorg verscherpt toezicht (mrt 2024), Hamber Zorg einde (dec 2024), Mazazorg verscherpt toezicht (mrt 2025), Mazazorg aanwijzing (nov 2025), Mazazorg einde (apr 2026), GGz Centraal Kastanjehof verscherpt toezicht (feb 2026).
+
+### Signalen zonder tip
+
+| Signaal | Reden |
+|---|---|
+| 1602 | Routine bekendmaking Leusden (ontvangst aanvraag dakopbouw) |
+| 1603 | Routine kapvergunning Soembastraat, geen afwijking |
+| 1604 | Routine omgevingsvergunning warmtepomp/airco |
+| 1605 | NS-werkzaamheden Den Haag–Rotterdam, buiten gebied → discarded |
+| 1606 | PRO raadsvragen Israelische ambassadeur RCE, volledig gedekt door De Stad Amersfoort (24 aug) |
+| 1607 | DENK raadsvragen standplaatsenbeleid Neptunusplein, score 4 (onder drempel, geen patroon op dit thema) |
+| 1611 | NS-werkzaamheden Den Haag–Gouda, buiten gebied → discarded |
+
+### Weggeschreven rijen (geteld, niet geschat)
+
+| Tabel | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld | 10 | 10 |
+| Tips aangemaakt | 1 | 1 (ID 33) |
+| tip_signals | 3 | 3 |
+| tip_events | 1 | 1 |
+| signal_events | 10 | 10 (2 tip_created + 8 reviewed) |
+| Dossiers | 1 | 1 (ID 18) |
+| Dossierfeiten | 8 | 8 |
+| Signalen op discarded | 2 | 2 (1605, 1611) |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Databasetoegang via @libsql/client/http.** De Turso HTTP API (v2/pipeline en v3/pipeline) retourneert 400 Bad Request vanuit de Cowork-sandbox. Oorzaak onduidelijk — de vorige run meldde dat v3 werkte. Omzeild door de Node.js HTTP-client van @libsql/client te gebruiken vanuit de scraper/node_modules. De native binding (@libsql/linux-x64-gnu) ontbreekt in de sandbox, maar de HTTP-transport werkt zonder native code.
+- **IGJ-scraper levert backfill.** De scraper haalde op 24 augustus alle IGJ-berichten met Amersfoortse link op, inclusief publicaties uit 2024 en 2025. Signalen 1609 en 1610 bevatten daardoor items die deels overlappen met de handmatig aangemaakte signalen 1, 2, 3 (published). De Hamber Zorg-items (mrt 2024, dec 2024) zijn nieuw; de overige waren al eerder gesignaleerd.
+- **GGz Centraal Kastanjehof deadline verstreken.** De IGJ stelde op 17 februari 2026 een deadline van 6 maanden (10 augustus 2026). Die is op het moment van deze run 15 dagen verstreken. Er is geen IGJ-publicatie over opheffing of verlenging gevonden.
+- **Clustervervuiling blijft de dominante ruis.** Van de 94 nieuw-materiaal-signalen bevatten alle gecontroleerde (top 15) uitsluitend items die door het cluster-algoritme fout zijn toegewezen. De clustervervuiling-fix van 23 augustus heeft de instroom beperkt, maar bestaande vervuilde signalen blijven last_seen_at-updates krijgen.
+- **PRO Israelische ambassadeur volledig gedekt.** De Stad Amersfoort publiceerde op 24 augustus over de PRO-vragen; NP33 heeft eerder over het PRO/Israël-dossier geschreven. Geen toegevoegde waarde als tip.
+
+### Niet geverifieerd
+
+- Of de IGJ Kastanjehof inmiddels heeft geëvalueerd — er is gezocht via web, maar de IGJ-site kan een vertraagde publicatie hebben.
+- Of er een verband is tussen de vier zorgaanbieders (gedeelde bestuurders, overlappende personeelsbureaus). Daar is niet naar gezocht.
+- Of de 79 niet-gecontroleerde nieuw-materiaal-signalen (van de 94) werkelijk geen nieuw materiaal bevatten. De top 15 is individueel bekeken; de overige zijn niet beoordeeld.
+- De volledige tekst van de PRO- en DENK-raadsvragen (Notubiz geeft Cloudflare-challenge, inhoud niet opgehaald).
+- Of de Turso HTTP API structureel onbereikbaar is vanuit de Cowork-sandbox of dat dit een tijdelijk probleem was.
+
+*Cowork-update: 2026-08-25 (Nieuwsplein33-account, weger-run)*

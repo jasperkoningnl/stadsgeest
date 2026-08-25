@@ -261,6 +261,27 @@ async function run() {
     const personIndex = await loadPersonIndex();
     console.log(`${personIndex.length} bekende personen geladen voor entiteitsherkenning`);
 
+    // Fix clustervervuiling (2026-08-23): entiteiten die in >8 signalen voorkomen
+    // zijn te generiek om als matchbasis te dienen. Wethouders, de burgemeester en
+    // organisaties als GGD/ODU staan in vrijwel elk bestuurlijk document — niet
+    // omdat het document over hen gaat, maar omdat zij het ondertekenen of
+    // behandelen. Die verbinden alles met alles: signaal 634 groeide zo van
+    // "Coffeeshopbeleid" naar 64 items met verkeersbesluiten en rekenkamer-
+    // onderzoeken. De drempel van 8 is conservatief: alleen entiteiten die
+    // aantoonbaar ruis veroorzaken vallen eruit.
+    const ruisRes = await db.execute(`
+      SELECT e.normalized_name, e.entity_type
+      FROM entities e JOIN entity_signals es ON es.entity_id = e.id
+      GROUP BY e.normalized_name, e.entity_type
+      HAVING COUNT(DISTINCT es.signal_id) > 8
+    `);
+    const RUIS_ENTITEITEN = new Set(
+      ruisRes.rows.map(r => `${r.entity_type}:${r.normalized_name}`)
+    );
+    // 'gemeente amersfoort' zat al hardcoded op regel 339; nu in dezelfde set
+    RUIS_ENTITEITEN.add('organization:gemeente amersfoort');
+    console.log(`${RUIS_ENTITEITEN.size} ruis-entiteiten uitgefilterd: ${[...RUIS_ENTITEITEN].join(', ')}`);
+
     const itemsResult = await db.execute(`
       SELECT r.id, r.title, r.content, r.summary, r.external_url, r.scraped_at, r.is_historical,
              r.published_at,
@@ -335,14 +356,23 @@ async function run() {
       if (!ie.rows.length) return null;
       const iStrong = new Set(), iLoc = new Set();
       for (const r of ie.rows) (r.entity_type === 'location' ? iLoc : iStrong).add(r.normalized_name);
-      // 'gemeente amersfoort' is te generiek als enige match
-      iStrong.delete('gemeente amersfoort');
+      // Filter ruis-entiteiten: te generiek om als matchbasis te dienen.
+      // Was alleen 'gemeente amersfoort'; nu alle entiteiten die in >8 signalen
+      // voorkomen (burgemeester, wethouders, GGD, ODU, etc.).
+      for (const e of [...iStrong]) {
+        const key = `person:${e}`;
+        const key2 = `organization:${e}`;
+        if (RUIS_ENTITEITEN.has(key) || RUIS_ENTITEITEN.has(key2)) iStrong.delete(e);
+      }
       let best = null, bestN = 0;
       for (const sig of activeSignals) {
         const b = sigEnt.get(sig.id);
         if (!b) continue;
         let n = 0;
-        for (const e of iStrong) if (b.strong.has(e)) n += 2;
+        // Tel alleen niet-ruis-entiteiten aan de signaal-kant
+        for (const e of iStrong) {
+          if (b.strong.has(e) && !RUIS_ENTITEITEN.has(`person:${e}`) && !RUIS_ENTITEITEN.has(`organization:${e}`)) n += 2;
+        }
         let locN = 0;
         for (const e of iLoc) if (b.loc.has(e)) locN++;
         if (locN >= 2) n += 2; // ≥2 gedeelde locaties telt als één sterke match
@@ -437,6 +467,36 @@ async function run() {
         continue;
       }
 
+      // Omnibus-documenten: B&W-besluitenlijsten bevatten 10-20 ongerelateerde
+      // onderwerpen in één stuk. De entiteitsextractor vindt álle genoemde namen,
+      // maar die horen bij verschillende agendapunten. Op 21-22 augustus schoof de
+      // intake zo 25 besluitenlijsten in signaal #634. Behandeling is dezelfde als
+      // spiegelbronnen: alleen koppelen bij een sterke entity-match (na
+      // ruisfiltering), zonder last_seen_at te verversen. Op termijn: de
+      // besluitenlijsten splitsen in losse agendapunten vóór de intake.
+      const isOmnibus = item.source_name && (
+        item.source_name.toLowerCase().includes('b&w besluitenlijst')
+        || item.source_name.toLowerCase().includes('b&w-besluitenlijst')
+        || item.source_name.toLowerCase().includes('besluitenlijst college')
+      );
+      if (isOmnibus) {
+        const sm = await entityMatchSignal(item.id);
+        if (sm) {
+          await db.execute({ sql: `UPDATE signals SET confirmations = confirmations + 1 WHERE id = ?`, args: [sm.sig.id] });
+          await db.execute({ sql: `INSERT OR IGNORE INTO signal_items (signal_id, raw_item_id) VALUES (?, ?)`, args: [sm.sig.id, item.id] });
+          sm.sig.confirmations = (sm.sig.confirmations || 0) + 1;
+          stats.bijgewerktSignaal++; stats.verwerkt++; stats.ids.push(item.id);
+          console.log(`  OMNIBUS [T${tier}] "${(item.title||'').substring(0,50)}" → #${sm.sig.id} (entiteiten:${sm.n})`);
+          await decisionBatcher.push(decisionStmt(runId, item, tier, 'matched', `omnibus-document gekoppeld op niet-generieke entiteiten aan signaal #${sm.sig.id}; last_seen_at bewust niet ververst`, { signal_id: sm.sig.id, match_score: sm.n }));
+          await eventBatcher.push(eventStmt(sm.sig.id, 'confirmed', { reason: `omnibus-document (${item.source_name || 'onbekend'}) raakt dit onderwerp — bevestiging, geen nieuw materiaal` }));
+        } else {
+          // Geen entity-match: wordt een eigen signaal, zodat de weger de
+          // individuele besluitpunten kan beoordelen.
+          // Valt door naar de standaard nieuw-signaal-logica hieronder.
+        }
+        if (sm) continue;
+      }
+
       // Het 48-uursfilter dat hier stond is op 2026-08-09 verwijderd. Oude items
       // worden nu hierboven als historisch aangemerkt in plaats van weggegooid.
 
@@ -458,8 +518,18 @@ async function run() {
           if (score >= 3 && score > bestScore) { bestScore = score; bestMatch = sig; }
         }
       }
-      // Bescherming: signalen met al veel items nooit verder voeden via woordoverlap
-      if (bestMatch && matchBasis === 'woorden' && (bestMatch.confirmations || 0) > 10) { bestMatch = null; bestScore = 0; }
+      // Bescherming: signalen met al veel items niet verder voeden.
+      // Tot 2026-08-23 gold dit alleen voor woordoverlap; entity-matches passeerden
+      // ongehinderd, waardoor signaal #634 tot 64 items groeide. Nu: cap op beide
+      // matchtypen, met een iets hogere grens voor entiteiten (die zijn betrouwbaarder
+      // dan woordoverlap, maar een signaal met >15 items is per definitie verdacht).
+      if (bestMatch) {
+        const cap = matchBasis === 'entiteiten' ? 15 : 10;
+        if ((bestMatch.confirmations || 0) > cap) {
+          console.log(`  CAP [${matchBasis}] "${(item.title||'').substring(0,50)}" niet gekoppeld aan #${bestMatch.id} (${bestMatch.confirmations} confirmaties > cap ${cap})`);
+          bestMatch = null; bestScore = 0;
+        }
+      }
 
       if (bestMatch) {
         await db.execute({ sql: `UPDATE signals SET confirmations = confirmations + 1, last_seen_at = datetime('now') WHERE id = ?`, args: [bestMatch.id] });

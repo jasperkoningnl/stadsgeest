@@ -6,7 +6,7 @@
 // cookie bevat geen geheim maar een ondertekende sessie met vervaldatum.
 //
 // Sinds 9 augustus 2026: één gedeeld wachtwoord vervangen door drie losse
-// accounts (Jasper, Pien, Gideon) voor de testperiode. Elk account heeft een
+// accounts (Jasper, Pien, Gideon, Benthe, Kees) voor de testperiode. Elk account heeft een
 // eigen wachtwoord en een eigen hash-omgevingsvariabele; de sessielaag
 // daaronder (HMAC, vervaldatum) is ongewijzigd t.o.v. de vorige versie.
 //
@@ -15,6 +15,8 @@
 //   DASHBOARD_WACHTWOORD_HASH_JASPER — SHA-256 (hex) van Jaspers wachtwoord
 //   DASHBOARD_WACHTWOORD_HASH_PIEN   — SHA-256 (hex) van Piens wachtwoord
 //   DASHBOARD_WACHTWOORD_HASH_GIDEON — SHA-256 (hex) van Gideons wachtwoord
+//   DASHBOARD_WACHTWOORD_HASH_BENTHE — SHA-256 (hex) van Benthes wachtwoord
+//   DASHBOARD_WACHTWOORD_HASH_KEES   — SHA-256 (hex) van Kees' wachtwoord
 //
 // Ontbreekt DASHBOARD_SESSIE_SECRET of hebben alle drie gebruikers geen hash,
 // dan komt niemand binnen. Dat is opzet: liever dicht dan per ongeluk open.
@@ -33,6 +35,8 @@ const GEBRUIKERS: Gebruiker[] = [
   { gebruikersnaam: 'jasper', envVar: 'DASHBOARD_WACHTWOORD_HASH_JASPER' },
   { gebruikersnaam: 'pien', envVar: 'DASHBOARD_WACHTWOORD_HASH_PIEN' },
   { gebruikersnaam: 'gideon', envVar: 'DASHBOARD_WACHTWOORD_HASH_GIDEON' },
+  { gebruikersnaam: 'benthe', envVar: 'DASHBOARD_WACHTWOORD_HASH_BENTHE' },
+  { gebruikersnaam: 'kees', envVar: 'DASHBOARD_WACHTWOORD_HASH_KEES' },
 ]
 
 const encoder = new TextEncoder()
