@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **25 augustus 2026**
+> ### Bijgewerkt tot en met **26 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-25 (weger-run) — één tip, één dossier, tien signalen beoordeeld"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-26 (weger-run) — één tip (Bibob Valutaboulevard), negen signalen beoordeeld"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5475,3 +5475,67 @@ Geen afwijkingen.
 - Of de Turso HTTP API structureel onbereikbaar is vanuit de Cowork-sandbox of dat dit een tijdelijk probleem was.
 
 *Cowork-update: 2026-08-25 (Nieuwsplein33-account, weger-run)*
+
+---
+
+## Cowork-update: 2026-08-26 (weger-run) — één tip (Bibob Valutaboulevard), negen signalen beoordeeld
+
+### Werkset
+
+Totaal open signalen (niet aan tip gekoppeld): 697. Daarvan 9 nieuw (geen eerdere weger-beoordeling), 96 met nieuw materiaal, 592 al beoordeeld.
+
+De 96 nieuw-materiaal-signalen zijn steekproefsgewijs gecontroleerd. Items gescraped na 25 augustus (16 stuks) zijn individueel bekeken: routinevergunningen (dakopbouw, kozijnen, warmtepomp, kapvergunning, steiger), bekendmakingen Leusden, een evenementenvergunning (Herfstfeest Laakzijde), een spiegel-item (De Stad Amersfoort), een NOS-bericht, en een nieuw ingekomen stuk (Utrechtse weerbaarheidsnorm Provincie Utrecht). Geen van deze rechtvaardigt herbeoordeling van het signaal.
+
+Alle 9 nieuwe signalen zijn beoordeeld.
+
+### Tip aangemaakt
+
+| ID | Titel | Score | Soort |
+|---|---|---|---|
+| 34 | Inwoner vraagt gemeente om Bibob-toets voor Valutaboulevard 1 | 6 | nieuwsfeit |
+
+Dragende bron: Raad Amersfoort — Ingekomen stukken (tier 1). Bevestigend: Raad Amersfoort — Schriftelijke vragen (tier 1, signaal 1517). Weging: +3 (tier 1), +2 (tweede onafhankelijke bron), +1 (geografisch precies). Een inwoner verzocht de gemeente formeel om de Wet Bibob toe te passen op een vergunning voor Valutaboulevard 1. Zeven maanden eerder stelde de fractie Amersfoort voor Vrijheid schriftelijke vragen over dezelfde vergunning (beantwoord op 24 maart 2026). De combinatie is nergens eerder samengebracht; geen spiegelbron heeft hierover geschreven.
+
+Signaal 1517 was op 24 augustus als routine afgedaan in een batchbeoordeling van 342 signalen. Met de komst van signaal 1613 (het Bibob-verzoek) is de context wezenlijk veranderd. Dit is geen stilzwijgend overrulen: het eerdere oordeel was correct gegeven het toenmalige materiaal; het nieuwe signaal verandert de beoordeling.
+
+### Overige signalen
+
+| Signaal | Uitkomst | Reden |
+|---|---|---|
+| 1612 | watching | Routine verkeersbesluit: onverplicht fietspad Bosweg (Leusderkwartier). Standaard GOW-30, geen afwijking. |
+| 1614 | watching | Ingekomen stuk VvE De Vleugelslag over rattenplaag door ROVA-container. Losstaand incident, geen patroon. |
+| 1615 | watching | Ingekomen stuk De Katoendrukkerij over evaluatie vertrek uit De Volmolen (contract tot 1 okt 2026). Losstaand cultuur/erfgoed-item. |
+| 1616 | watching | PR-bericht Meander MC over duurzaamheidsinitiatief. Geen nieuwswaarde. |
+| 1617 | discarded | NS-verstoring Utrecht-Rhenen, buiten gebied. |
+| 1618 | discarded | NS-verstoring Amersfoort-Ede, traject buiten Amersfoort. |
+| 1619 | discarded | NS-verstoring Utrecht-Den Haag, buiten gebied. |
+| 1620 | discarded | NS-verstoring Utrecht-Woerden, buiten gebied. |
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld | 9 | 9 |
+| Tips aangemaakt | 1 | 1 (ID 34) |
+| tip_signals | 2 | 2 (1613 dragend, 1517 bevestigend) |
+| tip_events | 1 | 1 |
+| signal_events geschreven | 10 | 10 (2 tip_created + 8 reviewed) |
+| Dossierfeiten | 0 | 0 |
+| Signalen op discarded | 4 | 4 (1617, 1618, 1619, 1620) |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Databasetoegang via @libsql/client/http.** De Turso HTTP API (v2/pipeline en v3/pipeline) retourneert HTTP 000 vanuit de Cowork-sandbox. Omzeild met de Node.js HTTP-client van @libsql/client vanuit scraper/node_modules, zoals bij de run van 25 augustus.
+- **Git-repo zit vast in een rebase.** Er loopt een interactieve rebase (author-rewrite van info@nieuwsplein33.nl naar jasperkoningnl) met lock-bestanden (.git/index.lock, .git/REBASE_HEAD.lock, .git/packed-refs.lock) die vanuit de sandbox niet te verwijderen zijn (Operation not permitted). De STATUS.md-wijziging is geschreven maar niet gecommit of gepusht. **Jasper moet op de laptop de lock-bestanden verwijderen, de rebase afronden of aborteren, en dan committen en pushen.**
+- **Twee tijdelijke bestanden achtergelaten in scraper/.** `_weger_q.cjs` en `_weger_write.cjs` zijn hulpscripts voor databasetoegang. Mogen verwijderd worden; staan niet in git (untracked).
+
+### Niet geverifieerd
+
+- Of de 96 nieuw-materiaal-signalen werkelijk geen herbeoordeling verdienen; alleen de 16 items gescraped na 25 augustus zijn individueel bekeken.
+- De inhoud van de schriftelijke vragen 2026-009 en het collegeantwoord van 24 maart — de Notubiz-documenten zijn niet opgehaald (Cloudflare-challenge).
+- Welk bedrijf op Valutaboulevard 1 is gevestigd en om welk type vergunning het Bibob-verzoek gaat.
+- Of het ingekomen stuk over de Utrechtse weerbaarheidsnorm (signaal 1386, nieuw item 25 aug) inhoudelijk relevant is voor bestaande dossiers.
+
+*Cowork-update: 2026-08-26 (Nieuwsplein33-account, weger-run)*
