@@ -23,6 +23,10 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-08-27 — Datums beter zichtbaar en wachtrij in vier blokken
+
+De datum van een tip staat nu groter en duidelijker in de kaart, rechts naast het etiket. Daarnaast is de wachtrij opgedeeld in vier blokken: vandaag, gisteren, deze week en eerder. Hierdoor vind je de tips van de afgelopen dagen makkelijker terug. Beide aanpassingen komen uit de feedback die Pien op 24 augustus heeft gestuurd.
+
 ## 2026-08-22 — Collegeagenda's als nieuwe bron
 
 De agenda's van de collegevergaderingen van januari tot en met juli 2026 zijn

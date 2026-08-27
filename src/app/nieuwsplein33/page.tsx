@@ -19,19 +19,21 @@ export default async function WachtrijPagina() {
     getMeetstand(),
   ])
 
-  // Drie dagkopjes, aansluitend op het ochtendritme van de weger: wat is er
-  // vandaag bijgekomen, wat gisteren, en wat ligt er nog van eerder. "Eerder"
-  // blijft één groep — de kaarten tonen daar hun eigen datum al.
+  // Vier dagkopjes: vandaag, gisteren, deze week, eerder. Sluit aan op het
+  // ochtendritme van de weger en op de wens van de redactie om recente tips
+  // makkelijker terug te vinden dan in één bak "eerder".
   const groepen: { kop: string; tips: TipRij[] }[] = [
     { kop: 'Vandaag', tips: [] },
     { kop: 'Gisteren', tips: [] },
+    { kop: 'Deze week', tips: [] },
     { kop: 'Eerder', tips: [] },
   ]
   for (const tip of tips) {
     const dagen = kalenderdagenGeleden(tip.created_at)
     if (dagen !== null && dagen <= 0) groepen[0].tips.push(tip)
     else if (dagen === 1) groepen[1].tips.push(tip)
-    else groepen[2].tips.push(tip)
+    else if (dagen !== null && dagen <= 7) groepen[2].tips.push(tip)
+    else groepen[3].tips.push(tip)
   }
 
   return (

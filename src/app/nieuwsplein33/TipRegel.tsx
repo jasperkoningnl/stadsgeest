@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { TipRij } from '@/lib/dashboard/tipQueries'
-import { formatRelative } from '@/lib/dashboard/format'
+import { formatDate } from '@/lib/dashboard/format'
 
 export const SOORT_LABEL: Record<string, string> = {
   nieuwsfeit: 'Nieuwsfeit',
@@ -23,6 +23,7 @@ export default function TipRegel({ tip }: { tip: TipRij }) {
       <div className="np-regel-labels">
         <span className={`np-soort np-soort-${tip.soort}`}>{SOORT_LABEL[tip.soort] ?? tip.soort}</span>
         {tip.gemeente !== 'Amersfoort' && <span className="np-gemeente">{tip.gemeente}</span>}
+        <span className="np-regel-datum">{formatDate(tip.created_at)}</span>
       </div>
 
       <span className="np-regel-titel">{tip.titel}</span>
@@ -46,8 +47,7 @@ export default function TipRegel({ tip }: { tip: TipRij }) {
             <span className="np-dossier">dossier {tip.dossier_naam}</span>
           </>
         )}
-        <span className="np-regel-scheiding">·</span>
-        <span>{formatRelative(tip.created_at)}</span>
+
       </div>
     </Link>
   )

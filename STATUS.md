@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **27 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-27 (weger-run) — één tip (Skaeve Huse tweede beroep), nieuw dossier, zestien signalen beoordeeld"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-27 — dashboard-aanpassingen naar aanleiding van redactiefeedback"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5621,3 +5621,28 @@ Geen afwijkingen.
 - Of er naast deze twee beroepen nog meer bezwaarmakers zijn die niet als ingekomen stuk zijn geregistreerd.
 
 *Cowork-update: 2026-08-27 (Nieuwsplein33-account, weger-run)*
+
+---
+
+### Cowork-update: 2026-08-27 — dashboard-aanpassingen naar aanleiding van redactiefeedback
+
+Alle feedback van de redactie uit `dashboard_feedback` en `tip_feedback` opgehaald en geanalyseerd. Pien en Gideon hebben op 24 en 25 augustus samen negentien beslissingen genomen op de tips in de wachtrij en Pien heeft één algemeen feedbackbericht gestuurd via de feedbackbalk.
+
+**Doorgevoerd:**
+
+1. **Datum prominenter in tipkaarten.** De datum stond als laatste item in de kleine meta-regel (via `formatRelative`, dus "vandaag" of "gisteren"). Nu staat hij als apart element rechts in de labelregel, met `formatDate` (dus "24 aug 2026"). Gewijzigd: `TipRegel.tsx`, `globals.css`.
+2. **Tijdgroepering wachtrij verfijnd.** Van drie groepen (vandaag/gisteren/eerder) naar vier (vandaag/gisteren/deze week/eerder). Tips van 2–7 dagen oud verdwijnen niet meer in de bak "eerder". Gewijzigd: `page.tsx` (wachtrijpagina).
+
+Build slaagt.
+
+**Niet opgepakt, vergt ontwerpkeuze:**
+
+- Pien wil dossiers bereikbaar maken vanaf de startpagina ("het zou fijn zijn als we dit soort patronen ook toe kunnen voegen in dossiers die we in de startpagina kunnen openen"). Er bestaan al dossiers in de database, maar ze zijn niet navigeerbaar buiten de context van een individuele tip. Dit raakt aan de vraag wat de startpagina moet worden — eerst bespreken met Jasper.
+- Gideon schreef bij een goedgekeurde tip "Misschien iets voor Kees of Benthe?" — er is geen mogelijkheid om tips aan een collega toe te wijzen. Grotere feature, niet zomaar inbouwen.
+
+**Patroon uit de beslissingen dat de weger raakt:**
+
+- Gideon wees vier tips af als "geen nieuwswaarde" — allemaal routine-vergunningszaken (kapaanvragen, padelbanen, huizen Leusden, basisschool). De weger zou hier strenger op kunnen filteren of een apart tier voor kunnen maken. Niet doorgevoerd, raakt aan de weger-prompt.
+- Pien wees de discriminatiemeldingen af met "zoals de tool zelf al aan geeft hebben we dit al op 12 augustus zelf gepubliceerd". Het systeem wist het al maar liet de tip toch door. De "al bekend"-detectie zou de score harder kunnen drukken.
+
+*Cowork-update: 2026-08-27 (Nieuwsplein33-account, dashboard-aanpassingen op redactiefeedback)*
