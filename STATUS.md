@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **26 augustus 2026**
+> ### Bijgewerkt tot en met **27 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-26 (weger-run) — één tip (Bibob Valutaboulevard), negen signalen beoordeeld"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-27 (weger-run) — één tip (Skaeve Huse tweede beroep), nieuw dossier, zestien signalen beoordeeld"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5539,3 +5539,85 @@ Geen afwijkingen.
 - Of het ingekomen stuk over de Utrechtse weerbaarheidsnorm (signaal 1386, nieuw item 25 aug) inhoudelijk relevant is voor bestaande dossiers.
 
 *Cowork-update: 2026-08-26 (Nieuwsplein33-account, weger-run)*
+
+---
+
+## Cowork-update: 2026-08-27 (weger-run) — één tip (Skaeve Huse tweede beroep), nieuw dossier, zestien signalen beoordeeld
+
+### Werkset
+
+Totaal open signalen (niet aan tip gekoppeld): 707. Daarvan 16 nieuw (geen eerdere weger-beoordeling), 99 met nieuw materiaal, 592 al beoordeeld.
+
+De 99 nieuw-materiaal-signalen zijn steekproefsgewijs gecontroleerd. Alle 21 items gescraped na 26 augustus zijn individueel bekeken: routinevergunningen (containers, schaftwagens, warmtepomp, dakisolatie, woninguitbreiding), BRP-uitschrijving, laadpalen Leusden, beslistermijn-verlengingen, maatwerkbesluit energieopslag, propaanmelding korfbalvereniging, en rechtbank-metadata zonder uitspraaktekst. Geen van deze rechtvaardigt herbeoordeling.
+
+Alle 16 nieuwe signalen zijn beoordeeld.
+
+### Tip aangemaakt
+
+| ID | Titel | Score | Soort |
+|---|---|---|---|
+| 35 | Tweede beroep tegen Skaeve Huse: na de Belangenvereniging nu ook een inwoner | 7 | verdieping |
+
+Dragende bron: Raad Amersfoort — Ingekomen stukken (tier 1). Weging: +3 (tier 1), +1 (geografisch precies: Palestinaweg-Oost), +2 (lopend dossier), +1 (agenda redactie: wonen is speerpunt coalitieakkoord). Een individuele inwoner stelde op 26 augustus apart beroep in tegen het TAM-omgevingsplan Hoofdstuk 22p Skaeve Huse, naast het al bekende beroep van de Belangenvereniging Vathorst bij de Raad van State. Afdoening B&W — het college handelt het af, geen commissiebehandeling. NP33 (8 aug), De Stad (5 aug) en RTV Utrecht (8 aug) berichtten over het beroep van de Belangenvereniging; dit tweede, individuele beroep is niet elders beschreven.
+
+### Dossier aangemaakt
+
+- **Dossier 19: Skaeve Huse Amersfoort** — drie dossierfeiten: raadsbesluit wijziging bestemmingsplan (juni 2026), beroep Belangenvereniging Vathorst bij RvS (aug 2026), beroep inwoner tegen TAM-plan (aug 2026).
+
+### Dossierfeiten toegevoegd
+
+| ID | Dossier | Feit |
+|---|---|---|
+| 237 | 19 — Skaeve Huse | Raadsbesluit wijziging bestemmingsplan Palestinaweg-Oost |
+| 238 | 19 — Skaeve Huse | Beroep Belangenvereniging Vathorst bij Raad van State |
+| 239 | 19 — Skaeve Huse | Beroep inwoner tegen TAM-omgevingsplan, afdoening B&W |
+| 240 | 17 — Parkeerbeleid | Inspreektekst parkeerbeleid, betrokken bij commissie Omgeving 9 september 2026 |
+
+### Overige signalen
+
+| Signaal | Uitkomst | Reden |
+|---|---|---|
+| 1621 | watching | Leusden routine besluit op aanvraag Heiligenbergerweg 1b |
+| 1622 | watching | Aanvraag kantoorpand/bedrijfsverzamelgebouw Amsterdamseweg 43. Ontvangstbevestiging, geen besluit |
+| 1625 | watching | Routinevergunning glazen pui Laakboulevard 152 |
+| 1627 | watching | Routinevergunning schaftwagen Mozartweg |
+| 1628 | watching | Routinevergunning container verlenging Kolkmanstraat |
+| 1630 | watching | Routinevergunning muurdoorbraak Maasstraat 11 |
+| 1631 | watching | Routinevergunning container Bernulfusstraat 40 |
+| 1633 | watching | Landelijk bericht VEH subsidieregels aardgasvrij, geen Amersfoortse hoek |
+| 1635 | watching | Inspreektekst parkeerbeleid; dossierfeit in dossier 17 |
+| 1636 | watching | PR-bericht burgemeester bezoekt bruidspaar |
+| 1623,1624,1626,1629,1632 | discarded | BRP-uitschrijvingen (vertrokken met onbekende bestemming), standaard |
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld | 16 | 16 |
+| Tips aangemaakt | 1 | 1 (ID 35) |
+| tip_signals | 1 | 1 |
+| tip_events | 1 | 1 |
+| signal_events geschreven | 16 | 16 (1 tip_created + 10 reviewed + 5 reviewed→discarded) |
+| Dossiers aangemaakt | 1 | 1 (ID 19) |
+| Dossierfeiten | 4 | 4 (ID 237-240) |
+| Signalen op discarded | 5 | 5 (1623,1624,1626,1629,1632) |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Databasetoegang via @libsql/client/http.** De Turso HTTP API (v2/pipeline en v3/pipeline) retourneert HTTP 000 vanuit de Cowork-sandbox. Omzeild met de Node.js HTTP-client van @libsql/client vanuit scraper/node_modules, consistent met de runs van 25 en 26 augustus.
+- **Git-repo is weer schoon.** De rebase-problemen van 26 augustus zijn opgelost; de repo is up to date met origin/main. Er staat nog één untracked bestand (`scraper/_weger_run.cjs`) dat vanuit de sandbox niet te verwijderen is (Operation not permitted). Jasper kan dat handmatig verwijderen. Er stond ook al een `_weger_q.cjs` van 26 augustus.
+- **Skaeve Huse-dossier aangemaakt (ID 19).** Drie feiten over de juridische sporen tegen het project. NP33 volgt het dossier intensief (acht artikelen); de toegevoegde waarde zit in het systematisch bijhouden van de procedurele stappen.
+- **Parkeerbeleid-dossier 17 bijgewerkt.** Inspreektekst voor commissie Omgeving 9 september vastgelegd. Dit is de negende formele burgeractie over parkeren in 2026.
+- **BRP-uitschrijvingen.** Vijf "vertrokken met onbekende bestemming"-berichten in deze batch, totaal dertien in de database. Dit zijn standaard gemeenteblad-publicaties bij opschorting van persoonslijsten; op zichzelf geen nieuwswaarde. Als het aantal structureel hoog is ten opzichte van vergelijkbare gemeenten zou dat een signaal zijn, maar er is geen vergelijkingsmateriaal.
+
+### Niet geverifieerd
+
+- Of de 99 nieuw-materiaal-signalen werkelijk geen herbeoordeling verdienen; alleen de 21 items gescraped na 26 augustus zijn individueel bekeken.
+- De inhoud van het beroepschrift van de inwoner (ingekomen stuk 417) — Notubiz toont alleen metadata, geen documenten.
+- Of het beroep van de inwoner en dat van de Belangenvereniging dezelfde juridische gronden aanvoeren.
+- Hoe het college de "Afdoening B&W" in de praktijk invult bij dit type ingekomen stuk.
+- Of er naast deze twee beroepen nog meer bezwaarmakers zijn die niet als ingekomen stuk zijn geregistreerd.
+
+*Cowork-update: 2026-08-27 (Nieuwsplein33-account, weger-run)*
