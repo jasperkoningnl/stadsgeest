@@ -42,6 +42,8 @@ function bronwereld(naam) {
   if (n.includes('bekendmaking') || n.startsWith('ob —') || n.includes('gemeenteblad')
       || n.includes('provinciaal blad') || n.includes('waterschapsblad')
       || n.includes('verkeersbesluit') || n.includes('omgevingsvergunning')) return 'bekendmaking';
+  if (n.includes('inspectie') || n.includes('nvwa') || n.includes('omgevingsdienst')
+      || n.includes('lrk') || n.includes('toezicht')) return 'inspectie';
   return 'anders';
 }
 
@@ -99,7 +101,7 @@ function matchScore(item, signal) {
 }
 
 function extractEntities(item, personIndex = []) {
-  const text = `${item.title || ''} ${item.summary || ''} ${(item.content || '').substring(0, 500)}`;
+  const text = `${item.title || ''} ${item.summary || ''} ${(item.content || '').substring(0, 2000)}`;
   const entities = [];
 
   // Bekende personen (college, raad, bestuurders) — matcht op volledige naam
@@ -450,6 +452,10 @@ async function run() {
         const key2 = `organization:${e}`;
         if (RUIS_ENTITEITEN.has(key) || RUIS_ENTITEITEN.has(key2)) iStrong.delete(e);
       }
+      // Filter ook ruis-locaties (bijv. "Soesterkwartier" in 19 signalen, "Isselt" in 14)
+      for (const e of [...iLoc]) {
+        if (RUIS_ENTITEITEN.has(`location:${e}`)) iLoc.delete(e);
+      }
       let best = null, bestN = 0;
       for (const sig of activeSignals) {
         const b = sigEnt.get(sig.id);
@@ -461,7 +467,7 @@ async function run() {
         }
         let locN = 0;
         for (const e of iLoc) if (b.loc.has(e)) locN++;
-        if (locN >= 2) n += 2; // ≥2 gedeelde locaties telt als één sterke match
+        if (locN >= 3) n += 2; // ≥3 gedeelde locaties telt als één sterke match (verhoogd van 2, bevinding #5)
         if (n >= 2 && n > bestN) { bestN = n; best = sig; }
       }
       return best ? { sig: best, n: bestN } : null;
@@ -707,14 +713,8 @@ async function run() {
       await eventBatcher.push(eventStmt(s.id, 'status_change', { statusFrom: 'new', statusTo: 'watching', reason: `drempel van ${s.threshold} bevestigingen bereikt` }));
     }
 
-    // Markeer verwerkt
-    for (let i = 0; i < stats.ids.length; i += 50) {
-      const chunk = stats.ids.slice(i, i+50);
-      const ph = chunk.map(() => '?').join(',');
-      await db.execute({ sql: `UPDATE raw_items SET is_processed = 1 WHERE id IN (${ph})`, args: chunk });
-    }
-
-    // Entiteiten (primary/secondary)
+    // Entiteiten (primary/secondary) — vóór is_processed = 1, zodat bij een
+    // crash halverwege de entiteitsextractie de items opnieuw worden aangeboden.
     const entItems = items.filter(it => (it.reliability === 'primary' || it.reliability === 'secondary') && stats.ids.includes(it.id));
     for (const item of entItems) {
       const ents = extractEntities(item, personIndex);
@@ -741,6 +741,14 @@ async function run() {
           args: [JSON.stringify(ents), runId, item.id],
         });
       }
+    }
+
+    // Markeer verwerkt — bewust ná de entiteitsextractie, zodat bij een crash
+    // halverwege items opnieuw worden aangeboden en hun entiteiten niet missen.
+    for (let i = 0; i < stats.ids.length; i += 50) {
+      const chunk = stats.ids.slice(i, i+50);
+      const ph = chunk.map(() => '?').join(',');
+      await db.execute({ sql: `UPDATE raw_items SET is_processed = 1 WHERE id IN (${ph})`, args: chunk });
     }
 
     await decisionBatcher.flush();
