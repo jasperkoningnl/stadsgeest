@@ -23,6 +23,10 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-08-28 — Minder ruis en dubbele tips in de wachtrij
+
+De intake is op vier punten bijgesteld. Ten eerste worden tips die over dezelfde webpagina gaan nu samengevoegd in plaats van apart aangeboden. Ten tweede zijn tientallen registertermen (zoals vergunning, perceel, slopen) uitgefilterd zodat ongerelateerde bekendmakingen niet meer per ongeluk aan elkaar worden gekoppeld. Ten derde worden B&W-besluitenlijsten nu apart gehouden omdat die veel losse onderwerpen bevatten die anders door elkaar lopen. Tot slot worden tips nu op volgorde van oudste eerst verwerkt, wat betere clustering geeft. Het netto-effect: minder tips waarin twee losse zaken door elkaar zitten, en minder dubbele tips over hetzelfde bericht. Keerzijde: een enkele gebeurtenis die in meerdere bronnen voorkomt kan nu in twee aparte tips verschijnen in plaats van samen te worden gevoegd.
+
 ## 2026-08-27 — Datums beter zichtbaar en wachtrij in vier blokken
 
 De datum van een tip staat nu groter en duidelijker in de kaart, rechts naast het etiket. Daarnaast is de wachtrij opgedeeld in vier blokken: vandaag, gisteren, deze week en eerder. Hierdoor vind je de tips van de afgelopen dagen makkelijker terug. Beide aanpassingen komen uit de feedback die Pien op 24 augustus heeft gestuurd.
