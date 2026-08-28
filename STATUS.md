@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **27 augustus 2026**
+> ### Bijgewerkt tot en met **28 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-27 — dashboard-aanpassingen naar aanleiding van redactiefeedback"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-28 — intake-audit en vier fixes"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5705,3 +5705,52 @@ Geen afwijkingen.
 - Of de abri-aanbesteding verband houdt met een lopend OV-beleid of halteplan van de gemeente.
 
 *Cowork-update: 2026-08-28 (Nieuwsplein33-account, weger-run)*
+
+
+## Cowork-update: 2026-08-28 — intake-audit en vier fixes
+
+Grondige audit van `scraper/intake-run.mjs` (685 regels) uitgevoerd met database-analyse. 13 bevindingen in 5 categorieën, gepubliceerd als interactief rapport. Vier fixes geïmplementeerd, getest en gepusht.
+
+### Audit-rapport
+
+Gepubliceerd als Artifact: https://claude.ai/code/artifact/672bc810-f90b-4a5e-add6-777196d8da9e
+
+13 bevindingen: 3 kritiek, 4 hoog, 4 midden, 2 laag. Alle vier de aanbevolen fixes zijn in deze sessie doorgevoerd (commits `5393e29` t/m `6b6ae59`).
+
+### Fix 1: Stopwoordenlijst uitgebreid (commit `5393e29`)
+
+53 registerwoorden toegevoegd aan STOPWOORDEN in drie categorieën:
+- **Bekendmakingen-registertaal** (21): vergunning, omgevingsvergunning, verleende, perceel, plaatsen, kappen, boom/bomen, kennisgeving, beschikking, behandelen, etc.
+- **BRP-/registermeldingen** (13): vertrokken, onbekende, bestemming, beslistermijn, verlengen, woning, dakkapel, gevel, etc.
+- **Datum-/tijdwoorden** (16): alle maandnamen + jaarcijfers 2024–2028
+- **Rechtspraak** (6): verdachte, straf, taakstraf, geldboete, rijontzegging, voorwaardelijke
+Simulatie: 6/6 bekende valse woordoverlap-matches voorkomen (van score 5–12 naar overlap 0–1).
+
+### Fix 2: BAG-filter en organisatielijst (commit `a9418af`)
+
+- **BAG-filter verbreed**: regex van `Status:\s*Pand in gebruik` naar `(?:Status:\s*)?Pand in gebruik` — vangt nu ook het titelformaat `Pand 0203... — Pand in gebruik` dat ~50 items doorliet. Items met echte gebeurtenissen (Bouw gestart, Pand gesloopt) blijven doorstromen.
+- **10 organisaties toegevoegd** aan extractEntities: Flint, SRO, Amfors, Omnia Wonen, Eemland Wonen, Inschool, GGD regio Utrecht, Kwintes, Amersfoort033, BPA Bergkwartier.
+- **Nextdoor-advertentiefilter**: de `€\s?\d` regex bleek al te werken sinds ~15 augustus — geen recente lekken, geen wijziging nodig.
+
+### Fix 3: Adresherkenning (commit `8d8e99f`)
+
+Twee nieuwe entiteitstypen in extractEntities:
+- **Postcodes** (4 cijfers + 2 letters): genormaliseerd als `postcode:3811ak`. Twee items met dezelfde postcode matchen op locatie.
+- **Straat+huisnummer**: geëxtraheerd na anchor-woorden (perceel, hoogte van, locatie, adres). Werkt voor samengestelde namen (Barchman Wuytierslaan, Hooglandseweg-Noord) en toevoegingen (130 A).
+
+Geen valse postcodes bij BAG-pandnummers of nieuwstitels.
+### Fix 4: Omnibus-documenten filteren (commit `6b6ae59`)
+
+B&W-besluitenlijsten en raadsvergadering-besluitenlijsten worden nu volledig gefilterd. De oude aanpak (entity-only match, net als spiegelbronnen) werkte niet: zelfs na ruisfiltering matchten 4–22 entiteiten uit verschillende agendapunten, waardoor signalen opbliezen (signaal #634 kreeg 68 valse bevestigingen). Detectie via source_name ("b&w besluitenlijst", "besluitenlijst college") + titel-regex (`/besluitenlijst/i`). Pas bruikbaar na splitsing in losse agendapunten — dat is een toekomstige fix.
+
+### Wekelijkse intake-auditor (scheduled task)
+
+Scheduled task aangemaakt (`trig_01MmpHJbph995KvFWoM4P736`), draait elke maandag 06:00 Amsterdam-tijd (`0 4 * * 1` UTC). Voert steekproefcontroles uit op intake-beslissingen van de afgelopen 7 dagen, schrijft bevindingen naar STATUS.md en pusht via Desktop Commander. De taak wijzigt NOOIT het intake-script — alleen rapportage. Vereist device-binding (approval vanuit desktop-app).
+
+### Openstaande bevindingen uit de audit (niet geïmplementeerd)
+
+- **Stille foutafhandeling** (`catch (_) {}` regel 572): entiteitsextractie-fouten worden ingeslikt. Zou minstens `console.warn` moeten loggen.
+- **Geen deduplicatie op URL**: items met dezelfde external_url maar andere titel worden als apart behandeld.
+- **Bronwereldscheiding**: sommige edge cases bij bekendmakingen vs. rechtspraak matching.
+
+*Cowork-update: 2026-08-28 (Nieuwsplein33-account, intake-audit en fixes)*
