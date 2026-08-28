@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **28 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-28 — intake-audit en vier fixes"**.
+> De laatste sectie onderaan dit bestand heet **"Stap 4 — foutafhandeling, dedup, volgorde en locking (2026-08-28, commit 397bb94)"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5749,8 +5749,22 @@ Scheduled task aangemaakt (`trig_01MmpHJbph995KvFWoM4P736`), draait elke maandag
 
 ### Openstaande bevindingen uit de audit (niet geïmplementeerd)
 
-- **Stille foutafhandeling** (`catch (_) {}` regel 572): entiteitsextractie-fouten worden ingeslikt. Zou minstens `console.warn` moeten loggen.
-- **Geen deduplicatie op URL**: items met dezelfde external_url maar andere titel worden als apart behandeld.
-- **Bronwereldscheiding**: sommige edge cases bij bekendmakingen vs. rechtspraak matching.
+- ~~**Stille foutafhandeling**: opgelost in stap 4 (commit 397bb94)~~
+- ~~**Geen deduplicatie op URL**: opgelost in stap 4 (commit 397bb94)~~
+- **Bronwereldscheiding**: sommige edge cases bij bekendmakingen vs. rechtspraak matching. Nog open.
+- **Omnibus-splitsing**: besluitenlijsten worden gefilterd maar niet gesplitst. Vereist PDF-parsing en schema-aanpassingen.
 
-*Cowork-update: 2026-08-28 (Nieuwsplein33-account, intake-audit en fixes)*
+*Cowork-update: 2026-08-28 (Nieuwsplein33-account, intake-audit en fixes)*### Stap 4 — foutafhandeling, dedup, volgorde en locking (2026-08-28, commit 397bb94)
+
+Vier verbeteringen in `intake-run.mjs`:
+
+1. **Foutafhandeling gefixt**: het stille `catch (_) {}` blok bij entiteit-opslag logt nu een `console.warn` met item-id en foutmelding. Fouten bij entity_signals-inserts zijn niet meer onzichtbaar.
+2. **URL-duplicaatdetectie**: vóór de filterloop wordt een batch-query gedaan op `raw_items WHERE is_processed = 1` met alle external_urls van de huidige batch. Items met een al verwerkte URL worden overgeslagen met filterreden `URL-duplicaat`. Voorkomt dat dezelfde pagina bij meerdere scrape-runs dubbele signalen aanmaakt.
+3. **Verwerkingsvolgorde**: `ORDER BY scraped_at` gewijzigd van `DESC` naar `ASC`. Oudste items worden nu eerst verwerkt, zodat het eerste item het signaal aanmaakt en latere items erbij matchen (was omgekeerd).
+4. **Lockfile-mechanisme**: atomaire `fs.mkdirSync('.intake-lock')` voorkomt dat twee gelijktijdige intake-runs dezelfde items oppakken. Stale locks (>15 minuten) worden automatisch opgeruimd. Lock wordt vrijgegeven bij exit, SIGINT en SIGTERM.
+
+**Omnibus-splitsing (4c)**: onderzocht maar niet gebouwd. De besluitenlijst-content is slechts een agendaoverzicht; de besluitteksten zitten in bijlage-PDFs. Een splitter vereist PDF-parsing, schema-aanpassingen (parent_id-kolom) en architectuurbeslissingen — apart te bespreken.
+
+**Bronwereldscheiding**: blijft open. Edge cases bij bekendmakingen vs. rechtspraak word-overlap matching vereisen nader onderzoek.
+
+*Cowork-update: 2026-08-28 (Nieuwsplein33-account, stap 4 fixes)*
