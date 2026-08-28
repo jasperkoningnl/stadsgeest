@@ -144,6 +144,18 @@ function extractEntities(item, personIndex = []) {
     { re: /\bsoesterkwartier\b/i, name: 'Soesterkwartier', normalized: 'soesterkwartier', type: 'location' },
     { re: /\bkattenbroek\b/i, name: 'Kattenbroek', normalized: 'kattenbroek', type: 'location' },
     { re: /\bnimf\b/i, name: 'NIMF', normalized: 'nimf amersfoort', type: 'organization' },
+    // Toegevoegd 2026-08-28: Amersfoortse organisaties die in de intake-audit
+    // als ontbrekend zijn geïdentificeerd.
+    { re: /\bflint\b/i, name: 'De Flint', normalized: 'de flint', type: 'organization' },
+    { re: /\bsro\b/i, name: 'SRO Amersfoort', normalized: 'sro amersfoort', type: 'organization' },
+    { re: /\bamfors\b/i, name: 'Amfors', normalized: 'amfors', type: 'organization' },
+    { re: /\bomnia wonen\b/i, name: 'Omnia Wonen', normalized: 'omnia wonen', type: 'organization' },
+    { re: /\beemland wonen\b/i, name: 'Eemland Wonen', normalized: 'eemland wonen', type: 'organization' },
+    { re: /\binschool\b/i, name: 'Inschool', normalized: 'inschool', type: 'organization' },
+    { re: /\bgg[dD]\s*(?:regio\s+)?utrecht\b/i, name: 'GGD regio Utrecht', normalized: 'ggd regio utrecht', type: 'organization' },
+    { re: /\bkwintes\b/i, name: 'Kwintes', normalized: 'kwintes', type: 'organization' },
+    { re: /\bamersfoort033\b/i, name: 'Amersfoort033', normalized: 'amersfoort033', type: 'organization' },
+    { re: /\bbpa\b|\bberg(?:kwartier)?pad\b/i, name: 'BPA Bergkwartier', normalized: 'bpa bergkwartier', type: 'organization' },
   ];
 
   for (const p of patterns) {
@@ -436,7 +448,7 @@ async function run() {
       // Panden met een ándere status blijven wel door: bouw gestart, sloopvergunning
       // verleend of pand gesloopt zijn wél gebeurtenissen.
       if (item.source_name === 'PDOK BAG Amersfoort'
-          && /Status:\s*Pand in gebruik/i.test(`${item.title} ${item.content || ''}`)) {
+          && /(?:Status:\s*)?Pand in gebruik/i.test(`${item.title} ${item.content || ''}`)) {
         stats.gefilterd++; stats.ids.push(item.id);
         await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', 'BAG-pandregistratie met status "Pand in gebruik": registermutatie, geen gebeurtenis'));
         continue;
