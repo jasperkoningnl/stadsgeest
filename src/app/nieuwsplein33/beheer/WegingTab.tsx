@@ -1,15 +1,22 @@
 'use client'
 
+import { useState } from 'react'
 import type {
   TipOverzicht, AfgewezenSignaal, WegingSamenvatting,
 } from '@/lib/dashboard/beheerQueries'
-import { formatDateTime, formatRelative } from '@/lib/dashboard/format'
+import { formatRelative } from '@/lib/dashboard/format'
 
 const SOORT_KLEUR: Record<string, string> = {
   nieuwsfeit: 'np-soort-nieuwsfeit',
   patroon: 'np-soort-patroon',
   verdieping: 'np-soort-verdieping',
   dossiersignaal: 'np-soort-dossiersignaal',
+}
+
+const ROL_LABEL: Record<string, string> = {
+  dragend: 'dragend',
+  bevestigend: 'bevestigend',
+  context: 'context',
 }
 
 function scoreKleur(score: number | null): string {
@@ -28,12 +35,14 @@ interface WegingTabProps {
   samenvatting: WegingSamenvatting
   tips: TipOverzicht[]
   afgewezen: AfgewezenSignaal[]
+  periodeLabel: string
 }
 
 export default function WegingTab({
   samenvatting,
   tips,
   afgewezen,
+  periodeLabel,
 }: WegingTabProps) {
   return (
     <div>
@@ -42,7 +51,7 @@ export default function WegingTab({
         <div className="np-weging-stats">
           <div className="np-weging-stat">
             <span className="np-weging-stat-getal">{samenvatting.signalenBeoordeeld}</span>
-            <span className="np-weging-stat-label">Signalen beoordeeld</span>
+            <span className="np-weging-stat-label">Beoordeeld</span>
           </div>
           <div className="np-weging-stat">
             <span className="np-weging-stat-getal np-weging-stat-groen">{samenvatting.tipsMade}</span>
@@ -61,13 +70,13 @@ export default function WegingTab({
 
       {/* Tips */}
       <p className="np-telling" style={{ marginTop: 24 }}>
-        Tips (afgelopen 7 dagen): {tips.length}
+        Tips ({periodeLabel}): {tips.length}
       </p>
       <div className="np-weging-tiplijst">
         {tips.map((tip) => (
           <div key={tip.id} className="np-weging-tipkaart">
             <div className="np-weging-tipkaart-kop">
-              <div>
+              <div style={{ minWidth: 0, flex: 1 }}>
                 <span className="np-weging-tiptitel">{tip.titel}</span>
                 <div className="np-weging-tipmeta">
                   {tip.soort && (
@@ -87,15 +96,17 @@ export default function WegingTab({
               )}
             </div>
 
-            {/* Gekoppelde signalen */}
+            {/* Gekoppelde signalen met roluitleg */}
             {tip.signalen.length > 0 && (
               <div className="np-weging-signalen">
                 {tip.signalen.map((s) => (
                   <span
                     key={s.signalId}
-                    className={`np-weging-signaal-pil${s.rol === 'dragend' ? ' np-weging-signaal-dragend' : ''}`}
+                    className={`np-weging-signaal-pil np-weging-rol-${s.rol}`}
+                    title={`Rol: ${ROL_LABEL[s.rol] ?? s.rol}`}
                   >
-                    {s.rol === 'dragend' ? '▸' : '◦'} #{s.signalId} {s.signalTitle} ({s.rol})
+                    #{s.signalId} {s.signalTitle}
+                    <span className="np-weging-rol-tag">{ROL_LABEL[s.rol] ?? s.rol}</span>
                   </span>
                 ))}
               </div>
@@ -110,7 +121,7 @@ export default function WegingTab({
           </div>
         ))}
         {tips.length === 0 && (
-          <p className="np-leeg">Geen tips in de afgelopen 7 dagen.</p>
+          <p className="np-leeg">Geen tips in deze periode.</p>
         )}
       </div>
 
@@ -120,26 +131,57 @@ export default function WegingTab({
       </p>
       <div className="np-weging-afgewezen">
         {afgewezen.map((s) => (
-          <div key={s.id} className="np-weging-afgewezen-item">
-            <span className="np-weging-afgewezen-titel">#{s.id} {s.title}</span>
-            <span className="np-weging-afgewezen-reden">{s.decisionReason ?? '—'}</span>
-            <div className="np-weging-scorebalk-wrap">
-              <div className="np-weging-scorebalk">
-                <div
-                  className={`np-weging-scorebalk-vul ${scoreKleur(s.noveltyScore)}`}
-                  style={{ width: scoreBalkBreedte(s.noveltyScore) }}
-                />
-              </div>
-              <span className={`np-weging-scorebalk-getal ${scoreKleur(s.noveltyScore)}`}>
-                {s.noveltyScore?.toFixed(1) ?? '—'}
-              </span>
-            </div>
-          </div>
+          <AfgewezenKaart key={s.id} signaal={s} />
         ))}
         {afgewezen.length === 0 && (
-          <p className="np-leeg" style={{ marginTop: 12 }}>Geen afgewezen signalen deze week.</p>
+          <p className="np-leeg" style={{ marginTop: 12 }}>Geen afgewezen signalen in deze periode.</p>
         )}
       </div>
+    </div>
+  )
+}
+
+/** Uitklapbare kaart voor een afgewezen signaal. */
+function AfgewezenKaart({ signaal: s }: { signaal: AfgewezenSignaal }) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div className="np-weging-afgewezen-kaart">
+      <button
+        type="button"
+        className="np-weging-afgewezen-kop"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+      >
+        <span className="np-weging-afgewezen-titel">#{s.id} {s.title}</span>
+        <div className="np-weging-scorebalk-wrap">
+          <div className="np-weging-scorebalk">
+            <div
+              className={`np-weging-scorebalk-vul ${scoreKleur(s.noveltyScore)}`}
+              style={{ width: scoreBalkBreedte(s.noveltyScore) }}
+            />
+          </div>
+          <span className={`np-weging-scorebalk-getal ${scoreKleur(s.noveltyScore)}`}>
+            {s.noveltyScore?.toFixed(1) ?? '—'}
+          </span>
+        </div>
+        <span className="np-weging-chevron">{open ? '▾' : '▸'}</span>
+      </button>
+      {open && (
+        <div className="np-weging-afgewezen-detail">
+          {s.summary && (
+            <p className="np-weging-afgewezen-samenvatting">{s.summary}</p>
+          )}
+          <div className="np-weging-afgewezen-meta">
+            <span><strong>Reden:</strong> {s.decisionReason ?? 'onbekend'}</span>
+            <span><strong>Bevestigingen:</strong> {s.confirmations}</span>
+            <span><strong>Laatst gezien:</strong> {formatRelative(s.lastSeenAt)}</span>
+            {s.firstSeenAt && (
+              <span><strong>Eerst gezien:</strong> {formatRelative(s.firstSeenAt)}</span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

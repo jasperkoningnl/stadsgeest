@@ -1892,6 +1892,132 @@ html[data-np-thema="donker"] .np-fb-balk-binnen { box-shadow: 0 12px 32px rgba(0
   flex-shrink: 0; min-width: 28px; text-align: right;
 }
 
+/* ── Beheer: sub-navigatie (submenu van Beheer) ──────────── */
+.np-subnav {
+  display: flex; align-items: center; gap: 2px; flex-wrap: wrap;
+  padding: 3px; margin-bottom: 4px;
+  background: var(--np-zacht); border-radius: 10px;
+  border: 1px solid var(--np-rand-z);
+}
+.np-subnav-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 14px; border-radius: 7px;
+  font-family: var(--f-d); font-size: 13px; font-weight: 600;
+  color: var(--np-inkt2); border: none; background: none;
+  transition: color .16s ease, background .16s ease;
+}
+.np-subnav-item:hover { color: var(--np-inkt); }
+.np-subnav-item-actief {
+  color: var(--np-inkt); background: var(--np-kaart); box-shadow: var(--np-schaduw);
+}
+html[data-np-thema="donker"] .np-subnav-item-actief { box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+
+/* ── Beheer: periodeselector ─────────────────────────────── */
+.np-periode-kiezer {
+  display: flex; align-items: center; gap: 2px;
+  margin-left: auto; padding-left: 12px;
+}
+.np-periode-pil {
+  padding: 4px 10px; border-radius: 6px;
+  font-family: var(--f-d); font-size: 12px; font-weight: 600;
+  color: var(--np-inkt3); border: none; background: none;
+  transition: color .15s, background .15s;
+}
+.np-periode-pil:hover { color: var(--np-inkt2); background: var(--np-rand-z); }
+.np-periode-pil-actief {
+  color: var(--np-accent); background: var(--np-accent-z);
+}
+
+/* ── Beheer: Intake uitklapbare rijen ────────────────────── */
+.np-intake-lijst { display: flex; flex-direction: column; gap: 2px; }
+.np-intake-rij-wrap { border-radius: 8px; overflow: hidden; }
+.np-intake-rij {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 8px 14px;
+  border: none; background: var(--np-kaart);
+  border-bottom: 1px solid var(--np-rand-z);
+  text-align: left; cursor: pointer;
+  transition: background .12s;
+}
+.np-intake-rij:hover { background: var(--np-zacht); }
+.np-intake-rij-open { background: var(--np-zacht); }
+.np-intake-rij-titel {
+  flex: 1; min-width: 0;
+  font-family: var(--f-d); font-size: 13.5px; font-weight: 500;
+  color: var(--np-inkt);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.np-intake-rij-open .np-intake-rij-titel {
+  white-space: normal; overflow: visible;
+}
+.np-intake-rij-bron {
+  font-size: 12px; color: var(--np-inkt3); flex-shrink: 0;
+  max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.np-intake-detail {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 8px 14px 12px;
+  background: var(--np-zacht);
+  font-size: 13px; color: var(--np-inkt2);
+  border-bottom: 1px solid var(--np-rand-z);
+}
+
+/* ── Beheer: Weging uitklapbare afgewezen kaarten ────────── */
+.np-weging-afgewezen-kaart {
+  border-radius: 10px; overflow: hidden;
+  background: var(--np-kaart); border: 1px solid var(--np-rand-z);
+}
+.np-weging-afgewezen-kop {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 16px;
+  border: none; background: none;
+  text-align: left; cursor: pointer;
+  transition: background .12s;
+}
+.np-weging-afgewezen-kop:hover { background: var(--np-zacht); }
+.np-weging-chevron {
+  font-size: 13px; color: var(--np-inkt3); flex-shrink: 0; width: 16px; text-align: center;
+}
+.np-weging-afgewezen-detail {
+  padding: 0 16px 14px;
+}
+.np-weging-afgewezen-samenvatting {
+  font-family: var(--f-b); font-size: 13.5px; color: var(--np-inkt2);
+  line-height: 1.5; margin-bottom: 8px;
+}
+.np-weging-afgewezen-meta {
+  display: flex; flex-wrap: wrap; gap: 6px 16px;
+  font-size: 12.5px; color: var(--np-inkt3);
+}
+
+/* ── Beheer: Weging signaalrol-tags ──────────────────────── */
+.np-weging-rol-tag {
+  display: inline-block; margin-left: 6px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; opacity: 0.7;
+}
+.np-weging-rol-dragend {
+  border-color: var(--np-accent); color: var(--np-accent); background: var(--np-accent-z);
+}
+.np-weging-rol-bevestigend {
+  border-color: var(--np-blauw); color: var(--np-blauw); background: var(--np-blauw-z);
+}
+.np-weging-rol-context {
+  /* standaard grijs — de basisstijl van np-weging-signaal-pil is al grijs */
+}
+
+/* Soort badges */
+.np-soort {
+  display: inline-block; padding: 2px 8px; border-radius: 6px;
+  font-family: var(--f-d); font-size: 11.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+.np-soort-nieuwsfeit { color: var(--np-blauw); background: var(--np-blauw-z); }
+.np-soort-patroon { color: var(--np-accent); background: var(--np-accent-z); }
+.np-soort-verdieping { color: var(--np-amber); background: var(--np-amber-z); }
+.np-soort-dossiersignaal { color: var(--np-groen); background: var(--np-groen-z); }
+.np-regel-scheiding { color: var(--np-inkt3); }
+
 /* ── Beheer: responsive aanpassingen ───────────────────────── */
 @media (max-width: 640px) {
   .np-beheer-trechter-groot { gap: 4px; }
@@ -1901,4 +2027,7 @@ html[data-np-thema="donker"] .np-fb-balk-binnen { box-shadow: 0 12px 32px rgba(0
   .np-weging-stats { gap: 8px; }
   .np-weging-stat-getal { font-size: 22px; }
   .np-weging-afgewezen-item { flex-direction: column; align-items: flex-start; }
+  .np-subnav { gap: 1px; }
+  .np-subnav-item { padding: 5px 10px; font-size: 12px; }
+  .np-periode-kiezer { margin-left: 0; padding-left: 0; margin-top: 4px; width: 100%; }
 }

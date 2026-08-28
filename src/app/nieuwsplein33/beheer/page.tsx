@@ -21,12 +21,20 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic'
 
-export default async function BeheerPagina() {
+interface BeheerPaginaProps {
+  searchParams: Promise<{ periode?: string }>
+}
+
+export default async function BeheerPagina({ searchParams }: BeheerPaginaProps) {
   const cookieStore = await cookies()
   const gebruiker = await sessieGebruiker(cookieStore.get(AUTH_COOKIE)?.value)
   if (gebruiker !== 'jasper') redirect('/nieuwsplein33')
 
   if (!hasTurso()) return <GeenDatabase />
+
+  const params = await searchParams
+  const dagen = [7, 14, 30].includes(Number(params.periode)) ? Number(params.periode) : 7
+  const periodeLabel = `afgelopen ${dagen} dagen`
 
   // Alle data parallel ophalen — elke tab krijgt precies wat hij nodig heeft.
   const [
@@ -38,13 +46,13 @@ export default async function BeheerPagina() {
     getTierAggregates(),
     getSourcesOverview(),
     getSourceErrors(),
-    getIntakeFunnel(7),
+    getIntakeFunnel(dagen),
     getIntakeDecisions(50),
-    getTopFilterReasons(7, 10),
-    getTopEntities(7, 10),
-    getRecentTips(7, 20),
-    getAfgewezenSignalen(7, 20),
-    getWegingSamenvatting(7),
+    getTopFilterReasons(dagen, 10),
+    getTopEntities(dagen, 10),
+    getRecentTips(dagen, 20),
+    getAfgewezenSignalen(dagen, 20),
+    getWegingSamenvatting(dagen),
   ])
 
   const laatsteRun = runs[0] ?? null
@@ -52,6 +60,7 @@ export default async function BeheerPagina() {
   return (
     <BeheerTabs
       bronnenCount={bronnen.rows.length}
+      periode={dagen}
       bronnenContent={
         <BronnenContent tiers={tiers} bronnen={bronnen} />
       }
@@ -62,6 +71,7 @@ export default async function BeheerPagina() {
           filterReasons={filterReasons}
           topEntities={topEntities}
           laatsteRun={laatsteRun}
+          periodeLabel={periodeLabel}
         />
       }
       wegingContent={
@@ -69,6 +79,7 @@ export default async function BeheerPagina() {
           samenvatting={wegingSamenvatting}
           tips={tips}
           afgewezen={afgewezen}
+          periodeLabel={periodeLabel}
         />
       }
     />

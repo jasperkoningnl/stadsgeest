@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import type {
   IntakeRun, IntakeFunnel, IntakeDecision, FilterReason, TopEntity,
 } from '@/lib/dashboard/beheerQueries'
-import { formatDateTime, formatDuration } from '@/lib/dashboard/format'
+import { formatDateTime, formatDuration, formatRelative } from '@/lib/dashboard/format'
 
 const BESLISSING_OPTIES = ['filtered', 'matched', 'new_signal'] as const
 const BESLISSING_LABEL: Record<string, string> = {
@@ -24,6 +24,7 @@ interface IntakeTabProps {
   filterReasons: FilterReason[]
   topEntities: TopEntity[]
   laatsteRun: IntakeRun | null
+  periodeLabel: string
 }
 
 export default function IntakeTab({
@@ -32,8 +33,10 @@ export default function IntakeTab({
   filterReasons,
   topEntities,
   laatsteRun,
+  periodeLabel,
 }: IntakeTabProps) {
   const [filters, setFilters] = useState<Set<string>>(new Set())
+  const [openRij, setOpenRij] = useState<number | null>(null)
 
   function toggleFilter(f: string) {
     setFilters((prev) => {
@@ -71,7 +74,7 @@ export default function IntakeTab({
 
       {/* Trechter */}
       <div className="np-beheer-kaart">
-        <p className="np-beheer-trechter-titel">Intake-trechter (7 dagen)</p>
+        <p className="np-beheer-trechter-titel">Intake-trechter ({periodeLabel})</p>
         <div className="np-beheer-trechter-groot">
           <div className="np-trechter-stap">
             <span className="np-trechter-getal">{funnel.totalIn}</span>
@@ -144,35 +147,38 @@ export default function IntakeTab({
             </span>
           </div>
 
-          <div className="np-beheer-tabel-wrap">
-            <table className="np-tabel">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Bron</th>
-                  <th>Beslissing</th>
-                  <th>Reden</th>
-                  <th>Signaal</th>
-                </tr>
-              </thead>
-              <tbody>
-                {gefilterdeDecisions.slice(0, 50).map((d, i) => (
-                  <tr key={i}>
-                    <td className="np-intake-itemtitel">{d.itemTitle}</td>
-                    <td className="np-bron-rest">{d.sourceName}</td>
-                    <td>
-                      <span className={`np-badge ${BESLISSING_KLEUR[d.decision] ?? ''}`}>
-                        {BESLISSING_LABEL[d.decision] ?? d.decision}
-                      </span>
-                    </td>
-                    <td className="np-bron-rest">{d.reason ?? '—'}</td>
-                    <td className="np-bron-rest">
-                      {d.signalTitle ? `#${d.signalId} ${d.signalTitle}` : '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="np-intake-lijst">
+            {gefilterdeDecisions.slice(0, 50).map((d, i) => (
+              <div key={i} className="np-intake-rij-wrap">
+                <button
+                  type="button"
+                  className={`np-intake-rij${openRij === i ? ' np-intake-rij-open' : ''}`}
+                  onClick={() => setOpenRij(openRij === i ? null : i)}
+                  aria-expanded={openRij === i}
+                >
+                  <span className="np-intake-rij-titel">{d.itemTitle}</span>
+                  <span className={`np-badge ${BESLISSING_KLEUR[d.decision] ?? ''}`}>
+                    {BESLISSING_LABEL[d.decision] ?? d.decision}
+                  </span>
+                  <span className="np-intake-rij-bron">{d.sourceName}</span>
+                  <span className="np-weging-chevron">{openRij === i ? '▾' : '▸'}</span>
+                </button>
+                {openRij === i && (
+                  <div className="np-intake-detail">
+                    {d.reason && (
+                      <span><strong>Reden:</strong> {d.reason}</span>
+                    )}
+                    {d.signalTitle && (
+                      <span><strong>Signaal:</strong> #{d.signalId} {d.signalTitle}</span>
+                    )}
+                    {d.entitiesFound && (
+                      <span><strong>Entiteiten:</strong> {d.entitiesFound}</span>
+                    )}
+                    <span><strong>Tijdstip:</strong> {formatRelative(d.createdAt)}</span>
+                  </div>
+                )}
+              </div>
+            ))}
             {gefilterdeDecisions.length === 0 && (
               <p className="np-leeg" style={{ marginTop: 12 }}>Geen beslissingen bij deze filters.</p>
             )}
@@ -183,7 +189,7 @@ export default function IntakeTab({
         <div>
           {/* Filterredenen */}
           <div className="np-beheer-kaart" style={{ marginTop: 24 }}>
-            <p className="np-beheer-trechter-titel">Top filterredenen (7d)</p>
+            <p className="np-beheer-trechter-titel">Top filterredenen ({periodeLabel})</p>
             {filterReasons.map((r, i) => (
               <div key={i}>
                 <div className="np-reden-item">
@@ -205,7 +211,7 @@ export default function IntakeTab({
 
           {/* Top entiteiten */}
           <div className="np-beheer-kaart" style={{ marginTop: 16 }}>
-            <p className="np-beheer-trechter-titel">Top entiteiten (7d)</p>
+            <p className="np-beheer-trechter-titel">Top entiteiten ({periodeLabel})</p>
             {topEntities.map((e, i) => (
               <div key={i} className="np-reden-item">
                 <span className="np-reden-naam">{e.name}</span>

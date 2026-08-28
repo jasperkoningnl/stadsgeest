@@ -368,8 +368,10 @@ export async function getRecentTips(dagen = 7, limiet = 20): Promise<TipOverzich
 export interface AfgewezenSignaal {
   id: number
   title: string
+  summary: string | null
   decisionReason: string | null
   noveltyScore: number | null
+  firstSeenAt: string | null
   lastSeenAt: string | null
   confirmations: number
 }
@@ -377,7 +379,8 @@ export interface AfgewezenSignaal {
 /** Signalen die door de weger zijn afgewezen (discarded). */
 export async function getAfgewezenSignalen(dagen = 7, limiet = 20): Promise<AfgewezenSignaal[]> {
   const rows = await q<any>(`
-    SELECT id, title, decision_reason, novelty_score, last_seen_at, confirmations
+    SELECT id, title, summary, decision_reason, novelty_score,
+           first_seen_at, last_seen_at, confirmations
     FROM signals
     WHERE status = 'discarded'
       AND julianday(last_seen_at) >= julianday('now', '-' || ? || ' days')
@@ -387,8 +390,10 @@ export async function getAfgewezenSignalen(dagen = 7, limiet = 20): Promise<Afge
   return rows.map((r: any) => ({
     id: r.id,
     title: r.title ?? '',
+    summary: r.summary ?? null,
     decisionReason: r.decision_reason ?? null,
     noveltyScore: r.novelty_score ?? null,
+    firstSeenAt: r.first_seen_at ?? null,
     lastSeenAt: r.last_seen_at ?? null,
     confirmations: r.confirmations ?? 0,
   }))
