@@ -585,21 +585,55 @@ async function run() {
         continue;
       }
 
-      // Omnibus-documenten: B&W-besluitenlijsten en raadsvergadering-
-      // besluitenlijsten bevatten 10-20 ongerelateerde onderwerpen in één stuk.
-      // Entity-matching werkt hier niet: zelfs na ruisfiltering matchen 4-22
-      // entiteiten uit verschillende agendapunten, waardoor signalen onterecht
-      // opblazen (signaal #634 kreeg 68 bevestigingen van ongerelateerde B&W-
-      // besluiten). Tot de besluitenlijsten gesplitst worden in losse
-      // agendapunten vóór de intake, worden ze volledig gefilterd.
+      // Omnibus-splitsing: B&W-besluitenlijsten bevatten meerdere ongerelateerde
+      // besluiten in één document. De content bevat een "=== DOCUMENTEN ==="
+      // sectie met individuele documenten gescheiden door "--- Titel ---" headers.
+      // Procedurele stukken (besluitenlijsten, invitaties, collegeberichten) worden
+      // overgeslagen; inhoudelijke stukken worden als nieuwe raw_items ingevoegd.
       const isOmnibus = item.source_name && (
         item.source_name.toLowerCase().includes('b&w besluitenlijst')
         || item.source_name.toLowerCase().includes('b&w-besluitenlijst')
         || item.source_name.toLowerCase().includes('besluitenlijst college')
       ) || /\bbesluitenlijst\b/i.test(item.title || '');
       if (isOmnibus) {
+        const omnContent = item.content || '';
+        const docsSplit = omnContent.split('=== DOCUMENTEN ===');
+        if (docsSplit.length < 2 || docsSplit[1].trim().length < 50) {
+          stats.gefilterd++; stats.ids.push(item.id);
+          await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', 'omnibus-document zonder documentensectie'));
+          continue;
+        }
+        const docParts = docsSplit[1].split(/\n--- (.+?) ---\n/);
+        const PROCEDUREEL = /besluitenlijst\s+(b\.|hamerstukken)|invitaties|collegebericht/i;
+        let gesplitst = 0, procedureel = 0;
+        for (let d = 1; d < docParts.length; d += 2) {
+          const docTitle = docParts[d].trim();
+          const docBody = (docParts[d + 1] || '').trim();
+          if (PROCEDUREEL.test(docTitle)) { procedureel++; continue; }
+          if (docBody.length < 100) continue;
+          const splitTitle = docTitle.replace(/^\d{6}\w?\s*[-\u2013]\s*/, '');
+          try {
+            await db.execute({
+              sql: `INSERT INTO raw_items (source_id, external_url, title, content, summary, scraped_at, is_processed, is_historical)
+                    VALUES (?, ?, ?, ?, ?, ?, 0, ?)`,
+              args: [
+                item.source_id,
+                item.external_url,
+                `[B&W] ${splitTitle}`,
+                docBody.substring(0, 50000),
+                `Gesplitst uit besluitenlijst (item #${item.id}): ${splitTitle}`,
+                item.scraped_at,
+                item.is_historical || 0,
+              ],
+            });
+            gesplitst++;
+          } catch (splitErr) {
+            console.warn(`Omnibus-split mislukt voor "${docTitle}" uit item ${item.id}: ${splitErr.message}`);
+          }
+        }
+        console.log(`  omnibus #${item.id}: ${gesplitst} inhoudelijke stukken gesplitst, ${procedureel} procedureel overgeslagen`);
         stats.gefilterd++; stats.ids.push(item.id);
-        await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', 'omnibus-document (besluitenlijst): bevat meerdere ongerelateerde besluiten, pas bruikbaar na splitsing in losse agendapunten'));
+        await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', `omnibus-document gesplitst: ${gesplitst} inhoudelijke stukken als aparte items ingevoegd, ${procedureel} procedurele stukken overgeslagen`));
         continue;
       }
 
