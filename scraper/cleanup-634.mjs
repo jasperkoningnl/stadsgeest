@@ -1,11 +1,8 @@
 /**
  * Eenmalige schoonmaakactie: signaal #634 opschonen.
- * Verwijdert 67 ongerelateerde signal_items (B&W-besluitenlijsten, raadsinformatie, etc.).
- * Houdt alleen item #2083 (het oorspronkelijke coffeeshopbeleid-uitspraak).
- *
+ * Gebruikt de HTTP API rechtstreeks (geen @libsql/client nodig).
  * Draai: node cleanup-634.mjs
  */
-import { createClient } from '@libsql/client';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -13,39 +10,37 @@ import path from 'path';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
 
-const db = createClient({
-  url: process.env.TURSO_URL,
-  authToken: process.env.TURSO_AUTH_TOKEN,
-});
+const TURSO_URL = process.env.TURSO_URL.replace('libsql://', 'https://');
+const TURSO_TOKEN = process.env.TURSO_AUTH_TOKEN;
+
+async function query(sql) {
+  const resp = await fetch(`${TURSO_URL}/v2/pipeline`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${TURSO_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ requests: [{ type: 'execute', stmt: { sql } }, { type: 'close' }] }),
+  });
+  const data = await resp.json();
+  return data.results[0];
+}
 
 async function main() {
-  // Tel huidige items
-  const before = await db.execute('SELECT COUNT(*) as n FROM signal_items WHERE signal_id = 634');
-  console.log(`Signal_items vóór opschoning: ${before.rows[0].n}`);
+  const before = await query('SELECT COUNT(*) as n FROM signal_items WHERE signal_id = 634');
+  console.log(`Signal_items vóór opschoning: ${before.response.result.rows[0][0].value}`);
 
-  // Verwijder alle signal_items behalve item 2083
-  const del = await db.execute('DELETE FROM signal_items WHERE signal_id = 634 AND raw_item_id != 2083');
-  console.log(`Verwijderd: ${del.rowsAffected} signal_items`);
+  const del = await query('DELETE FROM signal_items WHERE signal_id = 634 AND raw_item_id != 2083');
+  console.log(`Verwijderd: ${del.response.result.affected_row_count} signal_items`);
 
-  // Zet confirmations op 1
-  await db.execute('UPDATE signals SET confirmations = 1 WHERE id = 634');
+  await query('UPDATE signals SET confirmations = 1 WHERE id = 634');
   console.log('Confirmations gezet op 1');
 
-  // Schrijf een signal_event
-  await db.execute({
-    sql: `INSERT INTO signal_events (signal_id, event_type, actor, details)
-          VALUES (634, 'cleanup', 'opruimscript',
-          'Schoonmaakactie bevinding #6: 67 ongerelateerde signal_items verwijderd (B&W-besluitenlijsten, raadsinformatie, verkeersbesluiten). Alleen het oorspronkelijke coffeeshopbeleid-item (#2083) behouden.')`,
-    args: [],
-  });
+  await query("INSERT INTO signal_events (signal_id, event_type, actor, details) VALUES (634, 'cleanup', 'opruimscript', 'Schoonmaakactie bevinding #6: ongerelateerde signal_items verwijderd. Alleen coffeeshopbeleid-item #2083 behouden.')");
   console.log('Signal_event geschreven');
 
-  // Controleer
-  const after = await db.execute('SELECT COUNT(*) as n FROM signal_items WHERE signal_id = 634');
-  console.log(`Signal_items na opschoning: ${after.rows[0].n}`);
+  const after = await query('SELECT COUNT(*) as n FROM signal_items WHERE signal_id = 634');
+  console.log(`Signal_items na opschoning: ${after.response.result.rows[0][0].value}`);
 
-  const sig = await db.execute('SELECT confirmations FROM signals WHERE id = 634');
-  console.log(`Confirmations: ${sig.rows[0].confirmations}`);
+  const sig = await query('SELECT confirmations FROM signals WHERE id = 634');
+  console.log(`Confirmations: ${sig.response.result.rows[0][0].value}`);
 }
 
 main().catch(e => { console.error('FOUT:', e.message); process.exitCode = 1; });
