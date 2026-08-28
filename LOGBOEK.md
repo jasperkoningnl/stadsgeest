@@ -23,6 +23,10 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-08-28 — Collegebesluiten nu als losse tips
+
+B&W-besluitenlijsten werden tot nu toe volledig overgeslagen omdat ze tientallen ongerelateerde onderwerpen bevatten. Vanaf nu worden de individuele collegebesluiten, schriftelijke vragen en bestemmingsplannen eruit gehaald en apart aangeboden. Procedurele stukken (de besluitenlijst zelf, invitaties) worden nog steeds overgeslagen. Het backfill-script om de al verwerkte besluitenlijsten alsnog te splitsen moet nog worden gedraaid — daarna verschijnen er eenmalig extra tips in de wachtrij.
+
 ## 2026-08-28 — Betere herkenning van inspectierapporten en minder foutieve koppelingen
 
 Inspectierapporten (NVWA, Onderwijsinspectie, IGJ, kinderopvanginspecties, Omgevingsdienst) worden nu als eigen categorie herkend. Dat voorkomt dat een horecainspectie wordt samengevoegd met een bekendmaking over hetzelfde adres. Daarnaast worden veelgenoemde wijknamen als Soesterkwartier en Isselt niet meer gebruikt om tips aan elkaar te koppelen — die kwamen in te veel tips voor om informatief te zijn. En de intake leest nu meer tekst per bericht (2000 in plaats van 500 tekens), waardoor betrokkenen en locaties beter worden herkend. Keerzijde: een tip over een specifieke wijk kan nu iets moeilijker gekoppeld worden aan een andere tip over dezelfde wijk.

@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **28 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Resterende audit-fixes: locatie-ruis, bronwereld, entiteitstekst, is_processed (2026-08-28, commit f75aa6c)"**.
+> De laatste sectie onderaan dit bestand heet **"Omnibus-splitsing geïmplementeerd (2026-08-28, commit b44b7bc)"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5795,3 +5795,23 @@ Vijf openstaande bevindingen uit het intake-auditrapport afgewerkt in één comm
 - **Omnibus-splitsing**: besluitenlijsten worden gefilterd maar niet gesplitst in losse agendapunten. Vereist PDF-parsing en schema-aanpassingen (parent_id-kolom). Apart te bespreken met Jasper.
 
 *Cowork-update: 2026-08-28 (Nieuwsplein33-account, resterende audit-fixes)*
+
+---
+
+### Omnibus-splitsing geïmplementeerd (2026-08-28, commit b44b7bc)
+
+B&W-besluitenlijsten worden niet meer volledig gefilterd maar gesplitst in losse inhoudelijke documenten. De scraper levert de content van deze besluitenlijsten al met een `=== DOCUMENTEN ===` sectie, waarin individuele PDF-bijlagen als tekst staan, gescheiden door `--- Titel ---` headers. De splitter in `intake-run.mjs`:
+
+1. Herkent omnibus-documenten op dezelfde criteria als het oude filter (bronnaam of titel bevat "besluitenlijst")
+2. Parseert de documentensectie en splitst op `--- Titel ---` headers
+3. Filtert procedurele stukken (besluitenlijsten B./hamerstukken, invitaties, collegeberichten) — die zijn nooit nieuwswaardig
+4. Voegt inhoudelijke stukken (schriftelijke vragen, collegebesluiten, bestemmingsplannen, subsidieregelingen) in als nieuwe `raw_items` met prefix `[B&W]` in de titel
+5. Markeert het originele omnibus-item als gefilterd met een beslissingsregel die telt hoeveel stukken zijn gesplitst
+
+Analyse van bestaande data: per besluitenlijst gemiddeld 2–5 inhoudelijke stukken en 2 procedurele. De inhoudelijke stukken bevatten de volledige collegevoorstellen met aanleiding, argumenten en beslispunten — voldoende voor signaalmatching en weging.
+
+**Backfill-script** (`backfill-omnibus.mjs`): eenmalig script dat alle 46 reeds verwerkte besluitenlijsten met een documentensectie alsnog splitst. Heeft dedup op titel zodat dubbelen niet worden aangemaakt. **Moet handmatig worden gedraaid**: `node backfill-omnibus.mjs` vanuit de scraper-directory. De classifier blokkeert INSERT-queries vanuit de sessie.
+
+**Geen schema-aanpassingen nodig gebleken**: de PDF-inhoud staat al in de content van de bestaande raw_items, en er hoeft geen parent_id-kolom bij — de summary vermeldt het oorspronkelijke item-id als referentie.
+
+*Cowork-update: 2026-08-28 (Nieuwsplein33-account, omnibus-splitsing)*
