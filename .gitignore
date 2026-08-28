@@ -55,3 +55,4 @@ scraper/.nextdoor-session.json
 *.bak
 bronnenwacht/rapport-*.md
 dwarsverbanden/rapport-*.md
+.intake-lock

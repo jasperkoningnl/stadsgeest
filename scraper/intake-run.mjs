@@ -9,6 +9,7 @@ import { createClient } from '@libsql/client';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import fs from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -287,6 +288,36 @@ async function finishIntakeRun(runId, startedAt, counts, status, errorMessage) {
 async function run() {
   console.log(`\n=== Stadsgeest Intake: ${new Date().toISOString()} ===\n`);
 
+  // Lockfile: voorkom dat twee gelijktijdige intake-runs dezelfde items verwerken.
+  // fs.mkdirSync is atomair op alle OS'en — de eerste aanroep slaagt, de tweede faalt.
+  const LOCKDIR = path.join(__dirname, '.intake-lock');
+  try {
+    fs.mkdirSync(LOCKDIR);
+  } catch (lockErr) {
+    if (lockErr.code === 'EEXIST') {
+      // Controleer of de lock niet verouderd is (>15 minuten = stale lock)
+      try {
+        const lockAge = Date.now() - fs.statSync(LOCKDIR).mtimeMs;
+        if (lockAge > 15 * 60 * 1000) {
+          console.warn(`Stale lock gevonden (${Math.round(lockAge/60000)} min oud), wordt verwijderd`);
+          fs.rmdirSync(LOCKDIR);
+          fs.mkdirSync(LOCKDIR);
+        } else {
+          console.log('Andere intake-run is nog bezig — overgeslagen.');
+          return;
+        }
+      } catch (_) {
+        console.log('Andere intake-run is nog bezig — overgeslagen.');
+        return;
+      }
+    } else throw lockErr;
+  }
+  // Zorg dat de lock altijd wordt opgeruimd
+  const releaseLock = () => { try { fs.rmdirSync(LOCKDIR); } catch (_) {} };
+  process.on('exit', releaseLock);
+  process.on('SIGINT', () => { releaseLock(); process.exit(1); });
+  process.on('SIGTERM', () => { releaseLock(); process.exit(0); });
+
   const trigger = process.argv[2] || 'pm2';
   const startedAt = Date.now();
   const runResult = await db.execute({
@@ -343,7 +374,7 @@ async function run() {
              s.name as source_name, s.reliability, s.category, s.tier, s.bronrol, s.id as source_id
       FROM raw_items r JOIN sources s ON r.source_id = s.id
       WHERE r.is_processed = 0
-      ORDER BY r.is_historical ASC, r.scraped_at DESC
+      ORDER BY r.is_historical ASC, r.scraped_at ASC
       LIMIT 1000
     `);
     const items = itemsResult.rows;
@@ -436,6 +467,25 @@ async function run() {
       return best ? { sig: best, n: bestN } : null;
     }
 
+
+    // URL-duplicaatdetectie: items met een external_url die al eerder verwerkt
+    // is (is_processed = 1) overslaan. Voorkomt dat dezelfde pagina bij
+    // meerdere scrape-runs opnieuw een signaal aanmaakt of bijwerkt.
+    const bekendUrls = new Set();
+    const urlItems = items.filter(it => it.external_url);
+    if (urlItems.length > 0) {
+      const BATCH = 200;
+      for (let i = 0; i < urlItems.length; i += BATCH) {
+        const batch = urlItems.slice(i, i + BATCH);
+        const placeholders = batch.map(() => '?').join(',');
+        const res = await db.execute({
+          sql: `SELECT DISTINCT external_url FROM raw_items WHERE external_url IN (${placeholders}) AND is_processed = 1`,
+          args: batch.map(it => it.external_url),
+        });
+        for (const r of res.rows) bekendUrls.add(r.external_url);
+      }
+      if (bekendUrls.size > 0) console.log(`${bekendUrls.size} URLs al eerder verwerkt (duplicaatdetectie)`);
+    }
     for (const item of items) {
       const tier = item.tier || 2;
 
@@ -451,6 +501,13 @@ async function run() {
       if (!item.title && !item.content) {
         stats.gefilterd++; stats.ids.push(item.id);
         await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', 'leeg item zonder titel of inhoud'));
+        continue;
+      }
+      // URL-duplicaat: dit item heeft dezelfde external_url als een eerder
+      // verwerkt item — overslaan om dubbele signalen te voorkomen.
+      if (item.external_url && bekendUrls.has(item.external_url)) {
+        stats.gefilterd++; stats.ids.push(item.id);
+        await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', `URL-duplicaat: ${item.external_url} is al eerder verwerkt`));
         continue;
       }
       if (item.source_name && item.source_name.toLowerCase().includes('rechtspraak') && !item.content) {
@@ -676,7 +733,7 @@ async function run() {
           if (eid && sigId) {
             await db.execute({ sql: `INSERT OR IGNORE INTO entity_signals (entity_id, signal_id, source_id, role) VALUES (?, ?, ?, 'mentioned')`, args: [eid, sigId, item.source_name||''] });
           }
-        } catch (_) {}
+        } catch (entErr) { console.warn(`Entiteit-opslag mislukt voor item ${item.id}: ${entErr.message}`); }
       }
       if (ents.length > 0) {
         await entityUpdateBatcher.push({
