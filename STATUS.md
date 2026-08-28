@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **28 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Stap 4 — foutafhandeling, dedup, volgorde en locking (2026-08-28, commit 397bb94)"**.
+> De laatste sectie onderaan dit bestand heet **"Resterende audit-fixes: locatie-ruis, bronwereld, entiteitstekst, is_processed (2026-08-28, commit f75aa6c)"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5768,3 +5768,30 @@ Vier verbeteringen in `intake-run.mjs`:
 **Bronwereldscheiding**: blijft open. Edge cases bij bekendmakingen vs. rechtspraak word-overlap matching vereisen nader onderzoek.
 
 *Cowork-update: 2026-08-28 (Nieuwsplein33-account, stap 4 fixes)*
+
+---
+
+### Resterende audit-fixes: locatie-ruis, bronwereld, entiteitstekst, is_processed (2026-08-28, commit f75aa6c)
+
+Vijf openstaande bevindingen uit het intake-auditrapport afgewerkt in één commit:
+
+**Bevinding #5 — Locatie-ruisfiltering**: Locaties die in meer dan 8 signalen voorkomen (Soesterkwartier in 19, Isselt in 14, Centrum in 12, etc.) werden al als ruis-entiteiten geregistreerd, maar het ruisfilter werd niet toegepast op locaties — alleen op personen en organisaties. Nu wordt `RUIS_ENTITEITEN` ook gecontroleerd voor locatie-matches, en de drempel voor "gedeelde locaties tellen als match" is verhoogd van 2 naar 3. Zonder deze fix matchten veel ongerelateerde signalen op generieke wijknamen.
+
+**Bevinding #6 — Signaal #634 opschonen**: Schoonmaakscript `cleanup-634.mjs` aangemaakt. Signaal #634 (coffeeshopbeleid) had 68 signal_items door omnibus-matching. Het script verwijdert de 67 ongerelateerde items en houdt alleen #2083 (het oorspronkelijke coffeeshopbeleid-item). De variabelenaam `TURSO_DATABASE_URL` was fout (moest `TURSO_URL` zijn, conform `.env`) — gefixt. Script moet handmatig worden gedraaid: `node cleanup-634.mjs` vanuit de scraper-directory.
+
+**Bevinding #9 — Entiteitstekst te kort**: De tekst die naar `extractEntities()` gaat was afgekapt op 500 tekens content. Verhoogd naar 2000 tekens. Bij een gemiddeld artikel van ~1200 woorden is 500 tekens minder dan de eerste alinea; 2000 tekens vangt doorgaans de kern inclusief betrokkenen en locaties.
+
+**Bevinding #11 — is_processed volgorde**: De volgorde van entiteitsextractie en `is_processed = 1` markering was omgedraaid. Als de entiteitsextractie halverwege crashte, waren items al gemarkeerd als verwerkt en werden hun entiteiten nooit alsnog geëxtraheerd. Nu komt de entiteitsextractie eerst, zodat bij een crash het item opnieuw wordt aangeboden.
+
+**Bronwereldscheiding — inspectie als categorie**: Zes inspectie-gerelateerde bronnen (NVWA horeca, NVWA Amersfoort, Onderwijsinspectie, IGJ, LRK kinderopvanginspecties, Omgevingsdienst regio Utrecht) werden geclassificeerd als 'anders' en konden via woordoverlap matchen met bekendmakingen of rechtspraak-uitspraken. Nieuwe bronwereld `'inspectie'` toegevoegd in `bronwereld()`. Herkent bronnen met 'inspectie', 'nvwa', 'omgevingsdienst', 'lrk' of 'toezicht' in de naam.
+
+### Openstaande bevindingen (bijgewerkt)
+
+- ~~**Locatie-ruisfiltering** (#5): opgelost in commit f75aa6c~~
+- ~~**Signaal #634** (#6): cleanup-script aangemaakt, wacht op handmatige uitvoering~~
+- ~~**Entiteitstekst te kort** (#9): opgelost in commit f75aa6c~~
+- ~~**is_processed volgorde** (#11): opgelost in commit f75aa6c~~
+- ~~**Bronwereldscheiding** — inspectie: opgelost in commit f75aa6c~~
+- **Omnibus-splitsing**: besluitenlijsten worden gefilterd maar niet gesplitst in losse agendapunten. Vereist PDF-parsing en schema-aanpassingen (parent_id-kolom). Apart te bespreken met Jasper.
+
+*Cowork-update: 2026-08-28 (Nieuwsplein33-account, resterende audit-fixes)*

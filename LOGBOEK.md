@@ -23,6 +23,10 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-08-28 — Betere herkenning van inspectierapporten en minder foutieve koppelingen
+
+Inspectierapporten (NVWA, Onderwijsinspectie, IGJ, kinderopvanginspecties, Omgevingsdienst) worden nu als eigen categorie herkend. Dat voorkomt dat een horecainspectie wordt samengevoegd met een bekendmaking over hetzelfde adres. Daarnaast worden veelgenoemde wijknamen als Soesterkwartier en Isselt niet meer gebruikt om tips aan elkaar te koppelen — die kwamen in te veel tips voor om informatief te zijn. En de intake leest nu meer tekst per bericht (2000 in plaats van 500 tekens), waardoor betrokkenen en locaties beter worden herkend. Keerzijde: een tip over een specifieke wijk kan nu iets moeilijker gekoppeld worden aan een andere tip over dezelfde wijk.
+
 ## 2026-08-28 — Minder ruis en dubbele tips in de wachtrij
 
 De intake is op vier punten bijgesteld. Ten eerste worden tips die over dezelfde webpagina gaan nu samengevoegd in plaats van apart aangeboden. Ten tweede zijn tientallen registertermen (zoals vergunning, perceel, slopen) uitgefilterd zodat ongerelateerde bekendmakingen niet meer per ongeluk aan elkaar worden gekoppeld. Ten derde worden B&W-besluitenlijsten nu apart gehouden omdat die veel losse onderwerpen bevatten die anders door elkaar lopen. Tot slot worden tips nu op volgorde van oudste eerst verwerkt, wat betere clustering geeft. Het netto-effect: minder tips waarin twee losse zaken door elkaar zitten, en minder dubbele tips over hetzelfde bericht. Keerzijde: een enkele gebeurtenis die in meerdere bronnen voorkomt kan nu in twee aparte tips verschijnen in plaats van samen te worden gevoegd.
