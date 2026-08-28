@@ -167,6 +167,31 @@ function extractEntities(item, personIndex = []) {
     }
   }
 
+  // Adresherkenning (toegevoegd 2026-08-28): postcodes en straat+huisnummer
+  // uit bekendmakingen-titels extraheren. Twee items met dezelfde postcode
+  // of hetzelfde adres gaan over dezelfde locatie — entiteitsmatch voorkomt
+  // dat ze via (nu weggefilterde) procedurewoorden aan verkeerde signalen
+  // hangen.
+
+  // Postcode: 4 cijfers + 2 letters (Nederlands formaat), genormaliseerd zonder spatie
+  const pcRe = /\b(\d{4})\s*([A-Z]{2})\b/gi;
+  while ((m = pcRe.exec(text)) !== null) {
+    const pc = `${m[1]}${m[2].toUpperCase()}`;
+    entities.push({ type: 'location', name: pc, normalized: `postcode:${pc.toLowerCase()}`, context: text.substring(Math.max(0, m.index-30), m.index+30) });
+  }
+
+  // Straatnaam + huisnummer uit "perceel Straat ##" of "hoogte van Straat ##" patronen
+  const adresRe = /(?:perceel|hoogte van|locatie|adres)\s+([A-Z][a-zéèëïöüá]+(?:[\s-][a-z]*[A-Z]?[a-zéèëïöüá]+)*)\s+(\d+(?:\s*[A-Za-z])?)\b/g;
+  while ((m = adresRe.exec(text)) !== null) {
+    const straat = m[1].trim();
+    const nr = m[2].trim().replace(/\s+/g, '');
+    // Filter te korte straatnamen (waarschijnlijk geen echte straat)
+    if (straat.length >= 4) {
+      const adres = `${straat} ${nr}`;
+      entities.push({ type: 'location', name: adres, normalized: `adres:${adres.toLowerCase()}`, context: text.substring(Math.max(0, m.index-10), m.index+60) });
+    }
+  }
+
   // Deduplicate
   const seen = new Set();
   return entities.filter(e => {
