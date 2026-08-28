@@ -5646,3 +5646,62 @@ Build slaagt.
 - Pien wees de discriminatiemeldingen af met "zoals de tool zelf al aan geeft hebben we dit al op 12 augustus zelf gepubliceerd". Het systeem wist het al maar liet de tip toch door. De "al bekend"-detectie zou de score harder kunnen drukken.
 
 *Cowork-update: 2026-08-27 (Nieuwsplein33-account, dashboard-aanpassingen op redactiefeedback)*
+
+---
+
+## Cowork-update: 2026-08-28 (weger-run) — dertien signalen beoordeeld, geen tips, drie dossierfeiten
+
+### Werkset
+
+Totaal open signalen (niet aan tip gekoppeld): 714. Daarvan 13 nieuw (geen eerdere weger-beoordeling), 113 met nieuw materiaal, 588 al beoordeeld.
+
+De 113 nieuw-materiaal-signalen zijn steekproefsgewijs gecontroleerd (top 20 op last_seen_at). Alle bevatten uitsluitend herhaalde scrapes van routinevergunningen (containers, dakkapellen, kapvergunningen) of clusterruis. Geen van de steekproef rechtvaardigt herbeoordeling.
+
+Alle 13 nieuwe signalen zijn beoordeeld.
+
+### Geen tips
+
+Geen van de 13 signalen haalt de drempel van 6 punten. De werkset bestond uit:
+
+- 6 containervergunningen (Tuinbouwweg, Zielhorsterweg, Ariaweg ×2, Zuidsingel, Knieptang Hooglanderveen)
+- 2 alcoholwetvergunningen para-commercieel (Heiligenbergerweg 84, Barchman Wuytierslaan 55)
+- 1 kapvergunning aanvraag (Merwedestraat 48)
+- 1 buiten behandeling (stuc voorgevel Puntenburgerlaan 65)
+- 1 NVWA-inspectie Restaurant Oud Leusden (verbeterpunten hygiëne) — tier 1, maar standaarduitkomst
+- 2 NS-verstoringen (seinstoring Schiphol-Amersfoort; Hoofddorp-Hoorn buiten gebied → discarded)
+- 1 activiteitenkalender college B&W (participatieronde coalitieakkoord, opening politiek seizoen)
+- 2 TenderNed-aanbestedingen (HU strategisch vastgoed De Nieuwe Poort 21; Gemeente Amersfoort abri's)
+
+### Dossierfeiten toegevoegd
+
+| ID | Dossier | Feit |
+|---|---|---|
+| 241 | 7 — Horeca en voedselveiligheid | NVWA inspectie Restaurant Oud Leusden (Vlooswijkseweg 1, Leusden): verbeterpunten hygiëne. Inspectie 5 aug 2026. Eerste Leusden-item in dit dossier. |
+| 242 | 11 — Aanbestedingen | Gemeente Amersfoort besteedt levering en plaatsing abri's aan. Openbare procedure, EF16. |
+| 243 | 5 — Lokale politiek | College start participatieronde coalitieakkoord-uitwerking: drie locaties 31 aug – 2 sep (Schothorst, Kraailandhof Hoogland, Emmauskerk). Opening politiek seizoen 4 sep Het Lokaal. |
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld | 13 | 13 |
+| Tips aangemaakt | 0 | 0 |
+| signal_events geschreven | 13 | 13 (alle reviewed) |
+| Dossierfeiten | 3 | 3 (ID 241-243) |
+| Signalen op discarded | 1 | 1 (1646) |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Databasetoegang via @libsql/client/http.** Werkt stabiel, consistent met de runs van 25-27 augustus.
+- **TenderNed levert.** Twee aanbestedingen in deze batch: HU strategisch vastgoed (niet-openbaar, opdrachtgever HU) en abri's (openbaar, opdrachtgever gemeente). De gerepareerde scraper van 23 augustus blijft functioneren.
+- **Participatieronde coalitieakkoord.** Het college trekt de komende weken langs wijken om input op te halen voor de uitwerking van het coalitieakkoord. Dit sluit aan op het eerder gesignaleerde participatietraject (signaal 1195, 18 aug). Nu met concrete data en locaties.
+
+### Niet geverifieerd
+
+- Of de 113 nieuw-materiaal-signalen werkelijk geen herbeoordeling verdienen; alleen de top 20 op last_seen_at is bekeken.
+- De volledige TenderNed-publicatie van de HU-aanbesteding (geraamde waarde, sluitingsdatum). De content bevat alleen de samenvatting.
+- Of de abri-aanbesteding verband houdt met een lopend OV-beleid of halteplan van de gemeente.
+
+*Cowork-update: 2026-08-28 (Nieuwsplein33-account, weger-run)*
