@@ -48,7 +48,25 @@ const STOPWOORDEN = new Set(['de','het','een','en','van','in','te','dat','is','o
   // Gebiedsnamen en registerjargon (toegevoegd 2026-08-15): deze woorden staan
   // in vrijwel elke titel in deze database en verbinden daardoor alles met
   // alles — precies de clusterfouten uit de weger-runs van 13-15 augustus.
-  'amersfoort','amersfoortse','leusden','leusdense','gemeente','gemeentelijke','besluit','aanvraag','bekendmaking','vergadering','agenda']);
+  'amersfoort','amersfoortse','leusden','leusdense','gemeente','gemeentelijke','besluit','aanvraag','bekendmaking','vergadering','agenda',
+  // Bekendmakingen-registertaal (toegevoegd 2026-08-28): procedurele woorden
+  // die in vrijwel elke vergunning/kennisgeving terugkomen en ongerelateerde
+  // bekendmakingen aan elkaar koppelen via woordoverlap.
+  'vergunning','omgevingsvergunning','verleende','verleend','ontvangen','perceel',
+  'plaatsen','kappen','boom','bomen','slopen','realiseren','wijzigen','vervangen',
+  'tijdelijk','gebruik','hoogte','container','steiger',
+  'kennisgeving','ontvangst','beschikking','behandelen','intrekken','ingetrokken',
+  'buiten','behandeling','laten','aangevraagd',
+  // BRP-/registermeldingen (2026-08-28): voorkomen dat alle "Vertrokken met
+  // onbekende bestemming"-items en "Beslistermijn verlengen"-items clusteren.
+  'vertrokken','onbekende','bestemming','beslistermijn','verlengen','verlengd',
+  'woning','dakvlak','dakkapel','voorgevel','achtergevel','gevel','dakterras',
+  // Rechtspraak-procedurewoorden (2026-08-28)
+  'verdachte','straf','taakstraf','geldboete','rijontzegging','voorwaardelijke',
+  // Datum- en tijdwoorden (2026-08-28): maandnamen en jaarcijfers matchen
+  // alle bekendmakingen uit dezelfde periode aan elkaar.
+  'januari','februari','maart','april','juni','juli','augustus','september','oktober','november','december',
+  '2024','2025','2026','2027','2028']);
 
 function tokenize(text) {
   if (!text) return [];
