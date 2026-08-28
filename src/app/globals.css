@@ -1701,3 +1701,204 @@ html[data-np-thema="donker"] .np-fb-balk-binnen { box-shadow: 0 12px 32px rgba(0
 .np-fb-balk-sluit:hover { color: var(--np-inkt); }
 .np-fb-balk .np-tekst { margin: 0; font-size: 14px; }
 .np-fb-balk .np-fb-formulier { margin-top: 12px; }
+
+/* ── Beheer: Intake-trechter ───────────────────────────────── */
+.np-beheer-trechter-titel {
+  font-family: var(--f-d); font-size: 14px; font-weight: 600;
+  color: var(--np-inkt); margin: 0 0 14px;
+}
+.np-beheer-trechter-groot {
+  display: flex; flex-wrap: wrap; align-items: stretch; gap: 0;
+  margin-bottom: 16px;
+}
+.np-trechter-stap {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 12px 16px; min-width: 80px; flex: 1;
+  background: var(--np-zacht); border-radius: var(--r-xl);
+}
+.np-trechter-stap-rood { background: var(--np-rood-z); }
+.np-trechter-stap-blauw { background: var(--np-blauw-z); }
+.np-trechter-stap-groen { background: var(--np-groen-z); }
+.np-trechter-stap-accent { background: var(--np-accent-z); }
+.np-trechter-getal {
+  font-family: var(--f-d); font-size: 22px; font-weight: 700;
+  color: var(--np-inkt); font-variant-numeric: tabular-nums;
+}
+.np-trechter-label {
+  font-family: var(--f-d); font-size: 12px; font-weight: 600;
+  color: var(--np-inkt2); text-align: center;
+}
+.np-trechter-pct {
+  font-family: var(--f-m); font-size: 11px; color: var(--np-inkt3);
+}
+.np-trechter-pijl {
+  display: flex; align-items: center; padding: 0 6px;
+  font-size: 16px; color: var(--np-inkt3);
+}
+
+/* Proportionele balk onder de trechter */
+.np-trechter-balk-wrap { margin-top: 4px; }
+.np-trechter-balk {
+  display: flex; height: 8px; border-radius: 4px; overflow: hidden;
+  background: var(--np-rand-z);
+}
+.np-trechter-balk-rood { background: var(--np-rood); }
+.np-trechter-balk-blauw { background: var(--np-blauw); }
+.np-trechter-balk-groen { background: var(--np-groen); }
+.np-trechter-legenda {
+  display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px;
+  font-size: 12px; color: var(--np-inkt3);
+}
+.np-trechter-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  margin-right: 4px; vertical-align: middle;
+}
+
+/* ── Beheer: Intake twee-kolom layout ──────────────────────── */
+.np-intake-tweekolom {
+  display: grid; grid-template-columns: 1fr 340px; gap: 24px;
+}
+@media (max-width: 960px) {
+  .np-intake-tweekolom { grid-template-columns: 1fr; }
+}
+.np-intake-itemtitel {
+  max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* Filterredenen staafjes */
+.np-reden-item {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 4px 0;
+}
+.np-reden-naam {
+  font-size: 13px; color: var(--np-inkt2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.np-reden-aantal {
+  font-family: var(--f-m); font-size: 12px; color: var(--np-inkt3);
+  font-variant-numeric: tabular-nums; flex-shrink: 0;
+}
+.np-reden-balk {
+  height: 4px; border-radius: 2px; background: var(--np-rand-z); margin-bottom: 6px;
+}
+.np-reden-balk-vul {
+  height: 100%; border-radius: 2px; background: var(--np-rood);
+  transition: width .3s ease;
+}
+
+/* Pill kleuren voor intake-beslissingsfilter */
+.np-pil-blauw.np-pil-actief { border-color: var(--np-blauw); color: var(--np-blauw); background: var(--np-blauw-z); }
+.np-badge-blauw { border-color: var(--np-blauw); color: var(--np-blauw); background: var(--np-blauw-z); }
+
+/* ── Beheer: Weging-tab ────────────────────────────────────── */
+.np-weging-stats {
+  display: flex; flex-wrap: wrap; gap: 16px;
+}
+.np-weging-stat {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  flex: 1; min-width: 80px; padding: 8px 0;
+}
+.np-weging-stat-getal {
+  font-family: var(--f-d); font-size: 28px; font-weight: 700;
+  color: var(--np-inkt); font-variant-numeric: tabular-nums;
+}
+.np-weging-stat-groen { color: var(--np-groen); }
+.np-weging-stat-rood { color: var(--np-rood); }
+.np-weging-stat-amber { color: var(--np-amber); }
+.np-weging-stat-label {
+  font-family: var(--f-d); font-size: 12px; font-weight: 600;
+  color: var(--np-inkt3); text-transform: uppercase; letter-spacing: 0.04em;
+}
+
+/* Tipkaarten */
+.np-weging-tiplijst { display: flex; flex-direction: column; gap: 12px; }
+.np-weging-tipkaart {
+  padding: 16px 18px;
+  background: var(--np-kaart); border: 1px solid var(--np-rand-z);
+  border-radius: 14px; box-shadow: var(--np-schaduw);
+}
+.np-weging-tipkaart-kop {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.np-weging-tiptitel {
+  font-family: var(--f-d); font-size: 15px; font-weight: 600; color: var(--np-inkt);
+}
+.np-weging-tipmeta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  margin-top: 4px; font-size: 13px; color: var(--np-inkt3);
+}
+.np-weging-score {
+  font-family: var(--f-m); font-size: 18px; font-weight: 700;
+  padding: 4px 10px; border-radius: var(--r-xl);
+  font-variant-numeric: tabular-nums; flex-shrink: 0;
+}
+.np-weging-score-hoog { color: var(--np-groen); background: var(--np-groen-z); }
+.np-weging-score-midden { color: var(--np-amber); background: var(--np-amber-z); }
+.np-weging-score-laag { color: var(--np-rood); background: var(--np-rood-z); }
+
+/* Gekoppelde signalen */
+.np-weging-signalen {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+}
+.np-weging-signaal-pil {
+  font-family: var(--f-m); font-size: 11.5px; color: var(--np-inkt2);
+  padding: 3px 10px; border-radius: 14px;
+  background: var(--np-zacht); border: 1px solid var(--np-rand-z);
+  white-space: nowrap;
+}
+.np-weging-signaal-dragend {
+  border-color: var(--np-accent); color: var(--np-accent); background: var(--np-accent-z);
+}
+
+/* Motivatie */
+.np-weging-motivatie {
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--np-rand-z);
+  font-family: var(--f-b); font-size: 13.5px; color: var(--np-inkt2);
+  line-height: 1.5;
+}
+
+/* Afgewezen signalen */
+.np-weging-afgewezen { display: flex; flex-direction: column; gap: 8px; }
+.np-weging-afgewezen-item {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+  padding: 10px 16px;
+  background: var(--np-kaart); border: 1px solid var(--np-rand-z);
+  border-radius: 10px;
+}
+.np-weging-afgewezen-titel {
+  font-family: var(--f-d); font-size: 13.5px; font-weight: 600; color: var(--np-inkt);
+  flex: 1; min-width: 160px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.np-weging-afgewezen-reden {
+  font-size: 13px; color: var(--np-inkt3); flex: 1; min-width: 120px;
+}
+.np-weging-scorebalk-wrap {
+  display: flex; align-items: center; gap: 8px; min-width: 120px;
+}
+.np-weging-scorebalk {
+  flex: 1; height: 6px; border-radius: 3px; background: var(--np-rand-z);
+  overflow: hidden;
+}
+.np-weging-scorebalk-vul {
+  height: 100%; border-radius: 3px;
+  transition: width .3s ease;
+}
+.np-weging-scorebalk-vul.np-weging-score-hoog { background: var(--np-groen); }
+.np-weging-scorebalk-vul.np-weging-score-midden { background: var(--np-amber); }
+.np-weging-scorebalk-vul.np-weging-score-laag { background: var(--np-rood); }
+.np-weging-scorebalk-getal {
+  font-family: var(--f-m); font-size: 12px; font-variant-numeric: tabular-nums;
+  flex-shrink: 0; min-width: 28px; text-align: right;
+}
+
+/* ── Beheer: responsive aanpassingen ───────────────────────── */
+@media (max-width: 640px) {
+  .np-beheer-trechter-groot { gap: 4px; }
+  .np-trechter-stap { padding: 10px 8px; min-width: 60px; }
+  .np-trechter-getal { font-size: 18px; }
+  .np-trechter-pijl { padding: 0 3px; font-size: 14px; }
+  .np-weging-stats { gap: 8px; }
+  .np-weging-stat-getal { font-size: 22px; }
+  .np-weging-afgewezen-item { flex-direction: column; align-items: flex-start; }
+}
