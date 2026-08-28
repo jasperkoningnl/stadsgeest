@@ -522,34 +522,22 @@ async function run() {
         continue;
       }
 
-      // Omnibus-documenten: B&W-besluitenlijsten bevatten 10-20 ongerelateerde
-      // onderwerpen in één stuk. De entiteitsextractor vindt álle genoemde namen,
-      // maar die horen bij verschillende agendapunten. Op 21-22 augustus schoof de
-      // intake zo 25 besluitenlijsten in signaal #634. Behandeling is dezelfde als
-      // spiegelbronnen: alleen koppelen bij een sterke entity-match (na
-      // ruisfiltering), zonder last_seen_at te verversen. Op termijn: de
-      // besluitenlijsten splitsen in losse agendapunten vóór de intake.
+      // Omnibus-documenten: B&W-besluitenlijsten en raadsvergadering-
+      // besluitenlijsten bevatten 10-20 ongerelateerde onderwerpen in één stuk.
+      // Entity-matching werkt hier niet: zelfs na ruisfiltering matchen 4-22
+      // entiteiten uit verschillende agendapunten, waardoor signalen onterecht
+      // opblazen (signaal #634 kreeg 68 bevestigingen van ongerelateerde B&W-
+      // besluiten). Tot de besluitenlijsten gesplitst worden in losse
+      // agendapunten vóór de intake, worden ze volledig gefilterd.
       const isOmnibus = item.source_name && (
         item.source_name.toLowerCase().includes('b&w besluitenlijst')
         || item.source_name.toLowerCase().includes('b&w-besluitenlijst')
         || item.source_name.toLowerCase().includes('besluitenlijst college')
-      );
+      ) || /\bbesluitenlijst\b/i.test(item.title || '');
       if (isOmnibus) {
-        const sm = await entityMatchSignal(item.id);
-        if (sm) {
-          await db.execute({ sql: `UPDATE signals SET confirmations = confirmations + 1 WHERE id = ?`, args: [sm.sig.id] });
-          await db.execute({ sql: `INSERT OR IGNORE INTO signal_items (signal_id, raw_item_id) VALUES (?, ?)`, args: [sm.sig.id, item.id] });
-          sm.sig.confirmations = (sm.sig.confirmations || 0) + 1;
-          stats.bijgewerktSignaal++; stats.verwerkt++; stats.ids.push(item.id);
-          console.log(`  OMNIBUS [T${tier}] "${(item.title||'').substring(0,50)}" → #${sm.sig.id} (entiteiten:${sm.n})`);
-          await decisionBatcher.push(decisionStmt(runId, item, tier, 'matched', `omnibus-document gekoppeld op niet-generieke entiteiten aan signaal #${sm.sig.id}; last_seen_at bewust niet ververst`, { signal_id: sm.sig.id, match_score: sm.n }));
-          await eventBatcher.push(eventStmt(sm.sig.id, 'confirmed', { reason: `omnibus-document (${item.source_name || 'onbekend'}) raakt dit onderwerp — bevestiging, geen nieuw materiaal` }));
-        } else {
-          // Geen entity-match: wordt een eigen signaal, zodat de weger de
-          // individuele besluitpunten kan beoordelen.
-          // Valt door naar de standaard nieuw-signaal-logica hieronder.
-        }
-        if (sm) continue;
+        stats.gefilterd++; stats.ids.push(item.id);
+        await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', 'omnibus-document (besluitenlijst): bevat meerdere ongerelateerde besluiten, pas bruikbaar na splitsing in losse agendapunten'));
+        continue;
       }
 
       // Het 48-uursfilter dat hier stond is op 2026-08-09 verwijderd. Oude items
