@@ -251,7 +251,13 @@ export default async function TipPagina({ params }: Props) {
   ])
 
   const vragen = safeParseJsonArray<string>(tip.vervolgvragen) ?? []
-  const weging = safeParseJson<Record<string, number>>(tip.weging)
+  const wegingRaw = safeParseJson<Record<string, number | { punten: number; bron?: string }>>(tip.weging)
+  // Normaliseer: de weger slaat soms {punten, bron} op i.p.v. een getal.
+  const weging = wegingRaw
+    ? Object.fromEntries(
+        Object.entries(wegingRaw).map(([k, v]) => [k, typeof v === 'object' && v !== null ? (v as { punten: number }).punten : v as number])
+      )
+    : null
   const herkomst = safeParseJsonArray<HerkomstBron>(tip.herkomst) ?? []
   const elders = safeParseJsonArray<EldersItem>(tip.elders_gebracht) ?? []
   const briefing = tip.briefing ? parseBriefing(tip.briefing) : null
