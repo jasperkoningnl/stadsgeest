@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **28 augustus 2026**
+> ### Bijgewerkt tot en met **29 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Omnibus-splitsing geïmplementeerd (2026-08-28, commit b44b7bc)"**.
+> De laatste sectie onderaan dit bestand heet **"Weger-run 29 augustus: één tip, nieuw dossier Wind op Isselt, zes dossierfeiten"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5815,3 +5815,77 @@ Analyse van bestaande data: per besluitenlijst gemiddeld 2–5 inhoudelijke stuk
 **Geen schema-aanpassingen nodig gebleken**: de PDF-inhoud staat al in de content van de bestaande raw_items, en er hoeft geen parent_id-kolom bij — de summary vermeldt het oorspronkelijke item-id als referentie.
 
 *Cowork-update: 2026-08-28 (Nieuwsplein33-account, omnibus-splitsing)*
+
+---
+
+### Cowork-update: 2026-08-29 — Weger-run 29 augustus: één tip, nieuw dossier Wind op Isselt, zes dossierfeiten
+
+### Werkset
+
+Totaal open signalen (niet aan tip gekoppeld): 713. Daarvan 0 nieuw (geen eerdere weger-beoordeling), 113 met nieuw materiaal (last_seen_at > weger_laatst), 600 al beoordeeld.
+
+De 113 nieuw-materiaal-signalen zijn steekproefsgewijs gecontroleerd. De top 20 op last_seen_at bevatte uitsluitend herhaalde scrapes van routinevergunningen (containers, dakkapellen, kapvergunningen) en clusterruis (ongerelateerde items samengeklonterd op woordoverlap of locatie). Negen signalen met niet-routinematige titels zijn nader onderzocht op echt nieuw materiaal:
+
+- **Signaal 1425 (Wind op Isselt)**: genuinely nieuw — schriftelijke vragen 2026-096 van Amersfoort voor Vrijheid (27 aug) over integrale veiligheidsbeoordeling. → Herbeoordeling, tip aangemaakt.
+- **Signaal 1041 (rechtspraak)**: nieuw ECLI (2026:5894) erbij geclusterd, maar ongewijzigd clusterruis — twee ongerelateerde bestuursrechtzaken bij 112-meldingen. Geen herbeoordeling.
+- **Signaal 1064 (opslag gevaarlijke stoffen)**: propaaopslag Schothorsterlaan 5 (korfbalvereniging) erbij, andere locatie/organisatie dan diesel Gaslaan. Clusterruis. Geen herbeoordeling.
+- **Signaal 1273 (subsidie wijkaktiefonds)**: EOS-maatwerkbesluit en drie Leusden-verkeersbesluiten erbij geclusterd. Ongerelateerd. Geen herbeoordeling.
+- **Signaal 1279 (KeiHart vragen)**: cluster van alle KeiHart-vragen. Nieuwe vraag over parkeerboetes rijscholen (2026-093) is inhoudelijk apart maar zit vast in een onbruikbaar cluster. Geen herbeoordeling.
+- **Signaal 1348, 1386, 1437**: ingekomen stukken uit verschillende categorieën samengeklonterd. Geen herbeoordeling.
+- **Signaal 1636 (burgemeester bezoeken)**: ceremonieel, geen nieuws.
+
+### Tip aangemaakt
+
+| Tip | Titel | Soort | Score | Dossier |
+|---|---|---|---|---|
+| 36 | Vierde fractie stelt vragen over veiligheid windturbines Isselt | verdieping | 16 | 20 — Wind op Isselt |
+
+Vier raadsfracties (CDA, ChristenUnie+VVD, BPA, Amersfoort voor Vrijheid) hebben sinds februari 2026 vragen of moties over de veiligheid van Wind op Isselt ingediend. De nieuwste (AvV, 27 augustus) vraagt specifiek om een integrale veiligheidsbeoordeling, twee maanden na het negatieve advies van de Veiligheidsregio Utrecht. Eerste politieke activiteit rond Isselt na het zomerreces.
+
+NP33 schreef op 11 juni over het negatieve VRU-advies; na juni geen publicaties gevonden. Tip is van soort `verdieping` met als toegevoegde waarde het patroon van vier fracties en de specifieke eis van een veiligheidsbeoordeling.
+
+### Nieuw dossier aangemaakt
+
+| ID | Naam | Reden |
+|---|---|---|
+| 20 | Wind op Isselt | Minstens tien signalen en zes feiten over het Windplan Isselt. NP33 volgt dit als eigen dossier (Windmolens Isselt). Het dossier documenteert de vergunningprocedure en de politieke druk vanuit de raad, specifiek rond veiligheid bij Smit & Zoon en Meander ziekenhuis. |
+
+### Dossierfeiten toegevoegd
+
+| ID | Dossier | Datum | Feit |
+|---|---|---|---|
+| 244 | 20 — Wind op Isselt | 2026-05-22 | Zienswijzenprocedure ontwerpvergunning gestart |
+| 245 | 20 — Wind op Isselt | 2026-02-24 | Motie juridisch advies borging bindend advies aangenomen (CU/CDA/VVD) |
+| 246 | 20 — Wind op Isselt | 2026-03-31 | CDA schriftelijke vragen 2026-031 |
+| 247 | 20 — Wind op Isselt | 2026-06-10 | VRU negatief advies noordelijke turbine |
+| 248 | 20 — Wind op Isselt | 2026-08-09 | BPA-motie intrekking verworpen |
+| 249 | 20 — Wind op Isselt | 2026-08-27 | AvV schriftelijke vragen integrale veiligheidsbeoordeling |
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen met nieuw materiaal onderzocht | 9 | 9 |
+| Signalen herbeoordeeld | 1 | 1 (signaal 1425) |
+| Tips aangemaakt | 1 | 1 (tip 36) |
+| tip_signals geschreven | 3 | 3 (1 dragend, 2 context) |
+| signal_events geschreven | 3 | 3 (alle tip_created) |
+| tip_events geschreven | 1 | 1 |
+| Dossiers aangemaakt | 1 | 1 (dossier 20) |
+| Dossierfeiten geschreven | 6 | 6 (ID 244-249) |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Nul nieuwe signalen.** Alle 713 open signalen hadden al een eerdere weger-beoordeling. De instroom is sinds gisteren nul — dit kan duiden op het weekend (scrapers draaien wel maar bronnen publiceren minder op zaterdag) of op een pauze in de pijplijn.
+- **Clustering blijft het grootste probleem.** Van de negen nader onderzochte signalen waren er acht onbruikbaar door clusterruis. Signaal 1279 (alle KeiHart-vragen bij elkaar) en signaal 1348 (alle ingekomen stukken "Bedrijvigheid") zijn voorbeelden van clusters die inhoudelijk ongerelateerde items samenvoegen. Het parkeerboetenverhaal in signaal 1279 is op zichzelf interessant maar niet te beoordelen als onderdeel van dit cluster.
+- **Wind op Isselt had geen dossier.** Ondanks tien signalen was er geen dossier voor dit onderwerp. Aangemaakt met zes feiten die de tijdlijn van februari tot augustus 2026 dekken.
+
+### Niet geverifieerd
+
+- Of de overige 104 nieuw-materiaal-signalen (buiten de onderzochte negen) daadwerkelijk geen herbeoordeling verdienen. De steekproef van de top 20 op last_seen_at bestond volledig uit routinevergunningen en containervergunningen.
+- De volledige tekst van schriftelijke vragen 2026-096 (AvV, Wind op Isselt). Het notubiz-document is client-rendered; alleen titel en indiener zijn bekend.
+- Of de vergunningaanvraag Wind op Isselt formeel is opgeschort na het VRU-advies — de gemeentepagina suggereert dit, maar het exacte besluit en de datum ontbreken.
+
+*Cowork-update: 2026-08-29 (Nieuwsplein33-account, weger-run)*
