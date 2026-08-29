@@ -5889,3 +5889,11 @@ Geen afwijkingen.
 - Of de vergunningaanvraag Wind op Isselt formeel is opgeschort na het VRU-advies — de gemeentepagina suggereert dit, maar het exacte besluit en de datum ontbreken.
 
 *Cowork-update: 2026-08-29 (Nieuwsplein33-account, weger-run)*
+
+### Bugfix: tip 36 crashte op weging-objecten (29 augustus)
+
+Tip 36 gaf een 500-fout (door de gebruiker gemeld als 404). Oorzaak: het `weging`-veld was opgeslagen met objecten `{punten, bron}` per criterium, maar de tip-pagina verwachtte simpele getallen. React kon de objecten niet als child renderen.
+
+Fix in `src/app/nieuwsplein33/tip/[id]/page.tsx`: de weging wordt nu genormaliseerd — als een waarde een object is, wordt `.punten` eruit gehaald. Beide formaten (getal en object) werken nu. Commit `ae3d8cc`, Vercel deployment `dpl_44yMVEocTC3unvNjrauGjngdJDjX` is READY en geverifieerd.
+
+**Aandachtspunt voor de weger-routine:** het wegingformaat moet consistent zijn. De eerdere tips (tot en met 35) gebruikten getallen; tip 36 gebruikte objecten. De frontend is nu robuust, maar de routine zou bij voorkeur één formaat aanhouden.
