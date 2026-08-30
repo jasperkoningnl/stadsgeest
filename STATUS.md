@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **29 augustus 2026**
+> ### Bijgewerkt tot en met **30 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Weger-run 29 augustus: één tip, nieuw dossier Wind op Isselt, zes dossierfeiten"**.
+> De laatste sectie onderaan dit bestand heet **"Weger-run 30 augustus: één tip (RIEC-toezichthouders), nieuw dossier Ondermijning, zes dossierfeiten"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5897,3 +5897,80 @@ Tip 36 gaf een 500-fout (door de gebruiker gemeld als 404). Oorzaak: het `weging
 Fix in `src/app/nieuwsplein33/tip/[id]/page.tsx`: de weging wordt nu genormaliseerd — als een waarde een object is, wordt `.punten` eruit gehaald. Beide formaten (getal en object) werken nu. Commit `ae3d8cc`, Vercel deployment `dpl_44yMVEocTC3unvNjrauGjngdJDjX` is READY en geverifieerd.
 
 **Aandachtspunt voor de weger-routine:** het wegingformaat moet consistent zijn. De eerdere tips (tot en met 35) gebruikten getallen; tip 36 gebruikte objecten. De frontend is nu robuust, maar de routine zou bij voorkeur één formaat aanhouden.
+
+---
+
+### Cowork-update: 2026-08-30 — Weger-run 30 augustus: één tip (RIEC-toezichthouders), nieuw dossier Ondermijning, zes dossierfeiten
+
+### Werkset
+
+Totaal open signalen (niet aan tip gekoppeld): 730. Daarvan 19 nieuw (geen eerdere weger-beoordeling), 115 met nieuw materiaal (last_seen_at > weger_laatst), 596 al beoordeeld.
+
+De 19 nieuwe signalen zijn allemaal beoordeeld. De 115 nieuw-materiaal-signalen zijn steekproefsgewijs gecontroleerd: de top 30 op last_seen_at bestond grotendeels uit herhaalde scrapes van routinevergunningen (containers, dakkapellen, kapvergunningen) en clusterruis. Twee signalen met inhoudelijk nieuw materiaal zijn nader onderzocht:
+
+- **Signaal 981 (APV-wijziging)**: eerder beoordeeld op 10 augustus als raadsagendapunt. Nieuw item erbij geclusterd: het Aanwijzingsbesluit toezichthouders Team Operationele Versterking Amersfoort (gmb-2026-405619, gepubliceerd 29 augustus). Dit is wezenlijk nieuw materiaal — RIEC-medewerkers krijgen formeel toezichtbevoegdheden inclusief het betreden van woningen zonder toestemming. → Herbeoordeling, tip aangemaakt.
+- **Signaal 523 (Renewi Smink)**: derde 112-melding (containerbrand 29 augustus) erbij geclusterd. Alleen tier 3-bronnen, geen tip. Vastgelegd als dossierfeit in dossier 6 (Milieu-incidenten).
+
+Van de 19 nieuwe signalen vielen op:
+- **Signaal 1654 (Kaderbrief 2027-2030)** en **1655 (Coalitieakkoord 2026-2030)**: PDF's van het financiën-portaal, tier 1. Beide documenten zijn van mei/juli 2026 en al uitgebreid behandeld door NP33 en in de raad. Signalen 980, 1262, 417 dekken hetzelfde. Geen tip.
+- **Signaal 1651 (KCR2 VRU)**: herhaling van signaal 1298 (9 juli). Administratief raadsstuk.
+- **Signaal 1660 (Olympus 21)**: drie legalisatieverzoeken op één adres (vlaggenmasten, zuilen). Vastgelegd als dossierfeit in dossier 10 (Legalisatie achteraf).
+- Overige: zes routinevergunningen (containers, hoogwerker), drie evenementenvergunningen, drie NS-verstoringen, een ODU-voorlichtingsbericht, een VEH-landelijk bericht, een sloopmelding, een Leusden-routineaanvraag, een ontheffing middeleeuws erf.
+
+### Tip aangemaakt
+
+| Tip | Titel | Soort | Score | Dossier |
+|---|---|---|---|---|
+| 37 | RIEC-team krijgt bevoegdheid woningen binnen te treden zonder toestemming | verdieping | 13 | 21 — Ondermijning en handhaving Amersfoort |
+
+Burgemeester Bolsius en het college hebben op 26 augustus medewerkers van het Team Operationele Versterking (TOV) van RIEC Midden Nederland aangewezen als toezichthouder in Amersfoort. Zij worden bevoegd tot toezicht op negen wetten (APV, Alcoholwet, Leegstandwet, Omgevingswet, Wet goed verhuurderschap, Kansspelen, Woningwet, Afvalstoffenverordening, Verordening fysieke leefomgeving) en mogen woningen betreden zonder toestemming bij vermoedens van strijdig gebruik, illegale kamerverhuur, illegale prostitutie of woonoverlast.
+
+NP33 schreef eerder over de ondermijningsaanpak (extra budget, horecacontroles Isselt, villa met honderden inschrijvingen) maar niet over dit aanwijzingsbesluit. Tip is van soort `verdieping` met als toegevoegde waarde het besluit zelf en het patroon rekenkameronderzoek 2023 → bestuurlijke reactie 2024 → Utrechtse norm 2026 → formele aanwijzing TOV.
+
+Weging in getallen (niet in objecten, conform aandachtspunt vorige run): `dragende_bron_tier1: 3, patroon_met_getal: 4, burgemeester_betrokken: 2, concreet_gegeven: 2, geografisch: 1, agenda_redactie: 1`.
+
+### Nieuw dossier aangemaakt
+
+| ID | Naam | Reden |
+|---|---|---|
+| 21 | Ondermijning en handhaving Amersfoort | Minstens vier feiten uit verschillende bronnen: rekenkameronderzoek 2023, bestuurlijke reactie 2024, Utrechtse norm april 2026, aanwijzingsbesluit TOV augustus 2026. NP33 volgt het thema actief (Siem Eikelenboom). |
+
+### Dossierfeiten toegevoegd
+
+| ID | Dossier | Datum | Feit |
+|---|---|---|---|
+| 250 | 21 — Ondermijning | 2024-10-01 | Bestuurlijke reactie college op rekenkameronderzoek ondermijning |
+| 251 | 21 — Ondermijning | 2026-08-26 | Aanwijzingsbesluit toezichthouders TOV RIEC |
+| 252 | 21 — Ondermijning | 2023-05-01 | Rekenkameronderzoek ondermijning Amersfoort |
+| 253 | 21 — Ondermijning | 2026-04-30 | Ingekomen stuk: Utrechtse norm weerbaarheid ondermijning |
+| 254 | 6 — Milieu-incidenten | 2026-08-29 | Brand container bij Renewi Smink (derde melding sinds 31 juli) |
+| 255 | 10 — Legalisatie | 2026-08-29 | Drie legalisatieverzoeken Olympus 21 (vlaggenmasten, zuilen) |
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld (nieuw + herbeoordeling) | 21 | 21 (19 nieuw + 981 + 523) |
+| Signal events geschreven | 22 | 22 (20 reviewed + 2 tip_created) |
+| Tips aangemaakt | 1 | 1 (tip 37) |
+| tip_signals geschreven | 2 | 2 (981 dragend, 1354 context) |
+| tip_events geschreven | 1 | 1 |
+| Dossiers aangemaakt | 1 | 1 (dossier 21) |
+| Dossierfeiten geschreven | 6 | 6 (ID 250-255) |
+
+Verschil signal events vs beoordeelde signalen: 22 events voor 21 beoordeelde signalen. Het extra event is de context-koppeling van signaal 1354 (Utrechtse norm ondermijning) aan tip 37 — dat signaal is niet zelf herbeoordeeld maar als context gekoppeld.
+
+### Bevindingen
+
+- **Negentien nieuwe signalen na één dag.** Gisteren (29 aug) waren er nul nieuwe signalen; vandaag negentien. De scrapers draaiden normaal, maar bronnen publiceerden op zaterdag niets. De zondag-batch bevat publicaties van vrijdag 29 augustus die pas in de nachtelijke scrape-run zijn binnengekomen.
+- **Kaderbrief en coalitieakkoord pas nu binnengehaald.** De scraper voor Financiën gemeente Amersfoort heeft de PDF's van de kaderbrief (12 mei) en het coalitieakkoord (8 juli) pas op 29 augustus opgehaald. Dat is een vertraging van respectievelijk 3,5 en bijna 2 maanden. De documenten waren via de raadsinformatie al langer bekend (signalen 980, 417). Dit is geen probleem voor de beoordeling maar wel een indicatie dat deze bron traag of onregelmatig scrapt.
+- **Clustering koppelt TOV-aanwijzingsbesluit aan APV-wijziging.** Het aanwijzingsbesluit (raw_id 7658) is geclusterd in signaal 981 samen met de APV-wijziging. Dat is inhoudelijk te verdedigen (het besluit verwijst naar de APV), maar het effect is dat het aanwijzingsbesluit niet als apart signaal zichtbaar is. Zonder de steekproefsgewijze controle van nieuw-materiaal-signalen was het gemist.
+- **Wegingformaat.** Tip 37 gebruikt getallen conform het aandachtspunt uit de vorige run. De frontend-fix van 29 augustus maakt beide formaten robuust, maar getallen zijn eenduidiger.
+
+### Niet geverifieerd
+
+- Of de overige 85 nieuw-materiaal-signalen (buiten de top 30 + de twee onderzochte) daadwerkelijk geen herbeoordeling verdienen.
+- Hoeveel gemeenten in de VRU-regio een vergelijkbaar TOV-aanwijzingsbesluit hebben genomen — dat zou de nieuwswaarde beïnvloeden (uniek vs. standaard).
+- De volledige tekst van de Kaderbrief is gelezen (20.371 tekens uit de PDF geëxtraheerd) maar niet regel voor regel gecontroleerd op feiten die NP33 niet heeft behandeld. De hoofdlijnen (tekort €4,5 miljoen, Diftar-ombuiging, VRU-bijdrage) zijn wel geverifieerd.
+
+*Cowork-update: 2026-08-30 (Nieuwsplein33-account, weger-run)*
