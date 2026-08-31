@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **30 augustus 2026**
+> ### Bijgewerkt tot en met **31 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Weger-run 30 augustus: één tip (RIEC-toezichthouders), nieuw dossier Ondermijning, zes dossierfeiten"**.
+> De laatste sectie onderaan dit bestand heet **"Weger-run 31 augustus: één tip (parkeerboetes rijscholen), nieuw dossier Gemeentefinanciën, vijf dossierfeiten"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -5974,3 +5974,70 @@ Verschil signal events vs beoordeelde signalen: 22 events voor 21 beoordeelde si
 - De volledige tekst van de Kaderbrief is gelezen (20.371 tekens uit de PDF geëxtraheerd) maar niet regel voor regel gecontroleerd op feiten die NP33 niet heeft behandeld. De hoofdlijnen (tekort €4,5 miljoen, Diftar-ombuiging, VRU-bijdrage) zijn wel geverifieerd.
 
 *Cowork-update: 2026-08-30 (Nieuwsplein33-account, weger-run)*
+
+---
+
+### Cowork-update: 2026-08-31 — Weger-run 31 augustus: één tip (parkeerboetes rijscholen), nieuw dossier Gemeentefinanciën, vijf dossierfeiten
+
+### Werkset
+
+Totaal open signalen (niet aan tip gekoppeld): 722. Daarvan 0 nieuw (geen eerdere weger-beoordeling), 113 met nieuw materiaal (last_seen_at > weger_laatst), 609 al beoordeeld.
+
+Veertien signalen met nieuw materiaal zijn inhoudelijk onderzocht — geselecteerd op basis van niet-routine titels (na filtering van containers, dakkapellen, kapvergunningen, steigers, sloopmelding, etc.). De overige ~100 nieuw-materiaal-signalen zijn steekproefsgewijs gecontroleerd op de top 30 van last_seen_at en bestonden uit herhaalde scrapes van routinevergunningen.
+
+### Tip aangemaakt
+
+| Tip | Titel | Soort | Score | Dossier |
+|---|---|---|---|---|
+| 38 | Raadsvragen over parkeerboetes voor rijscholen tijdens parkeerlessen | nieuwsfeit | 5 | 17 — Parkeerbeleid Amersfoort |
+
+KeiHart voor Amersfoort heeft op 24 augustus schriftelijke vragen (2026-093) ingediend over onnodige parkeerboetes die rijscholen ontvangen tijdens parkeerlessen. Geen enkel signaal scoorde ≥6; dit is het beste beschikbare signaal van de dag (minimum-dag-regel). Score 5: dragende bron tier 1 (+3), geografisch (+1), lopend dossier parkeerbeleid (+2), agenda redactie (+1), losstaand incident (-2). Spiegelcheck negatief: NP33 en partners hebben hier niet over geschreven.
+
+Wegingformaat: getallen (conform aandachtspunt eerdere runs).
+
+### Nieuw dossier aangemaakt
+
+| ID | Naam | Reden |
+|---|---|---|
+| 22 | Gemeentefinanciën Amersfoort | Drie feiten uit twee documenten: Jaarstukken 2025 (€33M positief, structurele onderbesteding), Zomerrapportage 2026 (€5,6M voordelig prognose), ombuigingsoperatie €24M. Spant een boog van de Begroting 2025-2028 via de Jaarstukken naar de lopende monitoring. |
+
+### Dossierfeiten toegevoegd
+
+| ID | Dossier | Datum | Feit |
+|---|---|---|---|
+| 256 | 22 — Gemeentefinanciën | 2025-12-31 | Jaarstukken 2025: €33M positief resultaat, structurele onderbesteding, geen uitvoerbaarheidstoets |
+| 257 | 22 — Gemeentefinanciën | 2026-05-01 | Zomerrapportage 2026: prognose €5,6M voordelig (afgekapt document) |
+| 258 | 22 — Gemeentefinanciën | 2024-11-01 | Ombuigingsoperatie €24M structureel ingevoerd (Begroting 2025-2028) |
+| 259 | 21 — Ondermijning | 2026-08-25 | Utrechtse weerbaarheidsnorm als ingekomen stuk bij de raad |
+| 260 | 17 — Parkeerbeleid | 2026-08-24 | KeiHart schriftelijke vragen parkeerboetes rijscholen |
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen met nieuw materiaal onderzocht | 14 | 14 |
+| Signal events geschreven | 14 | 14 (13 reviewed + 1 tip_created) |
+| Tips aangemaakt | 1 | 1 (tip 38) |
+| tip_signals geschreven | 1 | 1 (1279 dragend) |
+| tip_events geschreven | 1 | 1 |
+| Dossiers aangemaakt | 1 | 1 (dossier 22) |
+| Dossierfeiten geschreven | 5 | 5 (ID 256-260) |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Nul nieuwe signalen, 113 met nieuw materiaal.** Dit is de tweede dag op rij zonder nieuwe signalen — de instroom begint pas weer na de nachtketen-runs op maandag/dinsdag. De 113 nieuw-materiaal-signalen zijn vrijwel uitsluitend herhaalde scrapes van bestaande vergunningen en bekendmakingen.
+- **Beantwoording feitelijke vragen Jaarstukken 2025 is afgekapt.** Het document (51 pagina's, raw_id 5343) is op 8.000 tekens afgekapt in de database. De eerste pagina bevat een belangrijke erkenning van het college: er is geen integrale uitvoerbaarheidstoets uitgevoerd op de begroting, en het positieve resultaat van €33 miljoen is grotendeels onderbesteding. De rest van het document is niet gelezen. Vastgelegd als dossierfeit, maar geen patroonpunten toegekend op afgekapte tekst.
+- **Dossier Gemeentefinanciën Amersfoort ontbrak.** Er was wel een dossier voor Leusden (15) maar niet voor Amersfoort. Aangemaakt met drie feiten die de financiële cyclus spannen van begroting tot rapportage.
+- **Signaal 603 (doodrijden Lotte)** bevat een AD-artikel dat de verdachte identificeert als een 17-jarige zonder rijbewijs. Dit is potentieel nieuwswaardig, maar alleen tier 3. Zodra er een rechtbankuitspraak verschijnt, kan dit een tip worden.
+- **Clustering blijft het hoofdprobleem.** Signaal 1279 (alle KeiHart-vragen bij elkaar), signaal 766 (jaarverslagen + Zomerrapportage + senioren), signaal 603 (ongerelateerde verkeerszaken + buurtpost + NVWA) — in alle drie zit de tipwaardige informatie verstopt in een cluster met onbruikbaar materiaal.
+- **Signaal 1041 bevat een juridisch significante toeslagenuitspraak** (ECLI:NL:RBMNE:2026:4803: de Rechtbank Midden-Nederland wijkt af van de Raad van State over dwangsommen). Nationaal relevant, maar geen Amersfoortse partij aanwijsbaar.
+
+### Niet geverifieerd
+
+- De volledige tekst van de Beantwoording feitelijke vragen Jaarstukken 2025 (pagina 2-51 van 51). De eerste pagina levert al een dossierfeit op; de rest kan verdere bevindingen bevatten.
+- Of de overige ~100 nieuw-materiaal-signalen (buiten de 14 onderzochte) daadwerkelijk geen herbeoordeling verdienen.
+- De volledige tekst van schriftelijke vragen 2026-093 (parkeerboetes rijscholen). Alleen de titel en metadata zijn beschikbaar; het PDF-document is niet opgehaald.
+
+*Cowork-update: 2026-08-31 (Nieuwsplein33-account, weger-run)*
