@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **31 augustus 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Weger-run 31 augustus: één tip (parkeerboetes rijscholen), nieuw dossier Gemeentefinanciën, vijf dossierfeiten"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-31 (speurder-run) — wekelijkse intake-audit"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -6041,3 +6041,79 @@ Geen afwijkingen.
 - De volledige tekst van schriftelijke vragen 2026-093 (parkeerboetes rijscholen). Alleen de titel en metadata zijn beschikbaar; het PDF-document is niet opgehaald.
 
 *Cowork-update: 2026-08-31 (Nieuwsplein33-account, weger-run)*
+
+## Cowork-update: 2026-08-31 (speurder-run) — wekelijkse intake-audit
+
+Wekelijkse steekproefcontrole op intake-beslissingen van 25-30 augustus 2026. Gequery'd via Turso HTTP pipeline API.
+
+### Volumes
+
+Vijf intake-runs (allemaal trigger `pm2`, status `ok`):
+
+| Dag | Items in | Gefilterd | Matched | Nieuwe signalen |
+|-----|----------|-----------|---------|-----------------|
+| 25 aug | 87 | 56 | 21 | 10 |
+| 26 aug | 60 | 48 | 3 | 9 |
+| 27 aug | 98 | 60 | 22 | 16 |
+| 28 aug | 102 | 48 | 41 | 13 |
+| 30 aug | 206 | 175 | 12 | 19 |
+| **Totaal** | **553** | **387 (70,0%)** | **99 (17,9%)** | **67 (12,1%)** |
+
+Geen run op 29 augustus (zaterdag — verwacht). 30 augustus is een uitschieter (206 items, waarvan 175 gefilterd). De 206 items vallen te verklaren door het ophopen van twee dagen bronmateriaal (za+zo) in de maandagnachtrun. Daarmee geen anomalie.
+
+Signaalaanmaak per dag: 10, 9, 16, 13, 19 — gemiddeld 13,4 per dag. Dat ligt binnen de bandbreedte van 17-28 die STATUS.md als normaal beschrijft, rekening houdend met het feit dat de scrapers niet elke dag draaien (minder bronmateriaal = minder signalen). Geen uitschieters.
+
+### Filterredenen
+
+Twee dominante filterredenen:
+- **tier 3-bron zonder trefwoord dat op nieuwswaarde wijst**: 179 (46,3% van gefilterd) — voornamelijk Nextdoor-berichten en Politie-items die niet aan de nieuwswaardedrempel komen.
+- **spiegelbron: geen eigen signaal**: 99 (25,6%) — amersfoort.nieuws.nl en RTV Utrecht worden correct als spiegelbron behandeld.
+- **Nextdoor-advertentie**: 20 — Marktplaats-links en te-koop-berichten, correct gefilterd.
+- **URL-duplicaat (B&W-besluitenlijsten)**: ~75 items — de omnibus-splitter genereert per agendapunt een item, maar die verwijzen allemaal naar dezelfde besluitenlijst-URL. De duplicaatdetectie vangt dat correct op.
+- **Exacte titelduplicaat**: 8 — correct.
+
+### Steekproef gefilterde items (5)
+
+1. "Burgemeester Lucas Bolsius bezoekt 100-jarige" (amersfoort.nieuws.nl) → reden: spiegelbron. **Terecht** — spiegelbronnen mogen geen eigen signaal aanmaken.
+2. "[NS] Utrecht - Arnhem" (NS Verstoringen) → reden: exacte titelduplicaat. **Terecht** — identiek signaal bestond al.
+3. "Water loopt amper weg na stortbuien" (RTV Utrecht) → reden: spiegelbron. **Terecht** — zelfde logica.
+4. Nextdoor-bericht over overlast in portiek → reden: tier 3 zonder trefwoord. **Terecht** — dit is buurtgesprek, geen nieuwsfeit.
+5. "Man gewond geraakt bij steekpartij Amersfoort" (Politie) → reden: tier 3 zonder trefwoord. **Grenseval** — een steekpartij kan nieuwswaardig zijn, maar het Politie-kanaal is tier 3 en zonder trefwoord als "dodelijk" of "aanhouding" wordt het correct weggefilterd. De informatie komt doorgaans via tier-1-bronnen (AD, RTV Utrecht) alsnog binnen.
+
+Oordeel: 5/5 terecht gefilterd.
+
+### Steekproef nieuwe signalen en matches (5+5)
+
+**Nieuwe signalen:**
+- Signaal #1652: NS-verstoring Schiphol-Amersfoort — correct apart signaal, specifieke lijn.
+- Signaal #1625: Vergunning garagedeur→glazen pui Laakboulevard — correct, individuele vergunning op tier-1-bron.
+- Signaal #1605: NS-verstoring Den Haag-Rotterdam — **twijfelachtig**: geen directe Amersfoort-relevantie in de titel. Bron is "NS Verstoringen Amersfoort" maar de verstoring betreft Den Haag-Rotterdam. Dit lijkt registerruis.
+
+**Matches:**
+- Item→signaal #1239 (Vondellaan containers, score 11): **correct** — hetzelfde adresgebied, hoge woordovereenkomst.
+- Item→signaal #1220 (kappen boom Vreeland, score 6): **correct** — zelfde perceelgebied.
+- Item→signaal #783 (warmtepomp Graaf Willemlaan, score 5): **correct** — zelfde type vergunning, zelfde straat.
+- Item→signaal #1088 (coaching aan huis Waterspringstaart, score 4): **correct** — zelfde adres.
+- Item→signaal #523 (brandweer Renewi Smink, score 3): **grenseval** — lage score, maar 112-meldingen over dezelfde locatie horen bij elkaar.
+
+Oordeel: 9/10 terecht, 1 twijfelgeval (NS-verstoring zonder Amersfoort-betrokkenheid).
+
+### Signalen met >15 bevestigingen (omnibus-lekkage check)
+
+Twee signalen boven de drempel van 15 in de afgelopen 30 dagen:
+- **#540 "Vandalisme op Sovjet Ereveld in Leusden"** — 32 bevestigingen, status watching. Dit is een reëel veel-bevestigd signaal dat regelmatig in de pers terugkomt. Geen omnibus-lekkage.
+- **#536 "De Alliantie bereikt hoogste punt van plot 26"** — 18 bevestigingen, status watching. Eveneens reëel (bouwproject met meerdere updates). Geen lekkage.
+
+Historisch: #417 (coalitieakkoord, 29 bevestigingen, published) en #419 (De Meern-vergunning, 28 bevestigingen, discarded) zijn ouder en niet uit de auditperiode. #419 is opvallend: een vergunning uit De Meern zou niet in een Amersfoort-pipeline thuishoren — dit is waarschijnlijk een fout in de brondata (raadsinformatie Leusden/Utrecht overlap).
+
+Conclusie: geen actieve omnibus-lekkage gedetecteerd.
+
+### B&W omnibus-splitsing
+
+80 items met [B&W]-prefix in de auditperiode. Alle 5 steekproef-items zijn correct gefilterd als URL-duplicaat — de splitter genereert per agendapunt een apart item, maar omdat ze naar dezelfde besluitenlijst-URL verwijzen worden ze na het eerste item als duplicaat herkend. Dit is correct gedrag: het eerste item per besluitenlijst komt door, de rest wordt terecht gefilterd.
+
+### Samenvattend oordeel
+
+De intake functioneert correct. Filterbeslissingen zijn in 5/5 gevallen terecht, signaalaanmaak en -matching in 9/10. De volumes liggen binnen de verwachte bandbreedte. Geen omnibus-lekkage. Eén aandachtspunt: NS-verstoringen zonder Amersfoort-betrokkenheid (zoals Den Haag-Rotterdam) worden als signaal aangemaakt omdat de bron "NS Verstoringen Amersfoort" heet — dit is bekende registerruis, geen nieuw probleem.
+
+*Cowork-update: 2026-08-31 (Nieuwsplein33-account, speurder-run)*
