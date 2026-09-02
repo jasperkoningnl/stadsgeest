@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **31 augustus 2026**
+> ### Bijgewerkt tot en met **2 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-08-31 (speurder-run) — wekelijkse intake-audit"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-02 — Weger-run 2 september (middag): één tip (SRO), drie dossierfeiten"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -6117,3 +6117,156 @@ Conclusie: geen actieve omnibus-lekkage gedetecteerd.
 De intake functioneert correct. Filterbeslissingen zijn in 5/5 gevallen terecht, signaalaanmaak en -matching in 9/10. De volumes liggen binnen de verwachte bandbreedte. Geen omnibus-lekkage. Eén aandachtspunt: NS-verstoringen zonder Amersfoort-betrokkenheid (zoals Den Haag-Rotterdam) worden als signaal aangemaakt omdat de bron "NS Verstoringen Amersfoort" heet — dit is bekende registerruis, geen nieuw probleem.
 
 *Cowork-update: 2026-08-31 (Nieuwsplein33-account, speurder-run)*
+
+---
+
+### Cowork-update: 2026-09-01 — Weger-run 1 september: één tip (westnijlvirus), twee dossierfeiten
+
+### Werkset
+
+Totaal open signalen (niet aan tip gekoppeld): 745. Daarvan 24 nieuw (geen eerdere weger-beoordeling), 100 met nieuw materiaal (last_seen_at > weger_laatst), 621 al beoordeeld.
+
+Alle 24 nieuwe signalen zijn inhoudelijk beoordeeld. Van de 100 signalen met nieuw materiaal is een steekproef van circa 15 niet-routine-signalen gecontroleerd; alle bleken al beoordeeld in recente runs (24-31 augustus). De overige ~85 zijn herhaalde scrapes van routinevergunningen.
+
+### Tip aangemaakt
+
+| Tip | Titel | Soort | Score | Dossier |
+|---|---|---|---|---|
+| 39 | Vier westnijlvirusbesmettingen in provincie Utrecht, één dode | verdieping | 5 | — |
+
+GGD regio Utrecht (tier 1) meldt op 1 september vier vastgestelde besmettingen met het westnijlvirus in de provincie, waarvan één persoon is overleden — het eerste Nederlandse overlijden door het virus. Een eerder signaal (1201, bloeddonor, 19 augustus) was als volledig gedekt beoordeeld. Sindsdien is de situatie geëscaleerd: vier gevallen, één dode. RTV Utrecht (spiegelbron) bracht drie artikelen (27-28 augustus). Nieuwsplein33 zelf heeft er niet over geschreven. Tip als verdieping: de GGD als gezondheidsautoriteit voor de regio Amersfoort is de officiële bron, en de vraag of er lokale gevolgen of maatregelen zijn voor Amersfoort staat open. Geen enkel signaal scoorde ≥6; dit is het beste beschikbare signaal van de dag (minimum-dag-regel, score 5).
+
+### Dossierfeiten toegevoegd
+
+| ID | Dossier | Datum | Feit |
+|---|---|---|---|
+| 261 | 4 — Woningbouw en wonen | 2026-08-28 | Verduurzaming daken en dakkapellen 27 woningen Klarissenstraat 58-110, waarschijnlijk corporatieproject, mogelijk uitvoering isolatieoffensief |
+| 262 | 10 — Legalisatie achteraf | 2026-08-28 | Legalisatie veranda achteraf Valutaboulevard 5 |
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld | 24 | 24 |
+| Signal events geschreven | 24 | 24 (23 reviewed + 1 tip_created) |
+| Tips aangemaakt | 1 | 1 (tip 39) |
+| tip_signals geschreven | 1 | 1 (1669 dragend) |
+| tip_events geschreven | 1 | 1 |
+| Dossiers aangemaakt | 0 | 0 |
+| Dossierfeiten geschreven | 2 | 2 (ID 261-262) |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Alle 24 nieuwe signalen zijn routinevergunningen of -bekendmakingen, op één na.** Containers, steigers, dakkapellen, sloopmelding, horeca, Leusden-beschikkingen. Enige uitzondering: het westnijlvirus-bericht van de GGD.
+- **Nieuw-materiaal-signalen leveren geen nieuwe tips op.** De niet-routine-signalen (rechtspraak, raadsinformatie, TenderNed, handhavingsstrategie) zijn allemaal al beoordeeld in de runs van 24-31 augustus. De nieuwe items zijn herhaalde scrapes of intake-bevestigingen, geen inhoudelijk nieuw materiaal.
+- **Signaal 1685 (horeca Middelhoefseweg) bevat een template-fout.** De bekendmaking toont `@ZAAK_BEVGEZAG_ORG_NAAM@` in plaats van de gemeentenaam — een niet-ingevuld sjabloonveld in het gemeentesysteem.
+- **Signaal 1676 (verduurzaming 27 woningen Klarissenstraat)** is opvallend groot voor een enkele vergunning. Waarschijnlijk een corporatieproject in Liendert. Vastgelegd als dossierfeit; als het isolatieoffensief meer van dit soort vergunningen oplevert, ontstaat er een patroon.
+- **GGD-artikelen zijn afgekapt.** De content van het westnijlvirus-bericht is na één alinea afgekapt; de GGD-pagina is client-rendered en levert via directe fetch niets. Het volledige bericht is als vervolgvraag in de tip opgenomen.
+
+### Niet geverifieerd
+
+- De volledige tekst van het GGD-bericht over het westnijlvirus (client-rendered pagina, afgekapte content in de database).
+- Of een van de vier besmette personen in Amersfoort of Leusden woont (de GGD meldt alleen 'provincie Utrecht').
+- Of de verduurzaming Klarissenstraat een corporatieproject is en wie de eigenaar is.
+- Of de overige ~85 nieuw-materiaal-signalen (routinevergunningen) daadwerkelijk geen herbeoordeling verdienen.
+
+*Cowork-update: 2026-09-01 (Nieuwsplein33-account, weger-run)*
+
+---
+
+### Cowork-update: 2026-09-02 — Weger-run 2 september: lege run, intake nog niet gedraaid
+
+### Werkset
+
+Totaal open signalen (niet aan tip gekoppeld): 744. Daarvan 0 nieuw (geen eerdere weger-beoordeling), 100 met nieuw materiaal (last_seen_at > weger_laatst), 644 al beoordeeld.
+
+De 100 signalen met nieuw materiaal zijn dezelfde als in de run van 1 september — uitsluitend herhaalde scrapes van routinevergunningen en eerder beoordeelde signalen. Geen inhoudelijk nieuw materiaal.
+
+De intake voor 2 september heeft nog niet gedraaid. De scrapers hebben 9 nieuwe raw items binnengehaald (tussen 00:01 en 00:31 UTC), maar die zijn nog niet tot signalen verwerkt. Inhoud van die 9 items: twee Leusden-evenementenvergunningen (Regioshow en Instrument van Vrede, beide in oktober), een dakopbouw Engweg, een intrekking erfafscheiding Knuppelweg, twee afvalcontainers, een verkeersbesluit parkeerverbod Vening Meineszstraat, een Restauratiefonds-bericht over verduurzaming monumenten (lege content), en een AD-sportbericht via Bluesky.
+
+### Tellingen
+
+| Wat | Aantal |
+|---|---|
+| Signalen beoordeeld | 0 |
+| Tips aangemaakt | 0 |
+| Dossierfeiten geschreven | 0 |
+| Signal events geschreven | 0 |
+
+Geen afwijkingen — er was geen materiaal om te beoordelen.
+
+### Bevindingen
+
+- **De minimum-één-tip-per-dag-regel is niet toegepast.** Die regel geldt na verwerking van alle signalen; er waren geen signalen om te verwerken. De intake voor vandaag heeft nog niet gedraaid en er zijn geen nieuwe signalen aangemaakt sinds de vorige run.
+- **De 9 raw items van vandaag zijn routine.** Het verkeersbesluit (parkeerverbod Vening Meineszstraat) is het enige dat enigszins opvalt, maar als losstaand verkeersbesluit zonder patroon geen tipkandidaat.
+- **Timing weger t.o.v. intake.** De weger draait vóór de intake van vandaag klaar is. Dit betekent dat het materiaal van 2 september pas op 3 september wordt gewogen. Dit is geen fout maar een consequentie van de timing: de scrapers draaien 's nachts, de intake verwerkt daarna, en de weger draait overdag.
+
+### Niet geverifieerd
+
+- Of de intake later op 2 september nog draait en signalen aanmaakt uit de 9 raw items.
+
+*Cowork-update: 2026-09-02 (Nieuwsplein33-account, weger-run)*
+
+---
+
+### Cowork-update: 2026-09-02 — Weger-run 2 september (middag): één tip (SRO), drie dossierfeiten
+
+Dit is de tweede weger-run op 2 september. De ochtendrun trof een lege werkset omdat de intake nog niet had gedraaid; deze middagrun verwerkt de 10 signalen die de intake van 2 september heeft aangemaakt.
+
+### Werkset
+
+Totaal open signalen (niet aan tip gekoppeld): 754. Daarvan 10 nieuw (geen eerdere weger-beoordeling), 108 met nieuw materiaal (last_seen_at > weger_laatst), 636 al beoordeeld.
+
+Van de 108 signalen met nieuw materiaal is er één met inhoudelijk nieuw materiaal: signaal #766 (Meander MC jaarverslag, clusterfout) kreeg een nieuw item — FvD schriftelijke vragen 2026-098 over SRO. De overige 107 zijn herhaalde scrapes van routinevergunningen of eerder beoordeeld materiaal.
+
+### Tip aangemaakt
+
+| Tip | Titel | Soort | Score | Dossier |
+|---|---|---|---|---|
+| 40 | FvD stelt raadsvragen over toezicht en financiële onregelmatigheden SRO | verdieping | 9 | 16 (SRO Amersfoort) |
+
+Forum voor Democratie diende op 1 september schriftelijke vragen 2026-098 in over toezicht, informatievoorziening en financiële onregelmatigheden bij SRO. FvD is daarmee de derde fractie (na BPA en Amersfoort voor Vrijheid) die via het vragenrecht actie onderneemt rond het SRO-dossier. De vragen verschuiven de focus van de inhoudelijke misstanden naar de vraag of de raad voldoende is geïnformeerd. NP33 heeft tot 3 augustus over SRO geschreven maar niet over deze specifieke vragen.
+
+Het item is door de clustering in signaal #766 (Meander MC jaarverslag) terechtgekomen — een clusterfout. De tip is aangemaakt op basis van dat item, met signaal 766 als dragend.
+
+### Dossierfeiten toegevoegd
+
+| ID | Dossier | Datum | Feit |
+|---|---|---|---|
+| 263 | 5 — Lokale politiek en college | 2026-09-01 | Burgemeester Bolsius kondigt pensioen aan per 1 juli 2027 |
+| 264 | 14 — Asielopvang en opvanglocaties | 2026-09-01 | FvD stelt schriftelijke vragen over nareis en gezinshereniging in de opvangopgave |
+| 265 | 16 — SRO Amersfoort | 2026-09-01 | FvD stelt schriftelijke vragen over toezicht en financiële onregelmatigheden SRO |
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld (nieuw) | 10 | 10 |
+| Signalen herbeoordeeld (nieuw materiaal) | 1 | 1 (#766) |
+| Signal events geschreven | 11 | 11 (10 reviewed + 1 tip_created) |
+| Tips aangemaakt | 1 | 1 (tip 40) |
+| tip_signals geschreven | 1 | 1 (766 dragend) |
+| tip_events geschreven | 1 | 1 |
+| Dossiers aangemaakt | 0 | 0 |
+| Dossierfeiten geschreven | 3 | 3 (ID 263-265) |
+| Signalen op discarded gezet | 2 | 2 (#1693, #1694) |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Bolsius pensioen volledig gedekt.** De brief van de burgemeester (#1696) over zijn pensioen per 1 juli 2027 is op 1 september al door NP33 zelf, De Stad Amersfoort en RTV Utrecht gebracht. Geen tip, wel vastgelegd als dossierfeit. "KNNS" in de notubiz-titel verwijst naar het formele verzoek om ontslag bij de Koning.
+- **FvD diende twee sets schriftelijke vragen in op 1 september**: 2026-097 (nareis/gezinshereniging) en 2026-098 (SRO). Alleen de SRO-vragen haalden de tipdrempel vanwege het lopende dossier en de entiteitsscore.
+- **Clusterprobleem bevestigd.** De FvD SRO-vragen kwamen in signaal #766 terecht (Meander MC jaarverslag). De TenderNed-aanbesteding Juliana van Stolbergbuurt belandde in #1523 (Bosweg driehoek). Het parkeerverbod Vening Meineszstraat in #1612 (fietspad Bosweg). De clustering op los woordoverlap of gelijk binnenkomstmoment is een bekend probleem (zie START-HIER.md punt 2).
+- **Notubiz-content blijft beperkt.** Alle drie de raadsinformatiedocumenten (Bolsius-brief, FvD nareis, FvD SRO) leveren alleen metadata, geen volledige tekst. De PDF's worden niet opgehaald door de scraper.
+- **NS-verstoringen blijven binnenkomen.** Twee verstoringen zonder Amersfoort-betrokkenheid (#1693, #1694). Bekende registerruis.
+
+### Niet geverifieerd
+
+- De inhoud van de FvD schriftelijke vragen 2026-097 en 2026-098 (notubiz levert alleen metadata).
+- Of het college al heeft geantwoord op de eerdere BPA-vragen (2026-081) over het geheime SRO-overleg.
+- Of de Restauratiefonds-aankondiging (vernieuwd Ontzorgingsprogramma Verduurzaming Monumenten) een Amersfoortse component heeft (content was leeg).
+
+*Cowork-update: 2026-09-02 (Nieuwsplein33-account, weger-run middag)*
