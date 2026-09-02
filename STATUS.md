@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **2 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-02 — Weger-run 2 september (middag): één tip (SRO), drie dossierfeiten"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-02 — Intake-uitval opgelost, PM2-proces opnieuw aangemaakt"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -6270,3 +6270,36 @@ Geen afwijkingen.
 - Of de Restauratiefonds-aankondiging (vernieuwd Ontzorgingsprogramma Verduurzaming Monumenten) een Amersfoortse component heeft (content was leeg).
 
 *Cowork-update: 2026-09-02 (Nieuwsplein33-account, weger-run middag)*
+
+---
+
+### Cowork-update: 2026-09-02 — Intake-uitval opgelost: dubbele PM2-start sinds 14 augustus
+
+De weegroutine meldde dat de scrapers niet hadden gedraaid. Onderzoek toonde dat de scrapers zelf wél normaal draaiden (scrape-dagelijks om 00:00, scrape-ob om 00:30, fetch-fulltext om 02:00, allemaal met output), maar dat `stadsgeest-intake` om 05:30 was overgeslagen.
+
+**Oorzaak.** Sinds 14 augustus startte PM2 telkens twee instanties van `stadsgeest-intake` tegelijk op dezelfde cron-trigger (de twee starts zaten ~350 ms uit elkaar). De lock in intake-run.mjs ving dat meestal op: de ene draaide, de andere sloeg over. Maar op 29 augustus, 31 augustus en 2 september crashte of hing de eerste instantie stilletjes na het pakken van de lock — geen output, geen "Voltooid". De tweede instantie zag de lock en sloeg over. Resultaat: geen intake die dag.
+
+De error-log bevatte een `SyntaxError` waarbij Node het batch-bestand `C:\Users\Jasper Koning\AppData\Roaming\npm\pm2.cmd` als JavaScript probeerde te laden. Dit is een PM2-bug op Windows: PM2 startte zijn eigen batchbestand als Node-script in plaats van het geconfigureerde intake-run.mjs.
+
+Het patroon was afwisselend: fail → succeed (stale lock opgeruimd na >15 min, soms maar één instantie gestart) → fail → succeed.
+
+**Wat gedaan.**
+
+1. Handmatige herstart van stadsgeest-intake: intake draaide succesvol, 10 nieuwe signalen, 9 bijgewerkt, 848 watching.
+2. PM2-proces `stadsgeest-intake` verwijderd en opnieuw aangemaakt met schone configuratie: `pm2 start intake-run.mjs --name stadsgeest-intake --cron "30 5 * * *" --no-autorestart --merge-logs`. Nieuw id 12, restart-counter op 0.
+3. `pm2 save` uitgevoerd (12 processen in dump.pm2, lijst was niet leeg).
+
+**Bijkomende bevindingen.**
+
+- `fetch-fulltext` faalde vannacht op 3 van 3 kandidaten met HTTP 403: twee FvD schriftelijke vragen (2026-097, 2026-098) en de brief van burgemeester Bolsius. Dit zijn raadsdocumenten achter een login of met toegangsbeperkingen — geen structureel probleem met fetch-fulltext zelf.
+- De error-logs van `scrape-ob` en `fetch-fulltext` bevatten oude `LibsqlError: URL_INVALID: The URL 'undefined'`-meldingen. Die zijn van vóór 7 augustus 2026 (de fix in lib.js die env handmatig parseert). De `.env` is intact en wordt correct gelezen door lib.js.
+- Geen van de PM2-processen heeft `TURSO_URL` in de PM2-omgeving (dump.pm2). Dat maakt niet uit omdat lib.js en db.js de `.env` zelf laden met dotenv/eigen parser, maar het verklaart wel de oude foutmeldingen.
+
+**In de gaten houden.** Of de dubbele start morgen wegblijft na het opnieuw aanmaken van het PM2-proces. Als het probleem terugkomt zit het dieper in PM2 zelf en moet er naar een alternatief gekeken worden.
+
+### Niet geverifieerd
+
+- Of de HTTP 403-documenten op raadsinformatie.nl achter een login zitten of anderszins geblokkeerd zijn (niet handmatig gecontroleerd).
+- Of het opnieuw aanmaken van het PM2-proces de dubbele start definitief oplost — dat kan pas morgen om 05:30 blijken.
+
+*Cowork-update: 2026-09-02 (intake-uitval opgelost)*
