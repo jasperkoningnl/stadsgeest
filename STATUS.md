@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **2 september 2026**
+> ### Bijgewerkt tot en met **3 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-02 — Intake-uitval opgelost, PM2-proces opnieuw aangemaakt"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-03 — Weger-run 3 september: één tip (Bibob Vathorst), zes dossierfeiten"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -6303,3 +6303,65 @@ Het patroon was afwisselend: fail → succeed (stale lock opgeruimd na >15 min, 
 - Of het opnieuw aanmaken van het PM2-proces de dubbele start definitief oplost — dat kan pas morgen om 05:30 blijken.
 
 *Cowork-update: 2026-09-02 (intake-uitval opgelost)*
+
+---
+
+### Cowork-update: 2026-09-03 — Weger-run 3 september: één tip (Bibob Vathorst), zes dossierfeiten
+
+### Werkset
+
+Totaal open signalen (niet aan tip gekoppeld): 788. Daarvan 37 nieuw (geen eerdere weger-beoordeling), 112 met nieuw materiaal (last_seen_at > weger_laatst), 639 al beoordeeld.
+
+Alle 37 nieuwe signalen zijn inhoudelijk beoordeeld. Van de 112 signalen met nieuw materiaal zijn twee met inhoudelijk nieuw materiaal gecontroleerd: #1695 (FvD nareis, kreeg FvD-vragen 2026-104 over gasvoorraad/winter erbij — clusterfout) en #1300 (RIB woningbouw, kreeg CDA-vragen 2026-102 over transportcapaciteit erbij — clusterfout). De overige 110 zijn herhaalde scrapes van routinevergunningen of eerder beoordeeld materiaal.
+
+### Tip aangemaakt
+
+| Tip | Titel | Soort | Score | Dossier |
+|---|---|---|---|---|
+| 41 | CDA wil opheldering over Bibob-inzet in Vathorst en grip op huisvesting arbeidsmigranten | verdieping | 7 | 21 (Ondermijning) |
+
+CDA diende op 2 september schriftelijke vragen 2026-100 in over een Bibob-verzoek in Vathorst en grip op huisvesting arbeidsmigranten. Acht dagen eerder diende een inwoner een formeel Bibob-verzoek in voor Valutaboulevard 1 (signaal #1613). NP33 schreef eerder over arbeidsmigranten ("Verslaafd aan arbeidsmigranten"), maar niet over de Bibob-hoek. Tip als verdieping: het Bibob-instrument als politiek middel tegen ondermijning in de huisvesting is nieuw. Notubiz levert alleen metadata; de volledige tekst van de vragen is niet beschikbaar.
+
+### Dossierfeiten toegevoegd
+
+| ID | Dossier | Datum | Feit |
+|---|---|---|---|
+| 266 | 5 — Lokale politiek en college | 2026-09-01 | College start peiling gemeenteraad over uitvoeringsprogramma 2026-2030 |
+| 267 | 4 — Woningbouw en wonen | 2026-09-02 | BPA stelt vragen over voorrang Amersfoorters op sociale huurwoningen |
+| 268 | 4 — Woningbouw en wonen | 2026-09-02 | AvV stelt vragen over toezicht maximale huurprijzen kamers |
+| 269 | 4 — Woningbouw en wonen | 2026-09-02 | CDA stelt vragen over toezicht kwaliteitsborgers Wkb |
+| 270 | 4 — Woningbouw en wonen | 2026-06-11 | Vergunning splitsen woning naar 3 studio's Neptunusplein 62A |
+| 271 | 4 — Woningbouw en wonen | 2026-09-02 | CDA stelt vervolgvragen over transportcapaciteit woningbouw/scholen |
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld (nieuw) | 37 | 37 |
+| Signalen herbeoordeeld (nieuw materiaal) | 2 | 2 (#1695, #1300 — beide clusterfout) |
+| Signal events geschreven | 37 | 37 (36 reviewed + 1 tip_created) |
+| Tips aangemaakt | 1 | 1 (tip 41) |
+| tip_signals geschreven | 1 | 1 (1706 dragend) |
+| tip_events geschreven | 1 | 1 |
+| Dossiers aangemaakt | 0 | 0 |
+| Dossierfeiten geschreven | 6 | 6 (ID 266-271) |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Cluster huisvestingsvragen op 2 september.** Vier nieuwe sets schriftelijke vragen van drie partijen over verschillende aspecten van wonen op dezelfde dag: BPA (voorrang Amersfoorters sociale huur), CDA (Bibob Vathorst + arbeidsmigranten, kwaliteitsborgers Wkb), AvV (huurprijzen kamers). Tel daarbij de FvD-vragen over nareis (1 september) en CDA over transportcapaciteit (2 september, geclustered in #1300), dan zijn dat zes sets van vier partijen in twee dagen. Wonen domineert de start van het politieke seizoen.
+- **Twee Bibob-verzoeken in acht dagen.** Een inwoner vroeg op 25 augustus Bibob-toepassing voor Valutaboulevard 1 (#1613); CDA stelt nu vragen over een Bibob-verzoek in Vathorst. Twee is te weinig voor een patroon, maar de koppeling met arbeidsmigranten maakt het relevant voor dossier 21 (Ondermijning).
+- **Clustering blijft een probleem.** FvD-vragen 2026-104 (gasvoorraad/winter) in #1695 (nareis) en CDA-vragen 2026-102 (transportcapaciteit) in #1300 (RIB woningbouw). Verschillende onderwerpen, geclusterd op partijnaam of woordoverlap.
+- **Tien "vertrokken met onbekende bestemming"-berichten.** 23 totaal sinds 13 augustus, in batches van 4-10 per week. Dit zijn routine BRP-registerhandelingen, geen nieuws.
+- **Collegebesluiten 1 september** bevatten o.a. mishandeling bezoeker Pride, brandweerkazerne Zielhorsterweg, voortgang Wonen Eerst, brief woonwagenbewoners. Tier 2 (gemeente), geen tier 1-bevestiging voor individuele items. Vastgelegd als dossierfeit in dossier 5.
+
+### Niet geverifieerd
+
+- De volledige tekst van alle schriftelijke vragen (2026-099 t/m 2026-104). Notubiz levert alleen metadata; de PDF's zijn niet opgehaald door de scraper.
+- Op welk adres in Vathorst het Bibob-verzoek betrekking heeft.
+- Of de twee Bibob-zaken (Vathorst en Valutaboulevard) verband houden.
+- De inhoud van de collegeberichten (mishandeling Pride, Wonen Eerst, etc.) — alleen de titels zijn beschikbaar.
+- Of de overige ~110 nieuw-materiaal-signalen daadwerkelijk geen herbeoordeling verdienen.
+
+*Cowork-update: 2026-09-03 (Nieuwsplein33-account, weger-run)*
