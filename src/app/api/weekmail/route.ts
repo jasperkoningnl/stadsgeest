@@ -51,6 +51,7 @@ export async function GET(request: Request) {
       'gideon.hofland@nieuwsplein33.nl',
       'pien.nieman@nieuwsplein33.nl',
     ],
+    bcc: ['stadsgeest@proton.me'],
     subject: `Stadsgeest weekoverzicht — ${tips.length} tips (${weekLabel()})`,
     html,
     text: plainText,
