@@ -23,6 +23,10 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-09-03 — Tips bevatten nu meer context en links naar eerdere berichtgeving
+
+Bij tips over wetgeving, procedures of bestuurlijk jargon staat nu een kort blokje dat uitlegt wat die termen betekenen. Denk aan wat de Wet Bibob inhoudt, hoe een BOPA-procedure werkt of wat verscherpt toezicht van de IGJ betekent. Het blokje verschijnt alleen als het nodig is, niet bij elke tip. Daarnaast staan bij eerdere berichtgeving nu directe links naar de bewuste artikelen in plaats van alleen een beschrijving. Bestaande tips in de wachtrij zijn waar mogelijk bijgewerkt met beide verbeteringen.
+
 ## 2026-08-28 — Collegebesluiten nu als losse tips
 
 B&W-besluitenlijsten werden tot nu toe volledig overgeslagen omdat ze tientallen ongerelateerde onderwerpen bevatten. Vanaf nu worden de individuele collegebesluiten, schriftelijke vragen en bestemmingsplannen eruit gehaald en apart aangeboden. Procedurele stukken (de besluitenlijst zelf, invitaties) worden nog steeds overgeslagen. Het backfill-script om de al verwerkte besluitenlijsten alsnog te splitsen moet nog worden gedraaid — daarna verschijnen er eenmalig extra tips in de wachtrij.

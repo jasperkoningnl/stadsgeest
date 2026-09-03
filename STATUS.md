@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **3 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-03 — Weger-run 3 september: één tip (Bibob Vathorst), zes dossierfeiten"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-03 — Weger-prompt verbeterd, bestaande tips bijgewerkt"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -6365,3 +6365,46 @@ Geen afwijkingen.
 - Of de overige ~110 nieuw-materiaal-signalen daadwerkelijk geen herbeoordeling verdienen.
 
 *Cowork-update: 2026-09-03 (Nieuwsplein33-account, weger-run)*
+
+---
+
+## Cowork-update: 2026-09-03 — Weger-prompt verbeterd, bestaande tips bijgewerkt
+
+Datum: 3 september 2026
+Sessie: Cowork (Nieuwsplein33-account)
+
+### Wat is gedaan
+
+Twee aanpassingen aan de weger-prompt (`stadsgeest-weger.md`) op verzoek van Jasper:
+
+1. **CONTEXT EN ACHTERGROND** — nieuw optioneel blok in het briefingformat, direct na WAT WE WETEN. Wordt alleen geschreven als een tip jargon, wetgeving of procedures bevat die een redacteur zonder specialistische voorkennis niet direct kan plaatsen (bijv. Bibob-wetgeving, BOPA-procedure, IGJ-toezicht). Laat het weg als de feiten voor zich spreken.
+
+2. **ELDERS GEBRACHT** — herschreven format. Elk artikel staat nu apart op een regel met medium, titel, directe URL en datum. Voorheen stond hier alleen beschrijvende tekst zonder links.
+
+### Bestaande tips bijgewerkt in de database
+
+Retroactief 17 updates uitgevoerd op bestaande tips:
+
+**Elders gebracht met artikellinks** (10 tips):
+- Tips 41, 40, 37, 36, 35, 33, 13, 11, 9, 10 — alle `elders_gebracht`-velden herschreven met directe artikellinks naar nieuwsplein33.nl, destadamersfoort.nl en rtvutrecht.nl.
+- Bij tip 9 (Stoutenburg-Noord) en tip 10 (amersfoort.nieuws.nl) kon de exacte URL niet worden achterhaald; daar staan titel en datum zonder link.
+
+**Context en achtergrond toegevoegd aan briefings** (7 tips):
+- Tip 41: Wet Bibob uitgelegd
+- Tip 34: Wet Bibob (Belasting Café)
+- Tip 37: RIEC, TOV, binnentredingsbevoegdheid
+- Tip 35: Skaeve Huse, TAM-omgevingsplan
+- Tip 33: IGJ verscherpt toezicht
+- Tip 14: BOPA-procedure
+- Tip 23: Onrechtmatige uitgaven jaarrekening
+
+### Projectdocument bijgewerkt
+
+`claude/stadsgeest-weger-prompt.md` in het Claude-project bevat een changelog-entry voor 3 september 2026 met beide wijzigingen.
+
+### Niet geverifieerd
+
+- Of alle gevonden artikellinks nog bereikbaar zijn (URLs zijn via websearch gevonden, niet geverifieerd met een fetch).
+- Of er tips zijn die een context-blok verdienen maar niet in de selectie van 7 zaten (tips met status `afgekeurd` zijn overgeslagen).
+
+*Cowork-update: 2026-09-03 (Nieuwsplein33-account, promptverbetering en tip-updates)*
