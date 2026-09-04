@@ -221,3 +221,12 @@ export async function getMeetstand(): Promise<{ gepubliceerd: number; eigenVonds
   )
   return { gepubliceerd: Number(rij?.gepubliceerd ?? 0), eigenVondst: Number(rij?.eigen ?? 0) }
 }
+
+/** Alle tip-ids in de wachtrij, in dezelfde volgorde als de lijst. */
+export async function getWachtrijIds(): Promise<number[]> {
+  const rijen = await q<{ id: number }>(
+    `SELECT id FROM tips WHERE status = 'wachtrij'
+     ORDER BY substr(created_at, 1, 10) DESC, score DESC, created_at DESC`,
+  )
+  return rijen.map((r) => r.id)
+}

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { hasTurso } from '@/lib/turso'
 import {
   getTipDetail, getTipDocumenten, getTipFeedback, getDossierTijdlijn,
+  getWachtrijIds,
   type TipDocument,
 } from '@/lib/dashboard/tipQueries'
 import { formatDate, formatDateTime, safeParseJson, safeParseJsonArray } from '@/lib/dashboard/format'
@@ -12,6 +13,7 @@ import { SOORT_LABEL } from '../../TipRegel'
 import TipTabs, { type Tab } from './TipTabs'
 import TipActies from './TipActies'
 import Meetknop from './Meetknop'
+import BeslisNavigatie from './BeslisNavigatie'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,40 +66,21 @@ interface EerderBericht {
 }
 
 /**
- * Het verhaal-tabblad: de briefing in leesbare blokken in plaats van platte
- * tekst, met een submenuutje dat naar de aanwezige blokken springt. Volgorde
- * vastgelegd met Jasper op 15 augustus: weten → wie → niet weten → verder →
- * let op → eerdere berichtgeving.
+ * Het verhaal: de briefing in leesbare blokken. De zijpaneel-secties
+ * (betrokkenen, niet-weten, verder, let-op) zijn naar de aside verhuisd;
+ * hier blijft alleen het inhoudelijke verhaal.
  */
-function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, vragen, context }: {
+function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, context }: {
   briefing: GeparsedeBriefing
   eerder: EerderBericht[]
   eldersTekst: string | null
   toegevoegdeWaarde: string | null
-  vragen: string[]
   context: string | null
 }) {
   const heeftEerder = eerder.length > 0 || Boolean(eldersTekst && !/^nee\.?$/i.test(eldersTekst))
-  const submenu = [
-    briefing.weten.length > 0 && { id: 'weten', label: 'Wat we weten' },
-    Boolean(context) && { id: 'context', label: 'Context en achtergrond' },
-    briefing.betrokkenen.length > 0 && { id: 'wie', label: 'Wie hierin voorkomen' },
-    briefing.nietWeten.length > 0 && { id: 'niet-weten', label: 'Wat we niet weten' },
-    vragen.length > 0 && { id: 'verder', label: 'Zo kom je verder' },
-    briefing.nietInMag.length > 0 && { id: 'let-op', label: 'Let op' },
-    heeftEerder && { id: 'eerder', label: 'Eerdere berichtgeving' },
-  ].filter(Boolean) as { id: string; label: string }[]
 
   return (
     <>
-      {submenu.length > 1 && (
-        <nav className="np-submenu" aria-label="Onderdelen van het verhaal">
-          {submenu.map((s) => (
-            <a key={s.id} href={`#${s.id}`}>{s.label}</a>
-          ))}
-        </nav>
-      )}
-
       <section id="weten" className="np-anker">
         <h3 className="np-kopje">Wat we weten</h3>
         <ol className="np-feiten">
@@ -123,50 +106,6 @@ function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, vragen, con
         </div>
       )}
 
-      {briefing.betrokkenen.length > 0 && (
-        <section id="wie" className="np-betrokkenen np-anker">
-          <h3 className="np-kopje">Wie hierin voorkomen</h3>
-          <ul>
-            {briefing.betrokkenen.map((b, i) => (
-              <li key={i}>
-                <div>
-                  <Link
-                    href={`/nieuwsplein33/verkenner?q=${encodeURIComponent(verkennerTerm(b.naam))}`}
-                    className="np-betrokkene-naam"
-                    title={`Alles wat Stadsgeest heeft over ${b.naam}`}
-                  >
-                    {b.naam}
-                  </Link>
-                  {b.rol && <span className="np-betrokkene-rol">{b.rol}</span>}
-                </div>
-                {b.toelichting && <div className="np-betrokkene-toel">{b.toelichting}</div>}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {briefing.nietWeten.length > 0 && (
-        <div id="niet-weten" className="np-paneel np-paneel-open np-anker">
-          <strong>Wat we niet weten</strong>
-          <ul>{briefing.nietWeten.map((r, i) => <li key={i}>{r}</li>)}</ul>
-        </div>
-      )}
-
-      {vragen.length > 0 && (
-        <div id="verder" className="np-paneel np-paneel-verder np-anker">
-          <strong>Zo kom je verder</strong>
-          <ul>{vragen.map((v, i) => <li key={i}>{v}</li>)}</ul>
-        </div>
-      )}
-
-      {briefing.nietInMag.length > 0 && (
-        <div id="let-op" className="np-paneel np-paneel-nee np-anker">
-          <strong>Let op</strong>
-          <ul>{briefing.nietInMag.map((r, i) => <li key={i}>{r}</li>)}</ul>
-        </div>
-      )}
-
       {heeftEerder && (
         <div id="eerder" className="np-paneel np-paneel-eerder np-anker">
           <strong>Eerdere berichtgeving</strong>
@@ -187,6 +126,60 @@ function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, vragen, con
         </div>
       )}
     </>
+  )
+}
+
+/**
+ * Zijpaneel rechts: actiegerichte blokken die de redacteur helpen beslissen.
+ * Verhuisd vanuit het verhaal zodat ze altijd zichtbaar zijn terwijl je scrollt.
+ */
+function Aside({ briefing, vragen }: {
+  briefing: GeparsedeBriefing
+  vragen: string[]
+}) {
+  return (
+    <aside className="np-aside">
+      {vragen.length > 0 && (
+        <div className="np-aside-paneel np-aside-verder">
+          <strong>Zo kom je verder</strong>
+          <ul>{vragen.map((v, i) => <li key={i}>{v}</li>)}</ul>
+        </div>
+      )}
+
+      {briefing.nietWeten.length > 0 && (
+        <div className="np-aside-paneel np-aside-open">
+          <strong>Wat we niet weten</strong>
+          <ul>{briefing.nietWeten.map((r, i) => <li key={i}>{r}</li>)}</ul>
+        </div>
+      )}
+
+      {briefing.nietInMag.length > 0 && (
+        <div className="np-aside-paneel np-aside-let-op">
+          <strong>Let op</strong>
+          <ul>{briefing.nietInMag.map((r, i) => <li key={i}>{r}</li>)}</ul>
+        </div>
+      )}
+
+      {briefing.betrokkenen.length > 0 && (
+        <div className="np-aside-betrokkenen">
+          <strong>Wie hierin voorkomen</strong>
+          <ul>
+            {briefing.betrokkenen.map((b, i) => (
+              <li key={i}>
+                <Link
+                  href={`/nieuwsplein33/verkenner?q=${encodeURIComponent(verkennerTerm(b.naam))}`}
+                  title={`Alles wat Stadsgeest heeft over ${b.naam}`}
+                >
+                  {b.naam}
+                </Link>
+                {b.rol && <span className="np-betrokkene-extra"> — {b.rol}</span>}
+                {b.toelichting && <div className="np-betrokkene-extra">{b.toelichting}</div>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </aside>
   )
 }
 
@@ -253,15 +246,15 @@ export default async function TipPagina({ params }: Props) {
   const tip = await getTipDetail(id)
   if (!tip) notFound()
 
-  const [documenten, feedback, tijdlijn] = await Promise.all([
+  const [documenten, feedback, tijdlijn, wachtrijIds] = await Promise.all([
     getTipDocumenten(id),
     getTipFeedback(id),
     tip.dossier_id ? getDossierTijdlijn(tip.dossier_id) : Promise.resolve([]),
+    getWachtrijIds(),
   ])
 
   const vragen = safeParseJsonArray<string>(tip.vervolgvragen) ?? []
   const wegingRaw = safeParseJson<Record<string, number | { punten: number; bron?: string }>>(tip.weging)
-  // Normaliseer: de weger slaat soms {punten, bron} op i.p.v. een getal.
   const weging = wegingRaw
     ? Object.fromEntries(
         Object.entries(wegingRaw).map(([k, v]) => [k, typeof v === 'object' && v !== null ? (v as { punten: number }).punten : v as number])
@@ -271,9 +264,6 @@ export default async function TipPagina({ params }: Props) {
   const elders = safeParseJsonArray<EldersItem>(tip.elders_gebracht) ?? []
   const briefing = tip.briefing ? parseBriefing(tip.briefing) : null
 
-  // "Eerdere berichtgeving": wat de weger als elders-gebracht vastlegde, plus
-  // de artikelen van Nieuwsplein33 en de partners die al aan deze tip hangen
-  // (de spiegeldocumenten uit de onderliggende sporen). Ontdubbeld op URL.
   const eerder: EerderBericht[] = elders.map((e) => ({
     medium: e.medium ?? 'onbekend medium',
     titel: null,
@@ -293,6 +283,13 @@ export default async function TipPagina({ params }: Props) {
     })
   }
 
+  // Tier badge: hoogste tier van de dragende bronnen
+  const dragendeBronnen = tip.bronnen.filter((b) => !b.spiegel)
+  const tier = dragendeBronnen.reduce<number | null>(
+    (min, b) => b.tier !== null ? (min === null ? b.tier : Math.min(min, b.tier)) : min,
+    null,
+  )
+
   const tabs: Tab[] = [
     {
       id: 'verhaal',
@@ -303,11 +300,9 @@ export default async function TipPagina({ params }: Props) {
           eerder={eerder}
           eldersTekst={briefing.elders}
           toegevoegdeWaarde={tip.toegevoegde_waarde}
-          vragen={vragen}
           context={briefing.context}
         />
       ) : tip.briefing ? (
-        // Terugval: briefing zonder het vaste format toont als platte tekst.
         <Alinea tekst={tip.briefing} />
       ) : (
         <p className="np-tekst np-stil">Nog geen uitgebreide beschrijving.</p>
@@ -371,9 +366,6 @@ export default async function TipPagina({ params }: Props) {
     },
   ]
 
-  // De vervolgvragen staan op het verhaal-tabblad ("Zo kom je verder"), direct
-  // onder wat we nog niet weten — die twee horen bij elkaar. Alleen als de
-  // briefing niet in het vaste format staat, krijgen ze een eigen tabblad.
   if (!briefing?.volledig && vragen.length > 0) {
     tabs.push({
       id: 'vragen',
@@ -427,12 +419,16 @@ export default async function TipPagina({ params }: Props) {
   }
 
   return (
-    <article className="np-detail">
-      <Link href="/nieuwsplein33" className="np-terug">← terug naar de wachtrij</Link>
+    <article className="np-detail np-detail-breed">
+      {/* Sticky beslisbalk met wachtrijnavigatie */}
+      <BeslisNavigatie tipId={tip.id} status={tip.status} wachtrijIds={wachtrijIds} />
 
       <header className="np-detail-kop">
         <div className="np-detail-labels">
           <span className={`np-soort np-soort-${tip.soort}`}>{SOORT_LABEL[tip.soort] ?? tip.soort}</span>
+          {tier !== null && (
+            <span className={`np-tier np-tier-${tier}`} title={TIER_UITLEG[tier]}>tier {tier}</span>
+          )}
           {tip.categorie && <span className="np-label">{tip.categorie}</span>}
           <span className="np-label">{tip.gemeente}</span>
           {tip.status !== 'wachtrij' && <span className="np-label np-label-status">{STATUS_LABEL[tip.status] ?? tip.status}</span>}
@@ -441,31 +437,40 @@ export default async function TipPagina({ params }: Props) {
         <p className="np-detail-kern">{tip.kern}</p>
       </header>
 
-      <TipActies tipId={tip.id} status={tip.status} />
+      {/* Twee-kolom layout: verhaal links, actiepanelen rechts */}
+      <div className="np-detail-rooster">
+        <div>
+          <TipActies tipId={tip.id} status={tip.status} />
+          <TipTabs tabs={tabs} />
 
-      <TipTabs tabs={tabs} />
+          <Meetknop
+            tipId={tip.id}
+            artikelUrl={tip.artikel_url}
+            eigenVondst={tip.eigen_vondst}
+            status={tip.status}
+          />
 
-      <Meetknop
-        tipId={tip.id}
-        artikelUrl={tip.artikel_url}
-        eigenVondst={tip.eigen_vondst}
-        status={tip.status}
-      />
+          {feedback.length > 0 && (
+            <section className="np-geschiedenis">
+              <h3 className="np-kopje">Wat er met deze tip is gebeurd</h3>
+              <ul>
+                {feedback.map((f) => (
+                  <li key={f.id}>
+                    <span className="np-stil">{formatDateTime(f.created_at)}</span> — {f.gebruiker}: {f.actie.replace(/_/g, ' ')}
+                    {f.reden_code && <> ({f.reden_code.replace(/_/g, ' ')})</>}
+                    {f.reden_tekst && <div className="np-tekst">{f.reden_tekst}</div>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
 
-      {feedback.length > 0 && (
-        <section className="np-geschiedenis">
-          <h3 className="np-kopje">Wat er met deze tip is gebeurd</h3>
-          <ul>
-            {feedback.map((f) => (
-              <li key={f.id}>
-                <span className="np-stil">{formatDateTime(f.created_at)}</span> — {f.gebruiker}: {f.actie.replace(/_/g, ' ')}
-                {f.reden_code && <> ({f.reden_code.replace(/_/g, ' ')})</>}
-                {f.reden_tekst && <div className="np-tekst">{f.reden_tekst}</div>}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+        {/* Zijpaneel: alleen als er een volledige briefing is */}
+        {briefing?.volledig && (
+          <Aside briefing={briefing} vragen={vragen} />
+        )}
+      </div>
     </article>
   )
 }

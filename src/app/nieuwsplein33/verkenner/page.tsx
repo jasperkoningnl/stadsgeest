@@ -64,8 +64,27 @@ export default async function VerkennerPagina({
             {resultaat.verbreedNaar && <> — niets gevonden op de volledige naam, gezocht op &ldquo;{resultaat.verbreedNaar}&rdquo;</>}
           </p>
 
+          {/* Springnavigatie: ankers naar de secties met resultaten */}
+          {(() => {
+            const secties = [
+              resultaat.tips.length > 0 && { id: 'v-tips', label: `Tips (${resultaat.tips.length})` },
+              resultaat.subsidieTotalen.length > 0 && { id: 'v-subsidies', label: 'Subsidies' },
+              resultaat.feiten.length > 0 && { id: 'v-feiten', label: `Feiten (${resultaat.feiten.length})` },
+              resultaat.signalen.length > 0 && { id: 'v-signalen', label: `Sporen (${resultaat.signalen.length})` },
+              resultaat.documenten.length > 0 && { id: 'v-documenten', label: `Documenten (${resultaat.documenten.length})` },
+            ].filter(Boolean) as { id: string; label: string }[]
+            if (secties.length <= 1) return null
+            return (
+              <nav className="np-verkenner-spring" aria-label="Spring naar sectie">
+                {secties.map((s) => (
+                  <a key={s.id} href={`#${s.id}`}>{s.label}</a>
+                ))}
+              </nav>
+            )
+          })()}
+
           {resultaat.tips.length > 0 && (
-            <section className="np-verkenner-blok">
+            <section id="v-tips" className="np-verkenner-blok">
               <h3 className="np-kopje">Tips ({resultaat.tips.length})</h3>
               <div className="np-lijst">
                 {resultaat.tips.map((t) => (
@@ -84,7 +103,7 @@ export default async function VerkennerPagina({
           )}
 
           {resultaat.subsidieTotalen.length > 0 && (
-            <section className="np-verkenner-blok">
+            <section id="v-subsidies" className="np-verkenner-blok">
               <h3 className="np-kopje">Subsidieregister</h3>
               <p className="np-tekst np-stil">
                 Gemeentelijke subsidies waarvan de ontvanger op de zoekterm lijkt.
@@ -112,7 +131,7 @@ export default async function VerkennerPagina({
           )}
 
           {resultaat.feiten.length > 0 && (
-            <section className="np-verkenner-blok">
+            <section id="v-feiten" className="np-verkenner-blok">
               <h3 className="np-kopje">Dossierfeiten ({resultaat.feiten.length})</h3>
               <ol className="np-tijdlijn">
                 {resultaat.feiten.map((f) => (
@@ -136,7 +155,7 @@ export default async function VerkennerPagina({
           )}
 
           {resultaat.signalen.length > 0 && (
-            <section className="np-verkenner-blok">
+            <section id="v-signalen" className="np-verkenner-blok">
               <h3 className="np-kopje">Sporen uit de bronnen ({resultaat.signalen.length})</h3>
               <p className="np-tekst np-stil">
                 Onderwerpen die Stadsgeest volgt of heeft gevolgd; niet elk spoor werd een tip.
@@ -159,7 +178,7 @@ export default async function VerkennerPagina({
           )}
 
           {resultaat.documenten.length > 0 && (
-            <section className="np-verkenner-blok">
+            <section id="v-documenten" className="np-verkenner-blok">
               <h3 className="np-kopje">
                 Documenten
                 {resultaat.documentenTotaal > resultaat.documenten.length

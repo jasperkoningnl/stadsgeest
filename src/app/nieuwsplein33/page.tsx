@@ -3,6 +3,8 @@ import { hasTurso } from '@/lib/turso'
 import { getTips, getGeparkeerdDezeWeek, getMeetstand, type TipRij } from '@/lib/dashboard/tipQueries'
 import { kalenderdagenGeleden } from '@/lib/dashboard/format'
 import TipRegel from './TipRegel'
+import WachtrijSneltoetsen from './WachtrijSneltoetsen'
+import WachtrijFilters from './WachtrijFilters'
 import GeenDatabase from './GeenDatabase'
 
 // Geen caching: een redacteur die net een tip heeft geparkeerd moet dat meteen
@@ -19,9 +21,10 @@ export default async function WachtrijPagina() {
     getMeetstand(),
   ])
 
-  // Vier dagkopjes: vandaag, gisteren, deze week, eerder. Sluit aan op het
-  // ochtendritme van de weger en op de wens van de redactie om recente tips
-  // makkelijker terug te vinden dan in één bak "eerder".
+  // Verzamel de beschikbare soorten voor de filterpillen.
+  const soorten = [...new Set(tips.map((t) => t.soort))].sort()
+
+  // Vier dagkopjes: vandaag, gisteren, deze week, eerder.
   const groepen: { kop: string; tips: TipRij[] }[] = [
     { kop: 'Vandaag', tips: [] },
     { kop: 'Gisteren', tips: [] },
@@ -53,6 +56,9 @@ export default async function WachtrijPagina() {
         </div>
       )}
 
+      {/* Filterpillen en sneltoetshint */}
+      <WachtrijFilters soorten={soorten} totaal={tips.length} />
+
       {tips.length === 0 ? (
         <div className="np-leeg">
           <p className="np-leeg-kop">Niets in de wachtrij</p>
@@ -62,17 +68,19 @@ export default async function WachtrijPagina() {
           </p>
         </div>
       ) : (
-        groepen.filter((g) => g.tips.length > 0).map((g) => (
-          <section key={g.kop} className="np-daggroep">
-            <h2 className="np-daggroep-kop">
-              {g.kop}
-              <span className="np-daggroep-tel">{g.tips.length}</span>
-            </h2>
-            <div className="np-lijst">
-              {g.tips.map((tip) => <TipRegel key={tip.id} tip={tip} />)}
-            </div>
-          </section>
-        ))
+        <WachtrijSneltoetsen>
+          {groepen.filter((g) => g.tips.length > 0).map((g) => (
+            <section key={g.kop} className="np-daggroep">
+              <h2 className="np-daggroep-kop">
+                {g.kop}
+                <span className="np-daggroep-tel">{g.tips.length}</span>
+              </h2>
+              <div className="np-lijst">
+                {g.tips.map((tip) => <TipRegel key={tip.id} tip={tip} />)}
+              </div>
+            </section>
+          ))}
+        </WachtrijSneltoetsen>
       )}
     </>
   )
