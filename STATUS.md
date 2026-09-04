@@ -6492,3 +6492,51 @@ De projectdocumentatie (`claude/stadsgeest-weger-prompt.md`) is mee bijgewerkt. 
 - Of de combinatieregel niet te streng is voor raadsvragen die een echt nieuw feit onthullen maar waarbij de weger de derde voorwaarde ("het onderwerp is op zichzelf al een hard feit") te conservatief interpreteert.
 
 *Cowork-update: 2026-09-04 (weger-prompt diversiteitsregels)*
+---
+
+### Sessie 4 september 2026 — Fase 0 uitbreidingsplan uitgevoerd
+
+Opdracht: Fase 0 van het Stadsgeest 2.0 uitbreidingsplan (Stadsgeest_uitbreidingsplan_Claude.md) uitvoeren. Vier deeltaken:
+
+**0.1 — Inventaris repository, runtime, database en adapters**
+- Alle 56 scrapers geïnventariseerd en geclassificeerd (actief/wekelijks/apart/uitgeschakeld).
+- 12 PM2-jobs beschreven met cron en functie.
+- 36 databasetabellen geïnventariseerd met rijtelling.
+- Bestaande componenten afgezet tegen de doelarchitectuur (SOURCES → ENTITIES → RELATIONS → EVENTS → SIGNALS).
+- Per component beschreven wat herbruikbaar is en wat moet veranderen.
+- Resultaat: `Stadsgeest-documentatie\current-state.md`
+
+**0.2 — Metingen**
+- Live database bevraagd via `meting-fase0.cjs` op Jaspers notebook.
+- Kerngetallen:
+  - 8.084 raw_items (bereik feb 2014 – sep 2026), waarvan 26,2% met fulltext
+  - 1.717 signalen (mei – sep 2026), gemiddeld ~18/dag
+  - 4.644 entities: 2.046 org, 1.183 persoon, 746 locatie, 608 ECLI, 52 bedrag, 5 adres, 2 KvK
+  - 134 personen (398 aliassen), 32 organisaties (40 aliassen), 134 rollen
+  - 105 URL-duplicaten in raw_items
+  - 131 bronnen: 85 ok, 21 dood, 11 dubbel, 10 eenmalig, 4 uitgeschakeld
+  - Intake-beslissingen: 45% gefilterd, 30% gematcht, 13% nieuw signaal, 12% historisch
+- Belangrijkste bevinding: slechts 2 KvK-nummers en 5 adressen in 4.644 entities — de entity-extractie vindt vrijwel geen gestructureerde identifiers, precies wat het uitbreidingsplan oplost.
+- Resultaat: `Stadsgeest-documentatie\fase0-metingen.md`
+
+**0.3 — Migratieplan, adaptercontract en testinfra**
+- Vier SQL-migraties gedefinieerd (M1-M4), alle additief en terugdraaibaar:
+  - M1: source_class, adapter_version op sources; detection_rule, provenance op signals; raw_hash op raw_items
+  - M2: kg_entities, entity_identifiers, kg_aliases, locations, entity_locations
+  - M3: kg_relations, kg_events, event_entities, source_records, fetch_runs, entity_merge_candidates
+  - M4: data-seed (persons → kg_entities, org_aliases → kg_aliases, roles → kg_relations, KvK → entity_identifiers)
+- BaseAdapter-klasse geschreven met discover/fetch/parse/normalize/diff/emit/health-contract
+- Source manifest formaat vastgelegd (JSON)
+- Provenance-contract gedefinieerd (12 verplichte velden per event)
+- Entity-resolutie scoring: +100 identifier, +45 website, +40 BAG, +35 naam, etc. Auto-merge ≥90, review 70-89.
+- Testinfra: fixture-standaard, mock HTTP-laag, testrunner (node --test), 6 testtypen
+- 5 feature flags gedefinieerd (STADSGEEST_KG_ENABLED, _MATCHING, _EVENTS, _DIFF, _NEW_ADAPTERS)
+- Resultaat: `Stadsgeest-documentatie\migratieplan.md`
+
+**0.4 — STATUS.md bijgewerkt** (deze entry)
+
+Meetscript `scraper\meting-fase0.cjs` kan worden verwijderd (eenmalig meetscript).
+
+Volgende stap: Fase 1 — migraties M1-M4 uitvoeren op Turso, BaseAdapter implementeren, eerste adapter wrappen.
+
+*Cowork-update: 2026-09-04 (fase 0 uitbreidingsplan)*
