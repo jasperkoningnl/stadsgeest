@@ -65,17 +65,14 @@ interface EerderBericht {
   url: string | null
 }
 
-/**
- * Het verhaal: de briefing in leesbare blokken. De zijpaneel-secties
- * (betrokkenen, niet-weten, verder, let-op) zijn naar de aside verhuisd;
- * hier blijft alleen het inhoudelijke verhaal.
- */
-function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, context }: {
+/** Het verhaal: de briefing in leesbare blokken. */
+function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, context, vragen }: {
   briefing: GeparsedeBriefing
   eerder: EerderBericht[]
   eldersTekst: string | null
   toegevoegdeWaarde: string | null
   context: string | null
+  vragen: string[]
 }) {
   const heeftEerder = eerder.length > 0 || Boolean(eldersTekst && !/^nee\.?$/i.test(eldersTekst))
 
@@ -99,11 +96,29 @@ function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, context }: 
         </ol>
       </section>
 
+      {briefing.nietWeten.length > 0 && (
+        <section className="np-anker">
+          <h3 className="np-kopje">Wat we niet weten</h3>
+          <ul className="np-open-punten">
+            {briefing.nietWeten.map((r, i) => <li key={i}>{r}</li>)}
+          </ul>
+        </section>
+      )}
+
       {context && (
         <div id="context" className="np-paneel np-paneel-context np-anker">
           <strong>Context en achtergrond</strong>
           <p>{context}</p>
         </div>
+      )}
+
+      {vragen.length > 0 && (
+        <section className="np-anker">
+          <h3 className="np-kopje">Zo kom je verder</h3>
+          <ul className="np-vragen">
+            {vragen.map((v, i) => <li key={i}>{v}</li>)}
+          </ul>
+        </section>
       )}
 
       {heeftEerder && (
@@ -125,45 +140,18 @@ function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, context }: 
           {toegevoegdeWaarde && <p className="np-eerder-nieuw"><strong>Wat hier nieuw aan is:</strong> {toegevoegdeWaarde}</p>}
         </div>
       )}
-    </>
-  )
-}
-
-/**
- * Zijpaneel rechts: actiegerichte blokken die de redacteur helpen beslissen.
- * Verhuisd vanuit het verhaal zodat ze altijd zichtbaar zijn terwijl je scrollt.
- */
-function Aside({ briefing, vragen }: {
-  briefing: GeparsedeBriefing
-  vragen: string[]
-}) {
-  return (
-    <aside className="np-aside">
-      {vragen.length > 0 && (
-        <div className="np-aside-paneel np-aside-verder">
-          <strong>Zo kom je verder</strong>
-          <ul>{vragen.map((v, i) => <li key={i}>{v}</li>)}</ul>
-        </div>
-      )}
-
-      {briefing.nietWeten.length > 0 && (
-        <div className="np-aside-paneel np-aside-open">
-          <strong>Wat we niet weten</strong>
-          <ul>{briefing.nietWeten.map((r, i) => <li key={i}>{r}</li>)}</ul>
-        </div>
-      )}
 
       {briefing.nietInMag.length > 0 && (
-        <div className="np-aside-paneel np-aside-let-op">
+        <div className="np-paneel np-paneel-let-op">
           <strong>Let op</strong>
           <ul>{briefing.nietInMag.map((r, i) => <li key={i}>{r}</li>)}</ul>
         </div>
       )}
 
       {briefing.betrokkenen.length > 0 && (
-        <div className="np-aside-betrokkenen">
-          <strong>Wie hierin voorkomen</strong>
-          <ul>
+        <section className="np-anker">
+          <h3 className="np-kopje">Wie hierin voorkomen</h3>
+          <ul className="np-betrokkenen">
             {briefing.betrokkenen.map((b, i) => (
               <li key={i}>
                 <Link
@@ -177,9 +165,9 @@ function Aside({ briefing, vragen }: {
               </li>
             ))}
           </ul>
-        </div>
+        </section>
       )}
-    </aside>
+    </>
   )
 }
 
@@ -301,6 +289,7 @@ export default async function TipPagina({ params }: Props) {
           eldersTekst={briefing.elders}
           toegevoegdeWaarde={tip.toegevoegde_waarde}
           context={briefing.context}
+          vragen={vragen}
         />
       ) : tip.briefing ? (
         <Alinea tekst={tip.briefing} />
@@ -419,7 +408,7 @@ export default async function TipPagina({ params }: Props) {
   }
 
   return (
-    <article className="np-detail np-detail-breed">
+    <article className="np-detail">
       {/* Sticky beslisbalk met wachtrijnavigatie */}
       <BeslisNavigatie tipId={tip.id} status={tip.status} wachtrijIds={wachtrijIds} />
 
@@ -437,40 +426,30 @@ export default async function TipPagina({ params }: Props) {
         <p className="np-detail-kern">{tip.kern}</p>
       </header>
 
-      {/* Twee-kolom layout: verhaal links, actiepanelen rechts */}
-      <div className="np-detail-rooster">
-        <div>
-          <TipActies tipId={tip.id} status={tip.status} />
-          <TipTabs tabs={tabs} />
+      <TipActies tipId={tip.id} status={tip.status} />
+      <TipTabs tabs={tabs} />
 
-          <Meetknop
-            tipId={tip.id}
-            artikelUrl={tip.artikel_url}
-            eigenVondst={tip.eigen_vondst}
-            status={tip.status}
-          />
+      <Meetknop
+        tipId={tip.id}
+        artikelUrl={tip.artikel_url}
+        eigenVondst={tip.eigen_vondst}
+        status={tip.status}
+      />
 
-          {feedback.length > 0 && (
-            <section className="np-geschiedenis">
-              <h3 className="np-kopje">Wat er met deze tip is gebeurd</h3>
-              <ul>
-                {feedback.map((f) => (
-                  <li key={f.id}>
-                    <span className="np-stil">{formatDateTime(f.created_at)}</span> — {f.gebruiker}: {f.actie.replace(/_/g, ' ')}
-                    {f.reden_code && <> ({f.reden_code.replace(/_/g, ' ')})</>}
-                    {f.reden_tekst && <div className="np-tekst">{f.reden_tekst}</div>}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-        </div>
-
-        {/* Zijpaneel: alleen als er een volledige briefing is */}
-        {briefing?.volledig && (
-          <Aside briefing={briefing} vragen={vragen} />
-        )}
-      </div>
+      {feedback.length > 0 && (
+        <section className="np-geschiedenis">
+          <h3 className="np-kopje">Wat er met deze tip is gebeurd</h3>
+          <ul>
+            {feedback.map((f) => (
+              <li key={f.id}>
+                <span className="np-stil">{formatDateTime(f.created_at)}</span> — {f.gebruiker}: {f.actie.replace(/_/g, ' ')}
+                {f.reden_code && <> ({f.reden_code.replace(/_/g, ' ')})</>}
+                {f.reden_tekst && <div className="np-tekst">{f.reden_tekst}</div>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </article>
   )
 }

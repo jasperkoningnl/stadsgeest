@@ -3,7 +3,6 @@ import { hasTurso } from '@/lib/turso'
 import { getTips, getGeparkeerdDezeWeek, getMeetstand, type TipRij } from '@/lib/dashboard/tipQueries'
 import { kalenderdagenGeleden } from '@/lib/dashboard/format'
 import TipRegel from './TipRegel'
-import WachtrijSneltoetsen from './WachtrijSneltoetsen'
 import WachtrijFilters from './WachtrijFilters'
 import GeenDatabase from './GeenDatabase'
 
@@ -68,19 +67,17 @@ export default async function WachtrijPagina() {
           </p>
         </div>
       ) : (
-        <WachtrijSneltoetsen>
-          {groepen.filter((g) => g.tips.length > 0).map((g) => (
-            <section key={g.kop} className="np-daggroep">
-              <h2 className="np-daggroep-kop">
-                {g.kop}
-                <span className="np-daggroep-tel">{g.tips.length}</span>
-              </h2>
-              <div className="np-lijst">
-                {g.tips.map((tip) => <TipRegel key={tip.id} tip={tip} />)}
-              </div>
-            </section>
-          ))}
-        </WachtrijSneltoetsen>
+        {groepen.filter((g) => g.tips.length > 0).map((g) => (
+          <section key={g.kop} className="np-daggroep">
+            <h2 className="np-daggroep-kop">
+              {g.kop}
+              <span className="np-daggroep-tel">{g.tips.length}</span>
+            </h2>
+            <div className="np-lijst">
+              {g.tips.map((tip) => <TipRegel key={tip.id} tip={tip} />)}
+            </div>
+          </section>
+        ))}
       )}
     </>
   )

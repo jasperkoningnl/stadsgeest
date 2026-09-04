@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -11,8 +10,6 @@ type Actie = 'goedgekeurd' | 'geparkeerd' | 'afgekeurd' | 'wachtrij'
  * - ← link terug naar de wachtrij
  * - positie in de wachtrij ("tip X van Y") met ↑/↓-knoppen
  * - beslisknoppen (oppakken / parkeren / afwijzen / terugzetten)
- *
- * Navigatie met j/k door de wachtrij; de ids komen van de server.
  */
 export default function BeslisNavigatie({
   tipId,
@@ -30,26 +27,9 @@ export default function BeslisNavigatie({
   const vorigeId = idx > 0 ? wachtrijIds[idx - 1] : null
   const volgendeId = idx >= 0 && idx < wachtrijIds.length - 1 ? wachtrijIds[idx + 1] : null
 
-  const gaVerder = useCallback((id: number) => {
+  function gaVerder(id: number) {
     router.push(`/nieuwsplein33/tip/${id}`)
-  }, [router])
-
-  // Sneltoetsen: j = volgende tip, k = vorige tip
-  useEffect(() => {
-    function handler(e: KeyboardEvent) {
-      const tag = (e.target as HTMLElement)?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
-      if (e.ctrlKey || e.metaKey || e.altKey) return
-
-      if (e.key === 'j' && volgendeId !== null) {
-        e.preventDefault(); gaVerder(volgendeId)
-      } else if (e.key === 'k' && vorigeId !== null) {
-        e.preventDefault(); gaVerder(vorigeId)
-      }
-    }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [vorigeId, volgendeId, gaVerder])
+  }
 
   async function verstuur(actie: Actie) {
     const res = await fetch(`/api/tip/${tipId}/beslis`, {
@@ -74,11 +54,11 @@ export default function BeslisNavigatie({
           <>
             <span className="np-beslisbalk-positie">tip {positie} van {totaal}</span>
             <button type="button" className="np-beslisbalk-nav" disabled={vorigeId === null}
-              onClick={() => vorigeId !== null && gaVerder(vorigeId)} title="Vorige tip (k)">
+              onClick={() => vorigeId !== null && gaVerder(vorigeId)} title="Vorige tip">
               ↑
             </button>
             <button type="button" className="np-beslisbalk-nav" disabled={volgendeId === null}
-              onClick={() => volgendeId !== null && gaVerder(volgendeId)} title="Volgende tip (j)">
+              onClick={() => volgendeId !== null && gaVerder(volgendeId)} title="Volgende tip">
               ↓
             </button>
           </>

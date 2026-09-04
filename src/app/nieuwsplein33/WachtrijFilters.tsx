@@ -3,7 +3,7 @@
 import { SOORT_LABEL } from './TipRegel'
 
 /**
- * Filterbalk boven de wachtrij: pillen per soort en een sneltoetshint.
+ * Filterbalk boven de wachtrij: pillen per soort.
  * Filtert client-side door np-lijst-items te tonen/verbergen op basis van
  * een data-attribuut, zodat de serverpagina ongewijzigd blijft.
  */
@@ -39,7 +39,6 @@ export default function WachtrijFilters({ soorten, totaal }: { soorten: string[]
           {SOORT_LABEL[s] ?? s}
         </button>
       ))}
-      <span className="np-sneltoets-hint">j/k navigeren · a/p/x beslissen · Enter openen</span>
     </div>
   )
 }
