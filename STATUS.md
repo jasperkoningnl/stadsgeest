@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **3 september 2026**
+> ### Bijgewerkt tot en met **4 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-03 — Weger-prompt verbeterd, bestaande tips bijgewerkt"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-04 — Weger-run 4 september: één tip (veiligheid Amersfoort-Noord), drie dossierfeiten"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -6408,3 +6408,62 @@ Retroactief 17 updates uitgevoerd op bestaande tips:
 - Of er tips zijn die een context-blok verdienen maar niet in de selectie van 7 zaten (tips met status `afgekeurd` zijn overgeslagen).
 
 *Cowork-update: 2026-09-03 (Nieuwsplein33-account, promptverbetering en tip-updates)*
+
+---
+
+### Cowork-update: 2026-09-04 — Weger-run 4 september: één tip (veiligheid Amersfoort-Noord), drie dossierfeiten
+
+### Werkset
+
+Totaal open signalen (niet aan tip gekoppeld): 817. Daarvan 30 nieuw (geen eerdere weger-beoordeling), 117 met nieuw materiaal (last_seen_at > weger_laatst), 670 al beoordeeld.
+
+Alle 30 nieuwe signalen inhoudelijk beoordeeld. De 117 signalen met nieuw materiaal zijn gecontroleerd op inhoudelijk nieuw materiaal; geen ervan bevatte inhoudelijk nieuwe informatie (herhaalde scrapes van routinevergunningen, wekelijks terugkerende activiteitenkalender, en eerder beoordeelde raadsstukken).
+
+### Tip aangemaakt
+
+| Tip | Titel | Soort | Score | Dossier |
+|---|---|---|---|---|
+| 42 | Amersfoort voor Vrijheid vraagt college naar veiligheid Amersfoort-Noord | nieuwsfeit | 8 | 1 (Explosies Amersfoort) |
+
+Amersfoort voor Vrijheid diende op 3 september schriftelijke vragen 2026-105 in over de veiligheidssituatie in Amersfoort-Noord. De volledige tekst van de vragen is niet beschikbaar (Notubiz levert alleen metadata, Cloudflare blokkeert directe fetch). De koppeling met het explosiedossier is plausibel — minstens vijftien explosieve incidenten in 2026, meerdere in wijken die onder Amersfoort-Noord vallen — maar niet bevestigd zonder de vraaginhoud. Tip bevat vijf vervolgvragen, waaronder het ophalen van de volledige tekst bij de griffie. Spiegelcheck: De Stad Amersfoort en RTV Utrecht schreven over de explosies zelf, maar niet over politieke vragen erover.
+
+### Dossierfeiten toegevoegd
+
+| ID | Dossier | Datum | Feit |
+|---|---|---|---|
+| 272 | 5 — Lokale politiek en college | 2026-09-03 | Olaf Krijgsman beëindigt werkzaamheden als buitengewoon raadslid |
+| 273 | 11 — Gemeentelijke opdrachten en aanbestedingen | 2026-09-03 | Marktconsultatie ITS-applicaties 2027-2031 provincie Utrecht en gemeente Amersfoort |
+| 274 | 12 — Bomen en kapvergunningen | 2026-08-27 | Aanvraag kappen 9 bomen Netwerklaan 450 (Vathorst) |
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld (nieuw) | 30 | 30 |
+| Signalen herbeoordeeld (nieuw materiaal) | 0 | 0 (117 gecontroleerd, geen inhoudelijk nieuw materiaal) |
+| Signal events geschreven | 30 | 30 (29 reviewed + 1 tip_created) |
+| Tips aangemaakt | 1 | 1 (tip 42) |
+| tip_signals geschreven | 1 | 1 (1743 dragend) |
+| tip_events geschreven | 1 | 1 |
+| Dossiers aangemaakt | 0 | 0 |
+| Dossierfeiten geschreven | 3 | 3 (ID 272-274) |
+| Signalen op discarded gezet | 1 | 1 (#1741, NS-verstoring buiten gebied) |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Rustige dag.** 30 nieuwe signalen, waarvan 24 routinevergunningen (kappen, dakkapel, tijdelijk weggebruik, inrit). Twee raadsstukken (AvV-vragen, Krijgsman-vertrek), één NVWA-inspectie (duplicaat), één marktconsultatie, één NS-verstoring buiten gebied, één VNG ALV-agenda.
+- **OMUR MARKT B.V. (#1742) is een duplicaat.** Het NVWA-inspectieresultaat (02-07-2026) was al vastgelegd als dossierfeit 78 in dossier 7. De scraper heeft dezelfde pagina opnieuw opgehaald.
+- **Klarissenstraat 58-110 bouwplaats (#1765) hoort bij verduurzamingsproject (#1676).** Drie maanden bouwplaats voor dak- en dakkapelrenovatie.
+- **Krijgsman (#1745)**: partij niet vermeld in Notubiz-metadata. Websearch wijst op Partij voor de Dieren of lijst NoëlleSanders, maar niet bevestigd.
+- **Nieuw-materiaal-signalen (117)**: steekproefsgewijs gecontroleerd. Betreft herhaalde scrapes van routinevergunningen, de wekelijkse activiteitenkalender van het college, en eerder beoordeelde raadsstukken. Geen inhoudelijk nieuw materiaal gevonden.
+
+### Niet geverifieerd
+
+- De volledige tekst van schriftelijke vragen 2026-105 (Cloudflare blokkeerde Notubiz, scraper levert alleen metadata).
+- Of de vragen specifiek over de explosies gaan of over een ander veiligheidsthema.
+- Bij welke partij Olaf Krijgsman buitengewoon raadslid was.
+- Of de overige ~117 nieuw-materiaal-signalen daadwerkelijk geen herbeoordeling verdienen (steekproefsgewijs gecontroleerd, niet uitputtend).
+
+*Cowork-update: 2026-09-04 (Nieuwsplein33-account, weger-run)*
