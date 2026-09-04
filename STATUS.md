@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **4 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-04 — Weger-run 4 september: één tip (veiligheid Amersfoort-Noord), drie dossierfeiten"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-04 — Weger-prompt: diversiteitsregels en raadsvragen-combinatieregel"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -6467,3 +6467,28 @@ Geen afwijkingen.
 - Of de overige ~117 nieuw-materiaal-signalen daadwerkelijk geen herbeoordeling verdienen (steekproefsgewijs gecontroleerd, niet uitputtend).
 
 *Cowork-update: 2026-09-04 (Nieuwsplein33-account, weger-run)*
+
+---
+
+### Cowork-update: 2026-09-04 — Weger-prompt: diversiteitsregels en raadsvragen-combinatieregel
+
+Aanleiding: vier van de vijf laatste tips kwamen voort uit schriftelijke raadsvragen van een enkele fractie. Op zich niet fout, maar het aanbod was eenzijdig. Een raadsvraag zonder beantwoording scoorde makkelijk hoog op spanning/conflict en concreetheid, terwijl de documentenstroom — de kernwaarde van Stadsgeest — ondervertegenwoordigd was.
+
+Vier wijzigingen doorgevoerd in `stadsgeest-weger.md` (het bestand dat de weger-taak dagelijks leest):
+
+1. **Combinatieregel raadsvragen (stap 2).** Een onbeantwoorde schriftelijke raadsvraag mag niet meer op eigen kracht een tip dragen. Pas als het antwoord beschikbaar is, er minstens één ander dragend bronitem over hetzelfde onderwerp is, of de vraag zelf een nog niet publiek feit onthult. Anders wordt het een dossierfeit, zodat het alsnog meetelt zodra er meer binnenkomt.
+
+2. **Solo-raadsvragen afgewaardeerd in scoretabel (stap 6).** Schriftelijke raadsvragen zonder beantwoording als enige dragende bron krijgen −3 punten. In combinatie met de bestaande −2 voor losstaand incident kan zo'n vraag niet meer boven de drempel van 6 komen tenzij er echt iets aan de hand is.
+
+3. **Drie bonusregels voor de documentenstroom (stap 6).** B&W-besluiten met drie of meer bijlagen of een bijlage van 20+ pagina's: +2. Vergunningen met ingediende zienswijze of bezwaar: +2. WOO-besluiten met gedeeltelijke openbaarmaking: +2. Dit verhoogt de kans dat diep-in-documenten-graven daadwerkelijk tips oplevert.
+
+4. **Diversiteitscheck na weging (stap 6).** Als meer dan de helft van de tips uit dezelfde broncategorie komt, pikt de weger het sterkste signaal uit een andere categorie op als extra tip, met een OPMERKING in de briefing. Geldt niet bij twee tips of minder.
+
+De projectdocumentatie (`claude/stadsgeest-weger-prompt.md`) is mee bijgewerkt. De weger-taak hoeft niet opnieuw aangemaakt te worden — hij leest het bestand bij elke run.
+
+### Niet geverifieerd
+
+- Of de puntenverdeling in de praktijk goed uitpakt. Na een paar runs bekijken of de balans klopt of dat de waarden bijgesteld moeten worden.
+- Of de combinatieregel niet te streng is voor raadsvragen die een echt nieuw feit onthullen maar waarbij de weger de derde voorwaarde ("het onderwerp is op zichzelf al een hard feit") te conservatief interpreteert.
+
+*Cowork-update: 2026-09-04 (weger-prompt diversiteitsregels)*

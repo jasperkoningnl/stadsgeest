@@ -23,6 +23,10 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-09-04 — Breder aanbod in de tipwachtrij
+
+De afgelopen dagen bestonden de meeste tips uit schriftelijke raadsvragen van een enkele fractie. Dat is aangepast: raadsvragen zonder beantwoording wegen nu minder zwaar en komen alleen als tip als er ook ander bronmateriaal over hetzelfde onderwerp is. Tegelijk scoren documenten met veel bijlagen, vergunningen met bezwaren en WOO-besluiten met weggelakte passages nu hoger. Het effect is dat de wachtrij gevarieerder wordt. Keerzijde: een raadsvraag die op zichzelf al een sterk signaal is, kan nu net onder de drempel vallen. Mocht dat opvallen, geef het door.
+
 ## 2026-09-03 — Tips bevatten nu meer context en links naar eerdere berichtgeving
 
 Bij tips over wetgeving, procedures of bestuurlijk jargon staat nu een kort blokje dat uitlegt wat die termen betekenen. Denk aan wat de Wet Bibob inhoudt, hoe een BOPA-procedure werkt of wat verscherpt toezicht van de IGJ betekent. Het blokje verschijnt alleen als het nodig is, niet bij elke tip. Daarnaast staan bij eerdere berichtgeving nu directe links naar de bewuste artikelen in plaats van alleen een beschrijving. Bestaande tips in de wachtrij zijn waar mogelijk bijgewerkt met beide verbeteringen.
