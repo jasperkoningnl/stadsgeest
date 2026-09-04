@@ -69,16 +69,18 @@ interface EerderBericht {
  * vastgelegd met Jasper op 15 augustus: weten → wie → niet weten → verder →
  * let op → eerdere berichtgeving.
  */
-function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, vragen }: {
+function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, vragen, context }: {
   briefing: GeparsedeBriefing
   eerder: EerderBericht[]
   eldersTekst: string | null
   toegevoegdeWaarde: string | null
   vragen: string[]
+  context: string | null
 }) {
   const heeftEerder = eerder.length > 0 || Boolean(eldersTekst && !/^nee\.?$/i.test(eldersTekst))
   const submenu = [
     briefing.weten.length > 0 && { id: 'weten', label: 'Wat we weten' },
+    Boolean(context) && { id: 'context', label: 'Context en achtergrond' },
     briefing.betrokkenen.length > 0 && { id: 'wie', label: 'Wie hierin voorkomen' },
     briefing.nietWeten.length > 0 && { id: 'niet-weten', label: 'Wat we niet weten' },
     vragen.length > 0 && { id: 'verder', label: 'Zo kom je verder' },
@@ -113,6 +115,13 @@ function Verhaal({ briefing, eerder, eldersTekst, toegevoegdeWaarde, vragen }: {
           ))}
         </ol>
       </section>
+
+      {context && (
+        <div id="context" className="np-paneel np-paneel-context np-anker">
+          <strong>Context en achtergrond</strong>
+          <p>{context}</p>
+        </div>
+      )}
 
       {briefing.betrokkenen.length > 0 && (
         <section id="wie" className="np-betrokkenen np-anker">
@@ -295,6 +304,7 @@ export default async function TipPagina({ params }: Props) {
           eldersTekst={briefing.elders}
           toegevoegdeWaarde={tip.toegevoegde_waarde}
           vragen={vragen}
+          context={briefing.context}
         />
       ) : tip.briefing ? (
         // Terugval: briefing zonder het vaste format toont als platte tekst.

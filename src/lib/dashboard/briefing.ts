@@ -26,6 +26,7 @@ export interface Betrokkene {
 export interface GeparsedeBriefing {
   volledig: boolean
   weten: BriefingFeit[]
+  context: string | null
   betrokkenen: Betrokkene[]
   gevonden: string | null
   nietWeten: string[]
@@ -35,6 +36,7 @@ export interface GeparsedeBriefing {
 
 const KOPPEN = [
   'WAT WE WETEN',
+  'CONTEXT EN ACHTERGROND',
   'BETROKKEN PERSONEN EN ORGANISATIES',
   'HOE DIT IS GEVONDEN',
   'WAT WE NIET WETEN',
@@ -118,6 +120,7 @@ export function parseBriefing(briefing: string): GeparsedeBriefing {
     // De platte terugval geldt zodra het hart van de briefing er niet uitkomt.
     volledig: weten.length > 0,
     weten,
+    context: secties.get('CONTEXT EN ACHTERGROND')?.replace(/\s*\n\s*/g, ' ').trim() || null,
     betrokkenen: secties.has('BETROKKEN PERSONEN EN ORGANISATIES')
       ? parseBetrokkenen(secties.get('BETROKKEN PERSONEN EN ORGANISATIES')!)
       : [],
