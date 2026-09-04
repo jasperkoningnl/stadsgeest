@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import type { TipRij } from '@/lib/dashboard/tipQueries'
 import { formatDate } from '@/lib/dashboard/format'
-import InlineTriage from './InlineTriage'
 
 export const SOORT_LABEL: Record<string, string> = {
   nieuwsfeit: 'Nieuwsfeit',
@@ -15,7 +14,7 @@ export const SOORT_LABEL: Record<string, string> = {
  * bronnen, tier-badge en inline triage-knoppen. De redacteur kan nu direct
  * vanuit de lijst beslissen of doorlezen.
  */
-export default function TipRegel({ tip, toonTriage = true }: { tip: TipRij; toonTriage?: boolean }) {
+export default function TipRegel({ tip }: { tip: TipRij }) {
   const dragend = tip.bronnen.filter((b) => !b.spiegel)
   const spiegels = tip.bronnen.filter((b) => b.spiegel)
 
@@ -67,10 +66,6 @@ export default function TipRegel({ tip, toonTriage = true }: { tip: TipRij; toon
         </div>
       </Link>
 
-      {/* Inline triage: alleen in de wachtrij */}
-      {toonTriage && tip.status === 'wachtrij' && (
-        <InlineTriage tipId={tip.id} />
-      )}
     </div>
   )
 }

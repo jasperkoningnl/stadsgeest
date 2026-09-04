@@ -67,7 +67,7 @@ export default async function WachtrijPagina() {
           </p>
         </div>
       ) : (
-        {groepen.filter((g) => g.tips.length > 0).map((g) => (
+        <>{groepen.filter((g) => g.tips.length > 0).map((g) => (
           <section key={g.kop} className="np-daggroep">
             <h2 className="np-daggroep-kop">
               {g.kop}
@@ -77,7 +77,7 @@ export default async function WachtrijPagina() {
               {g.tips.map((tip) => <TipRegel key={tip.id} tip={tip} />)}
             </div>
           </section>
-        ))}
+        ))}</>
       )}
     </>
   )
