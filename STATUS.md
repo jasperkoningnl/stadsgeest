@@ -6598,3 +6598,42 @@ Geen afwijkingen.
 - Of de overige ~119 nieuw-materiaal-signalen daadwerkelijk geen herbeoordeling verdienen (steekproefsgewijs gecontroleerd, niet uitputtend).
 
 *Cowork-update: 2026-09-05 (Nieuwsplein33-account, weger-run)*
+
+---
+
+### Sessie 5 september 2026 — Fase 1 uitbreidingsplan uitgevoerd
+
+**Wat is gebouwd (fase 1: entiteitenfundament):**
+
+1. **Migraties M1-M3 uitgevoerd op Turso** — 7 kolommen op bestaande tabellen (sources, signals, raw_items), 11 nieuwe tabellen (kg_entities, entity_identifiers, kg_aliases, locations, entity_locations, kg_relations, kg_events, event_entities, source_records, fetch_runs, entity_merge_candidates). Database van 36 → 47 tabellen. Alles idempotent, niets aan bestaande data gewijzigd.
+
+2. **Data-seed M4 uitgevoerd** — 134 personen + 32 organisaties → kg_entities, 398 persoons-aliassen + 40 org-aliassen → kg_aliases, 129 rollen → kg_relations. KvK-nummers uit entities-tabel: 0 (de 2 kvk_number-entities hadden geen organization_id-koppeling).
+
+3. **Handmatige seeds** — 12 nieuwe organisaties (Amerpoort, Koppelkerk, Flint Theater, SC Amersfoort, UU Amersfoort, HU Amersfoort, Vathorst Beheer, Wijkteams, Indebuurt033, Provincie Utrecht, ProRail, NS). 40 identifiers (KvK-nummers + websites) voor 13 bestaande + 12 nieuwe organisaties. 55 extra aliassen. Eindscore: 178 entities, 493 aliassen, 40 identifiers.
+
+4. **BaseAdapter geïmplementeerd** — `scraper/src/kg/base-adapter.cjs`. Volledig adaptercontract: discover → fetch → parse → normalize → diff → emit → health → run(). Logt naar fetch_runs, slaat snapshots op in source_records voor diff-detectie.
+
+5. **Entity-resolver gebouwd** — `scraper/src/kg/entity-resolver.cjs`. Scoringsmodel: +100 identifier, +45 website, +40 BAG, +35 exacte naam, +25 genormaliseerd, +20 gedeelde bestuurder, +15 postcode, +10 werkgebied. Drempels: auto-merge ≥90, review 70-89, personen nooit auto-merge op naam alleen (drempel 110). Met resolve(), createEntity(), mergeEntities(), createMergeCandidate(), resolveOrCreate().
+
+6. **Testinfra opgezet** — `scraper/__tests__/` met node:test runner. 43 tests, alle groen:
+   - `entity-resolution/scoring.test.cjs` — normalizeStr, scoringsgewichten, drempelwaarden
+   - `entity-resolution/merge.test.cjs` — resolve op naam/alias/KvK, persoon-bescherming, onbekende entities, _determineAction
+   - `migrations/verify-schema.test.cjs` — M1-M4 kolommen, tabelstructuur, data-integriteit, weescontroles
+
+**Bestanden op schijf (nog niet gecommit):**
+- `scraper/src/kg/base-adapter.cjs`
+- `scraper/src/kg/entity-resolver.cjs`
+- `scraper/__tests__/entity-resolution/scoring.test.cjs`
+- `scraper/__tests__/entity-resolution/merge.test.cjs`
+- `scraper/__tests__/migrations/verify-schema.test.cjs`
+- `scraper/migrate-kg-m1m2m3.cjs` (eenmalig, kan weg)
+- `scraper/migrate-kg-m4-seed.cjs` (eenmalig, kan weg)
+- `scraper/seed-kg-handmatig.cjs` (eenmalig, kan weg)
+
+**Dagelijkse pipeline ongewijzigd.** Alle nieuwe tabellen en code staan naast de bestaande structuur. Geen feature flags aangezet. PM2-jobs, scrapers, intake, weger draaien door.
+
+**Tests draaien met:** `cd scraper && node --test __tests__/entity-resolution/scoring.test.cjs __tests__/entity-resolution/merge.test.cjs __tests__/migrations/verify-schema.test.cjs`
+
+**Volgende stap (fase 2):** Adapter-implementaties voor bestaande bronnen, KvK/Kadaster-adapters, entity-extractie op fulltext, dashboardintegratie kennisgraaf. Fase 2 raakt de dagelijkse pipeline pas wanneer feature flags worden aangezet.
+
+*Cowork-update: 2026-09-05 (fase 1 uitbreidingsplan)*
