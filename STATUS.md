@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **4 september 2026**
+> ### Bijgewerkt tot en met **5 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-04 — Weger-prompt: diversiteitsregels en raadsvragen-combinatieregel"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-05 — Weger-run 5 september"**.
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
@@ -6540,3 +6540,61 @@ Meetscript `scraper\meting-fase0.cjs` kan worden verwijderd (eenmalig meetscript
 Volgende stap: Fase 1 — migraties M1-M4 uitvoeren op Turso, BaseAdapter implementeren, eerste adapter wrappen.
 
 *Cowork-update: 2026-09-04 (fase 0 uitbreidingsplan)*
+
+---
+
+### Cowork-update: 2026-09-05 — Weger-run 5 september: één tip (Archief Eemland), twee dossierfeiten
+
+### Werkset
+
+Totaal open signalen (niet aan tip gekoppeld): 837. Daarvan 22 nieuw (geen eerdere weger-beoordeling), 119 met nieuw materiaal (last_seen_at > weger_laatst), 696 al beoordeeld.
+
+Alle 22 nieuwe signalen inhoudelijk beoordeeld. De 119 signalen met nieuw materiaal zijn steekproefsgewijs gecontroleerd; geen ervan bevatte inhoudelijk nieuwe informatie (herhaalde scrapes van routinevergunningen, activiteitenkalender college, eerder beoordeelde raadsstukken en bekendmakingen — zelfde beeld als 4 september).
+
+### Tip aangemaakt
+
+| Tip | Titel | Soort | Score | Dossier |
+|---|---|---|---|---|
+| 43 | Zeven Eemlandgemeenten bundelen archiefbeheer in één regeling | nieuwsfeit | 4 | — |
+
+Zeven Eemlandgemeenten (Amersfoort, Baarn, Eemnes, Leusden, Renswoude, Soest, Woudenberg) vervangen zes bilaterale archiefovereenkomsten door één gemeenschappelijke regeling Archief Eemland. Bunschoten staat als beoogd toekomstig deelnemer in de overwegingen. Geselecteerd als beste beschikbare signaal van de dag — score 4, onder de drempel van 6. Dragende bron: Gemeenteblad overig Amersfoort (tier 1). Niet eerder gebracht door Nieuwsplein33 of partners. Volledige tekst van de regeling was afgekapt in de database; governance-bepalingen, stemverhoudingen en kostenverdeelsleutel niet gelezen.
+
+### Dossierfeiten toegevoegd
+
+| ID | Dossier | Datum | Feit |
+|---|---|---|---|
+| 275 | 7 — Horeca en voedselveiligheid | 2026-07-08 | NVWA inspectie Indian Accent B.V. (Eemplein 20): hygiëne voldoet niet, overige drie onderdelen voldoen |
+| 276 | 11 — Gemeentelijke opdrachten en aanbestedingen | 2026-09-04 | Aanbesteding beheersing eikenprocessierups 2027-2030 (23.500 bomen/jaar inspecteren, 2.500 mechanisch) |
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld (nieuw) | 22 | 22 |
+| Signalen herbeoordeeld (nieuw materiaal) | 0 | 0 (119 gecontroleerd, geen inhoudelijk nieuw materiaal) |
+| Signal events geschreven | 22 | 22 (21 reviewed + 1 tip_created) |
+| Tips aangemaakt | 1 | 1 (tip 43) |
+| tip_signals geschreven | 1 | 1 (signaal 1783, dragend) |
+| tip_events geschreven | 1 | 1 |
+| Dossiers aangemaakt | 0 | 0 |
+| Dossierfeiten geschreven | 2 | 2 (ID 275-276) |
+| Signalen op discarded gezet | 1 | 1 (#1772, NS-verstoring routineverstoring) |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Rustige dag.** 22 nieuwe signalen, waarvan 15 routinevergunningen tijdelijk weggebruik (containers, hoogwerkers, rolsteigers, bouwplaatsen), 2 dakkapellen, 1 warmtepomp, 1 beslistermijnverlenging. Drie inhoudelijk relevante signalen: gemeenschappelijke regeling Archief Eemland, NVWA-inspectie, TenderNed-aanbesteding.
+- **Minimaal-één-tip-per-dag-regel toegepast.** Geen signaal haalde score ≥ 6. Archief Eemland (score 4) was het sterkste: tier 1 bron, raakt Leusden, bestuurlijke herordening, niet gedekt door spiegelbronnen.
+- **Signaal #1785 (grondlevering Kaasjeskruid 16)**: standaard Didam-publicatie, ca. 12 m², enige gegadigde. Geen nieuwswaarde.
+- **Signaal #1780 (constructieve wijziging Euroweg 40)**: wijziging op eerder verleende vergunning CLZ-00026609. Zonder kennis van het oorspronkelijke project niet te beoordelen. Industrieterrein.
+- **Signaal #1775 (Utrechtsestraat 27)**: twee vergunningen voor hetzelfde adres (hoogwerker nov 2026 en jan 2027), wat op langduriger werk wijst, maar zonder meer context geen nieuws.
+
+### Niet geverifieerd
+
+- De volledige tekst van de gemeenschappelijke regeling Archief Eemland (afgekapt in database). Governance-bepalingen, stemverhoudingen en financiële consequenties niet gelezen.
+- Of de gemeenteraden van de zeven deelnemende gemeenten toestemming hebben gegeven (wettelijk vereist bij GR tussen colleges).
+- Waarom Bunschoten nog niet deelneemt.
+- Of de overige ~119 nieuw-materiaal-signalen daadwerkelijk geen herbeoordeling verdienen (steekproefsgewijs gecontroleerd, niet uitputtend).
+
+*Cowork-update: 2026-09-05 (Nieuwsplein33-account, weger-run)*
