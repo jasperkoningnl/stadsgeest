@@ -2,7 +2,51 @@
 
 > ### Bijgewerkt tot en met **5 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-05 — Weger-run 5 september"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-05 — Fase 2 eventbronnen en detection rules"**.
+
+## Cowork-update: 2026-09-05 — Fase 2 eventbronnen en detection rules
+
+Fase 2 van het expansieplan ("eerste eventbronnen en graph matching") uitgevoerd. Exit-criterium behaald: 38 signalen via detection rules (ruim boven de drempel van 5).
+
+### Nieuwe adapters (`scraper/src/kg/adapters/`)
+
+| Adapter | Bron-ID | Status | Resultaat |
+|---|---|---|---|
+| `liander-storingen.cjs` | 134 | ✅ Werkt | 5 lokale events (ArcGIS API) |
+| `acm-publicaties.cjs` | 135 | ⚠️ Feed dood | RSS-URL levert HTML i.p.v. XML; alternatief nodig |
+| `ap-sancties.cjs` | 136 | ✅ Werkt | 9 sancties, 0 lokale matches (verwacht) |
+| `tuchtrecht-sru.cjs` | 137 | ❌ Geparkeerd | Databron is fout: collection "tuchtrecht" op repository.overheid.nl bevat Kamerstukken, geen tuchtrechtuitspraken |
+| `asbestovertredingen.cjs` | 138 | ✅ Werkt | 380 overtredingen gescraped, 4 lokaal relevant |
+| `lrk-kinderopvang.cjs` | 139 | ✅ Werkt | 31.289 records, 346 lokale locaties, eerste snapshot opgeslagen |
+| `arbeidsinspectie-eerlijk-werk.cjs` | 133 | ✅ Werkt | 76 resultaten, 72 lokaal, 33 INSPECTION_VIOLATION + 39 INSPECTION_CLEAR |
+
+### Detection engine en regels (`scraper/src/kg/`)
+
+- **`detection-engine.cjs`** — Generiek framework: evalueert kg_events tegen geregistreerde regels, deduplicatie op source_identifier+detection_rule, maakt signalen aan in signals-tabel.
+- **`detection-rules.cjs`** — 7 regels geregistreerd: R1 (bedrijfsuitbreiding via vergunning), R2 (bestuurdersnetwerk), R3 (landelijke sanctie lokaal bedrijf), R4 (lokale persoon in externe bron), R6 (kinderopvang-tekortkoming), R7 (grote Liander-storing), R9 (registerwijziging uit diff).
+- **Testresultaat**: 81 events geëvalueerd → 38 signalen (35× R3, 3× R7).
+
+### Fixes toegepast deze sessie
+
+- `eerlijk-werk`: kolom `raw_data` → `provenance`, `created_at` verwijderd uit INSERT (kg_events heeft die kolom met DEFAULT)
+- `eerlijk-werk`: backfill van 72 kg_events die door de kolomfout niet waren aangemaakt
+- `detection-engine`: signaalstatus `'open'` → `'new'` (CHECK-constraint)
+- `detection-rules` R3 createSignal: fallback bedrijfsnaam uit event-titel i.p.v. "onbekend bedrijf"
+- `detection-rules` R7: `UTILITY_OUTAGE_RESOLVED` toegevoegd aan eventTypes
+- `asbestovertredingen`: volledig herschreven van niet-bestaande API naar HTML-scraper
+- `lrk-kinderopvang`: source_type `'csv'` → `'api'`, scrape_frequency `'twice_weekly'` → `'weekly'`
+
+### Feature flags
+
+Alle kg-flags staan nog uit: `STADSGEEST_KG_ENABLED`, `_MATCHING`, `_EVENTS`, `_DIFF`, `_NEW_ADAPTERS`. Eerst stabiliseren en PM2-integratie plannen voordat we aanzetten.
+
+### Openstaand
+
+- ACM-adapter: alternatieve databron zoeken (RSS is dood)
+- Tuchtrecht: echte bron vinden (tuchtrecht.overheid.nl?) of permanent parkeren
+- PM2-integratie: adapters inplannen als processen
+- Feature flags aanzetten na review met Jasper
+- `backfill-eerlijk-werk-events.cjs` kan verwijderd worden (eenmalig script, werk is gedaan)
 >
 > **Draai je de weegroutine?** De databasetoegang gaat nu via de Turso HTTP
 > pipeline API (curl naar /v2/pipeline). De weger-prompt is bijgewerkt en
