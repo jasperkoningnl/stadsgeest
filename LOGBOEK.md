@@ -23,6 +23,10 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-09-07 — Meer Arbeidsinspectie-signalen in het dashboard
+
+Deze week is een grote batch inspectieresultaten van de Nederlandse Arbeidsinspectie verwerkt. Daardoor staan er nu tientallen Amersfoortse bedrijven met inspectieresultaten als signaal in het dashboard, de meeste op watching-status. Mocht er opvallend veel Arbeidsinspectie-materiaal in de tipwachtrij verschijnen, dan is dat de verklaring — het is eenmalige registerdata, geen plotselinge hausse aan inspecties.
+
 ## 2026-09-04 — Breder aanbod in de tipwachtrij
 
 De afgelopen dagen bestonden de meeste tips uit schriftelijke raadsvragen van een enkele fractie. Dat is aangepast: raadsvragen zonder beantwoording wegen nu minder zwaar en komen alleen als tip als er ook ander bronmateriaal over hetzelfde onderwerp is. Tegelijk scoren documenten met veel bijlagen, vergunningen met bezwaren en WOO-besluiten met weggelakte passages nu hoger. Het effect is dat de wachtrij gevarieerder wordt. Keerzijde: een raadsvraag die op zichzelf al een sterk signaal is, kan nu net onder de drempel vallen. Mocht dat opvallen, geef het door.

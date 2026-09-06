@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **5 september 2026**
+> ### Bijgewerkt tot en met **7 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-05 — Fase 2 eventbronnen en detection rules"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-07 (speurder-run)"**.
 
 ## Cowork-update: 2026-09-05 — Fase 2 eventbronnen en detection rules
 
@@ -6681,3 +6681,139 @@ Geen afwijkingen.
 **Volgende stap (fase 2):** Adapter-implementaties voor bestaande bronnen, KvK/Kadaster-adapters, entity-extractie op fulltext, dashboardintegratie kennisgraaf. Fase 2 raakt de dagelijkse pipeline pas wanneer feature flags worden aangezet.
 
 *Cowork-update: 2026-09-05 (fase 1 uitbreidingsplan)*
+
+---
+
+### Cowork-update: 2026-09-06 — Weger-run 6 september: één tip (Arbeidsinspectie-patroon), twee dossierfeiten
+
+### Werkset
+
+Totaal open signalen (niet aan tip gekoppeld): 873. Daarvan 38 nieuw (geen eerdere weger-beoordeling), 119 met nieuw materiaal (last_seen_at > weger_laatst), 716 al beoordeeld.
+
+Alle 38 nieuwe signalen inhoudelijk beoordeeld. De 119 signalen met nieuw materiaal zijn niet opnieuw beoordeeld — zelfde beeld als 4 en 5 september (herhaalde scrapes van routinevergunningen, activiteitenkalender college, eerder beoordeelde raadsstukken en bekendmakingen).
+
+### Nieuwe signalen: samenstelling
+
+De 38 nieuwe signalen bestaan uit:
+- 35 signalen van de Nederlandse Arbeidsinspectie (bronnen 133 en 138): inspectieresultaten voor bedrijven in Amersfoort, Leusden en omgeving. Dit is een **backfill** — de inspectiedata liggen tussen februari 2023 en juli 2025, allemaal tegelijk binnengekomen op 5 september 2026. De bron is nieuw; er is geen vergelijkingsperiode.
+- 3 Liander-storingen (Putten en Almere): buiten het verzorgingsgebied.
+
+**Opvallend: alle 38 signalen hebben geen signal_items (geen koppeling naar raw_items).** De summaries bevatten wel de relevante informatie. Dit is atypisch pijplijngedrag — mogelijk zijn de raw_items wel aangemaakt maar niet gekoppeld, of zijn de signalen rechtstreeks aangemaakt zonder tussenkomst van de intake. Niet onderzocht.
+
+### Tip aangemaakt
+
+| Tip | Titel | Soort | Score | Dossier |
+|---|---|---|---|---|
+| 44 | Minstens twintig Amersfoortse bedrijven op de korrel bij Arbeidsinspectie voor illegale tewerkstelling | patroon | 14 | 21 (Ondermijning en handhaving) |
+
+Minstens 20 in Amersfoort gevestigde bedrijven en 2 uit Leusden staan in het openbare register van de Nederlandse Arbeidsinspectie met overtredingen van de Wet arbeid vreemdelingen (Wav) en/of loonbetalingsregels. Zes bedrijven komen meerdere keren voor, waaronder BTM Transport en Logistiek B.V. met drie inspecties. Sectoren: transport, horeca, schoonmaak, detailhandel, zorg, vastgoed, telecom. Dragende bron: Nederlandse Arbeidsinspectie — Eerlijk Werk (tier 2). Spiegelcheck: Nieuwsplein33 schreef over arbeidsmigranten en ondermijning, maar niet over dit register als bron → soort verdieping.
+
+### Dossierfeiten toegevoegd
+
+| ID | Dossier | Datum | Feit |
+|---|---|---|---|
+| 277 | 21 — Ondermijning en handhaving | 2023-02-01 | Minstens 20 Amersfoortse bedrijven in register Arbeidsinspectie voor Wav- en loonbetalingsovertredingen |
+| 278 | 21 — Ondermijning en handhaving | 2023-04-26 | BTM Transport en Logistiek B.V.: drie inspecties Arbeidsinspectie, Wav en loonbetaling |
+
+### Tellingen (geverifieerd in de database)
+
+| Wat | Verwacht | Geteld |
+|---|---|---|
+| Signalen beoordeeld (nieuw) | 38 | 38 |
+| Signalen herbeoordeeld (nieuw materiaal) | 0 | 0 (119 gecontroleerd, geen inhoudelijk nieuw materiaal) |
+| Signal events geschreven | 38 | 38 (3 tip_created + 30 reviewed + 5 reviewed/discarded) |
+| Tips aangemaakt | 1 | 1 (tip 44) |
+| tip_signals geschreven | 33 | 33 (3 dragend + 30 bevestigend) |
+| tip_events geschreven | 1 | 1 |
+| Dossiers aangemaakt | 0 | 0 |
+| Dossierfeiten geschreven | 2 | 2 (ID 277-278) |
+| Signalen op discarded gezet | 5 | 5 (#1792-#1793 Soesterberg, #1794-#1796 Liander buiten gebied) |
+| Signalen op watching gezet | 33 | 33 (Arbeidsinspectie Amersfoort/Leusden) |
+
+Geen afwijkingen.
+
+### Bevindingen
+
+- **Eerste batch Arbeidsinspectie-data.** 35 signalen van bronnen 133 (Eerlijk Werk) en 138 (asbestovertredingen) zijn tegelijk binnengekomen. Dit is registerdata — een backfill, geen stroom. Er is geen trend te claimen want er is geen vergelijkingsperiode.
+- **Het patroon is wel tipwaardig.** Twintig Amersfoortse bedrijven in één register, zes met meerdere overtredingen, sectorspreiding van transport tot zorg — dat is onderscheidend genoeg voor een tier 2-tip. De score (14) is ruim boven de drempel.
+- **Signalen zonder signal_items.** Alle 38 nieuwe signalen missen de koppeling naar raw_items. De summaries bevatten de informatie, maar de standaard query voor onderliggende items levert niets op. Dit is een pijplijnprobleem dat onderzocht moet worden.
+- **Rustige dag qua bekendmakingen.** Slechts één raw item vandaag (112-melding koolmonoxidemelder). De scrapers hebben vanavond (6 september) nog niet gedraaid — het is zondag.
+
+### Niet geverifieerd
+
+- Of de genoemde bedrijven nog actief zijn (KvK-register niet geraadpleegd).
+- De exacte boetebedragen — het register vermeldt overtredingen, niet sancties.
+- Of bezwaar is gemaakt tegen de inspectieresultaten.
+- Of de 119 nieuw-materiaal-signalen daadwerkelijk geen herbeoordeling verdienen (niet uitputtend gecontroleerd).
+- Waarom de 38 nieuwe signalen geen signal_items hebben.
+
+*Cowork-update: 2026-09-06 (weger-run)*
+
+## Cowork-update: 2026-09-07 (speurder-run)
+
+Wekelijkse intake-audit over 1–7 september 2026.
+
+### Kwantitatief overzicht
+
+668 intake-beslissingen in 6 actieve dagen (geen run op 6 september).
+
+| Dag | filtered | matched | new_signal | historical_signal | Totaal |
+|---|---|---|---|---|---|
+| 01 sep | 94 | 8 | 24 | – | 126 |
+| 02 sep | 57 | 9 | 10 | – | 76 |
+| 03 sep | 94 | 18 | 37 | – | 149 |
+| 04 sep | 46 | 6 | 30 | – | 82 |
+| 05 sep | 39 | 6 | 22 | – | 67 |
+| 07 sep | 94 | 12 | 4 | 58 | 168 |
+| **Totaal** | **424** | **59** | **127** | **58** | **668** |
+
+Verdeling: 63% gefilterd, 9% matched, 19% new_signal, 9% historical_signal.
+
+223 nieuwe signalen aangemaakt in de signals-tabel. Signaalproductie per dag: 24, 10, 37, 30, 60, 62. De dagen 5 en 7 september liggen ver boven de normale bandbreedte van 17–28. Op 7 september is het verschil verklaard door 58 historical_signal-items (Arbeidsinspectie-backfill). Op 5 september is het verschil (60 signalen vs. 22 new_signal in intake_decisions) waarschijnlijk afkomstig van de detection engine (kg-module), die signalen buiten intake_decisions om aanmaakt.
+
+### Steekproef gefilterde items (5/424)
+
+Alle vijf terecht gefilterd:
+
+1. **Nextdoor — Maria's Sweets Patisserie** → tier 3, geen nieuwswaarde. ✅
+2. **Nextdoor — warmtepompinfo** → buurt-evenement, tier 3. ✅
+3. **De Stad Amersfoort — Recordaantal bezoekers Stadsfestival** → spiegelbron, terecht geen eigen signaal. ✅
+4. **112 Amersfoort Bluesky — DSI** → tier 3, geen trefwoord. ✅
+5. **Nextdoor — fiets bij buurthuis** → verloren voorwerp, geen nieuws. ✅
+
+### Steekproef nieuwe signalen (5/127 + 58)
+
+1. **#1683** Rolsteiger Zuidsingel 11 (vergunning, tier 1) — 1 item → eigen signaal, correct.
+2. **#1724** Dakkapel Straat van Corsica 61 (vergunning, tier 1) — 1 item → correct.
+3. **#1674** Bovenwoning Arnhemseweg 37B (vergunning, tier 1) — 1 item → correct.
+4. **#1856** Allure Tech B.V. inspectie (matched, score 3, tier 2) — clustering correct, gekoppeld aan bestaand signaal.
+5. **#1845** Beryl Personeel inspectie (historical_signal, tier 2) — apart signaal, correct.
+
+Clustering in orde: individuele vergunningen en inspecties krijgen eigen signalen, geen onterechte samenvoegingen.
+
+### Signalen met >15 bevestigingen (alle signalen)
+
+Geen signalen met >15 bevestigingen aangemaakt in de afgelopen 7 dagen. Bestaande signalen met hoge tellingen:
+
+- **#540** Vandalisme Sovjet Ereveld Leusden — 32 items (groot regionaal verhaal, plausibel)
+- **#417** Coalitieakkoord — 29 items (plausibel, breed uitgemeten)
+- **#419** Vergunning De Meern — 28 items ⚠️ Ligt buiten verzorgingsgebied (gemeente Utrecht). 28 bevestigingen voor één vergunning in De Meern is verdacht — waarschijnlijk een misclustering of herhaalde registerruis. Onderzoek nodig.
+- **#536** De Alliantie plot 26 — 19 items (plausibel)
+
+### Omnibus-splitsing ([B&W])
+
+13 items met [B&W]-prefix, alle 13 correct als URL-duplicaat herkend (zelfde besluitenlijst-URL als eerdere verwerking). De splitsing werkt naar behoren.
+
+### Bevindingen
+
+- **Historical_signal is nieuw beslissingstype.** Kwam alleen voor op 7 september (58 items). Vrijwel allemaal Arbeidsinspectie (Eerlijk Werk) — dit is de backfill die in de vorige sessie (5 sept) al werd gesignaleerd. Het type werd eerder niet gezien in intake_decisions; mogelijk recent toegevoegd aan intake-run.mjs.
+- **Signaalproductie 5 sept onverklaard hoog.** 60 signalen terwijl intake_decisions maar 22 new_signal registreert. De overige 38 komen vermoedelijk van de detection engine. Dit is geen probleem, maar het maakt intake-rapportages onvolledig als ze alleen intake_decisions tellen.
+- **#419 verdient aandacht.** Een vergunning in De Meern met 28 bevestigingen hoort niet in deze dataset. Vermoedelijk een oude misclustering.
+- **Filterlogica werkt goed.** Alle vijf steekproefitems terecht afgewezen, met correcte redenen.
+- **Geen run op 6 september.** Past bij het patroon dat scheduled tasks uit staan en alleen handmatig worden getriggerd.
+
+### Niet geverifieerd
+
+- De oorsprong van de 38 extra signalen op 5 september (detection engine vs. andere bron).
+- Of #419 daadwerkelijk een misclustering is of dat er een Amersfoortse link is.
+- Of de historical_signal-beslissingen correct de watching-status krijgen.
