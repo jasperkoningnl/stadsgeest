@@ -37,6 +37,11 @@ class TuchtrechtSruAdapter {
       this.sourceId = existing.rows[0].id;
       return;
     }
+    if (this.dryRun) {
+      console.log(`[Tuchtrecht] Bron niet gevonden, maar dryRun — geen INSERT`);
+      this.sourceId = -1;
+      return;
+    }
     const result = await this.db.execute({
       sql: `INSERT INTO sources (name, url, source_type, reliability, category, scrape_frequency,
               is_active, created_at, source_class, adapter_version)
@@ -75,11 +80,11 @@ class TuchtrechtSruAdapter {
     let hasMore = true;
 
     while (hasMore) {
-      // SRU 2.0 query: zoek op plaatsnaam via cql.serverChoice (full-text)
+      // SRU 2.0 query: selecteer product-area tuchtrecht + zoek op plaatsnaam
       const queries = FILTER_TERMS.map(term =>
         `cql.serverChoice="${term}"`
       );
-      const cql = `(${queries.join(' OR ')}) AND dt.modified>="${sinceDate}"`;
+      const cql = `c.product-area==tuchtrecht AND (${queries.join(' OR ')}) AND dt.modified>="${sinceDate}"`;
 
       const params = new URLSearchParams({
         operation: 'searchRetrieve',

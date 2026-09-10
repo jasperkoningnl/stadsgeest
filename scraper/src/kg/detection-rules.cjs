@@ -22,13 +22,11 @@ const R1_BUSINESS_EXPANSION = {
     ];
     const hasExpansionTerm = expansionTerms.some(t => text.includes(t));
     if (!hasExpansionTerm) return false;
-    if (context.entities && context.entities.length > 0) {
-      const hasLocalOrg = context.entities.some(e =>
-        e.entity_type === 'organization' || e.entity_type === 'location'
-      );
-      return hasLocalOrg;
-    }
-    return text.includes('amersfoort') || text.includes('leusden');
+    // Geen plaatsnaam-fallback: R1 vereist een gekoppelde entity
+    if (!context.entities || context.entities.length === 0) return false;
+    return context.entities.some(e =>
+      e.entity_type === 'organization' || e.entity_type === 'location'
+    );
   },
   async createSignal(event, context) {
     const orgs = (context.entities || []).filter(e => e.entity_type === 'organization');
@@ -112,26 +110,26 @@ const R3_NATIONAL_SANCTION = {
     'INSPECTION_VIOLATION', 'ASBESTOS_VIOLATION_PUBLISHED', 'ASBESTOS_WORK_STOPPED',
   ],
   async condition(event, context) {
-    if (context.entities && context.entities.length > 0) {
-      for (const entity of context.entities) {
-        const entityId = entity.entity_id || entity.id;
-        const locResult = await context.db.execute({
-          sql: `SELECT l.city FROM entity_locations el
-                JOIN locations l ON l.id = el.location_id
-                WHERE el.entity_id = ? AND l.city IN ('Amersfoort', 'Leusden')`,
-          args: [entityId],
-        });
-        if (locResult.rows.length > 0) return true;
-        const kgResult = await context.db.execute({
-          sql: `SELECT id FROM kg_entities WHERE id = ?
-                AND (source_person_id IS NOT NULL OR source_org_id IS NOT NULL)`,
-          args: [entityId],
-        });
-        if (kgResult.rows.length > 0) return true;
-      }
+    // Geen plaatsnaam-fallback: R3 bewijst de graph alleen als er een entity
+    // via entity_locations of source_person/org_id lokaal verankerd is.
+    if (!context.entities || context.entities.length === 0) return false;
+    for (const entity of context.entities) {
+      const entityId = entity.entity_id || entity.id;
+      const locResult = await context.db.execute({
+        sql: `SELECT l.city FROM entity_locations el
+              JOIN locations l ON l.id = el.location_id
+              WHERE el.entity_id = ? AND l.city IN ('Amersfoort', 'Leusden')`,
+        args: [entityId],
+      });
+      if (locResult.rows.length > 0) return true;
+      const kgResult = await context.db.execute({
+        sql: `SELECT id FROM kg_entities WHERE id = ?
+              AND (source_person_id IS NOT NULL OR source_org_id IS NOT NULL)`,
+        args: [entityId],
+      });
+      if (kgResult.rows.length > 0) return true;
     }
-    const text = `${event.title || ''} ${event.summary || ''}`.toLowerCase();
-    return text.includes('amersfoort') || text.includes('leusden');
+    return false;
   },
   async createSignal(event, context) {
     const orgs = (context.entities || []).filter(e => e.entity_type === 'organization');
@@ -257,7 +255,8 @@ const R6_CHILDCARE_INSPECTION = {
 const R7_UTILITY_OUTAGE = {
   id: 'R7',
   name: 'Grote of terugkerende netwerkstoring',
-  eventTypes: ['UTILITY_OUTAGE_STARTED', 'UTILITY_OUTAGE_UPDATED', 'UTILITY_OUTAGE_RESOLVED'],
+  // UTILITY_OUTAGE_RESOLVED bewust weggelaten: een opgelost incident mag geen nieuw signaal openen
+  eventTypes: ['UTILITY_OUTAGE_STARTED', 'UTILITY_OUTAGE_UPDATED'],
   async condition(event, context) {
     let provenance = {};
     try { provenance = JSON.parse(event.provenance || '{}'); } catch { /* negeer */ }

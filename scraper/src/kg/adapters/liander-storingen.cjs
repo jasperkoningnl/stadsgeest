@@ -10,8 +10,9 @@ const { createClient } = require('@libsql/client');
 const SOURCE_NAME = 'Liander storingsdata';
 const FEATURE_SERVER_URL = 'https://services1.arcgis.com/v6W5HAVrpgSg3vts/ArcGIS/rest/services/IStoringen_Productie_V7/FeatureServer/0';
 const FILTER_CITIES = ['amersfoort', 'leusden'];
-// Postcodegebieden Amersfoort (38xx) en Leusden (383x, 384x)
-const LOCAL_POSTCODES = /^38[0-9]{2}/;
+// Postcodegebieden Amersfoort (3811-3828) en Leusden (3831-3834)
+// Bewust NIET 38xx: dat vangt ook Nijkerk (3861), Hoevelaken (3871), Putten (3880+)
+const LOCAL_POSTCODES = /\b(381[1-9]|382[0-8]|383[1-4])\b/;
 
 function createDb() {
   return createClient({
@@ -34,6 +35,11 @@ class LianderStoringenAdapter {
     });
     if (existing.rows.length > 0) {
       this.sourceId = existing.rows[0].id;
+      return;
+    }
+    if (this.dryRun) {
+      console.log(`[Liander] Bron niet gevonden, maar dryRun — geen INSERT`);
+      this.sourceId = -1;
       return;
     }
     const result = await this.db.execute({

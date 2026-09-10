@@ -38,6 +38,11 @@ class ArbeidsinspectieEerlijkWerkAdapter {
       this.sourceId = existing.rows[0].id;
       return;
     }
+    if (this.dryRun) {
+      console.log(`[ArbInsp] Bron niet gevonden, maar dryRun — geen INSERT`);
+      this.sourceId = -1;
+      return;
+    }
     const result = await this.db.execute({
       sql: `INSERT INTO sources (name, url, source_type, reliability, category, scrape_frequency,
               is_active, created_at, source_class, adapter_version)

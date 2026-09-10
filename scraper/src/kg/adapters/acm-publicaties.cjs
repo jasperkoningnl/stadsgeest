@@ -8,7 +8,8 @@ require('dotenv').config({ path: path.join(__dirname, '../../../.env') });
 const { createClient } = require('@libsql/client');
 
 const SOURCE_NAME = 'Autoriteit Consument & Markt';
-const RSS_URL = 'https://www.acm.nl/nl/nieuws/rss';
+// /nl/nieuws/rss is de configuratiepagina; de werkelijke feed zit op /nl/nieuws/rss/publicaties
+const RSS_URL = 'https://www.acm.nl/nl/nieuws/rss/publicaties';
 const BASE_URL = 'https://www.acm.nl';
 
 function createDb() {
@@ -33,6 +34,11 @@ class AcmPublicatiesAdapter {
     });
     if (existing.rows.length > 0) {
       this.sourceId = existing.rows[0].id;
+      return;
+    }
+    if (this.dryRun) {
+      console.log(`[ACM] Bron niet gevonden, maar dryRun — geen INSERT`);
+      this.sourceId = -1;
       return;
     }
     const result = await this.db.execute({

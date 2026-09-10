@@ -1,12 +1,57 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **7 september 2026**
+> ### Bijgewerkt tot en met **10 september 2026**
 >
 > De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-07 (speurder-run)"**.
 
+## Cowork-update: 2026-09-10 — Fase 2 correctie: exitcriterium NIET behaald
+
+**Correctie**: de 38 demosignalen uit de sessie van 5 september bewijzen de knowledge graph NIET. Ze kwamen via plaatsnaam-fallbacks (R3) en te brede postcodefilters (R7), niet via opgeslagen entiteit-relatie-lokale-anchorroutes. Het formele exitcriterium is dus nog niet gehaald. Feature flags blijven uit.
+
+### Bugs gevonden en gecorrigeerd
+
+1. **Liander postcodefilter te breed** — `/^38[0-9]{2}/` matchte ook Nijkerk (3861), Hoevelaken (3871), Putten (3880+). Gecorrigeerd naar `/\b(381[1-9]|382[0-8]|383[1-4])\b/` (alleen Amersfoort 3811-3828 en Leusden 3831-3834). Getest: Putten/Hoevelaken/Nijkerk worden niet meer doorgelaten.
+2. **R7 UTILITY_OUTAGE_RESOLVED** — een opgelost incident opende een nieuw signaal. Verwijderd uit eventTypes; alleen STARTED en UPDATED triggeren nu.
+3. **R3 plaatsnaam-fallback** — `text.includes('amersfoort')` als fallback verwijderd. R3 matcht nu alleen via entity_locations of source_person/org_id path. Dit is de graph-route die fase 2 moet bewijzen.
+4. **R1 plaatsnaam-fallback** — idem, verwijderd. R1 vereist nu gekoppelde entity.
+5. **ACM feed-URL** — `/nl/nieuws/rss` is de configuratiepagina, niet de feed. Gecorrigeerd naar `/nl/nieuws/rss/publicaties`. Getest: 10 items succesvol opgehaald.
+6. **Tuchtrecht SRU-query** — `c.product-area==tuchtrecht` toegevoegd aan CQL. Zonder dit filter kwamen parlementaire documenten mee in plaats van tuchtrechtuitspraken. Getest: 5 tuchtrechtuitspraken opgehaald.
+7. **dryRun _ensureSource()** — alle adapters schreven een bronrecord naar de DB, ook in dryRun. Guard toegevoegd: bij dryRun wordt alleen een bestaande source gelezen, nooit een nieuwe aangemaakt.
+
+### Opruiming
+
+- 38 onterechte signalen (35× R3, 3× R7) naar status `discarded` gezet via `opruim-signalen.cjs`
+- Alle signalen waren afkomstig van plaatsnaam-matching of te brede postcodefilters
+
+### Testresultaten na correcties
+
+- Liander dry-run: 500 storingen opgehaald, 0 lokaal (correct: geen actieve storingen in Amersfoort/Leusden op dit moment)
+- ACM dry-run: 10 items uit RSS, 0 lokale matches (correct: werkt nu via entity-matching)
+- Tuchtrecht dry-run: 5 uitspraken, 0 lokaal (correct: haalt nu tuchtrecht op, niet parlementair)
+- Detection rules dry-run (30 dagen): 81 events geëvalueerd, 0 signalen (correct: zonder plaatsnaam-fallback zijn er nog geen entity-gekoppelde matches)
+
+### Wat nog moet voor het exitcriterium
+
+Het exitcriterium vereist minimaal vijf signalen die via de graph (entiteit→relatie→lokale verankering) gevonden worden, niet via plaatsnaam. Daarvoor is nodig:
+1. **Event-entity koppeling**: de eerlijk-werk events (72 stuks) hebben bedrijfsnamen die gematcht moeten worden tegen kg_entities via aliassen, en die entities moeten via entity_locations lokaal verankerd zijn
+2. **GGD-rapportcrawler**: nog niet gebouwd (R6 heeft events nodig)
+3. **Vergunning→BAG→entiteit pad**: nog niet gebouwd (R1 heeft events nodig)
+4. **Graph-tests per regel**: R1/R2/R4/R6/R9 zijn niet aantoonbaar getest met echte graph-paden
+
+### Openstaand (overgenomen, bijgewerkt)
+
+- ~~ACM-adapter: alternatieve databron zoeken (RSS is dood)~~ → opgelost, juiste URL
+- ~~Tuchtrecht: echte bron vinden~~ → opgelost, juiste CQL-query
+- `backfill-eerlijk-werk-events.cjs` kan verwijderd worden (eenmalig script)
+- `opruim-signalen.cjs` kan verwijderd worden (eenmalig script)
+- PM2-integratie: adapters inplannen als processen
+- Feature flags aanzetten na review met Jasper en na behalen exitcriterium
+- Signaalweergave met relatiepad (entityPath) in dashboard
+
 ## Cowork-update: 2026-09-05 — Fase 2 eventbronnen en detection rules
 
-Fase 2 van het expansieplan ("eerste eventbronnen en graph matching") uitgevoerd. Exit-criterium behaald: 38 signalen via detection rules (ruim boven de drempel van 5).
+~~Fase 2 van het expansieplan ("eerste eventbronnen en graph matching") uitgevoerd. Exit-criterium behaald: 38 signalen via detection rules (ruim boven de drempel van 5).~~
+**GECORRIGEERD**: zie update 2026-09-10 hierboven. Exitcriterium was niet behaald.
 
 ### Nieuwe adapters (`scraper/src/kg/adapters/`)
 
