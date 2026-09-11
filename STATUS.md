@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **11 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-11 (weger-run) — MISLUKT"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-11 (fase 2 afronding)"**.
 
 ## Cowork-update: 2026-09-10 (sessie 2) — Fase 2 exitcriterium BEHAALD
 
@@ -6893,3 +6893,44 @@ De weger-run van 11 september is niet uitgevoerd. Geen signalen beoordeeld, geen
 **Actie vereist:** de volgende weger-run moet de achterstand inhalen. Als het bash-probleem structureel is, moet de scheduled task opnieuw worden ingericht of moet er een alternatief pad voor databasetoegang komen.
 
 *Cowork-update: 2026-09-11 (weger-run)*
+
+---
+
+### Cowork-update: 2026-09-11 (fase 2 afronding) — scripts opgeruimd, feature flags geanalyseerd
+
+#### Analyse feature flags
+
+De vijf feature flags uit het migratieplan (STADSGEEST_KG_ENABLED, _KG_MATCHING, _EVENTS_ENABLED, _DIFF_ENABLED, _NEW_ADAPTERS) zijn **nooit geïmplementeerd**. Ze staan niet in `.env`, worden nergens in de code gelezen, en er is geen code die ze checkt. De KG-module (detection-engine, detection-rules, entity-resolver, adapters) draait volledig standalone — er is geen import vanuit de hoofdpipeline (`run-all.js`, `intake-run.mjs`, etc.) naar `scraper/src/kg/`.
+
+**Advies:** de vlaggen als concept laten vallen. In plaats daarvan de detection engine integreren als apart PM2-proces dat na de intake draait. Dat is veiliger dan de intake zelf aanpassen en past bij de huidige architectuur.
+
+#### Eenmalige scripts opgeruimd
+
+Negen scripts verwijderd uit `scraper/src/kg/` (commit acf707f):
+
+- **3 tracked** (git rm): opruim-signalen.cjs, vul-graph-keten.cjs, backfill-eerlijk-werk-events.cjs (adapters/)
+- **6 untracked** (del): kg-query.cjs, kg-query2.cjs, kg-schema.cjs, koppel-asbest.cjs, test-detection.cjs, verify-graph.cjs
+
+Productie-code (detection-engine.cjs, detection-rules.cjs, entity-resolver.cjs, base-adapter.cjs en alle 7 adapters) is intact. De tracked scripts zijn herstelbaar uit git-history.
+
+#### Openstaand uit fase 2
+
+- **Asbest-events koppelen aan entities:** koppel-asbest.cjs was een diagnostisch script (21 regels, deed alleen JSON printen). De echte koppeling moet nog gebouwd worden — vergelijkbaar met hoe vul-graph-keten.cjs de eerlijk-werk events aan entities koppelde. Klein werk, geschat 30 minuten.
+- **Dashboard entityPath display:** uitgesteld. Hangt samen met het dashboardontwerp dat nog in alpha is.
+- **R1 vergunning→BAG→entity pad:** uitgesteld. Vereist BAG-koppeling die er nog niet is.
+
+#### Fase 3 werkplan (voorbereiding)
+
+Uitbreidingsplan doorgenomen. DUO BO/VO (basisonderwijs/voortgezet onderwijs) is de meest concrete eerste adapter voor fase 3: open data, gestructureerd, directe lokale relevantie voor Amersfoort. Verdere fase-3-adapters: AFM, DNB, KOOP-audit, Politie/CBS anomalie, NDW, RVO. Detectieregels R5 en R10 nog te bouwen.
+
+#### Bash-sandbox
+
+De device_bash sandbox werkte niet gedurende het grootste deel van deze sessie (Plan9 mount failure, vermoedelijk gerelateerd aan Windows-update KB5124008 — zie [GitHub issue #92984](https://github.com/anthropics/claude-code/issues/92984)). Bestands- en git-operaties uitgevoerd via Desktop Commander (PowerShell). Aan het eind van de sessie werkte bash weer na herverbinden.
+
+#### Niet geverifieerd
+
+- Of de verwijderde untracked scripts (kg-query, kg-schema, etc.) nog referentiewaarde hadden. Ze stonden niet in git en waren nooit gecommit.
+- Of de DUO BO/VO API daadwerkelijk beschikbaar en bruikbaar is voor een adapter.
+- De exacte omvang van de weger-achterstand (geen databasetoegang gehad).
+
+*Cowork-update: 2026-09-11 (fase 2 afronding)*
