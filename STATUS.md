@@ -7065,3 +7065,55 @@ Doorgeschoven naar volgende chat.
 - Of detection-run.cjs als PM2-proces stabiel zou draaien (nog niet gebouwd)
 
 *Cowork-update: 2026-09-11 (asbest-koppeling, detection engine ontwerp)*
+
+---
+
+### Codex-update: 2026-09-11 — intake hersteld en clustering gerepareerd
+
+#### Intake weer betrouwbaar uitvoerbaar
+
+- Achterstand van 365 raw items verwerkt; een follow-uprun verwerkte de 19 daarbij gesplitste B&W-documenten. De wachtrij staat daarna op 0.
+- Dubbele PM2-starts van `stadsgeest-intake` vervangen door één Windows Scheduled Task (`Stadsgeest Intake`, dagelijks 05:30) die Node rechtstreeks start via `scraper/run-intake-task.ps1`.
+- De intake-lock heeft nu een heartbeat, een stale-grens van 30 minuten en houdt Node na afloop niet onnodig actief.
+- Oude onafgeronde `intake_runs` worden bij een volgende start als fout gemarkeerd in plaats van onbeperkt met status NULL te blijven staan.
+
+#### Oorzaak clustervervuiling opgelost
+
+De fout zat op twee niveaus:
+
+1. Woordmatching gebruikte naast de titel ook summary en content. Daardoor kon een score van 3 ontstaan terwijl twee titels inhoudelijk niets met elkaar te maken hadden.
+2. Entiteitsmatching voegde de entiteiten van alle clusteritems samen. Eén verkeerde koppeling besmette daardoor het cluster; latere items konden vervolgens via de nieuw aangehechte persoon of organisatie opnieuw fout matchen.
+
+Nieuwe regels staan in `scraper/src/intake-matching.mjs`:
+
+- titel-only woordbewijs met minimale relatieve overlap;
+- verschillende registratienummers van schriftelijke vragen, raadsbrieven en ingekomen stukken blokkeren elkaar;
+- ECLI's, verkeersbesluiten, spoorstoringen en vergunningen gebruiken geen generieke sjabloonoverlap;
+- aanvraag en verlening op exact hetzelfde postcode/huisnummer mogen wel koppelen;
+- entiteitsmatching gebruikt alleen de canonical seed van het signaal, bij voorkeur het raw item waarvan de titel gelijk is aan de signaaltitel;
+- één gedeelde entiteit zonder inhoudelijke titelsteun is niet meer genoeg;
+- de clustercap gebruikt nu `>=` en laat dus niet ongemerkt nog één extra item toe.
+
+#### Bestaande clusters opgeschoond
+
+`scraper/opruim-clusters.mjs` gebruikt nu dezelfde geteste regels, draait standaard als dry-run, slaat signalen met bestaande tips over en logt alle losgemaakte raw-item-id's voor herstelbaarheid.
+
+Uitgevoerd resultaat:
+
+- 246 onbetrouwbare koppelingen verwijderd uit 26 niet-aan-tips-gekoppelde clusters;
+- de items opnieuw door de intake gehaald: 207 historische signalen, 5 actuele signalen, 5 geldige matches en 29 filters;
+- de bekende foutclusters #587, #931, #1348, #1612 en #1695 bevatten nu ieder alleen hun eigen kernitem;
+- #1300 bleef terecht intact: de RIB en schriftelijke vragen gaan beide concreet over vervroegde transportcapaciteit voor woningbouw en scholen;
+- backlog na herstel: 0;
+- laatste herstelrun #64: status `ok`;
+- volledige scraper-testset: 66/66 geslaagd, waaronder 11 nieuwe clusteringregressietests.
+
+#### Bewust nog niet automatisch gewijzigd
+
+Veertien vervuilde clusters zijn aan bestaande redactietips gekoppeld en daarom niet automatisch aangepast. Daaronder #766 en #1279. Hun tips zijn afgekeurd/geparkeerd, maar het verplaatsen van bronkoppelingen vraagt een afzonderlijke redactionele opschoning. De preventieve fout is wel opgelost: nieuwe items kunnen deze clusters niet verder vervuilen.
+
+#### Volgende stap vóór fase 3
+
+Notubiz-fulltext herstellen en de drie eerder gemelde schriftelijke vragen controleren. Pas daarna de fase-3-adapters verder uitbouwen.
+
+*Codex-update: 2026-09-11 (intake en clustering)*

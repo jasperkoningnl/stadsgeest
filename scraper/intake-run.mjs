@@ -10,6 +10,11 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
+import {
+  bronwereld,
+  entiteitMatchToegestaan,
+  woordMatchScore,
+} from './src/intake-matching.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -29,76 +34,6 @@ const db = createClient({
 // met status 'watching' en het label [HISTORISCH], zodat de weger het ziet.
 // Tier 3 blijft wél afvallen als het oud is; dat is de bestaande regel hieronder.
 const VERSHEID_DAGEN = Number(process.env.VERSHEID_DAGEN || 7);
-
-// Woordoverlap mag geen bekendmaking aan een rechtspraakuitspraak knopen. Dat
-// gebeurde structureel: vier meldingen "toepassen van grond of baggerspecie"
-// hingen aan een uitspraak over proceskostenvergoeding, en een vergunning voor
-// zeven appartementen aan de Langestraat hing aan een woning aan 't Zand.
-// Gedeelde entiteiten mogen die grens wél oversteken — een persoon of adres dat
-// in beide voorkomt is juist het interessante geval.
-function bronwereld(naam) {
-  const n = (naam || '').toLowerCase();
-  if (n.includes('rechtspraak') || n.includes('raad van state')) return 'rechtspraak';
-  if (n.includes('bekendmaking') || n.startsWith('ob —') || n.includes('gemeenteblad')
-      || n.includes('provinciaal blad') || n.includes('waterschapsblad')
-      || n.includes('verkeersbesluit') || n.includes('omgevingsvergunning')) return 'bekendmaking';
-  if (n.includes('inspectie') || n.includes('nvwa') || n.includes('omgevingsdienst')
-      || n.includes('lrk') || n.includes('toezicht')) return 'inspectie';
-  return 'anders';
-}
-
-const STOPWOORDEN = new Set(['de','het','een','en','van','in','te','dat','is','op','aan','met','er','maar','om','dan','ook','door','als','bij','dit','zijn','uit','noch','naar','tot','onder','over','worden','heeft','was','voor','nog','wel','niet','meer','ook','zo','nu','al','elke','alle','elk','die','wat','wie','hoe','waar','wanneer','welke','hoeveel','waarom','echter','omdat','want','toch','ja','nee','hier','daar','deze','dit','die','dat','zo','zeer','veel','meer','minder','andere','ieder','iedere','voor','door','naar','zijn','werd','worden','heeft','hebben','kunnen','zal','zou','mogen','willen','gaan',
-  // Gebiedsnamen en registerjargon (toegevoegd 2026-08-15): deze woorden staan
-  // in vrijwel elke titel in deze database en verbinden daardoor alles met
-  // alles — precies de clusterfouten uit de weger-runs van 13-15 augustus.
-  'amersfoort','amersfoortse','leusden','leusdense','gemeente','gemeentelijke','besluit','aanvraag','bekendmaking','vergadering','agenda',
-  // Bekendmakingen-registertaal (toegevoegd 2026-08-28): procedurele woorden
-  // die in vrijwel elke vergunning/kennisgeving terugkomen en ongerelateerde
-  // bekendmakingen aan elkaar koppelen via woordoverlap.
-  'vergunning','omgevingsvergunning','verleende','verleend','ontvangen','perceel',
-  'plaatsen','kappen','boom','bomen','slopen','realiseren','wijzigen','vervangen',
-  'tijdelijk','gebruik','hoogte','container','steiger',
-  'kennisgeving','ontvangst','beschikking','behandelen','intrekken','ingetrokken',
-  'buiten','behandeling','laten','aangevraagd',
-  // BRP-/registermeldingen (2026-08-28): voorkomen dat alle "Vertrokken met
-  // onbekende bestemming"-items en "Beslistermijn verlengen"-items clusteren.
-  'vertrokken','onbekende','bestemming','beslistermijn','verlengen','verlengd',
-  'woning','dakvlak','dakkapel','voorgevel','achtergevel','gevel','dakterras',
-  // Rechtspraak-procedurewoorden (2026-08-28)
-  'verdachte','straf','taakstraf','geldboete','rijontzegging','voorwaardelijke',
-  // Datum- en tijdwoorden (2026-08-28): maandnamen en jaarcijfers matchen
-  // alle bekendmakingen uit dezelfde periode aan elkaar.
-  'januari','februari','maart','april','juni','juli','augustus','september','oktober','november','december',
-  '2024','2025','2026','2027','2028']);
-
-function tokenize(text) {
-  if (!text) return [];
-  return text.toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .split(/\s+/)
-    .filter(w => w.length > 3 && !STOPWOORDEN.has(w));
-}
-
-function matchScore(item, signal) {
-  const itemTokens = new Set([
-    ...tokenize(item.title),
-    ...tokenize(item.summary || ''),
-    ...tokenize((item.content || '').substring(0, 300))
-  ]);
-  // Match alleen op signaal-TITEL, niet op summary.
-  // Summary kan heel lang zijn (bijv. research-rapporten) waardoor
-  // bijna elk item 2+ woorden deelt en foutief matcht.
-  const sigTokens = new Set(tokenize(signal.title));
-  let common = 0;
-  for (const t of itemTokens) {
-    if (sigTokens.has(t)) common++;
-  }
-  // Fix 2026-08-02 (n.a.v. #587: agendapunt gekoppeld aan motorrace-vergunning):
-  // bij dunne titels/items is 2 gedeelde woorden te zwak — eis dan 3.
-  const dun = sigTokens.size < 6 || itemTokens.size < 6;
-  if (dun && common < 3) return 0;
-  return common;
-}
 
 function extractEntities(item, personIndex = []) {
   const text = `${item.title || ''} ${item.summary || ''} ${(item.content || '').substring(0, 2000)}`;
@@ -293,14 +228,19 @@ async function run() {
   // Lockfile: voorkom dat twee gelijktijdige intake-runs dezelfde items verwerken.
   // fs.mkdirSync is atomair op alle OS'en — de eerste aanroep slaagt, de tweede faalt.
   const LOCKDIR = path.join(__dirname, '.intake-lock');
+  // Een normale run duurt doorgaans seconden. We geven een trage database-run
+  // toch ruim de tijd en houden de lock ondertussen levend. Zonder heartbeat
+  // kon een tweede PM2-trigger een nog actieve run als "stale" overnemen.
+  const STALE_LOCK_MS = 30 * 60 * 1000;
+  let lockHeartbeat = null;
   try {
     fs.mkdirSync(LOCKDIR);
   } catch (lockErr) {
     if (lockErr.code === 'EEXIST') {
-      // Controleer of de lock niet verouderd is (>15 minuten = stale lock)
+      // Controleer of de lock niet verouderd is (>30 minuten = stale lock)
       try {
         const lockAge = Date.now() - fs.statSync(LOCKDIR).mtimeMs;
-        if (lockAge > 15 * 60 * 1000) {
+        if (lockAge > STALE_LOCK_MS) {
           console.warn(`Stale lock gevonden (${Math.round(lockAge/60000)} min oud), wordt verwijderd`);
           fs.rmdirSync(LOCKDIR);
           fs.mkdirSync(LOCKDIR);
@@ -314,8 +254,18 @@ async function run() {
       }
     } else throw lockErr;
   }
-  // Zorg dat de lock altijd wordt opgeruimd
-  const releaseLock = () => { try { fs.rmdirSync(LOCKDIR); } catch (_) {} };
+  // Zorg dat de lock altijd wordt opgeruimd en dat een actieve run niet ten
+  // onrechte als stale wordt gezien.
+  const releaseLock = () => {
+    if (lockHeartbeat) clearInterval(lockHeartbeat);
+    try { fs.rmdirSync(LOCKDIR); } catch (_) {}
+  };
+  lockHeartbeat = setInterval(() => {
+    try { fs.utimesSync(LOCKDIR, new Date(), new Date()); } catch (_) {}
+  }, 60 * 1000);
+  // De timer is alleen een beschermingsmechanisme tijdens actief werk en mag
+  // Node niet in leven houden zodra alle databasehandelingen zijn afgerond.
+  lockHeartbeat.unref();
   process.on('exit', releaseLock);
   process.on('SIGINT', () => { releaseLock(); process.exit(1); });
   process.on('SIGTERM', () => { releaseLock(); process.exit(0); });
@@ -327,6 +277,18 @@ async function run() {
     args: [trigger],
   });
   const runId = runResult.rows[0]?.id;
+
+  // Een proces dat abrupt werd afgebroken liet eerder een intake_runs-rij met
+  // status NULL achter. Markeer zulke oude runs bij een volgende start, zodat
+  // de beheerweergave nooit stilzwijgend een hangende intake suggereert.
+  await db.execute({
+    sql: `UPDATE intake_runs
+          SET status = 'error', finished_at = datetime('now'),
+              error_message = 'Run niet afgerond; bij volgende intake als verlopen gemarkeerd'
+          WHERE status IS NULL AND id != ?
+            AND started_at < datetime('now', '-2 hours')`,
+    args: [runId],
+  });
 
   const decisionBatcher = makeBatcher(50);
   const eventBatcher = makeBatcher(50);
@@ -394,22 +356,57 @@ async function run() {
     }
 
     const signalsResult = await db.execute(`
-      SELECT id, title, summary, confirmations, threshold, status
-      FROM signals WHERE status NOT IN ('published', 'discarded')
+      WITH eerste_item AS (
+        SELECT si.signal_id, si.raw_item_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY si.signal_id
+            ORDER BY CASE
+                       WHEN lower(trim(r0.title)) = lower(trim(s0.title)) THEN 0
+                       ELSE 1
+                     END,
+                     datetime(si.added_at), si.raw_item_id
+          ) AS volgorde
+        FROM signal_items si
+        JOIN raw_items r0 ON r0.id = si.raw_item_id
+        JOIN signals s0 ON s0.id = si.signal_id
+      )
+      SELECT s.id, s.title, s.summary, s.confirmations, s.threshold, s.status,
+             r.title AS seed_title, src.name AS seed_source_name
+      FROM signals s
+      LEFT JOIN eerste_item ei ON ei.signal_id = s.id AND ei.volgorde = 1
+      LEFT JOIN raw_items r ON r.id = ei.raw_item_id
+      LEFT JOIN sources src ON src.id = r.source_id
+      WHERE s.status NOT IN ('published', 'discarded')
     `);
     const activeSignals = signalsResult.rows;
 
     const allTitlesResult = await db.execute(`SELECT title FROM signals`);
     const allSignalTitles = new Set(allTitlesResult.rows.map(r => (r.title || '').toLowerCase().trim()));
 
-    // Entity-gebaseerde matching (P1, 2026-08-02): per actief signaal de set entiteiten
-    // (personen/organisaties/adressen tellen zwaar; locaties licht). Items zijn vóór intake
-    // al gescand door extract-entities.cjs (draait in de run-files).
+    // Entity-gebaseerde matching: gebruik uitsluitend entiteiten van het eerste
+    // (seed-)item. Eerder werden entiteiten van álle clusteritems samengevoegd.
+    // Eén foute koppeling besmette daardoor het cluster en trok via die nieuwe
+    // entiteiten steeds meer ongerelateerde stukken aan.
     const sigEnt = new Map(); // signal_id -> {strong:Set, loc:Set}
     const entRows = await db.execute(`
-      SELECT si.signal_id, e.entity_type, e.normalized_name
-      FROM signal_items si JOIN entities e ON e.raw_item_id = si.raw_item_id
-      WHERE e.entity_type IN ('person','organization','address','location')
+      WITH eerste_item AS (
+        SELECT si.signal_id, si.raw_item_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY si.signal_id
+            ORDER BY CASE
+                       WHEN lower(trim(r0.title)) = lower(trim(s0.title)) THEN 0
+                       ELSE 1
+                     END,
+                     datetime(si.added_at), si.raw_item_id
+          ) AS volgorde
+        FROM signal_items si
+        JOIN raw_items r0 ON r0.id = si.raw_item_id
+        JOIN signals s0 ON s0.id = si.signal_id
+      )
+      SELECT ei.signal_id, e.entity_type, e.normalized_name
+      FROM eerste_item ei JOIN entities e ON e.raw_item_id = ei.raw_item_id
+      WHERE ei.volgorde = 1
+        AND e.entity_type IN ('person','organization','address','location')
     `);
     for (const r of entRows.rows) {
       if (!sigEnt.has(r.signal_id)) sigEnt.set(r.signal_id, { strong: new Set(), loc: new Set() });
@@ -417,18 +414,11 @@ async function run() {
       (r.entity_type === 'location' ? b.loc : b.strong).add(r.normalized_name);
     }
 
-    // Per signaal: uit welke bronwerelden het is opgebouwd. Nodig om te voorkomen
-    // dat woordoverlap een bekendmaking aan een rechtspraakuitspraak knoopt.
+    // Per signaal de bronwereld van het seed-item. Een eerder fout gekoppeld item
+    // mag ook deze beveiliging niet meer beïnvloeden.
     const sigWerelden = new Map(); // signal_id -> Set('bekendmaking'|'rechtspraak'|'anders')
-    const wereldRows = await db.execute(`
-      SELECT si.signal_id, s.name AS source_name
-      FROM signal_items si
-      JOIN raw_items r ON r.id = si.raw_item_id
-      JOIN sources s ON s.id = r.source_id
-    `);
-    for (const r of wereldRows.rows) {
-      if (!sigWerelden.has(r.signal_id)) sigWerelden.set(r.signal_id, new Set());
-      sigWerelden.get(r.signal_id).add(bronwereld(r.source_name));
+    for (const sig of activeSignals) {
+      sigWerelden.set(sig.id, new Set([bronwereld(sig.seed_source_name)]));
     }
     // Botsen twee specifieke werelden, dan is woordoverlap geen bewijs van samenhang.
     function wereldenBotsen(itemWereld, signalId) {
@@ -439,8 +429,8 @@ async function run() {
       if (specifiek.length === 0) return false;
       return !specifiek.includes(itemWereld);
     }
-    async function entityMatchSignal(itemId) {
-      const ie = await db.execute({ sql: `SELECT entity_type, normalized_name FROM entities WHERE raw_item_id = ?`, args: [itemId] });
+    async function entityMatchSignal(item) {
+      const ie = await db.execute({ sql: `SELECT entity_type, normalized_name FROM entities WHERE raw_item_id = ?`, args: [item.id] });
       if (!ie.rows.length) return null;
       const iStrong = new Set(), iLoc = new Set();
       for (const r of ie.rows) (r.entity_type === 'location' ? iLoc : iStrong).add(r.normalized_name);
@@ -460,14 +450,16 @@ async function run() {
       for (const sig of activeSignals) {
         const b = sigEnt.get(sig.id);
         if (!b) continue;
-        let n = 0;
+        let strongMatches = 0;
         // Tel alleen niet-ruis-entiteiten aan de signaal-kant
         for (const e of iStrong) {
-          if (b.strong.has(e) && !RUIS_ENTITEITEN.has(`person:${e}`) && !RUIS_ENTITEITEN.has(`organization:${e}`)) n += 2;
+          if (b.strong.has(e) && !RUIS_ENTITEITEN.has(`person:${e}`) && !RUIS_ENTITEITEN.has(`organization:${e}`)) strongMatches++;
         }
         let locN = 0;
         for (const e of iLoc) if (b.loc.has(e)) locN++;
-        if (locN >= 3) n += 2; // ≥3 gedeelde locaties telt als één sterke match (verhoogd van 2, bevinding #5)
+        if (!entiteitMatchToegestaan(item, sig, { strongMatches, locationMatches: locN })) continue;
+        let n = strongMatches * 2;
+        if (locN >= 3) n += 2;
         if (n >= 2 && n > bestN) { bestN = n; best = sig; }
       }
       return best ? { sig: best, n: bestN } : null;
@@ -569,7 +561,7 @@ async function run() {
       // koppelen bij een entiteitsmatch, als bevestiging zonder last_seen_at
       // te verversen; zonder match blijft het item naslag voor de spiegelcheck.
       if (item.bronrol === 'spiegel') {
-        const sm = await entityMatchSignal(item.id);
+        const sm = await entityMatchSignal(item);
         if (sm) {
           await db.execute({ sql: `UPDATE signals SET confirmations = confirmations + 1 WHERE id = ?`, args: [sm.sig.id] });
           await db.execute({ sql: `INSERT OR IGNORE INTO signal_items (signal_id, raw_item_id) VALUES (?, ?)`, args: [sm.sig.id, item.id] });
@@ -642,19 +634,16 @@ async function run() {
 
       // Signaalmatching — primair op gedeelde entiteiten (P1), woordoverlap als fallback
       let bestMatch = null, bestScore = 0, matchBasis = 'woorden';
-      const em = await entityMatchSignal(item.id);
+      const em = await entityMatchSignal(item);
       if (em) {
         bestMatch = em.sig; bestScore = em.n; matchBasis = 'entiteiten';
       } else {
         const itemWereld = bronwereld(item.source_name);
         for (const sig of activeSignals) {
           if (wereldenBotsen(itemWereld, sig.id)) continue;
-          const score = matchScore(item, sig);
-          // Drempel op 3 sinds 2026-08-15. Twee gedeelde woorden bleek opnieuw
-          // over-matchend (de les van juni herhaalde zich): signaal 1051 kreeg
-          // BRP-uitschrijvingen bij een gunning, 1041 meldkamerberichten bij een
-          // ECLI, 1067 advertenties bij een steigervergunning. Entiteitsmatching
-          // hierboven is de bedoelde route; woordoverlap is alleen nog vangnet.
+          const score = woordMatchScore(item, sig);
+          // woordMatchScore levert alleen een score vanaf 3 als de documentsoort,
+          // eventuele registratienummers en titeloverlap voldoende bewijs geven.
           if (score >= 3 && score > bestScore) { bestScore = score; bestMatch = sig; }
         }
       }
@@ -665,8 +654,8 @@ async function run() {
       // dan woordoverlap, maar een signaal met >15 items is per definitie verdacht).
       if (bestMatch) {
         const cap = matchBasis === 'entiteiten' ? 15 : 10;
-        if ((bestMatch.confirmations || 0) > cap) {
-          console.log(`  CAP [${matchBasis}] "${(item.title||'').substring(0,50)}" niet gekoppeld aan #${bestMatch.id} (${bestMatch.confirmations} confirmaties > cap ${cap})`);
+        if ((bestMatch.confirmations || 0) >= cap) {
+          console.log(`  CAP [${matchBasis}] "${(item.title||'').substring(0,50)}" niet gekoppeld aan #${bestMatch.id} (${bestMatch.confirmations} confirmaties >= cap ${cap})`);
           bestMatch = null; bestScore = 0;
         }
       }
@@ -675,8 +664,6 @@ async function run() {
         await db.execute({ sql: `UPDATE signals SET confirmations = confirmations + 1, last_seen_at = datetime('now') WHERE id = ?`, args: [bestMatch.id] });
         await db.execute({ sql: `INSERT OR IGNORE INTO signal_items (signal_id, raw_item_id) VALUES (?, ?)`, args: [bestMatch.id, item.id] });
         bestMatch.confirmations = (bestMatch.confirmations || 0) + 1;
-        if (!sigWerelden.has(bestMatch.id)) sigWerelden.set(bestMatch.id, new Set());
-        sigWerelden.get(bestMatch.id).add(bronwereld(item.source_name));
         stats.bijgewerktSignaal++;
         console.log(`  MATCH [T${tier}] "${(item.title||'').substring(0,50)}" → #${bestMatch.id} (score:${bestScore})`);
         await decisionBatcher.push(decisionStmt(runId, item, tier, 'matched', `gekoppeld aan signaal #${bestMatch.id} (basis: ${matchBasis}, score ${bestScore})`, { signal_id: bestMatch.id, match_score: bestScore, match_basis: matchBasis }));
@@ -721,7 +708,16 @@ async function run() {
 
         if (newId) {
           await db.execute({ sql: `INSERT OR IGNORE INTO signal_items (signal_id, raw_item_id) VALUES (?, ?)`, args: [newId, item.id] });
-          activeSignals.push({ id: newId, title: item.title, summary, confirmations: 1, threshold: 1, status });
+          activeSignals.push({
+            id: newId,
+            title: item.title,
+            summary,
+            confirmations: 1,
+            threshold: 1,
+            status,
+            seed_title: item.title,
+            seed_source_name: item.source_name,
+          });
           // Nieuw signaal ook meteen in de wereldenkaart, anders kan een volgend item
           // in dezelfde run er alsnog dwars overheen matchen.
           sigWerelden.set(newId, new Set([bronwereld(item.source_name)]));
