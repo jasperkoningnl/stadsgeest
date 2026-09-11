@@ -12,7 +12,8 @@
 //    in de URL, zodat alle items van het lopende jaar zichtbaar zijn.
 //
 // De ORI-scraper (raadsinformatie-ori.js in run-all.js) blijft als complementaire
-// bron draaien — die levert documenttekst, deze levert titels en detectie.
+// bron draaien — die vult documenttekst aan zodra ORI het stuk heeft geïndexeerd;
+// deze browserroute levert direct de titel en metadata voor detectie.
 // Deduplicatie loopt via insertItem (titel + source_id).
 //
 // Module-IDs (gevonden 2026-06-04, bevestigd 2026-08-23):

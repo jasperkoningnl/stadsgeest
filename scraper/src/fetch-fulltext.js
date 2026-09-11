@@ -4,8 +4,9 @@
 // Namen van aanvragers, bezwaarmakers, bestuurders en gemachtigden staan in het DOCUMENT,
 // niet in de titel. Zonder documenttekst valt er niets te matchen tegen de personendatabase.
 //
-// Draait ná de scrapers. Idempotent: slaat items over die al full_text hebben en
-// items waarvoor het eerder is geprobeerd (fulltext_fetched_at gezet, full_text leeg).
+// Draait ná de scrapers. Idempotent: slaat items met full_text over. Mislukte
+// Notubiz-documenten worden na zeven dagen opnieuw geprobeerd, omdat ORI de tekst
+// later alsnog kan indexeren; overige mislukte URL's blijven afgevinkt.
 //
 // Gebruik:
 //   node src/fetch-fulltext.js              # standaard: max 400 items per run
@@ -16,6 +17,7 @@
 
 import * as cheerio from 'cheerio';
 import { createDb } from './lib.js';
+import { buildOriLookup, extractOriText, isNotubizUrl } from './notubiz-fulltext.mjs';
 
 // pdfjs-dist wordt pas geladen als er echt een PDF langskomt (legacy build, want
 // we draaien in Node zonder DOM). Vóór 2026-08-09 werden PDF's overgeslagen én
@@ -91,29 +93,32 @@ function cleanText(html) {
 // document 17106654/2 gaf via notubiz een 400 en via ORI 14.659 tekens.
 async function oriTekst(url) {
   try {
-    const r = await fetch('https://api.openraadsinformatie.nl/v1/elastic/ori_amersfoort_*/_search', {
+    const r = await fetch('https://api.openraadsinformatie.nl/v1/elastic/ori_amersfoort*/_search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'User-Agent': UA },
-      body: JSON.stringify({ size: 1, query: { term: { original_url: url } }, _source: ['text'] }),
+      body: JSON.stringify(buildOriLookup(url)),
       signal: AbortSignal.timeout(20000),
     });
     if (!r.ok) return null;
     const j = await r.json();
-    const tekst = j.hits?.hits?.[0]?._source?.text;
-    if (!tekst || String(tekst).length < MIN_TEXT) return null;
-    return String(tekst).replace(/\s+/g, ' ').trim();
+    return extractOriText(j, url, MIN_TEXT);
   } catch {
     return null;
   }
 }
 
 async function fetchText(url) {
+  // ORI eerst: Notubiz blokkeert geautomatiseerde documentdownloads geregeld,
+  // terwijl ORI dezelfde oudere documenten met geëxtraheerde tekst aanbiedt.
+  // De nieuwe amersfoort.notubiz.nl-URL wordt daarbij naar de oude API-vorm
+  // genormaliseerd. Recente stukken kunnen nog ontbreken; die blijven retrybaar.
+  if (isNotubizUrl(url)) {
+    const tekst = await oriTekst(url);
+    if (tekst) return { text: tekst, reason: null };
+  }
+
   const r = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(20000) });
   if (!r.ok) {
-    if (url.includes('api.notubiz.nl/')) {
-      const tekst = await oriTekst(url);
-      if (tekst) return { text: tekst, reason: null };
-    }
     throw new Error(`HTTP ${r.status}`);
   }
   const ct = r.headers.get('content-type') || '';
@@ -144,7 +149,13 @@ async function run() {
     sql: `SELECT r.id, r.title, r.external_url, s.name AS source_name
           FROM raw_items r JOIN sources s ON s.id = r.source_id
           WHERE r.full_text IS NULL
-            AND r.fulltext_fetched_at IS NULL
+            AND (
+              r.fulltext_fetched_at IS NULL
+              OR (
+                r.external_url LIKE '%notubiz.nl/document/%'
+                AND datetime(r.fulltext_fetched_at) < datetime('now', '-7 days')
+              )
+            )
             AND r.external_url IS NOT NULL AND r.external_url != ''
             AND (${like})
           ORDER BY r.id DESC
@@ -160,7 +171,9 @@ async function run() {
       const { text, reason } = await fetchText(row.external_url);
       if (text) {
         await db.execute({
-          sql: `UPDATE raw_items SET full_text = ?, fulltext_fetched_at = ? WHERE id = ?`,
+          sql: `UPDATE raw_items
+                SET full_text = ?, fulltext_fetched_at = ?, entities_scanned_at = NULL
+                WHERE id = ?`,
           args: [text.substring(0, 200000), new Date().toISOString(), row.id],
         });
         stats.ok++;

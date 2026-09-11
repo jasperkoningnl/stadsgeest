@@ -7117,3 +7117,39 @@ Veertien vervuilde clusters zijn aan bestaande redactietips gekoppeld en daarom 
 Notubiz-fulltext herstellen en de drie eerder gemelde schriftelijke vragen controleren. Pas daarna de fase-3-adapters verder uitbouwen.
 
 *Codex-update: 2026-09-11 (intake en clustering)*
+
+---
+
+### Codex-update: 2026-09-11 — Notubiz-fulltext hersteld en recente vragen aangevuld
+
+#### Oorzaak vastgesteld
+
+- De browser-scraper haalt actuele titels en metadata wel op uit de zichtbare Notubiz-modulepagina's.
+- De documentlinks gebruiken inmiddels `amersfoort.notubiz.nl/document/...`; `fetch-fulltext.js` herkende alleen `api.notubiz.nl/...` als Notubiz-terugvalroute.
+- Een gewone geautomatiseerde documentaanvraag krijgt HTTP 403 van Cloudflare. Een normale browsersessie ontvangt voor hetzelfde document wel een PDF.
+- Open Raadsinformatie is bruikbaar voor oudere stukken, maar de Amersfoort-index loopt op dit moment slechts tot 10 juli 2026. Recente septemberstukken kunnen daar dus nog niet uit worden aangevuld.
+
+#### Structurele reparatie
+
+- Nieuwe module `scraper/src/notubiz-fulltext.mjs` herkent beide Notubiz-domeinen, extraheert document-id en revisie en normaliseert nieuwe URL's naar de oude ORI/API-vorm.
+- `fetch-fulltext.js` probeert voor Notubiz eerst ORI, accepteert alleen tekst van exact hetzelfde document en probeert mislukte Notubiz-items na zeven dagen opnieuw. Bij nieuwe fulltext wordt `entities_scanned_at` gewist zodat entiteitsextractie opnieuw draait.
+- `raadsinformatie-ori.js` slaat ORI-documenttekst voortaan direct als `full_text` op. Bestaande browseritems worden op document-id en revisie herkend, ook als ORI de oude `api.notubiz.nl`-URL gebruikt; zo ontstaat geen tweede item en wordt de bestaande rij aangevuld.
+- `saveRawItem` ondersteunt daarom nu optionele `fullText` en vult een bestaand duplicaat zonder fulltext veilig aan.
+- `backfill-notubiz-ori.mjs` toegevoegd voor efficiënte batch-backfills; `import-notubiz-pdf.mjs` is de gecontroleerde handmatige route voor recente PDF's die alleen in een normale browser openen.
+
+#### Database en drie gemelde schriftelijke vragen
+
+- ORI-batchbackfill uitgevoerd: 9 van 295 ontbrekende Notubiz-items aangevuld; de overige 286 staan nog niet met tekst in ORI.
+- PDF's van raw items 8566, 8567 en 8672 via de normale browser gedownload en gecontroleerd geïmporteerd: respectievelijk 2.600, 2.626 en 3.662 tekens fulltext.
+- Entiteitsextractie opnieuw uitgevoerd voor 43 bijgewerkte items: 78 nieuwe entities/mentions en 26 nieuwe entity-signaalkoppelingen over beide runs.
+- De drie vragen hangen nu ieder aan een eigen, inhoudelijk gelijknamig signaal: #1919 (EBU-reis), #1920 (Wmo-Regiotaxi) en #1932 (BDO-benchmark), alle drie status `watching`.
+- Notubiz-documentdekking na backfill: 137 van 423 met fulltext; 286 zonder fulltext. Er staan geen items meer open voor entiteitsextractie.
+
+#### Verificatie en resterende grens
+
+- Live ORI-normalisatietest op document 17106654/2: 14.618 tekens gevonden via een nieuwe-vorm-URL.
+- Volledige scraper-testset: 71/71 geslaagd, inclusief vijf nieuwe Notubiz-regressietests; alle gewijzigde scripts slagen voor de syntaxcontrole.
+- De 286 resterende documenten zijn niet met code alleen direct op te halen zolang Cloudflare automatische documentdownloads blokkeert en ORI achterloopt. Ze worden nu wekelijks opnieuw tegen ORI geprobeerd; urgente recente stukken kunnen via de nieuwe PDF-import worden aangevuld.
+- De drie gedownloade bron-PDF's staan in Jaspers map Downloads en zijn niet verwijderd.
+
+*Codex-update: 2026-09-11 (Notubiz-fulltext)*

@@ -5,6 +5,7 @@
 // Classificeert op naam naar de bestaande substromen (zelfde bronnamen, historie loopt door).
 import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult, makeSummary } from '../utils.js';
+import { notubizDocumentParts } from '../notubiz-fulltext.mjs';
 
 const ES = 'https://api.openraadsinformatie.nl/v1/elastic/ori_amersfoort*/_search';
 const UA = 'Stadsgeest033/1.0 (redactie@stadsgeest.nl)';
@@ -105,13 +106,20 @@ async function scrape() {
   // overlap; een bredere controle zou elke run een tabelscan kosten.
   const RAADSRIJEN = [108, 31, ...Object.values(sourceIds).map(Number)];
   const plaatshouders = RAADSRIJEN.map(() => '?').join(',');
-  async function elders(url) {
+  async function bestaandRaadsitem(url) {
     if (!url) return false;
+    const parts = notubizDocumentParts(url);
+    const documentLike = parts
+      ? `%notubiz.nl/document/${parts.documentId}/${parts.revision}%`
+      : null;
     const r = await db.execute({
-      sql: `SELECT 1 FROM raw_items WHERE external_url = ? AND source_id IN (${plaatshouders}) LIMIT 1`,
-      args: [url, ...RAADSRIJEN],
+      sql: `SELECT id, full_text FROM raw_items
+            WHERE (external_url = ? OR (? IS NOT NULL AND external_url LIKE ?))
+              AND source_id IN (${plaatshouders})
+            LIMIT 1`,
+      args: [url, documentLike, documentLike, ...RAADSRIJEN],
     });
-    return r.rows.length > 0;
+    return r.rows[0] || null;
   }
 
   for (const h of hits) {
@@ -120,15 +128,28 @@ async function scrape() {
     if (!naam) continue;
     const stream = STREAMS.find(s => s.re.test(naam)) || STREAMS[STREAMS.length - 1];
     const url = src.original_url || (Array.isArray(src.sources) && src.sources[0] && src.sources[0].url) || `https://api.openraadsinformatie.nl/v1/elastic/${h._index}/_doc/${encodeURIComponent(h._id)}`;
-    const tekst = String(src.text || src.description || '').substring(0, 25000);
+    const tekst = String(src.text || src.description || '').substring(0, 200000);
     const datum = src.last_discussed_at || src.start_date || src['@timestamp'] || new Date().toISOString();
     try {
-      if (await elders(url)) { stats[stream.name].skipped++; continue; }
+      const bestaand = await bestaandRaadsitem(url);
+      if (bestaand) {
+        if (!bestaand.full_text && tekst.length >= 200) {
+          await db.execute({
+            sql: `UPDATE raw_items
+                  SET full_text = ?, fulltext_fetched_at = ?, entities_scanned_at = NULL
+                  WHERE id = ?`,
+            args: [tekst, new Date().toISOString(), bestaand.id],
+          });
+        }
+        stats[stream.name].skipped++;
+        continue;
+      }
       const r = await saveRawItem(db, {
         sourceId: sourceIds[stream.name],
         externalUrl: url,
         title: naam.substring(0, 300),
-        content: tekst,
+        content: tekst.substring(0, 25000),
+        fullText: tekst.length >= 200 ? tekst : null,
         summary: makeSummary(tekst) || `${src['@type'] || ''} — raadsinformatie Amersfoort, ${String(datum).substring(0, 10)}`,
         publishedAt: datum,
       });
@@ -217,14 +238,15 @@ async function leusdenPass(dagen) {
     const titel = String(src.name || '').trim();
     if (!titel) continue;
     const url = src.original_url || (Array.isArray(src.sources) && src.sources[0] && src.sources[0].url) || `https://api.openraadsinformatie.nl/v1/elastic/${h._index}/_doc/${encodeURIComponent(h._id)}`;
-    const tekst = String(src.text || src.description || '').substring(0, 25000);
+    const tekst = String(src.text || src.description || '').substring(0, 200000);
     const datum = src.last_discussed_at || src.start_date || src['@timestamp'] || new Date().toISOString();
     try {
       const r = await saveRawItem(db, {
         sourceId,
         externalUrl: url,
         title: titel.substring(0, 300),
-        content: tekst,
+        content: tekst.substring(0, 25000),
+        fullText: tekst.length >= 200 ? tekst : null,
         summary: makeSummary(tekst) || `${src['@type'] || ''} — raadsinformatie Leusden, ${String(datum).substring(0, 10)}`,
         publishedAt: datum,
       });

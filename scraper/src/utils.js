@@ -40,15 +40,19 @@ export function makeSummary(text, maxLen = 500) {
   return (lastSpace > 0 ? chunk.substring(0, lastSpace) : chunk.substring(0, maxLen)).trim() + '…';
 }
 
-export async function saveRawItem(db, { sourceId, externalUrl, title, content, summary, publishedAt }) {
+export async function saveRawItem(db, { sourceId, externalUrl, title, content, summary, publishedAt, fullText = null }) {
   const hash = contentHash(`${title}${externalUrl}`);
   const pub = naarPublicatieIso(publishedAt);
+  const completeText = fullText ? String(fullText).substring(0, 200000) : null;
+  const fetchedAt = completeText ? new Date().toISOString() : null;
 
   try {
     await db.execute({
-      sql: `INSERT INTO raw_items (source_id, external_url, title, content, summary, content_hash, published_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      args: [sourceId, externalUrl || null, title || null, content || null, (summary || makeSummary(content)) || null, hash, pub],
+      sql: `INSERT INTO raw_items (
+              source_id, external_url, title, content, summary, content_hash,
+              published_at, full_text, fulltext_fetched_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [sourceId, externalUrl || null, title || null, content || null, (summary || makeSummary(content)) || null, hash, pub, completeText, fetchedAt],
     });
     return { saved: true, hash };
   } catch (err) {
@@ -62,6 +66,20 @@ export async function saveRawItem(db, { sourceId, externalUrl, title, content, s
             args: [pub, hash],
           });
         } catch { /* backfill is een extraatje, geen reden om de run te breken */ }
+      }
+      // ORI kan bij een latere scrape alsnog volledige documenttekst leveren.
+      // Vul die alleen aan als de bestaande rij nog geen fulltext heeft.
+      if (completeText) {
+        try {
+          await db.execute({
+            sql: `UPDATE raw_items
+                  SET full_text = CASE WHEN full_text IS NULL THEN ? ELSE full_text END,
+                      fulltext_fetched_at = CASE WHEN full_text IS NULL THEN ? ELSE fulltext_fetched_at END,
+                      entities_scanned_at = CASE WHEN full_text IS NULL THEN NULL ELSE entities_scanned_at END
+                  WHERE content_hash = ?`,
+            args: [completeText, fetchedAt, hash],
+          });
+        } catch { /* fulltext-backfill is een extraatje, geen reden om de run te breken */ }
       }
       return { saved: false, hash, reason: 'duplicate' };
     }
