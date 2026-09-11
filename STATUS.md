@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **11 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-11 (fase 2 afronding)"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-11 (weger-run)"**.
 
 ## Cowork-update: 2026-09-10 (sessie 2) — Fase 2 exitcriterium BEHAALD
 
@@ -6934,3 +6934,50 @@ De device_bash sandbox werkte niet gedurende het grootste deel van deze sessie (
 - De exacte omvang van de weger-achterstand (geen databasetoegang gehad).
 
 *Cowork-update: 2026-09-11 (fase 2 afronding)*
+
+---
+
+### Cowork-update: 2026-09-11 (weger-run)
+
+Weger-run na vijf dagen stilstand (laatste succesvolle run: 6 september). De mislukte run van eerder vandaag had geen bash-toegang; deze run had dat wel.
+
+#### Werkset
+
+- 62 nieuwe signalen (nooit beoordeeld), waarvan 57 Arbeidsinspectie-backfill en 5 overig.
+- 121 signalen met nieuw materiaal sinds vorige beoordeling; top 40 gecontroleerd, geen herbeoordelingen nodig (spiegelbron-scrapes, routine bekendmakingen, NS-verstoringen).
+
+#### Tip aangemaakt
+
+**Tip #45** — *Arbeidsinspectie trof bij veertig inspecties in Amersfoort overtredingen aan* — score 15, soort `patroon`.
+
+De Nederlandse Arbeidsinspectie (programma Eerlijk Werk) heeft tussen februari 2023 en juli 2026 zevenenzestig inspecties uitgevoerd bij bedrijven in Amersfoort, Leusden en Hoogland. Bij veertig daarvan is een overtreding vastgesteld (60%). Overwegend tewerkstelling van vreemdelingen (illegale arbeid). Drie herhaalovertreders:
+- BTM Transport en Logistiek B.V. (2023 + 2024, vier overtredingen)
+- Netwerk Exploitatiemaatschappij B.V. (2x in 2023, bij herinspectie geen overtreding meer)
+- K. Attour (twee horecazaken Qamarya en Albeek, beide met overtreding)
+
+Opvallend: Huisartsen Eemland HAP B.V. (de huisartsenpost) met overtreding tewerkstelling vreemdelingen. Niet eerder gedekt door spiegelbronnen. Zes signalen gekoppeld (twee dragend, vier bevestigend).
+
+#### Dossierfeiten
+
+3 feiten weggeschreven:
+- Feit #279 (dossier 21 Ondermijning en handhaving): Arbeidsinspectie-patroon
+- Feit #280 (dossier 11 Aanbestedingen): gunning openbare verlichting 2026-2030
+- Feit #281 (dossier 4 Woningbouw): CDA-vragen over vervroegd aanvragen transportcapaciteit (netcongestie)
+
+#### Signal events
+
+62 events geschreven: 56 reviewed + 6 tip_created. Alle 62 nieuwe signalen beoordeeld; 0 onbeoordeeld over. Telling klopt.
+
+#### Nieuw-materiaal signalen niet herbeoordelen
+
+Van de 121 signalen met `last_seen_at` na `weger_laatst` zijn er 40 gecontroleerd. In alle gevallen was het nieuwe materiaal routine: bekendmakingen (vergunningen, verkeersbesluiten, BRP-opschoningen), NS-verstoringen, Nextdoor-berichten, of TenderNed-gunningen die al als dossierfeit zijn vastgelegd. Geen herbeoordeling nodig. De overige 81 zijn niet individueel gecontroleerd; het risico is laag gezien het patroon (spiegelbron-scrapes en bekendmakingen domineren).
+
+#### Niet geverifieerd
+
+- Of de genoemde bedrijven (BTM Transport, Netwerk Exploitatiemaatschappij, K. Attour) nog actief zijn — KvK niet geraadpleegd.
+- Of er boetes zijn opgelegd bij de vastgestelde overtredingen — het register vermeldt alleen het feit.
+- De inhoud van raadsinformatiebrief 2026-069 (transportcapaciteit) en de CDA-vragen — notubiz leverde alleen metadata.
+- Of de 81 niet-gecontroleerde nieuw-materiaal signalen werkelijk geen herbeoordelingswaarde hebben.
+- WebSearch was niet beschikbaar (sessielimiet bereikt); spiegelcheck voor Arbeidsinspectie is alleen op de database gedaan, niet op het web.
+
+*Cowork-update: 2026-09-11 (weger-run)*
