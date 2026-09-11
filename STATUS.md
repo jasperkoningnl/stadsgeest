@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **11 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-11 (weger-run)"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-11 (asbest-koppeling, detection engine ontwerp)"**.
 
 ## Cowork-update: 2026-09-10 (sessie 2) — Fase 2 exitcriterium BEHAALD
 
@@ -6915,7 +6915,7 @@ Productie-code (detection-engine.cjs, detection-rules.cjs, entity-resolver.cjs, 
 
 #### Openstaand uit fase 2
 
-- **Asbest-events koppelen aan entities:** koppel-asbest.cjs was een diagnostisch script (21 regels, deed alleen JSON printen). De echte koppeling moet nog gebouwd worden — vergelijkbaar met hoe vul-graph-keten.cjs de eerlijk-werk events aan entities koppelde. Klein werk, geschat 30 minuten.
+- ~~**Asbest-events koppelen aan entities**~~ — AFGEHANDELD (commit 1d3f97a, zie update hieronder)
 - **Dashboard entityPath display:** uitgesteld. Hangt samen met het dashboardontwerp dat nog in alpha is.
 - **R1 vergunning→BAG→entity pad:** uitgesteld. Vereist BAG-koppeling die er nog niet is.
 
@@ -6981,3 +6981,87 @@ Van de 121 signalen met `last_seen_at` na `weger_laatst` zijn er 40 gecontroleer
 - WebSearch was niet beschikbaar (sessielimiet bereikt); spiegelcheck voor Arbeidsinspectie is alleen op de database gedaan, niet op het web.
 
 *Cowork-update: 2026-09-11 (weger-run)*
+
+---
+
+### Cowork-update: 2026-09-11 (weger-run, heronderzoek)
+
+Jasper vond de opbrengst van de eerdere weger-run te mager (1 tip na vijf dagen stilstand) en vroeg om signalen die te snel waren afgeserveerd opnieuw te bekijken. Vijf signalen heronderzocht, één extra tip aangemaakt, en structurele problemen in de pipeline geïdentificeerd die verklaren waarom de opbrengst laag was.
+
+#### Tip aangemaakt
+
+**Tip #46** — *Netcongestie raakt Amersfoortse woningbouw: Stedin belooft vervroegde transportcapaciteit* — score 8, soort `verdieping`, dossier 4 (Woningbouw en wonen).
+
+Signaal #1300 bevat raadsinformatiebrief 2026-069 waarin het college meldt dat Stedin heeft toegezegd de transportcapaciteit voor het onderstation Isselt eerder beschikbaar te stellen dan het reguliere schema. Het CDA heeft hierover schriftelijke vragen gesteld (SV 2026-052). Nieuwsplein33 berichtte in juni al over netcongestie als belemmering voor woningbouw — deze tip bouwt daarop voort met de concrete toezegging. Eén dragend signaal (#1300). Dossierfeit #282 aangemaakt (plan, dossier 4, zekerheid `officieel`).
+
+#### Heronderzochte signalen
+
+Vijf signalen opnieuw beoordeeld die in de eerdere run als `reviewed` waren afgesloten:
+
+- **#525** (Boeier/Zangvogelweg woningbouw): al tip #37 (4 augustus). SV 2026-041 met beantwoording (24 augustus) zit erbij maar was in de run van 2 september gemist. Geen nieuwe tip, maar de beantwoording is nieuw materiaal dat een volgende weger kan meenemen.
+- **#703** (subsidie Sociale Wijkteams): substantieel bedrag (20,7 mln), maar geen aanwijzing voor afwijking, conflict of besluit — puur continuering. Geen tip.
+- **#1695** (aanbesteding openbare verlichting): al als dossierfeit #280 vastgelegd bij tip #45. Geen eigen tip — een TenderNed-gunning zonder afwijking of bezwaarprocedure.
+- **#931** (misclustering — 5 ongerelateerde items in één signaal): bevat NS-storing, Nextdoor-berichten, bekendmakingen en een Arbeidsinspectie-record die niets met elkaar te maken hebben. Geen tip mogelijk, wel als structureel probleem genoteerd.
+- **#1348** (misclustering — 12 ongerelateerde items): Rechtbank-uitspraken, bekendmakingen, subsidies en NS-verstoringen door elkaar. Zelfde probleem als #931.
+
+#### Structurele problemen in de pipeline
+
+Het heronderzoek legde drie problemen bloot die verklaren waarom er minder tips uit vijf dagen materiaal komen dan verwacht:
+
+1. **Misclustering.** Signalen #931, #1279, #1348 en #587 bevatten elk 5 tot 12 compleet ongerelateerde items. De clusterstap voegt items samen die niets gemeen hebben. Een tip vereist een samenhangend verhaal; uit een cluster van een NS-storing, een dakkapelvergunning en een Nextdoor-bericht valt dat niet te construeren. Dit onderdrukt de tipopbrengst structureel.
+
+2. **Notubiz fulltext-ophaling faalt.** De notubiz-bron levert HTTP 400 bij het ophalen van de volledige tekst van raadsinformatiebrieven en schriftelijke vragen. Daardoor hebben deze items alleen metadata (titel, datum) en ontbreekt de inhoud die nodig is om nieuwswaarde te beoordelen. Dit raakt direct de kwaliteit van de signalen rond lokale politiek.
+
+3. **Drie recente schriftelijke vragen niet geclusterd tot signaal.** SV 8672 (BDO-benchmark overhead), SV 8567 (Wmo-Regiotaxi) en SV 8566 (EBU-wethouder) staan als raw_items in de database maar zijn niet in een signaal opgenomen. De combinatieregel (een SV zonder beantwoording kan geen tip dragen tenzij er een tweede dragende bron is) is hier niet het probleem — ze komen niet eens aan die stap toe.
+
+Deze drie problemen samen verklaren waarom vijf dagen materiaal slechts twee tips opleverde: het materiaal is er wel, maar het komt niet goed door de trechter.
+
+#### Niet geverifieerd
+
+- Of de toezegging van Stedin (vervroegde transportcapaciteit Isselt) al elders in de media is opgepikt — websearch was niet beschikbaar.
+- Of de fulltext-fout bij notubiz reproduceerbaar is met een andere ophaalmethode.
+- Of de drie ongesignaleerde SV's (8672, 8567, 8566) een systematisch probleem zijn of incidenteel.
+
+*Cowork-update: 2026-09-11 (weger-run, heronderzoek)*
+
+---
+
+### Cowork-update: 2026-09-11 (asbest-koppeling, detection engine ontwerp)
+
+#### Taak 1 — Asbest-events gekoppeld aan entities ✅
+
+Script `scraper/src/kg/koppel-asbest-entities.cjs` gebouwd en gedraaid (commit 1d3f97a, gepusht). Het script leest de provenance-JSON van alle 4 asbest kg_events, extraheert de bedrijfsnaam, zoekt via alias- en normalized_name-matching naar bestaande entities, maakt nieuwe entities aan als er geen match is, en koppelt via event_entities.
+
+**Resultaat:**
+- 4 nieuwe entities aangemaakt (id 238-241): Stichting 's Heeren Loo Zorggroep, SloopTeam B.V., TB Asbestsanering B.V., GSR recreatie en buitenruimte B.V.
+- 4 event_entities rijen aangemaakt (role=subject)
+- Alle 4 asbest-events nu gekoppeld — het openstaande punt "Asbest-events koppelen aan entities" uit fase 2 is hiermee afgehandeld
+
+#### Taak 2 — Detection engine als PM2-proces (ontwerp besproken)
+
+Ontwerp besproken met Jasper:
+- **Standalone PM2-proces** `detection-run.cjs`, cron `0 7 * * *` (07:00 UTC, na intake)
+- Draait alle 7 KG-adapters (liander, acm, ap, tuchtrecht, asbest, lrk, eerlijk-werk), dan detection rules R1-R9
+- KG-module blijft volledig los van de hoofdpipeline — geen import in intake-run.mjs
+- **Feature flags** (migratieplan par. 2) zijn nooit geimplementeerd en hoeven nu niet gebouwd te worden. Ze worden pas relevant wanneer de intake zelf naar de KG-module migreert. De flags als concept blijven in het migratieplan staan.
+
+**Niet gebouwd** — doorgeschoven naar volgende chat.
+
+#### Taak 3 — DUO BO/VO adapter (niet gestart)
+
+Doorgeschoven naar volgende chat.
+
+#### Database-stand
+
+| Tabel | Rijen | Wijziging |
+|---|---|---|
+| kg_entities | 241 | +4 (asbest-bedrijven) |
+| event_entities | 76+ | +4 (asbest-koppelingen) |
+| kg_aliases | 556 | +4 (bedrijfsnamen) |
+
+#### Niet geverifieerd
+
+- Of de 4 nieuwe asbest-entities duplicaten zijn van bestaande records onder andere namen (het script deed alias- en normalized_name-matching, maar geen identifier- of locatiematching)
+- Of detection-run.cjs als PM2-proces stabiel zou draaien (nog niet gebouwd)
+
+*Cowork-update: 2026-09-11 (asbest-koppeling, detection engine ontwerp)*
