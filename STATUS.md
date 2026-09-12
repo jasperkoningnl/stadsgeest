@@ -1,8 +1,8 @@
 # STATUS.md — Stadsgeest 033
 
-> ### Bijgewerkt tot en met **11 september 2026**
+> ### Bijgewerkt tot en met **12 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-11 (asbest-koppeling, detection engine ontwerp)"**.
+> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-12 (weger-run)"**.
 
 ## Cowork-update: 2026-09-10 (sessie 2) — Fase 2 exitcriterium BEHAALD
 
@@ -7153,3 +7153,64 @@ Notubiz-fulltext herstellen en de drie eerder gemelde schriftelijke vragen contr
 - De drie gedownloade bron-PDF's staan in Jaspers map Downloads en zijn niet verwijderd.
 
 *Codex-update: 2026-09-11 (Notubiz-fulltext)*
+
+---
+
+### Cowork-update: 2026-09-12 (weger-run)
+
+Geautomatiseerde weger-run, 12 september 2026. De bash-sandbox is nog steeds onbereikbaar (Plan9-mountfout sinds Windows-update 8 september). Alle databasetoegang liep via de ingebouwde browser: `fetch()` naar de Turso HTTP API vanuit JavaScript op example.com. Dat werkt betrouwbaar en is nu de standaard workaround voor weger-runs.
+
+#### Werkset
+
+338 nieuwe signalen (nooit eerder door de weger beoordeeld), waarvan 323 uit de clusteringherstelrun van 11 september en 15 van vandaag. Plus 26 signalen met nieuw materiaal. De 323 historische zijn grotendeels routine: 111 vergunningen, 99 ingekomen stukken, 18 BRP-vertrekberichten, 6 beslistermijnverlengingen, 5 NS-verstoringen, 5 milieumelding. Die zijn batchgewijs afgehandeld.
+
+#### Tips aangemaakt
+
+Drie tips in de wachtrij gezet:
+
+1. **Tip #47** (score 8, verdieping) — *Raad vraagt college naar onterechte scanauto-boetes in Amersfoort*. SV 2026-046 van Amersfoort2014. Bron: raadsinformatie. Niet eerder door NP33 of partners gebracht. Dossier 17 (parkeerbeleid).
+2. **Tip #48** (score 6, nieuwsfeit) — *College informeert raad over sociale veiligheid in de openbare ruimte*. RIB 2026-034. Bron: raadsinformatie. Niet gevonden bij NP33. Dossier 21 (ondermijning en handhaving).
+3. **Tip #49** (score 8, nieuwsfeit) — *Regiogemeenten gunnen vervoer Jeugd-GGZ aan één partij*. TenderNed-gunning voor Amersfoort en zes buurgemeenten. Bron: TenderNed (tier 1, geen spiegel). Niet bij NP33 of partners. Dossier 18 (zorginspectie). Deze tip verbetert de brondiversiteit: de eerste twee tips komen uit raadsinformatie, deze uit een aanbestedingsregister.
+
+#### Dossier-feiten
+
+Vijf dossier-feiten geschreven:
+
+- #283: Schietpartij Vathorst, verdachte aangehouden (dossier 1, Explosies Amersfoort)
+- #284: Maatschappelijke opvang Westsingel, college informeert raad (dossier 14, asielopvang)
+- #285: Wind op Isselt, SV over provinciale dwang (dossier 20)
+- #286: Kastanjehof GGz, SV over veiligheidsketen (dossier 18)
+- #287: Busvervoer afschaling, SV CU en A2014 (dossier 5, lokale politiek)
+
+Bij #285, #286 en #287 mislukte de eerste insertpoging op `fact_type = 'raadsvraag'` — dat is geen geldige waarde in de CHECK-constraint. Hersteld met 'claim' (285, 287) en 'maatregel' (286).
+
+#### Spiegelcheck
+
+Systematisch gecontroleerd op dekking bij NP33 en partners voor alle tip-kandidaten:
+
+- Wind op Isselt: zwaar gedekt (NP33 3 en 11 sep), geen tip
+- Kastanjehof: gedekt (NP33 5 sep), geen tip
+- Busvervoer: gedekt (NP33 8 aug), geen tip
+- Vuurwerkverbod RIB: 13 spiegeltreffers, geen tip
+- Scanauto-boetes: niet gevonden bij NP33 → tip #47
+- Sociale veiligheid: niet gevonden bij NP33 → tip #48
+- Jeugd-GGZ vervoer: niet gevonden bij NP33 → tip #49
+
+#### Tellingen
+
+- 341 signal_events geschreven door de weger (4 tip_created, 337 reviewed/discarded)
+- 3 tips aangemaakt (#47, #48, #49)
+- 5 dossier-feiten (#283–#287)
+- 0 signalen onbeoordeeld gebleven (van de werkset)
+
+#### Niet geverifieerd
+
+- De Notubiz-documenten achter de schriftelijke vragen en RIB's zijn niet inhoudelijk gelezen; die pagina's zijn client-rendered en geven geen bruikbare tekst via geautomatiseerde methoden. De beoordeling van SVs rust op metadata (titel, datum, fractie, beantwoordingsdatum).
+- De TenderNed-gunning (tip #49) is niet verder uitgelezen dan de samenvatting. De contractwaarde en naam van de winnende partij zijn niet geverifieerd — dat is precies de vervolgvraag voor de redactie.
+
+#### Openstaand
+
+- Bash-sandbox nog steeds kapot. De browser-workaround werkt, maar git pull/push vereist handmatige actie of computer-use met PowerShell (die alleen click-tier heeft, geen typing).
+- De fact_type-constraint in dossier_facts kent geen waarde voor 'raadsvraag'. Als dat een veel voorkomend type wordt, overweeg de constraint uit te breiden.
+
+*Cowork-update: 2026-09-12 (weger-run)*

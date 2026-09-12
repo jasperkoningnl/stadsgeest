@@ -23,6 +23,18 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-09-12 — Drie nieuwe tips in de wachtrij
+
+Er staan drie nieuwe tips klaar. De eerste gaat over scanauto-boetes: de raad heeft het college gevraagd naar het aantal onterechte parkeerboetes door de scanauto en de afhandeling van bezwaren. De tweede gaat over sociale veiligheid in de openbare ruimte: het college informeert de raad over de aanpak en resultaten. De derde is een aanbestedingsvondst: zeven regiogemeenten, waaronder Amersfoort, hebben het vervoer van jongeren in GGZ-behandeling gegund aan een enkele partij. Die laatste komt niet uit raadsstukken maar uit het aanbestedingsregister TenderNed, een type bron dat normaal niet in beeld komt.
+
+---
+
+## 2026-09-11 — Twee nieuwe tips in de wachtrij
+
+Er staan twee nieuwe tips klaar. De eerste gaat over een patroon bij de Arbeidsinspectie: bij veertig van de zevenenzestig inspecties in Amersfoort zijn overtredingen vastgesteld, vooral illegale tewerkstelling. De tweede gaat over netcongestie en woningbouw: Stedin heeft toegezegd de transportcapaciteit voor onderstation Isselt eerder beschikbaar te stellen, en het CDA heeft daar vragen over gesteld. Die tweede tip sluit aan bij de eerdere berichtgeving over netcongestie als rem op de woningbouw.
+
+---
+
 ## 2026-09-07 — Meer Arbeidsinspectie-signalen in het dashboard
 
 Deze week is een grote batch inspectieresultaten van de Nederlandse Arbeidsinspectie verwerkt. Daardoor staan er nu tientallen Amersfoortse bedrijven met inspectieresultaten als signaal in het dashboard, de meeste op watching-status. Mocht er opvallend veel Arbeidsinspectie-materiaal in de tipwachtrij verschijnen, dan is dat de verklaring — het is eenmalige registerdata, geen plotselinge hausse aan inspecties.
