@@ -3,6 +3,7 @@
 // Semikolon-gescheiden, twee keer per week bijgewerkt (ma+vr).
 // Detecteert: nieuwe/verdwenen locaties, houderwissels, capaciteitswijzigingen.
 
+const crypto = require('crypto');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../../.env') });
 const { createClient } = require('@libsql/client');
@@ -86,22 +87,24 @@ class LrkKinderopvangAdapter {
 
   /** Haal het vorige snapshot op uit source_records. */
   async _getPreviousSnapshot() {
-    try {
-      const result = await this.db.execute({
-        sql: `SELECT raw_data FROM source_records
-              WHERE source_id = ? AND record_type = 'snapshot'
-              ORDER BY fetched_at DESC LIMIT 1`,
-        args: [this.sourceId],
-      });
-      if (result.rows.length > 0) {
-        return JSON.parse(result.rows[0].raw_data);
-      }
-    } catch { /* source_records bestaat misschien nog niet */ }
+    const result = await this.db.execute({
+      sql: `SELECT id, raw_object, semantic_hash FROM source_records
+            WHERE source_id = ? AND source_key = 'lrk_full'
+            ORDER BY id DESC LIMIT 1`,
+      args: [this.sourceId],
+    });
+    if (result.rows.length > 0) {
+      return {
+        id: Number(result.rows[0].id),
+        snapshot: JSON.parse(result.rows[0].raw_object || '{}'),
+        semanticHash: result.rows[0].semantic_hash,
+      };
+    }
     return null;
   }
 
   /** Sla het huidige snapshot op in source_records. */
-  async _saveSnapshot(records) {
+  async _saveSnapshot(records, previousState = null) {
     if (this.dryRun) return;
     // Sla een compact snapshot op: lrk_id -> hash
     const snapshot = {};
@@ -118,16 +121,19 @@ class LrkKinderopvangAdapter {
         postcode: row.opvanglocatie_postcode,
       };
     }
-    try {
-      await this.db.execute({
-        sql: `INSERT INTO source_records (source_id, record_type, record_key,
-                fetched_at, raw_data, semantic_hash)
-              VALUES (?, 'snapshot', 'lrk_full', datetime('now'), ?, ?)`,
-        args: [this.sourceId, JSON.stringify(snapshot), String(records.length)],
-      });
-    } catch (err) {
-      console.error(`[LRK] Snapshot opslaan mislukt: ${err.message}`);
-    }
+    const rawObject = JSON.stringify(snapshot);
+    const semanticHash = crypto.createHash('sha256').update(rawObject).digest('hex');
+    if (previousState?.semanticHash === semanticHash) return;
+    const contentHash = crypto.createHash('sha256')
+      .update(`${semanticHash}:${previousState?.id || 0}`)
+      .digest('hex');
+    await this.db.execute({
+      sql: `INSERT INTO source_records
+            (source_id, source_key, raw_object, content_hash, semantic_hash, previous_id, change_type)
+            VALUES (?, 'lrk_full', ?, ?, ?, ?, ?)`,
+      args: [this.sourceId, rawObject, contentHash, semanticHash, previousState?.id || null,
+        previousState ? 'changed' : 'added'],
+    });
   }
 
   /** Vergelijk huidig met vorig snapshot en detecteer wijzigingen. */
@@ -269,7 +275,8 @@ class LrkKinderopvangAdapter {
     await this._ensureSource();
 
     const records = await this._fetchAndParse();
-    const previousSnapshot = await this._getPreviousSnapshot();
+    const previousState = await this._getPreviousSnapshot();
+    const previousSnapshot = previousState?.snapshot || null;
     const events = this._diff(records, previousSnapshot);
 
     console.log(`[LRK] ${events.length} wijzigingen gedetecteerd${previousSnapshot ? '' : ' (eerste run, alles is nieuw)'}`);
@@ -277,7 +284,7 @@ class LrkKinderopvangAdapter {
     // Bij eerste run: niet alle 200+ locaties als "nieuw" signaleren
     if (!previousSnapshot && events.length > 20) {
       console.log(`[LRK] Eerste run — snapshot opslaan zonder events te genereren`);
-      await this._saveSnapshot(records);
+      await this._saveSnapshot(records, previousState);
       return { total: records.length, events: 0, note: 'eerste snapshot opgeslagen' };
     }
 
@@ -285,20 +292,7 @@ class LrkKinderopvangAdapter {
       await this._processEvent(event);
     }
 
-    await this._saveSnapshot(records);
-
-    // Log fetch run
-    if (!this.dryRun) {
-      try {
-        await this.db.execute({
-          sql: `INSERT INTO fetch_runs (source_id, adapter_class, started_at, finished_at,
-                  items_found, items_new, items_changed, status)
-                VALUES (?, 'LrkKinderopvang', datetime('now'), datetime('now'),
-                  ?, ?, 0, 'ok')`,
-          args: [this.sourceId, records.length, events.length],
-        });
-      } catch { /* fetch_runs mag falen */ }
-    }
+    await this._saveSnapshot(records, previousState);
 
     const summary = { total: records.length, events: events.length };
     console.log(`[LRK] Klaar: ${JSON.stringify(summary)}`);

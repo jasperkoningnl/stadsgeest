@@ -98,18 +98,19 @@ class DetectionEngine {
 
           // Maak signaal aan
           if (!this.dryRun) {
-            const signalId = await this._createSignal(event, rule, signal);
+            const signalResult = await this._createSignal(event, rule, signal);
             details.push({
-              ruleId, eventId: event.id, signalId,
-              title: signal.title, action: 'created',
+              ruleId, eventId: event.id, signalId: signalResult.id,
+              title: signal.title, action: signalResult.created ? 'created' : 'existing',
             });
+            if (signalResult.created) signalsCreated++;
           } else {
             details.push({
               ruleId, eventId: event.id, signalId: null,
               title: signal.title, action: 'dry_run',
             });
+            signalsCreated++;
           }
-          signalsCreated++;
         } catch (err) {
           console.error(`[${ruleId}] Fout bij event ${event.id}: ${err.message}`);
           details.push({
@@ -127,22 +128,29 @@ class DetectionEngine {
    * Maak een signaal aan in de bestaande signals-tabel.
    */
   async _createSignal(event, rule, signalData) {
-    // Check of er al een signaal bestaat met dezelfde detection_rule + source_url
+    // Exact-once: een periodieke detectierun mag hetzelfde event niet opnieuw
+    // als bevestiging of nieuw signaal tellen. Oude signalen hebben nog geen
+    // event_id in provenance; voor die records vallen we terug op de unieke
+    // bron-URL of bronidentifier.
     const existing = await this.db.execute({
-      sql: `SELECT id FROM signals WHERE detection_rule = ? AND provenance LIKE ?`,
-      args: [rule.id, `%${event.source_url || event.id}%`],
+      sql: `SELECT id FROM signals
+            WHERE detection_rule = ? AND (
+              json_extract(provenance, '$.event_id') = ?
+              OR (? IS NOT NULL AND json_extract(provenance, '$.source_url') = ?)
+              OR (? IS NOT NULL AND json_extract(provenance, '$.source_identifier') = ?)
+            )
+            LIMIT 1`,
+      args: [
+        rule.id,
+        event.id,
+        event.source_url || null,
+        event.source_url || null,
+        event.source_identifier || null,
+        event.source_identifier || null,
+      ],
     });
     if (existing.rows.length > 0) {
-      // Update bestaand signaal
-      await this.db.execute({
-        sql: `UPDATE signals SET
-                confirmations = confirmations + 1,
-                last_seen_at = datetime('now'),
-                summary = CASE WHEN length(?) > length(summary) THEN ? ELSE summary END
-              WHERE id = ?`,
-        args: [signalData.summary || '', signalData.summary || '', existing.rows[0].id],
-      });
-      return existing.rows[0].id;
+      return { id: existing.rows[0].id, created: false };
     }
 
     // Nieuw signaal
@@ -154,6 +162,7 @@ class DetectionEngine {
       occurred_at: event.occurred_at,
       fetched_at: event.fetched_at,
       detection_rule: rule.id,
+      event_id: event.id,
       evidence: signalData.evidence || [],
       entity_path: signalData.entityPath || null,
     });
@@ -190,7 +199,7 @@ class DetectionEngine {
       // entity_signals tabel bestaat misschien nog niet — geen probleem
     }
 
-    return signalId;
+    return { id: signalId, created: true };
   }
 
   /**

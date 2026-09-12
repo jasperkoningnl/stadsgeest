@@ -270,19 +270,6 @@ class ArbeidsinspectieEerlijkWerkAdapter {
       else if (outcome.action === 'unchanged') unchanged++;
     }
 
-    // Log fetch run
-    if (!this.dryRun) {
-      try {
-        await this.db.execute({
-          sql: `INSERT INTO fetch_runs (source_id, adapter_class, started_at, finished_at,
-                  items_found, items_new, items_changed, status)
-                VALUES (?, 'ArbeidsinspectieEerlijkWerk', datetime('now'), datetime('now'),
-                  ?, ?, ?, 'ok')`,
-          args: [this.sourceId, results.length, created, updated],
-        });
-      } catch { /* fetch_runs mag falen */ }
-    }
-
     const summary = { total: results.length, created, updated, unchanged, skipped };
     console.log(`[ArbInsp] Klaar: ${JSON.stringify(summary)}`);
     return summary;

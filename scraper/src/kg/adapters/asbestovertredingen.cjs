@@ -3,6 +3,7 @@
 // Detecteert: boetes en stilleggingen bij asbestwerk in Amersfoort/Leusden.
 // HTML-scraper: overzichtspagina → detailpagina's → lokale filtering.
 
+const crypto = require('crypto');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../../.env') });
 const { createClient } = require('@libsql/client');
@@ -164,14 +165,20 @@ class AsbestovertredingenAdapter {
     const slugs = await this._fetchOvertredingLinks();
 
     // Check welke slugs we al kennen
-    const knownSlugs = new Set();
-    for (const slug of slugs) {
-      const existing = await this.db.execute({
-        sql: `SELECT id FROM kg_events WHERE source_id = ? AND source_identifier = ?`,
-        args: [this.sourceId, slug],
-      });
-      if (existing.rows.length > 0) knownSlugs.add(slug);
-    }
+    const [knownRecords, knownEvents] = await Promise.all([
+      this.db.execute({
+        sql: `SELECT DISTINCT source_key FROM source_records WHERE source_id = ?`,
+        args: [this.sourceId],
+      }),
+      this.db.execute({
+        sql: `SELECT DISTINCT source_identifier FROM kg_events WHERE source_id = ?`,
+        args: [this.sourceId],
+      }),
+    ]);
+    const knownSlugs = new Set([
+      ...knownRecords.rows.map(row => row.source_key),
+      ...knownEvents.rows.map(row => row.source_identifier),
+    ]);
 
     const newSlugs = slugs.filter(s => !knownSlugs.has(s));
     console.log(`[Asbest] ${knownSlugs.size} al bekend, ${newSlugs.length} nieuw te checken`);
@@ -183,6 +190,17 @@ class AsbestovertredingenAdapter {
       if (!detail) {
         skipped++;
         continue;
+      }
+
+      if (!this.dryRun) {
+        const rawObject = JSON.stringify(detail);
+        const contentHash = crypto.createHash('sha256').update(rawObject).digest('hex');
+        await this.db.execute({
+          sql: `INSERT OR IGNORE INTO source_records
+                (source_id, source_key, raw_object, content_hash, semantic_hash, change_type)
+                VALUES (?, ?, ?, ?, ?, 'added')`,
+          args: [this.sourceId, slug, rawObject, contentHash, contentHash],
+        });
       }
 
       if (!this._isLocallyRelevant(detail)) {
@@ -233,7 +251,7 @@ class AsbestovertredingenAdapter {
     }
 
     console.log(`[Asbest] Klaar: ${lokaal} lokaal, ${events} nieuwe events, ${skipped} niet-lokaal`);
-    return { lokaal, events, skipped };
+    return { total: slugs.length, lokaal, events, skipped, cached: knownSlugs.size };
   }
 }
 

@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "result": {
+    "total": 1,
+    "fields": [
+      {"id":"_id"},{"id":"PROVINCIE"},{"id":"BEVOEGD GEZAG NUMMER"},
+      {"id":"INSTELLINGSCODE"},{"id":"VESTIGINGSCODE"},{"id":"VESTIGINGSNAAM"},
+      {"id":"STRAATNAAM"},{"id":"HUISNUMMER-TOEVOEGING"},{"id":"POSTCODE"},
+      {"id":"PLAATSNAAM"},{"id":"GEMEENTENUMMER"},{"id":"GEMEENTENAAM"},
+      {"id":"DENOMINATIE"},{"id":"TELEFOONNUMMER"},{"id":"INTERNETADRES"}
+    ],
+    "records": [{
+      "_id": 4438,
+      "PROVINCIE": "Utrecht",
+      "BEVOEGD GEZAG NUMMER": 41296,
+      "INSTELLINGSCODE": "07EX",
+      "VESTIGINGSCODE": "07EX00",
+      "VESTIGINGSNAAM": "Vrije School Amersfoort",
+      "STRAATNAAM": "Romeostraat",
+      "HUISNUMMER-TOEVOEGING": "74",
+      "POSTCODE": "3816SE",
+      "PLAATSNAAM": "AMERSFOORT",
+      "GEMEENTENUMMER": "0307",
+      "GEMEENTENAAM": "AMERSFOORT",
+      "DENOMINATIE": "Antroposofisch",
+      "TELEFOONNUMMER": "0334727622",
+      "INTERNETADRES": "www.vrijeschoolamersfoort.nl"
+    }]
+  }
+}

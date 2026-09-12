@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **12 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Cowork-update: 2026-09-12 (weger-run)"**.
+> De laatste sectie onderaan dit bestand heet **"Codex-update: 2026-09-12 — tips 47-49, fase 2 productierun en DUO-start"**.
 
 ## Cowork-update: 2026-09-10 (sessie 2) — Fase 2 exitcriterium BEHAALD
 
@@ -7214,3 +7214,55 @@ Systematisch gecontroleerd op dekking bij NP33 en partners voor alle tip-kandida
 - De fact_type-constraint in dossier_facts kent geen waarde voor 'raadsvraag'. Als dat een veel voorkomend type wordt, overweeg de constraint uit te breiden.
 
 *Cowork-update: 2026-09-12 (weger-run)*
+
+---
+
+### Codex-update: 2026-09-12 — tips 47-49, fase 2 productierun en DUO-start
+
+#### Tips 47-49 inhoudelijk afgerond
+
+- Voor tip #47 zijn de schriftelijke vragen 2026-033 én de beantwoording via een normale Notubiz-browsersessie opgehaald. `raw_items.id=6624` bevat nu 12.869 tekens gecombineerde fulltext; de foutieve titelcode `20226-033` is gecorrigeerd naar `2026-033`.
+- De beantwoording bevat lokale cijfers die de oude tip wezenlijk veranderen: 1.109/3.599/3.969 naheffingen in januari-maart 2026 en volgens het college 8%/6%/2% onterechte naheffingen. In dezelfde maanden van 2025 was dat 11%/14%/12%. De tip is herschreven en verhoogd van score 8 naar 9.
+- Voor tip #48 zijn RIB 2026-079 en de bijlage opgehaald. `raw_items.id=8569` bevat nu 25.286 tekens gecombineerde fulltext. De oude speculatieve koppeling aan explosies is verwijderd. De tip benoemt nu de professionele locatieschouwen, database met onveilige plekken, het toetsingskader, €300.000 per jaar in 2027-2030 en het aangekondigde raadsvoorstel eind Q4 2026. Score verhoogd van 6 naar 9.
+- Voor tip #49 is de officiële TenderNed-publicatie TN-532902 volledig gecontroleerd. Noot Touringcar Ede B.V. won; er waren twee inschrijvingen; het contract loopt van 1 januari 2026 tot 1 januari 2030 met één optie van 1,5 jaar; het gaat om circa 75 jeugdigen per jaar. De gepubliceerde waarde van €1 is niet als werkelijke contractwaarde gepresenteerd. Tip herschreven en verhoogd van score 8 naar 9.
+- De eerdere weger-notitie noemde voor #47 en #48 abusievelijk SV 2026-046 en RIB 2026-034. De gekoppelde bronrecords en gecontroleerde documenten zijn respectievelijk SV 2026-033 en RIB 2026-079.
+- Entiteitsextractie is na de fulltextimport opnieuw uitgevoerd: 2 items gescand, 3 nieuwe entities, 3 mentions en 3 entity-signaalkoppelingen.
+
+#### Fase 2 als zelfstandige productierun
+
+- `scraper/src/kg/detection-run.cjs` toegevoegd als orchestrator voor arbeidsinspectie, Liander, ACM, AP, tuchtrecht, asbest, LRK, DUO en daarna de zeven detectieregels R1/R2/R3/R4/R6/R7/R9.
+- De run heeft een exclusieve lock met heartbeat en stale-herstel, selecteerbare adapters, dry-run, configureerbaar terugkijkvenster, foutisolatie per bron en uniforme logging naar `fetch_runs`.
+- `scraper/run-detection-task.ps1` schrijft een UTF-8-log naar `scraper/logs/detection-run.log`.
+- Windows Taakplanner-taak **Stadsgeest Detection** aangemaakt: dagelijks 06:15 lokale tijd, na **Stadsgeest Intake** om 05:30. Meervoudige instanties worden genegeerd en de maximale looptijd is twee uur.
+- De Taakplanner-taak handmatig gestart en end-to-end gecontroleerd: laatste resultaat `0`, volgende run 13 september 2026 06:15.
+- De detectie-engine is exact-once gemaakt. Een reeds verwerkt event verhoogt `confirmations` niet meer bij elke herhaalrun; nieuwe provenance bevat voortaan `event_id` en oude signalen worden exact herkend via bron-URL of bronidentifier.
+- Live terugkijkrun over alle 81 bestaande KG-events maakte twee nog ontbrekende R3-signalen aan (#2230 en #2231). Een identieke tweede run maakte 0 signalen aan en bewees daarmee de idempotentie. Totaal staat nu op 37 R3-signalen en 3 R7-signalen.
+
+#### Twee oudere fase-2-defecten opgelost
+
+- De LRK-adapter gebruikte verouderde kolommen (`raw_data`, `record_type`, `record_key`) die niet in de huidige `source_records`-tabel bestaan. Daardoor werd de nulmeting nooit bewaard en leek elke run een eerste run. De adapter gebruikt nu de actuele kolommen en een semantische snapshot-hash. Live nulmeting: 345 locaties; herhaalrun: 0 wijzigingen.
+- De asbestadapter onthield alleen de vier lokale overtredingen. Daardoor werden bij iedere run opnieuw 378 niet-lokale detailpagina's geladen. Alle gecontroleerde slugs worden nu in `source_records` gecachet. Eerste run: 378 controles; directe herhaalrun: 382 bekend en 0 detailcontroles.
+
+#### Fase 3 gestart: DUO BO/VO
+
+- Nieuwe adapter `scraper/src/kg/adapters/duo-schoolvestigingen.cjs` gebruikt de officiële CKAN-datastores voor alle BO- en VO-vestigingen.
+- Lokale filtering gebeurt exact op `GEMEENTENAAM = AMERSFOORT/LEUSDEN`; een losse vermelding van Amersfoort in bijvoorbeeld een onderwijsregio telt niet mee.
+- Live nulmeting bevat 86 vestigingen: 60 BO en 26 VO. Voor iedere vestiging zijn een versieerbaar bronrecord, een schoolentity, een stabiele bronidentifier en een vestigingslocatie opgeslagen. De eerste run genereerde bewust 0 events.
+- Een directe tweede live run vond 86 ongewijzigde records en maakte 0 duplicaten, 0 events en 0 signalen.
+- Latere wijzigingen kunnen events maken voor opening, sluiting, naamswijziging, verhuizing, bestuurswijziging, denominatie en onderwijsaanbod. R9 is voor deze eventtypes uitgebreid.
+- Fixtures met echte BO- en VO-responsvormen en tests voor exacte lokale filtering, stabiele sleutels, schemadrift en semantische diff zijn toegevoegd.
+- Twee schema-aannames werden tijdens de veilige eerste live run onderschept en hersteld: de broncategorie moet een bestaande CHECK-waarde zijn (`registry`) en het identifierschema kent nog geen apart DUO-type. De vestigingscode wordt daarom als stabiele brongebonden website-URL opgeslagen. Eén half aangemaakte, ongekoppelde testentity (#242) is gecontroleerd verwijderd; er waren geen relaties, aliassen of identifiers aan gekoppeld.
+
+#### Verificatie
+
+- Volledige scraper-testset: **78/78 geslaagd**.
+- Integrale dry-run van alle acht adapters en zeven regels: geen fouten.
+- Integrale live run: geen fouten; daarna afzonderlijke idempotentieruns voor asbest, LRK, DUO en detectieregels.
+- Databasecontroles: DUO 86 `source_records` en 0 baseline-events; LRK 1 actuele snapshot; asbest 378 gecachete niet-lokale bronrecords; tips #47-#49 alle drie status `wachtrij`, score 9.
+
+#### Openstaand na deze sessie
+
+- De DUO-adapter volgt nu registerwijzigingen in adressen en schoolstructuur. Leerlingenaantallen, prognoses en kwaliteitsoordelen zijn nog niet aangesloten; dat zijn de volgende fase-3-bronnen.
+- De 286 overige Notubiz-documenten zonder fulltext blijven afhankelijk van de wekelijkse ORI-backfill of handmatige browserimport voor urgente stukken.
+
+*Codex-update: 2026-09-12 (tips 47-49, fase 2 productierun en DUO-start)*

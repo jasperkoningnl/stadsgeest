@@ -308,6 +308,9 @@ const R9_REGISTER_CHANGE = {
   eventTypes: [
     'CHILDCARE_OPENED', 'CHILDCARE_CLOSED', 'CHILDCARE_HOLDER_CHANGED',
     'CHILDCARE_CAPACITY_CHANGED', 'CHILDCARE_STATUS_CHANGED',
+    'SCHOOL_OPENED', 'SCHOOL_CLOSED', 'SCHOOL_RENAMED',
+    'SCHOOL_ADDRESS_CHANGED', 'SCHOOL_BOARD_CHANGED',
+    'SCHOOL_DENOMINATION_CHANGED', 'SCHOOL_PROGRAMME_CHANGED',
   ],
   async condition(event, context) {
     if (event.event_type === 'CHILDCARE_CLOSED') {
@@ -333,18 +336,26 @@ const R9_REGISTER_CHANGE = {
     const orgName = orgs.length > 0 ? orgs[0].canonical_name : '';
     let category = 'overig';
     if (event.event_type.startsWith('CHILDCARE_')) category = 'zorg-welzijn';
+    if (event.event_type.startsWith('SCHOOL_')) category = 'onderwijs';
     const typeLabels = {
       'CHILDCARE_OPENED': 'Nieuwe kinderopvang',
       'CHILDCARE_CLOSED': 'Kinderopvang gesloten',
       'CHILDCARE_HOLDER_CHANGED': 'Houderwissel kinderopvang',
       'CHILDCARE_CAPACITY_CHANGED': 'Capaciteitswijziging kinderopvang',
       'CHILDCARE_STATUS_CHANGED': 'Statuswijziging kinderopvang',
+      'SCHOOL_OPENED': 'Nieuwe schoolvestiging',
+      'SCHOOL_CLOSED': 'Schoolvestiging gesloten',
+      'SCHOOL_RENAMED': 'Schoolvestiging hernoemd',
+      'SCHOOL_ADDRESS_CHANGED': 'Schoolvestiging verhuisd',
+      'SCHOOL_BOARD_CHANGED': 'Schoolbestuur gewijzigd',
+      'SCHOOL_DENOMINATION_CHANGED': 'Denominatie school gewijzigd',
+      'SCHOOL_PROGRAMME_CHANGED': 'Onderwijsaanbod gewijzigd',
     };
     return {
       title: `${typeLabels[event.event_type] || 'Registerwijziging'}: ${orgName || event.title}`,
       summary: event.summary || event.title,
       category,
-      tier: event.event_type === 'CHILDCARE_CLOSED' ? 2 : 3,
+      tier: ['CHILDCARE_CLOSED', 'SCHOOL_CLOSED', 'SCHOOL_OPENED'].includes(event.event_type) ? 2 : 3,
       noveltyScore: event.event_type === 'CHILDCARE_HOLDER_CHANGED' ? 60 : 45,
       evidence: [event.title, event.summary].filter(Boolean),
       entities: orgs.map(e => ({ entityId: e.entity_id || e.id, relevance: 'subject' })),

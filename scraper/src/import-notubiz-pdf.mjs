@@ -4,12 +4,22 @@
 //   node src/import-notubiz-pdf.mjs --raw-id 8672 --file "C:\\...\\stuk.pdf"
 
 import { readFile } from 'fs/promises';
-import { resolve } from 'path';
+import { basename, resolve } from 'path';
 import { createDb } from './lib.js';
 
 function argument(name) {
   const index = process.argv.indexOf(name);
   return index === -1 ? null : process.argv[index + 1];
+}
+
+function argumentsFor(name) {
+  const values = [];
+  for (let index = 0; index < process.argv.length; index++) {
+    if (process.argv[index] === name && process.argv[index + 1]) {
+      values.push(process.argv[index + 1]);
+    }
+  }
+  return values;
 }
 
 async function pdfNaarTekst(buffer) {
@@ -31,18 +41,22 @@ async function pdfNaarTekst(buffer) {
 }
 
 const rawId = Number(argument('--raw-id'));
-const fileArg = argument('--file');
-if (!Number.isInteger(rawId) || rawId <= 0 || !fileArg) {
-  throw new Error('Gebruik: node src/import-notubiz-pdf.mjs --raw-id <id> --file <pdf-pad>');
+const fileArgs = argumentsFor('--file');
+if (!Number.isInteger(rawId) || rawId <= 0 || fileArgs.length === 0) {
+  throw new Error('Gebruik: node src/import-notubiz-pdf.mjs --raw-id <id> --file <pdf-pad> [--file <bijlage.pdf>]');
 }
 
-const filePath = resolve(fileArg);
-const buffer = await readFile(filePath);
-if (buffer.subarray(0, 5).toString('latin1') !== '%PDF-') {
-  throw new Error(`${filePath} is geen PDF-bestand`);
+const filePaths = fileArgs.map(fileArg => resolve(fileArg));
+const tekstdelen = [];
+for (const filePath of filePaths) {
+  const buffer = await readFile(filePath);
+  if (buffer.subarray(0, 5).toString('latin1') !== '%PDF-') {
+    throw new Error(`${filePath} is geen PDF-bestand`);
+  }
+  const deel = await pdfNaarTekst(buffer);
+  tekstdelen.push(filePaths.length > 1 ? `[${basename(filePath)}]\n${deel}` : deel);
 }
-
-const tekst = await pdfNaarTekst(buffer);
+const tekst = tekstdelen.join('\n\n');
 if (tekst.length < 200) {
   throw new Error(`PDF leverde slechts ${tekst.length} tekens op; mogelijk is dit een scan zonder tekstlaag`);
 }
@@ -70,7 +84,7 @@ try {
           WHERE id = ?`,
     args: [tekst.substring(0, 200000), new Date().toISOString(), rawId],
   });
-  console.log(`[NOTUBIZ-IMPORT] raw_item ${rawId}: ${tekst.length} tekens uit ${filePath}`);
+  console.log(`[NOTUBIZ-IMPORT] raw_item ${rawId}: ${tekst.length} tekens uit ${filePaths.length} PDF-bestand(en)`);
 } finally {
   await db.close();
 }

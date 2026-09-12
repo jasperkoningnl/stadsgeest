@@ -56,3 +56,5 @@ scraper/.nextdoor-session.json
 bronnenwacht/rapport-*.md
 dwarsverbanden/rapport-*.md
 .intake-lock
+/scraper/.detection-run.lock
+/scraper/logs/
