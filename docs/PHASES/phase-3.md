@@ -45,4 +45,6 @@ historische import:
 ## Buiten deze stap
 
 Geen uitbreiding naar nieuwe sectoren voordat de schoolkwaliteitsbron stabiel
-en redactioneel beoordeeld is. Oude faseplannen zijn historie, geen backlog.
+en redactioneel beoordeeld is. De resterende scope volgt het leidende
+`../Stadsgeest_uitbreidingsplan_Claude.md`; afwijkingen vereisen een expliciete,
+vastgelegde reden.
