@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "result": {
+    "name": "wpoprognoses",
+    "title": "Prognoses bo en sbo per vestiging",
+    "metadata_modified": "2026-07-03T10:19:03.129569",
+    "resources": [
+      {
+        "id": "f27c0d5c-59a0-41b9-b23f-f3a7ee03d4ba",
+        "state": "active",
+        "format": "CSV",
+        "last_modified": "2026-07-03T10:18:40.030357",
+        "total_record_count": 127140,
+        "url": "https://onderwijsdata.duo.nl/dataset/7cf3a1f0-78d6-4d4e-a820-64017d5aafcb/resource/f27c0d5c-59a0-41b9-b23f-f3a7ee03d4ba/download/brin6_prognosespo.csv"
+      }
+    ]
+  }
+}

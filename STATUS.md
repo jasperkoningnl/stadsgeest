@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **12 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Codex-update: 2026-09-12 — DUO-leerlingaantallen en bewijsbrug"**.
+> De laatste sectie onderaan dit bestand heet **"Codex-update: 2026-09-12 — DUO-prognoses BO/SBO"**.
 
 ## Cowork-update: 2026-09-10 (sessie 2) — Fase 2 exitcriterium BEHAALD
 
@@ -7295,3 +7295,24 @@ Systematisch gecontroleerd op dekking bij NP33 en partners voor alle tip-kandida
 - Eerstvolgende logische fase-3-stap: de officiële DUO-prognoses voor BO/SBO per vestiging aansluiten en verschillen tussen prognose en realisatie volgen, opnieuw met een baseline en terughoudende drempels.
 
 *Codex-update: 2026-09-12 (DUO-leerlingaantallen en bewijsbrug)*
+
+### Codex-update: 2026-09-12 — DUO-prognoses BO/SBO
+
+#### Officiële bron en nulmeting
+
+- Nieuwe adapter `scraper/src/kg/adapters/duo-prognoses.cjs` ontdekt de actuele resource via de officiële CKAN-package `wpoprognoses` en koppelt de prognoserijen via `INSTELLINGSCODE + VESTIGINGSCODE` aan het officiële BO-vestigingenregister. De actuele CSV-resource `f27c0d5c-59a0-41b9-b23f-f3a7ee03d4ba` is gewijzigd op **3 juli 2026**, telt **127.140 rijen** en heeft de velden `INSTELLINGSCODE`, `VESTIGINGSCODE`, `TYPE_PO`, `JAAR` en `PROGNOSEAANTALLEN`.
+- De live nulmeting bevat **60 actieve lokale BO-vestigingen** met ieder twintig prognosejaren, samen 1.200 waarden voor 2026-2045. De prognosebron kent momenteel geen lokale SBO-rijen. Databasecontrole: 60 schoolrecords, één baseline-sentinel en 0 events.
+- De directe identieke herhaalrun gaf `created=0`, `changed=0`, `removed=0`, `events=0`. De semantische hash bevat alleen stabiele vestigingssleutel, schooltype en gesorteerde jaar/waarde-reeks; naamopmaak, metadata en rijvolgorde veroorzaken geen wijzigingen. Een ontbrekende prognosereeks wordt alleen als tombstone opgeslagen en nooit als schoolsluiting behandeld.
+
+#### Detectie en verificatie
+
+- Nieuwe eventtypen: `SCHOOL_FORECAST_GROWTH/DECLINE` voor een nieuwe relevante vijfjaarstrend, `SCHOOL_FORECAST_REVISED_UP/DOWN` voor een forse herziening van hetzelfde doeljaar en `SCHOOL_FORECAST_OVERSHOOT/UNDERSHOOT` wanneer een latere realisatie aantoonbaar afwijkt van de eerder opgeslagen prognose. Een modelupdate levert maximaal één trend/herziening-event per vestiging; een herziening heeft voorrang om dubbele signalen over dezelfde beweging te voorkomen.
+- Regel **R11** gebruikt terughoudende grenzen: minstens 50 leerlingen verschil, of minstens 30 én 10%, of bij een vestiging onder 100 leerlingen minstens 20 én 25%. Toegepast op 2026→2030 zouden die grenzen 11 van de 60 lokale reeksen als opvallend selecteren (4 groei, 7 krimp); de nulmeting maakt daar bewust geen historische events van.
+- Kleine fixtures zijn gebaseerd op de officiële metadata, het echte schema en de twintig waarden van vestiging `07EX00`. Tests dekken schemadrift, koppeling van de tweeledige vestigingscode, decimalen, sorteringsongevoeligheid, drempels, baseline, één-eventvoorrang en exacte idempotentie.
+- Volledige scraper-testset: **98/98 geslaagd**. Integrale dry-run: tien adapters `ok`, negen regels geregistreerd, 0 events, 0 signalen en geen failures. Windows-taak **Stadsgeest Detection** blijft ingeschakeld en `Ready`; laatste run 12 september 2026 10:18:28 met resultaat 0, volgende run 13 september 2026 06:15.
+
+#### Eerstvolgende stap
+
+- Laat de opgeslagen 2026-prognoses meelopen tot DUO de telling met peiljaar 2026 publiceert; R11 kan die realisatie dan automatisch met het eerder voorspelde vestigingsaantal vergelijken. De volgende afzonderlijke fase-3-bron is het officiële toezicht- en kwaliteitsoordeel per school, waarbij eerst opnieuw het actuele bronschema en de lokale journalistieke drempel moeten worden vastgesteld.
+
+*Codex-update: 2026-09-12 (DUO-prognoses BO/SBO)*

@@ -23,6 +23,10 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-09-12 — Opvallende schoolprognoses komen in beeld
+
+Stadsgeest bewaart nu ook de officiële DUO-prognoses voor basisscholen in Amersfoort en Leusden. De eerste uitgave is alleen als nulpunt opgeslagen en vult de wachtrij dus niet. Bij een volgende uitgave kan een tip ontstaan als DUO voor een school een duidelijke meerjarige groei of krimp verwacht, een eerder cijfer fors bijstelt of als het werkelijke leerlingaantal duidelijk van de eerdere prognose afwijkt. Kleine modelverschillen worden genegeerd.
+
 ## 2026-09-12 — Grote veranderingen in leerlingaantallen komen in beeld
 
 Stadsgeest volgt nu ook de officiële leerlingaantallen van basisscholen en middelbare scholen in Amersfoort en Leusden. De eerste telling is alleen als nulpunt opgeslagen; oude jaarverschillen vullen de wachtrij dus niet. Bij een volgende DUO-uitgave komt alleen opvallende groei of krimp door, niet iedere gewone schommeling.

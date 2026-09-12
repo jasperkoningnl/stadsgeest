@@ -410,6 +410,65 @@ const R10_SCHOOL_ENROLLMENT = {
 };
 
 /**
+ * R11: Materiële DUO-prognosetrend, herziening of afwijking van realisatie.
+ * Dezelfde conservatieve absolute/relatieve band als bij R10 voorkomt dat
+ * normale modelruis of afronding een redactiesignaal wordt.
+ */
+const R11_SCHOOL_FORECAST = {
+  id: 'R11',
+  name: 'Opvallende ontwikkeling schoolprognose',
+  eventTypes: [
+    'SCHOOL_FORECAST_GROWTH', 'SCHOOL_FORECAST_DECLINE',
+    'SCHOOL_FORECAST_REVISED_UP', 'SCHOOL_FORECAST_REVISED_DOWN',
+    'SCHOOL_FORECAST_OVERSHOOT', 'SCHOOL_FORECAST_UNDERSHOOT',
+  ],
+  async condition(event) {
+    let provenance = {};
+    try { provenance = JSON.parse(event.provenance || '{}'); } catch { return false; }
+    if (provenance.journalistically_relevant !== true) return false;
+    const absolute = Math.abs(Number(provenance.absolute_change));
+    const relative = Math.abs(Number(provenance.relative_change));
+    const from = Number(provenance.change_kind === 'realization'
+      ? provenance.previous?.forecasts?.find(item => item.year === provenance.target_year)?.pupils
+      : provenance.change_kind === 'trend'
+        ? provenance.current?.forecasts?.find(item => item.year === provenance.from_year)?.pupils
+        : provenance.previous?.forecasts?.find(item => item.year === provenance.target_year)?.pupils);
+    return absolute >= 50 ||
+      (absolute >= 30 && relative >= 0.10) ||
+      (from > 0 && from < 100 && absolute >= 20 && relative >= 0.25);
+  },
+  async createSignal(event, context) {
+    let provenance = {};
+    try { provenance = JSON.parse(event.provenance || '{}'); } catch { /* al gevalideerd */ }
+    const orgs = (context.entities || []).filter(entity => entity.entity_type === 'organization');
+    const school = orgs[0]?.canonical_name || provenance.current?.naam || event.title;
+    const labels = {
+      SCHOOL_FORECAST_GROWTH: 'Opvallende verwachte leerlinggroei',
+      SCHOOL_FORECAST_DECLINE: 'Opvallende verwachte leerlingkrimp',
+      SCHOOL_FORECAST_REVISED_UP: 'Leerlingenprognose fors omhoog bijgesteld',
+      SCHOOL_FORECAST_REVISED_DOWN: 'Leerlingenprognose fors omlaag bijgesteld',
+      SCHOOL_FORECAST_OVERSHOOT: 'Leerlingaantal boven eerdere prognose',
+      SCHOOL_FORECAST_UNDERSHOOT: 'Leerlingaantal onder eerdere prognose',
+    };
+    const absolute = Math.abs(Number(provenance.absolute_change || 0));
+    const percentage = Math.abs(Math.round(Number(provenance.relative_change || 0) * 1_000) / 10);
+    const groot = absolute >= 50 || percentage >= 25;
+    return {
+      title: `${labels[event.event_type] || 'Opvallende schoolprognose'}: ${school}`,
+      summary: event.summary || event.title,
+      category: 'onderwijs',
+      tier: groot ? 2 : 3,
+      noveltyScore: groot ? 70 : 60,
+      evidence: [event.title, event.summary, event.source_url, provenance.actual?.sourceUrl].filter(Boolean),
+      entityPath: orgs.length > 0
+        ? `${school} → DUO-prognose → ${provenance.target_year || 'doeljaar'}`
+        : null,
+      entities: orgs.map(entity => ({ entityId: entity.entity_id || entity.id, relevance: 'subject' })),
+    };
+  },
+};
+
+/**
  * Registreer de productie-detectieregels bij een DetectionEngine.
  */
 function registerPhase2Rules(engine) {
@@ -421,6 +480,7 @@ function registerPhase2Rules(engine) {
   engine.register(R7_UTILITY_OUTAGE);
   engine.register(R9_REGISTER_CHANGE);
   engine.register(R10_SCHOOL_ENROLLMENT);
+  engine.register(R11_SCHOOL_FORECAST);
   console.log(`[DetectionRules] ${engine.rules.size} regels geregistreerd: ${[...engine.rules.keys()].join(', ')}`);
 }
 
@@ -471,5 +531,6 @@ module.exports = {
   R7_UTILITY_OUTAGE,
   R9_REGISTER_CHANGE,
   R10_SCHOOL_ENROLLMENT,
+  R11_SCHOOL_FORECAST,
   registerPhase2Rules,
 };
