@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint src next.config.ts",
+    "test": "npm --prefix scraper test",
+    "docs:check": "node scripts/check-docs.mjs",
+    "check": "npm run docs:check && npm run lint && npm test && npm run build"
   },
   "dependencies": {
     "@libsql/client": "^0.17.4",

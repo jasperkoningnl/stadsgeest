@@ -3,7 +3,9 @@
 Wat er aan het dashboard is veranderd, in gewone taal. Dit bestand wordt
 getoond op `/nieuwsplein33/logboek`. Het is bedoeld voor de redactie, niet voor
 de techniek — schrijf op wat iemand merkt, niet wat er onder de motorkap is
-verzet. Wat er technisch gebeurde staat in STATUS.md.
+verzet. Dagelijkse tips en gewone routine-uitkomsten horen hier niet in.
+Technische overdracht staat compact in `docs/HANDOFFS/`; de actuele toestand in
+`docs/CURRENT.md`.
 
 **Hoe je een regel toevoegt.** Nieuwste bovenaan, één blok per wijziging:
 

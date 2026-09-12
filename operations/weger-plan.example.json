@@ -1,0 +1,64 @@
+{
+  "reviews": [
+    {
+      "signal_id": 42,
+      "status_to": "watching",
+      "reason": "Officiële bron gelezen; lokaal en controleerbaar, als tip verwerkt."
+    }
+  ],
+  "tips": [
+    {
+      "titel": "Raad besluit over nieuwe woonwijk",
+      "kern": "Het raadsbesluit maakt een eerder voornemen concreet en controleerbaar.",
+      "briefing": "1. WAT WE WETEN — ...\n2. CONTEXT EN ACHTERGROND — ...\n3. BETROKKEN PERSONEN EN ORGANISATIES — ...\n4. HOE DIT IS GEVONDEN — ...\n5. WAT WE NIET WETEN — ...\n6. WAT HIER NIET IN MAG — ...\n7. ELDERS GEBRACHT — ...",
+      "vervolgvragen": [
+        "Vraag de gemeente wanneer de uitvoering begint.",
+        "Controleer het definitieve raadsbesluit en de financiële bijlage.",
+        "Vraag betrokken bewoners naar de gevolgen."
+      ],
+      "soort": "nieuwsfeit",
+      "gemeente": "Amersfoort",
+      "categorie": "wonen",
+      "score": 6,
+      "score_motivatie": "Officieel besluit met concrete lokale gevolgen.",
+      "weging": {
+        "tier_1": 3,
+        "concreet_besluit": 2,
+        "precieze_locatie": 1
+      },
+      "herkomst": [
+        {
+          "naam": "Gemeente Amersfoort",
+          "tier": 1,
+          "spiegel": false,
+          "url": "https://voorbeeld.invalid/besluit",
+          "datum": "2026-09-12",
+          "bijdrage": "Definitief besluit en financiële bijlage."
+        }
+      ],
+      "elders_gebracht": [],
+      "toegevoegde_waarde": "",
+      "trefwoorden": ["woonwijk", "raadsbesluit", "planning"],
+      "dossier_id": null,
+      "signals": [
+        { "id": 42, "rol": "dragend" }
+      ]
+    }
+  ],
+  "dossier_facts": [
+    {
+      "dossier_id": 4,
+      "fact_type": "besluit",
+      "datum": "2026-09-12",
+      "locatie": "Amersfoort",
+      "titel": "De raad nam een definitief besluit over de woonwijk.",
+      "details": "Vervang dit voorbeeld door het controleerbare feit.",
+      "classificatie": "definitief besluit",
+      "zekerheid": "officieel",
+      "primaire_bron_url": "https://voorbeeld.invalid/besluit",
+      "secundaire_bronnen": [],
+      "signal_id": 42,
+      "tegenstrijdigheid": null
+    }
+  ]
+}

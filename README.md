@@ -14,7 +14,7 @@ bronnen → scrapers (PM2) → Turso → routines → dashboard (Next.js op Verc
 
 1. **Scrapen** — elf cron-gestuurde processen halen raadsstukken, officiële bekendmakingen, vergunningen, subsidieregisters, rechtspraak, aanbestedingen, inspectierapporten en jaarverslagen op.
 2. **Intake** — nieuwe items worden geclusterd tot signalen op basis van inhoudelijke overlap; entiteiten worden geëxtraheerd en gekoppeld. Elke wel/niet-beslissing wordt met reden vastgelegd.
-3. **Analyse** — signalen worden gewogen: hoeveel onafhankelijke bronnen bevestigen het, is het eerder gemeld, zijn er dwarsverbanden via gedeelde entiteiten. Verreweg het meeste valt af.
+3. **Analyse** — een compacte Codex-weger beoordeelt alleen nieuwe of inhoudelijk gewijzigde signalen: hoeveel onafhankelijke bronnen bevestigen het, is het eerder gemeld, zijn er dwarsverbanden via gedeelde entiteiten. Verreweg het meeste valt af.
 4. **Doorgeven** — wat overblijft komt in een dashboard voor de redactie: het signaal, de brondocumenten, de achtergrond en de open vragen.
 
 ### Bronladder
@@ -25,7 +25,7 @@ bronnen → scrapers (PM2) → Turso → routines → dashboard (Next.js op Verc
 
 ## Stack
 
-Next.js, TypeScript, Tailwind, Turso (libsql), Vercel. Scrapers in Node met Playwright, beheerd via PM2. Analyse via Claude.
+Next.js, TypeScript, Tailwind, Turso (libsql), Vercel. Scrapers in Node met Playwright, beheerd via PM2. Redactionele analyse via Codex.
 
 ## Structuur
 
@@ -34,8 +34,12 @@ Next.js, TypeScript, Tailwind, Turso (libsql), Vercel. Scrapers in Node met Play
 | `src/app/` | Voorpagina, inlog en het redactionele dashboard |
 | `src/lib/` | Turso-client en de dashboardqueries |
 | `scraper/` | De scrapers, de intake en de PM2-jobs |
+| `docs/` | Compacte projectkaart, actuele toestand en gerichte runbooks |
+| `operations/` | Operationele opdrachten zoals de dagelijkse weger |
 
-`STATUS.md` bevat de actuele staat en per routine-run wat er is gebeurd, inclusief gevonden bugs.
+Begin voor projectwerk bij `AGENTS.md`, `docs/INDEX.md` en `docs/CURRENT.md`.
+`STATUS.md` blijft alleen bestaan als verwijzer voor oude koppelingen; de omvangrijke
+historie staat onder `docs/HISTORY/` en wordt alleen gericht geraadpleegd.
 
 ## Lokaal draaien
 
@@ -45,6 +49,9 @@ npm run dev
 ```
 
 Vereist `TURSO_URL` en `TURSO_AUTH_TOKEN` in `.env.local`. Zonder die variabelen start het dashboard wel, maar toont het een melding in plaats van data.
+
+De volledige lokale controle is `npm run check`. Die controleert ook de compacte
+documentatiestructuur en draait de scraper-tests.
 
 ## Transparantie
 
