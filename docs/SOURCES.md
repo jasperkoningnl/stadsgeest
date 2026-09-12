@@ -34,7 +34,9 @@ semantische diff. De orkestrator registreert momenteel onder meer:
 
 De klassieke bronlaag bevat daarnaast gemeentelijke bekendmakingen,
 raadsinformatie, TenderNed, rechtspraak, subsidies, overheidsorganisaties,
-regionale bronnen en detectiebronnen. Gebruik databasequeries of de
+regionale bronnen en detectiebronnen. De Onderwijsinspectiebron volgt actuele
+toezichtresultaten exact voor Amersfoort en Leusden en gebruikt rapportnummer en
+detail-URL als stabiele identiteit. Gebruik databasequeries of de
 bronnenwacht voor de actuele lijst en opbrengst; kopieer aantallen niet naar dit
 document.
 

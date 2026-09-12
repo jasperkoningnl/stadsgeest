@@ -1,0 +1,18 @@
+{
+  "elementId": 911666,
+  "parentId": 311662,
+  "bestuur": false,
+  "elementType": "CLR",
+  "elementSector": "PO",
+  "oordeel": {
+    "dimensieomschrijving": "Kwaliteit onderwijs",
+    "effectieveWaarde": "ZZ",
+    "effectieveWaardeomschrijving": "Zeer zwak",
+    "publicatiedatum": "19-02-2026",
+    "vaststellingsdatum": "05-02-2026",
+    "onderzoekNummer": 323319,
+    "helptekst": "De school schiet ernstig tekort als het gaat om de kwaliteit van het onderwijs: de school levert geen basiskwaliteit. Daarom staat de school onder vervolgtoezicht."
+  },
+  "indicatoren": {},
+  "onderzoekenVoorRapporten": [323319]
+}
