@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../../.env') });
 const { createClient } = require('@libsql/client');
+const { load } = require('cheerio');
 
 const SOURCE_NAME = 'Nederlandse Arbeidsinspectie — asbestovertredingen';
 const BASE_URL = 'https://asbestovertredingen.nlarbeidsinspectie.nl';
@@ -18,6 +19,31 @@ function createDb() {
     url: process.env.TURSO_URL,
     authToken: process.env.TURSO_AUTH_TOKEN,
   });
+}
+
+function parseDetailHtml(html, slug, url = `${BASE_URL}/overtredingen/${slug}`) {
+  const $ = load(html);
+  const headingBlock = (pattern) => $('h2')
+    .filter((_, element) => pattern.test($(element).text().trim()))
+    .first()
+    .next();
+  const cleanBlockText = (block) => block.clone().find('br').replaceWith(' ').end().text().replace(/\s+/g, ' ').trim();
+  const overtrederText = cleanBlockText(headingBlock(/^Overtreder$/i));
+  const bedrijf = /Naam overtreder\/bedrijf:\s*(.*?)\s+Plaats overtreder\/bedrijf:/i.exec(overtrederText)?.[1]?.trim()
+    || slug.replace(/^\d+-/, '').replace(/-/g, ' ').trim();
+  const plaatsOvertreder = /Plaats overtreder\/bedrijf:\s*(.+)$/i.exec(overtrederText)?.[1]?.trim() || '';
+  const locatieText = cleanBlockText(headingBlock(/^Locatie overtreding$/i));
+  const datum = headingBlock(/^Datum (constatering overtredingen|overtreding|inspectie)$/i).text().trim();
+  const besluit = headingBlock(/^Bestuurlijk besluit$/i).text().replace(/\s+/g, ' ').trim();
+  const overtredingen = headingBlock(/^(Geconstateerde )?Overtreding(en|\(en\))$/i)
+    .find('li')
+    .map((_, element) => $(element).text().replace(/\s+/g, ' ').trim())
+    .get()
+    .join('; ');
+  const boeteMatch = $.root().text().match(/Boetebedrag\s*:?\s*€?\s*([\d.,]+)/i);
+  const boete = boeteMatch ? `€${boeteMatch[1]}` : '';
+  const stillegging = /stillegging/i.test(besluit) ? 'Ja' : '';
+  return { slug, url, bedrijf, plaatsOvertreder, locatieText, stillegging, boete, besluit, overtredingen, datum };
 }
 
 class AsbestovertredingenAdapter {
@@ -98,54 +124,8 @@ class AsbestovertredingenAdapter {
     if (!response.ok) return null;
 
     const html = await response.text();
+    return parseDetailHtml(html, slug, url);
 
-    // Parse velden uit de HTML
-    const getField = (label) => {
-      const regex = new RegExp(`${label}[^:]*:\\s*([^<]+)`, 'i');
-      const m = html.match(regex);
-      return m ? m[1].trim() : '';
-    };
-
-    const bedrijf = getField('Naam overtreder') || getField('Bedrijfsnaam') || slug.replace(/^\d+-/, '').replace(/-/g, ' ');
-    const plaatsOvertreder = getField('Plaats overtreder');
-
-    // Locatie overtreding: staat in een <h2>Locatie overtreding</h2> blok
-    let locatieText = '';
-    const locatieMatch = html.match(/<h2>Locatie overtreding<\/h2>\s*<p>([\s\S]*?)<\/p>/i);
-    if (locatieMatch) {
-      locatieText = locatieMatch[1].replace(/<br\s*\/?>/g, ' ').replace(/<[^>]+>/g, '').trim();
-    }
-
-    // Stillegging
-    const stillegging = getField('Stillegging') || (html.toLowerCase().includes('stillegging: ja') ? 'Ja' : '');
-
-    // Boetebedrag
-    const boeteMatch = html.match(/Boetebedrag[^:]*:\s*[€]?\s*([\d.,]+)/i);
-    const boete = boeteMatch ? `€${boeteMatch[1]}` : '';
-
-    // Overtredingen
-    const overtredingenMatch = html.match(/<h2>Overtreding\(en\)<\/h2>\s*<ul>([\s\S]*?)<\/ul>/i);
-    let overtredingen = '';
-    if (overtredingenMatch) {
-      overtredingen = overtredingenMatch[1].replace(/<li>/g, '').replace(/<\/li>/g, '; ').replace(/<[^>]+>/g, '').trim();
-    }
-
-    // Datum
-    const datumMatch = html.match(/Datum overtreding[^:]*:\s*(\d{1,2}[-/]\d{1,2}[-/]\d{4})/i)
-      || html.match(/Datum inspectie[^:]*:\s*(\d{1,2}[-/]\d{1,2}[-/]\d{4})/i);
-    const datum = datumMatch ? datumMatch[1] : '';
-
-    return {
-      slug,
-      url,
-      bedrijf,
-      plaatsOvertreder,
-      locatieText,
-      stillegging,
-      boete,
-      overtredingen,
-      datum,
-    };
   }
 
   /** Check of een overtreding lokaal relevant is. */
@@ -219,6 +199,7 @@ class AsbestovertredingenAdapter {
         detail.locatieText ? `Locatie: ${detail.locatieText}` : null,
         detail.boete ? `Boete: ${detail.boete}` : null,
         detail.stillegging ? `Stillegging: ${detail.stillegging}` : null,
+        detail.besluit && !detail.boete && !detail.stillegging ? `Besluit: ${detail.besluit}` : null,
         detail.overtredingen ? `Overtredingen: ${detail.overtredingen}` : null,
       ].filter(Boolean).join('. ');
 
@@ -237,6 +218,7 @@ class AsbestovertredingenAdapter {
               bedrijf: detail.bedrijf,
               locatie: detail.locatieText,
               boete: detail.boete,
+              besluit: detail.besluit,
               stillegging: detail.stillegging,
             }),
           ],
@@ -271,4 +253,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { AsbestovertredingenAdapter };
+module.exports = { AsbestovertredingenAdapter, parseDetailHtml };

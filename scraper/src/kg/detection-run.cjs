@@ -15,6 +15,7 @@ const { TuchtrechtSruAdapter } = require('./adapters/tuchtrecht-sru.cjs');
 const { AsbestovertredingenAdapter } = require('./adapters/asbestovertredingen.cjs');
 const { LrkKinderopvangAdapter } = require('./adapters/lrk-kinderopvang.cjs');
 const { DuoSchoolvestigingenAdapter } = require('./adapters/duo-schoolvestigingen.cjs');
+const { DuoLeerlingaantallenAdapter } = require('./adapters/duo-leerlingaantallen.cjs');
 
 const LOCK_PATH = path.join(__dirname, '../../.detection-run.lock');
 const STALE_LOCK_MS = 6 * 60 * 60 * 1000;
@@ -28,6 +29,7 @@ const ADAPTERS = [
   ['asbest', AsbestovertredingenAdapter],
   ['lrk', LrkKinderopvangAdapter],
   ['duo', DuoSchoolvestigingenAdapter],
+  ['duo-leerlingen', DuoLeerlingaantallenAdapter],
 ];
 
 function numberFrom(result, keys, fallback = 0) {

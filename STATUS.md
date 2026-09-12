@@ -2,7 +2,7 @@
 
 > ### Bijgewerkt tot en met **12 september 2026**
 >
-> De laatste sectie onderaan dit bestand heet **"Codex-update: 2026-09-12 — tips 47-49, fase 2 productierun en DUO-start"**.
+> De laatste sectie onderaan dit bestand heet **"Codex-update: 2026-09-12 — DUO-leerlingaantallen en bewijsbrug"**.
 
 ## Cowork-update: 2026-09-10 (sessie 2) — Fase 2 exitcriterium BEHAALD
 
@@ -7266,3 +7266,32 @@ Systematisch gecontroleerd op dekking bij NP33 en partners voor alle tip-kandida
 - De 286 overige Notubiz-documenten zonder fulltext blijven afhankelijk van de wekelijkse ORI-backfill of handmatige browserimport voor urgente stukken.
 
 *Codex-update: 2026-09-12 (tips 47-49, fase 2 productierun en DUO-start)*
+
+### Codex-update: 2026-09-12 — DUO-leerlingaantallen en bewijsbrug
+
+#### Productietaak gecontroleerd
+
+- Windows-taak **Stadsgeest Detection** staat ingeschakeld en `Ready`, met `IgnoreNew`, een looptijdlimiet van twee uur en `StartWhenAvailable`. Laatste run: 12 september 2026 10:18:28, resultaat 0; volgende run: 13 september 2026 06:15.
+- Ook de inhoud van `scraper/logs/detection-run.log` is gecontroleerd. Alle acht toen geregistreerde adapters waren `ok`, de detectie-engine had geen nieuwe events te verwerken en `failures` was leeg. LRK telde 345 locaties, de DUO-vestigingenbron 86, asbest gebruikte 382 gecachete controles; er waren geen stille deelproblemen.
+
+#### DUO-leerlingaantallen aangesloten
+
+- Nieuwe adapter `duo-leerlingaantallen.cjs` gebruikt uitsluitend officiële DUO-bestanden. Voor BO is dat **Historische leerlingenaantallen PO, versie 2026**, met `LEERLINGEN_2025` als nieuwste telling (peildatum 1 oktober 2025). Voor VO is dat **Voorlopig - Leerlingen 2025 per vestiging en bevoegd gezag** (peildatum 1 oktober 2025, publicatie 22 december 2025). De adapter ontdekt automatisch de nieuwste twee VO-CSV-jaargangen op de officiële landingspagina.
+- De afbakening is regulier BO en VO in de vestigingsgemeenten Amersfoort en Leusden. Afgeschermde waarden zoals `<5`, nulregels, speciaal onderwijs en niet-lokale records worden niet als betrouwbare veranderingsbasis gebruikt.
+- Live nulmeting: **83 vestigingen**, waarvan 60 BO en 23 VO. De eerste run maakte bewust 0 events. De onmiddellijke identieke herhaalrun gaf `created=0`, `changed=0`, `removed=0`, `events=0`; ook R10 heeft 0 signalen.
+- Sleutels zijn `duo-leerlingen:<sector>:<vestigingscode>`. De semantische hash bevat alleen vestigingssleutel, peiljaar en leerlingaantal. Sortering, naamopmaak, VAVO-detail en andere niet-semantische velden veroorzaken dus geen event. Ontbrekende rijen worden onthouden maar niet als schoolsluiting geïnterpreteerd; daarvoor blijft het DUO-adressenregister leidend.
+- Nieuwe eventtypen: `SCHOOL_ENROLLMENT_GROWTH` en `SCHOOL_ENROLLMENT_DECLINE`. Regel **R10** maakt alleen een signaal bij minimaal 100 leerlingen verschil, of minimaal 30 én 10%, of bij een vestiging onder 100 leerlingen minimaal 20 én 25%. Op de lokale overgang 2024→2025 zouden die grenzen zes uitschieters selecteren; normale schommelingen blijven erbuiten. R9 blijft verantwoordelijk voor aantoonbare opening en sluiting uit het adressenregister.
+
+#### Detectiesignalen bruikbaar gemaakt voor de weger
+
+- Een aantoonbaar integratiegat is gesloten: nieuw gemaakte detectiesignalen krijgen voortaan een verwerkt `raw_item` met de officiële bron en een koppeling via `signal_items`. Daardoor ziet de bestaande weegroutine niet alleen titel en samenvatting, maar ook het onderliggende bewijs.
+- Bij #2230 en #2231 bleek bovendien dat de asbestparser een footerlink als stillegging las, echte datum/besluit/overtredingen miste en HTML-entiteiten liet staan. De parser leest nu de feitelijke `h2`/`p`/`ul`-blokken. Alleen de twee betrokken bronrecords, events, entities en signalen zijn live gecorrigeerd.
+- #2230 en #2231 staan nog onbeoordeeld in status `new`, hebben elk precies één primair bronitem en komen met de ongewijzigde productiequery van de weegroutine in de werkset. Er zijn nog geen tips of weger-events voor deze signalen; de routine kan ze nu inhoudelijk beoordelen.
+
+#### Verificatie en vervolg
+
+- Nieuwe fixtures bevatten kleine uitsneden van de officiële BO-, VO- en asbestresponses. Unit- en integratietests dekken schemawijziging, lokale filtering, CSV-quotes, stabiele sleutels, semantische diff, drempels, baselinegedrag, bewijslinking en herhaalruns.
+- Volledige detectieketen in dry-run: negen adapters `ok`, acht regels geregistreerd, 0 events, 0 signalen en geen failures. Volledige scraper-testset: **90/90 geslaagd**.
+- Eerstvolgende logische fase-3-stap: de officiële DUO-prognoses voor BO/SBO per vestiging aansluiten en verschillen tussen prognose en realisatie volgen, opnieuw met een baseline en terughoudende drempels.
+
+*Codex-update: 2026-09-12 (DUO-leerlingaantallen en bewijsbrug)*

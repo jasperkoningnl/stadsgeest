@@ -3,6 +3,7 @@
 // Regels worden geregistreerd met register() en draaien via evaluate().
 
 const path = require('path');
+const crypto = require('crypto');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 const { createClient } = require('@libsql/client');
 
@@ -186,6 +187,14 @@ class DetectionEngine {
 
     const signalId = Number(result.lastInsertRowid);
 
+    // De weegroutine leest bewijs via raw_items → signal_items. Leg daarom
+    // voor elk nieuw KG-signaal ook een compact, al verwerkt bewijsitem vast.
+    try {
+      await this.linkEvidenceForSignal(signalId, event);
+    } catch (error) {
+      console.error(`[DetectionEngine] Bewijsitem voor signaal ${signalId} mislukt: ${error.message}`);
+    }
+
     // Koppel event-entities aan het signaal via entity_signals (als die tabel bestaat)
     try {
       for (const entity of (signalData.entities || [])) {
@@ -200,6 +209,47 @@ class DetectionEngine {
     }
 
     return { id: signalId, created: true };
+  }
+
+  async linkEvidenceForSignal(signalId, event) {
+    if (this.dryRun || !signalId || !event?.source_url || !event?.source_id) return null;
+    let found = await this.db.execute({
+      sql: `SELECT id FROM raw_items WHERE source_id=? AND external_url=? ORDER BY id LIMIT 1`,
+      args: [event.source_id, event.source_url],
+    });
+    let rawItemId = found.rows[0]?.id ? Number(found.rows[0].id) : null;
+    if (!rawItemId) {
+      const contentHash = event.raw_object_hash || crypto.createHash('sha256')
+        .update(`${event.event_type || ''}:${event.source_identifier || ''}:${event.summary || ''}`)
+        .digest('hex');
+      await this.db.execute({
+        sql: `INSERT OR IGNORE INTO raw_items
+              (source_id, external_url, title, content, summary, scraped_at,
+               content_hash, is_processed, published_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`,
+        args: [
+          event.source_id,
+          event.source_url,
+          event.title || '(geen titel)',
+          event.provenance || event.summary || '',
+          event.summary || event.title || '',
+          event.fetched_at || new Date().toISOString(),
+          contentHash,
+          event.published_at || event.occurred_at || null,
+        ],
+      });
+      found = await this.db.execute({
+        sql: `SELECT id FROM raw_items WHERE source_id=? AND external_url=? ORDER BY id LIMIT 1`,
+        args: [event.source_id, event.source_url],
+      });
+      rawItemId = found.rows[0]?.id ? Number(found.rows[0].id) : null;
+    }
+    if (!rawItemId) return null;
+    await this.db.execute({
+      sql: `INSERT OR IGNORE INTO signal_items (signal_id, raw_item_id) VALUES (?, ?)`,
+      args: [signalId, rawItemId],
+    });
+    return rawItemId;
   }
 
   /**

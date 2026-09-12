@@ -23,6 +23,12 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-09-12 — Grote veranderingen in leerlingaantallen komen in beeld
+
+Stadsgeest volgt nu ook de officiële leerlingaantallen van basisscholen en middelbare scholen in Amersfoort en Leusden. De eerste telling is alleen als nulpunt opgeslagen; oude jaarverschillen vullen de wachtrij dus niet. Bij een volgende DUO-uitgave komt alleen opvallende groei of krimp door, niet iedere gewone schommeling.
+
+Twee nog onbeoordeelde signalen over asbestovertredingen, van Stichting 's Heeren Loo Zorggroep en SloopTeam B.V., bevatten nu de juiste datum, locatie en overtredingen en verwijzen naar de officiële bronpagina. Ze kunnen daardoor normaal door de dagelijkse weging worden beoordeeld.
+
 ## 2026-09-12 — Drie nieuwe tips in de wachtrij
 
 Er staan drie nieuwe tips klaar. De eerste gaat over scanauto-boetes: de raad heeft het college gevraagd naar het aantal onterechte parkeerboetes door de scanauto en de afhandeling van bezwaren. De tweede gaat over sociale veiligheid in de openbare ruimte: het college informeert de raad over de aanpak en resultaten. De derde is een aanbestedingsvondst: zeven regiogemeenten, waaronder Amersfoort, hebben het vervoer van jongeren in GGZ-behandeling gegund aan een enkele partij. Die laatste komt niet uit raadsstukken maar uit het aanbestedingsregister TenderNed, een type bron dat normaal niet in beeld komt.

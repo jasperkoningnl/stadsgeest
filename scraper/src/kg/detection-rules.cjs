@@ -1,5 +1,5 @@
-// Detectieregels voor Stadsgeest 2.0 — Fase 2
-// R1, R2, R3, R4, R6, R7, R9
+// Detectieregels voor Stadsgeest 2.0 — fase 2 en 3
+// R1, R2, R3, R4, R6, R7, R9, R10
 // Worden geregistreerd bij de DetectionEngine.
 
 const { DetectionEngine } = require('./detection-engine.cjs');
@@ -364,7 +364,53 @@ const R9_REGISTER_CHANGE = {
 };
 
 /**
- * Registreer alle fase-2 detectieregels bij een DetectionEngine.
+ * R10: Uitzonderlijke groei of krimp van een lokale schoolvestiging.
+ * De adapter past de empirisch gekozen absolute én relatieve drempels toe;
+ * deze regel controleert de provenance nogmaals voordat een signaal ontstaat.
+ */
+const R10_SCHOOL_ENROLLMENT = {
+  id: 'R10',
+  name: 'Opvallende ontwikkeling leerlingaantal',
+  eventTypes: ['SCHOOL_ENROLLMENT_GROWTH', 'SCHOOL_ENROLLMENT_DECLINE'],
+  async condition(event) {
+    let provenance = {};
+    try { provenance = JSON.parse(event.provenance || '{}'); } catch { return false; }
+    const absolute = Math.abs(Number(provenance.absolute_change));
+    const relative = Math.abs(Number(provenance.relative_change));
+    const previous = Number(provenance.previous?.aantalLeerlingen);
+    if (provenance.journalistically_relevant !== true) return false;
+    return absolute >= 100 ||
+      (absolute >= 30 && relative >= 0.10) ||
+      (previous > 0 && previous < 100 && absolute >= 20 && relative >= 0.25);
+  },
+  async createSignal(event, context) {
+    let provenance = {};
+    try { provenance = JSON.parse(event.provenance || '{}'); } catch { /* al gevalideerd */ }
+    const orgs = (context.entities || []).filter(entity => entity.entity_type === 'organization');
+    const school = orgs[0]?.canonical_name || provenance.current?.naam || event.title;
+    const groei = event.event_type === 'SCHOOL_ENROLLMENT_GROWTH';
+    const verschil = Number(provenance.absolute_change || 0);
+    const percentage = Math.round(Number(provenance.relative_change || 0) * 1_000) / 10;
+    const groot = Math.abs(verschil) >= 100 || Math.abs(percentage) >= 25;
+    return {
+      title: `${groei ? 'Opvallende leerlinggroei' : 'Opvallende leerlingkrimp'}: ${school}`,
+      summary: event.summary || event.title,
+      category: 'onderwijs',
+      tier: groot ? 2 : 3,
+      noveltyScore: groot ? 70 : 60,
+      evidence: [
+        event.title,
+        `${provenance.previous?.aantalLeerlingen} → ${provenance.current?.aantalLeerlingen} leerlingen (${percentage}%)`,
+        event.source_url,
+      ].filter(Boolean),
+      entityPath: orgs.length > 0 ? `${school} → DUO-leerlingtelling → ${provenance.current?.peiljaar || 'nieuw peiljaar'}` : null,
+      entities: orgs.map(entity => ({ entityId: entity.entity_id || entity.id, relevance: 'subject' })),
+    };
+  },
+};
+
+/**
+ * Registreer de productie-detectieregels bij een DetectionEngine.
  */
 function registerPhase2Rules(engine) {
   engine.register(R1_BUSINESS_EXPANSION);
@@ -374,6 +420,7 @@ function registerPhase2Rules(engine) {
   engine.register(R6_CHILDCARE_INSPECTION);
   engine.register(R7_UTILITY_OUTAGE);
   engine.register(R9_REGISTER_CHANGE);
+  engine.register(R10_SCHOOL_ENROLLMENT);
   console.log(`[DetectionRules] ${engine.rules.size} regels geregistreerd: ${[...engine.rules.keys()].join(', ')}`);
 }
 
@@ -423,5 +470,6 @@ module.exports = {
   R6_CHILDCARE_INSPECTION,
   R7_UTILITY_OUTAGE,
   R9_REGISTER_CHANGE,
+  R10_SCHOOL_ENROLLMENT,
   registerPhase2Rules,
 };
