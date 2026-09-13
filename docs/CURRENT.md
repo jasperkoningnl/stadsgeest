@@ -24,30 +24,28 @@ en detectie hebben eigen locks.
 
 ## Afgeronde fase
 
-Fase 3 is op 13 september 2026 technisch en operationeel afgerond. Naast DUO
-(86 vestigingen, 83 tellingen en 60 prognosereeksen) zijn actief:
+Fase 4 is op 13 september 2026 technisch en operationeel afgerond. De fase-3-
+keten en nummering bleven intact. Nieuw productieactief zijn:
 
-- Onderwijsinspectie: 116 lokale instellingen, gekoppeld aan BRIN/vestiging;
-- KOOP: eigen SRU-route voor vier niet-gemeentelijke publicatiebladen;
-- AFM: volledige XML, 23.336 landelijke instellingen en 195 lokale registraties
-  met KVK, vergunningen, producten en diensten;
-- DNB: zes deelregisters, 45.700 landelijke regels en 15 lokale of hard
-  gematchte registerrelaties;
-- Politie/CBS: 160.000 meetrijen, zestien delicten, 214 geversioneerde gebieden
-  en laatste maand `2026MM07`;
-- NDW: DATEX II, officiële gemeentegeometrie plus één kilometer buffer en bij
-  laatste controle 164 lokale records;
-- RVO: 73.879 landelijke exportregels en 329 lokale projecten via geometrie,
-  plaatsvermelding of lokale graph-watchlist.
+- Jaarverantwoording Zorg: 3.503 lokale/hard gekoppelde regels en tien
+  vergelijkbare financiële reeksen uit 2023–2024;
+- dPi: 1.482 actuele en 1.482 historische lokale regels, met 1.170
+  een-op-eenvergelijkingen;
+- UITagenda 266 optredens, evenementenkalender 115 registraties,
+  Rijksmonumentenregister 559 monumenten en 17 governancefeiten;
+- SEVESO+: één lokale inrichting, één nalevingsvermelding en vijf openbare
+  inspectiesamenvattingen;
+- RIVM Samen Meten: 72 lokale meetstromen bij veertien meetpunten, experimenteel
+  en standaard uitgeschakeld.
 
 Alle nieuwe bronnen gebruiken een nulmeting zonder historische events,
 semantische hashes, ruwe snapshots, stabiele bronidentiteit,
 tweerunsbevestiging voor verdwijningen en adaptergewijze foutisolatie.
 Identieke productieruns schreven niets nieuws.
 
-De orkestrator registreert dertien regels: R1–R7 en R9–R14. R8 blijft voor fase
-4. De oorspronkelijke nummering is hersteld: R5 is politie-anomalie, R10 is
-multi-sourceversterking, DUO is R11/R12, Inspectie R13 en NDW R14.
+De orkestrator registreert R1–R16. R8 is de veelgevraagde lokale spreker/maker,
+R15 de zorgcijferafwijking en R16 de dPi-planverschuiving. R5, R10, R11, R12,
+R13 en R14 behouden hun afgesproken betekenis.
 
 ## Laatste verificatie
 
@@ -57,20 +55,28 @@ multi-sourceversterking, DUO is R11/R12, Inspectie R13 en NDW R14.
   en 62.129 onderdrukkingen (0,024%).
 - R10-backtest over 24 maanden: 2.069 signalen, 185 multibronkandidaten, 133
   binnen negentig dagen en 83 niet verworpen.
-- Offline suite: 81/81 tests geslaagd. Productie-nulmetingen en herhaalruns
-  leverden geen onverwachte events of duplicaten; NDW-taakresultaat is 0.
+- Fase-4-productienulmeting: alle acht adapters `ok`, nul events; ruwe snapshots
+  en baselines zijn in productie vastgelegd.
+- R15-backtest 2023–2024: 10 vergelijkingen, 6 signalen, 4 onderdrukt. R16-
+  backtest 2024–2025: 1.170 vergelijkingen, 200 signalen, 970 onderdrukt.
+- De identieke productieherhaalrun is op verzoek afgebroken en geldt niet als
+  bewijs; de eerstvolgende geplande run moet het live herhaalbewijs leveren.
+- Offline suite 92/92 en database-integratie 39/39 geslaagd; documentatiecontrole,
+  lint en productiebuild groen. Lint meldt alleen de al bestaande ongebruikte
+  `bronFouten`-variabele in het beheerscherm.
 
 Deze cijfers zijn een momentopname, geen vervanging voor een nieuwe controle na
 codewijzigingen.
 
 ## Open risico's en eerstvolgende stappen
 
-1. Fase 4 is de volgende productfase; start met de periodieke bronnen uit het
-   leidende uitbreidingsplan.
-2. Herkalibreer de conservatieve politieformule alleen met nieuwe redactioneel
+1. Fase 5 is de volgende productfase; begin met de redactionele leerloop.
+2. Bevestig bij de eerstvolgende geplande detectierun dat fase-4-records
+   ongewijzigd blijven en niets dupliceert.
+3. Herkalibreer de conservatieve politieformule alleen met nieuwe redactioneel
    gelabelde uitkomsten en verhoog dan de detectorversie.
-3. RVO-graphmatches en NDW-bufferrecords dragen een onzekerheidswaarschuwing en
+4. RVO-graphmatches en NDW-bufferrecords dragen een onzekerheidswaarschuwing en
    blijven redactioneel te beoordelen.
-4. Onbekende niet-gevolgde bestanden blijven buiten deze wijziging.
+5. Onbekende niet-gevolgde bestanden blijven buiten deze wijziging.
 
-De actuele uitwerking staat in `PHASES/phase-3.md`.
+De actuele uitwerking staat in `PHASES/phase-4.md`.

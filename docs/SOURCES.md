@@ -63,6 +63,26 @@ De productie-enums blijven grof (`registry`/`data` en
 De dagelijkse orkestrator respecteert minimumintervallen; `Stadsgeest NDW`
 draait daarnaast werkelijk iedere vijftien minuten.
 
+## Fase-4-broncontracten
+
+Jaarverantwoording Zorg ontdekt steeds de twee nieuwste definitieve boekjaren,
+filtert exact op vestigingsplaats of hard KVK en vergelijkt uitsluitend
+jaarneutraal gemapte financiële velden. dPi vergelijkt de officiële 2024- en
+2025-XLSX voor hetzelfde KVK, DAEB-type, doeljaar, gegevenstype en dezelfde
+gemeente. Beide bronnen benoemen dat aangeleverde cijfers of plannen geen
+gevalideerde realisaties zijn.
+
+Tijd voor Amersfoort gebruikt detail-JSON-LD en exacte `addressLocality`.
+Agenda-items en de gemeentelijke evenementenkalender zijn context; opname op de
+kalender is geen vergunning. Governancefeiten komen alleen van vooraf gekozen
+openbare organisatiepagina's en personen krijgen een brongebonden identiteit.
+
+Rijksmonumenten komen uit de officiële RCE-collectie in de PDOK OGC API en
+worden met GM0307/GM0327 begrensd. SEVESO volgt de maandelijkse inrichtingen- en
+nalevingslijst plus lokale inspectiesamenvattingen. Samen Meten combineert de
+SensorThings-geoquery met dezelfde officiële polygonen en een gemeentecodecheck;
+de adapter staat standaard uit en emitteert geen harde events.
+
 ## Contract voor nieuwe bronnen
 
 Leg minimaal vast: eigenaar, officiële URL, bereik, lokale filter,

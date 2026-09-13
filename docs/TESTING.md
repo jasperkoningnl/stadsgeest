@@ -74,3 +74,24 @@ Een productiebaseline moet `baseline:true` en nul events tonen; de onmiddellijke
 herhaalrun moet `baseline:false`, uitsluitend `unchanged` en nul events tonen.
 Controleer na installatie van `Stadsgeest NDW` zowel het log als
 `LastTaskResult = 0`.
+
+## Fase-4-verificatie
+
+De fixture-suite `scraper/__tests__/phase4/adapters.test.cjs` dekt exacte lokale
+filters, XLSX/ODS inclusief streaming, JSON-LD, kalender- en governancegrenzen,
+SensorThings-geometrie, stabiele SEVESO-naamvarianten, R8 en de drempels voor
+R15/R16. Het gedeelde fase-3-diffcontract blijft de idempotentie, baseline en
+tweerunsverwijdering bewijzen.
+
+Voer na de additieve migratie en bron-dry-runs uit:
+
+```powershell
+node scraper/audit-phase4.cjs
+node scraper/backtest-phase4.cjs
+npm --prefix scraper run test:integration
+```
+
+De audit vereist per fase-4-bron een baseline, twee geslaagde productieruns en
+een laatste run zonder nieuwe, gewijzigde of verwijderde records. Samen Meten
+wordt voor die gecontroleerde nulmeting tijdelijk aangezet en blijft daarna in
+de gewone planning uitgeschakeld.

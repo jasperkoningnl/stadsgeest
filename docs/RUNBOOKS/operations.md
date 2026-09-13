@@ -31,3 +31,18 @@ Belangrijke ingangen:
 
 Brongezondheid wordt per actieve run gemeten. Kalenderdagen zonder nieuwe
 records zijn op zichzelf geen storing.
+
+## Fase-4-cadans en begrenzing
+
+De dagelijkse detectietaak haalt fase-4-bronnen alleen op wanneer hun
+minimuminterval is verstreken. UITagenda draait dagelijks; monumenten en
+governance wekelijks; evenementenkalender wekelijks in augustus–december en
+anders maandelijks; zorg wekelijks in maart–juni en september–oktober en anders
+maandelijks; dPi en SEVESO maandelijks. Samen Meten draait alleen met
+`STADSGEEST_ENABLE_SAMEN_METEN=1`.
+
+Start de zorgadapter operationeel met een Node-heaplimiet van 768 MB. De
+streamparser voorkomt volledig uitpakken, maar de vijf ODS-bestanden blijven
+CPU-intensief. Een zorgfout mag nooit aanleiding zijn om de lock te verwijderen
+zolang het proces nog bestaat. Gebruik `audit-phase4.cjs` en
+`backtest-phase4.cjs` na een gecontroleerde dubbele nulmeting.

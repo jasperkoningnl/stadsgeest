@@ -24,8 +24,9 @@ de vastgelegde beslissing.
   slotaudit open.
 - Fase 3 — sectorregisters en statistiek: afgerond en productieactief; zie
   `PHASES/phase-3.md`.
-- Fase 4 — periodieke en experimentele bronnen: eerstvolgende productfase.
-- Fase 5 — redactionele leerloop: volgt na fase 4, met vroege feedbackmeting
+- Fase 4 — periodieke en experimentele bronnen: afgerond en productieactief;
+  Samen Meten blijft bewust achter een experimentele feature flag.
+- Fase 5 — redactionele leerloop: eerstvolgende productfase, met vroege feedbackmeting
   waar dat al zinvol is.
 
 Zie `PHASES/README.md` voor de status en afsluitvoorwaarde per fase.

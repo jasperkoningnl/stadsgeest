@@ -23,6 +23,14 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-09-13 — Meer openbare registers geven achtergrond en veranderingen
+
+Stadsgeest volgt nu ook zorgverantwoordingen, woningbouwplannen van corporaties,
+rijksmonumenten, SEVESO-inspecties en openbare bestuurspagina's. Agenda's en de
+evenementenkalender helpen als achtergrond, maar worden niet zelfstandig als
+hard nieuws behandeld. Historische gegevens zijn als beginstand opgeslagen en
+hebben daarom geen oude tips veroorzaakt.
+
 ---
 
 ## 2026-09-13 — Nieuwe registers en lokale patronen worden gevolgd

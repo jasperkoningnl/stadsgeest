@@ -14,5 +14,5 @@ New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 [Console]::OutputEncoding = $utf8
 $OutputEncoding = $utf8
 Set-Location -LiteralPath $scriptDir
-& $nodeExe 'src\kg\detection-run.cjs' 2>&1 | Out-File -LiteralPath $logFile -Encoding utf8 -Append
+& $nodeExe '--max-old-space-size=768' 'src\kg\detection-run.cjs' 2>&1 | Out-File -LiteralPath $logFile -Encoding utf8 -Append
 exit $LASTEXITCODE

@@ -270,6 +270,7 @@ async function emitEvent(db, sourceId, meta, record, previous, event, snapshot, 
     current: record, previous: previous || null, changed_fields: event.changedFields || [],
     evidence: event.evidence || [], journalistically_relevant: event.journalisticallyRelevant !== false,
     uncertainty: event.uncertainty || null,
+    absolute_change: event.absoluteChange ?? null, relative_change: event.relativeChange ?? null,
   };
   const inserted = await db.execute({
     sql: `INSERT INTO kg_events

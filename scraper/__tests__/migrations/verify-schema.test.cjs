@@ -146,6 +146,21 @@ describe('M5: fase-3-provenance en backtests', () => {
   });
 });
 
+describe('M6: fase-4-audit en jaar-op-jaarbacktests', () => {
+  for (const table of ['phase4_backtests', 'phase4_source_audits']) {
+    it(`${table} bestaat`, async () => { assert.ok((await getColumns(table)).length > 0); });
+  }
+
+  it('beide fase-4-jaarparen zijn reproduceerbaar vastgelegd', async () => {
+    for (const [name, from, to] of [['zorg-r15', 2023, 2024], ['dpi-r16', 2024, 2025]]) {
+      const result = await db.execute({ sql: `SELECT * FROM phase4_backtests WHERE test_name=? ORDER BY created_at DESC LIMIT 1`, args: [name] });
+      assert.equal(result.rows.length, 1, `${name} ontbreekt`);
+      assert.ok(Number(result.rows[0].period_from) <= from && Number(result.rows[0].period_to) >= to);
+      assert.ok(Number(result.rows[0].input_count) > 0);
+    }
+  });
+});
+
 describe('Integriteit', () => {
   it('geen kg_entities zonder type', async () => {
     const r = await db.execute("SELECT COUNT(*) as n FROM kg_entities WHERE entity_type IS NULL");

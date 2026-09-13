@@ -24,6 +24,12 @@ const { NdwPlanningAdapter } = require('./adapters/ndw-planning.cjs');
 const { RvoProjectenAdapter } = require('./adapters/rvo-projecten.cjs');
 const { KoopNonMunicipalAdapter } = require('./adapters/koop-nonmunicipal.cjs');
 const { OnderwijsinspectieKwaliteitAdapter } = require('./adapters/onderwijsinspectie-kwaliteit.cjs');
+const {
+  CareAccountabilityAdapter, DpiHousingAdapter, RijksmonumentenAdapter, SevesoScopeAdapter,
+} = require('./adapters/phase4-official-datasets.cjs');
+const {
+  GovernanceAdapter, MunicipalEventsAdapter, SamenMetenAdapter, UitAgendaAdapter,
+} = require('./adapters/phase4-context-sources.cjs');
 
 const LOCK_PATH = path.join(__dirname, '../../.detection-run.lock');
 const STALE_LOCK_MS = 6 * 60 * 60 * 1000;
@@ -46,6 +52,14 @@ const ADAPTERS = [
   ['politie-cbs', PolitieCbsAdapter, { sourceName: 'Politie/CBS — geregistreerde misdrijven per buurt', minimumHours: 650 }],
   ['ndw', NdwPlanningAdapter, { sourceName: 'NDW — wegwerkzaamheden en evenementen', minimumHours: 0.2 }],
   ['rvo', RvoProjectenAdapter, { sourceName: 'RVO — Projectendatabase', minimumHours: 144 }],
+  ['zorg-jaarverantwoording', CareAccountabilityAdapter, { sourceName: 'Jaarverantwoording Zorg — openbare datasets', minimumHours: [3, 4, 5, 6, 9, 10].includes(new Date().getMonth() + 1) ? 144 : 650 }],
+  ['dpi', DpiHousingAdapter, { sourceName: 'Woningcorporaties — dPi', minimumHours: 650 }],
+  ['uitagenda', UitAgendaAdapter, { sourceName: 'Tijd voor Amersfoort — volledige UITagenda', minimumHours: 20 }],
+  ['evenementenkalender', MunicipalEventsAdapter, { sourceName: 'Gemeente Amersfoort — evenementenkalender', minimumHours: [8, 9, 10, 11, 12].includes(new Date().getMonth() + 1) ? 144 : 650 }],
+  ['rijksmonumenten', RijksmonumentenAdapter, { sourceName: 'Rijksmonumentenregister — Extract_MRS', minimumHours: 144 }],
+  ['seveso', SevesoScopeAdapter, { sourceName: 'SEVESO+ — inrichtingenlijst', minimumHours: 650 }],
+  ['governance', GovernanceAdapter, { sourceName: 'Openbare governancepagina’s — lokale ankerorganisaties', minimumHours: 144 }],
+  ['samen-meten', SamenMetenAdapter, { sourceName: 'RIVM Samen Meten — experimenteel', minimumHours: 1, featureFlag: 'STADSGEEST_ENABLE_SAMEN_METEN' }],
 ];
 
 function isDueAt(lastFinishedAt, minimumHours, now = Date.now()) {
@@ -164,6 +178,10 @@ async function main(argv = process.argv.slice(2)) {
     if (!options.skipAdapters) {
       for (const [name, Adapter, schedule] of ADAPTERS) {
         if (options.adapterNames && !options.adapterNames.has(name)) continue;
+        if (schedule?.featureFlag && process.env[schedule.featureFlag] !== '1') {
+          adapterResults.push({ name, status: 'disabled', featureFlag: schedule.featureFlag });
+          continue;
+        }
         if (!options.adapterNames && !options.dryRun && !(await adapterIsDue(db, schedule))) {
           adapterResults.push({ name, status: 'not_due' });
           continue;
@@ -177,7 +195,7 @@ async function main(argv = process.argv.slice(2)) {
             health = await adapter.health();
             if (health?.status === 'error') failures.push(`${name} health: ${health.message}`);
           }
-          const status = health?.status === 'error' ? 'error' : (summarizeRun(result).recordsFound === 0 ? 'empty' : 'ok');
+          const status = health?.status === 'error' ? 'error' : health?.status === 'suspect' ? 'suspect' : 'ok';
           await logAdapterRun(db, adapter, startedAt, status, result, health?.status === 'error' ? health.message : null);
           adapterResults.push({ name, status, result, health });
         } catch (error) {

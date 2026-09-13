@@ -62,6 +62,14 @@ genegeerd onder `scraper/data/phase3-snapshots/`; de database bewaart hash,
 media-type, omvang en opslagpad. Politiecorrecties krijgen een nieuwe
 `source_records`-versie, nooit een stille overschrijving.
 
+`scraper/migrate-phase4.cjs` voegt uitsluitend `phase4_backtests` en
+`phase4_source_audits` toe. Fase-4-bestandsbronnen gebruiken dezelfde
+`source_records`-, snapshot- en tweerunsdiff als fase 3. De zorgadapter leest
+grote ODS-inhoud als stream; samengestelde bronnen archiveren ieder officieel
+bestand en daarnaast een reproduceerbaar runmanifest. Jaar-op-jaarrecords hebben
+een stabiele sleutel zonder boekjaar, zodat een nieuwe uitgave een inhoudelijke
+wijziging is en geen los historisch object.
+
 Fase-3-adapters delen `phase3-core.cjs`: canonieke semantische hashing,
 schema-/volumecontrole, retry met backoff, bronmetadata, baseline, semantische
 diff en tweerunsbevestiging voor verwijderingen. Een herstelde tijdelijke
@@ -91,6 +99,7 @@ nooit uitsluitend op naam automatisch samengevoegd.
 | Uitgevoerde KG-migraties | `scraper/migrate-kg-m1m2m3.cjs`, `scraper/migrate-kg-m4-seed.cjs` |
 | Fase-3-migratie en gedeelde diff | `scraper/migrate-phase3.cjs`, `scraper/src/kg/phase3-core.cjs` |
 | Fase-3-audit en backtest | `scraper/audit-phase3.cjs`, `scraper/backtest-phase3.cjs` |
+| Fase-4-audit en backtest | `scraper/audit-phase4.cjs`, `scraper/backtest-phase4.cjs` |
 | NDW-taak | `scraper/run-ndw-task.ps1` |
 | Tests en fixtures | `scraper/__tests__/` |
 

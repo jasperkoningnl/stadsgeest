@@ -1,5 +1,5 @@
-// Detectieregels voor Stadsgeest 2.0 — fase 2 en 3
-// R1-R7, R9-R14. R8 hoort bij fase 4.
+// Detectieregels voor Stadsgeest 2.0 — fase 2 t/m 4
+// R1-R16; R15/R16 zijn de sectorspecifieke jaar-op-jaarregels uit fase 4.
 // Worden geregistreerd bij de DetectionEngine.
 
 const { DetectionEngine } = require('./detection-engine.cjs');
@@ -108,6 +108,7 @@ const R3_NATIONAL_SANCTION = {
     'ACM_SANCTION_PUBLISHED', 'ACM_DECISION_PUBLISHED',
     'AP_SANCTION_PUBLISHED', 'AP_ORDER_PUBLISHED',
     'INSPECTION_VIOLATION', 'ASBESTOS_VIOLATION_PUBLISHED', 'ASBESTOS_WORK_STOPPED',
+    'SEVESO_INSPECTION_PUBLISHED', 'SEVESO_VIOLATION_RECORDED',
   ],
   async condition(event, context) {
     // Geen plaatsnaam-fallback: R3 bewijst de graph alleen als er een entity
@@ -317,6 +318,49 @@ const R7_UTILITY_OUTAGE = {
       noveltyScore: 70,
       evidence: [event.title, `${klanten} klanten`, provenance.oorzaak].filter(Boolean),
       entities: [],
+    };
+  },
+};
+
+/** R8: veelgevraagde lokale spreker/maker; zachte agenda-context. */
+const R8_FREQUENT_LOCAL_SPEAKER = {
+  id: 'R8',
+  name: 'Veelgevraagde lokale spreker of maker',
+  eventTypes: ['SPEAKER_APPEARANCE'],
+  async condition(event, context) {
+    const person = (context.entities || []).find(entity => entity.entity_type === 'person');
+    if (!person) return false;
+    const entityId = Number(person.entity_id || person.id);
+    const result = await context.db.execute({
+      sql: `SELECT e.id,e.occurred_at,e.source_identifier,e.provenance
+            FROM kg_events e JOIN event_entities ee ON ee.event_id=e.id
+            WHERE ee.entity_id=? AND e.event_type='SPEAKER_APPEARANCE'
+              AND e.occurred_at BETWEEN datetime(?, '-90 days') AND datetime(?)`,
+      args: [entityId, event.occurred_at || event.fetched_at, event.occurred_at || event.fetched_at],
+    });
+    const appearances = new Map(); const organizers = new Set();
+    for (const row of result.rows) {
+      let provenance = {}; try { provenance = JSON.parse(row.provenance || '{}'); } catch { continue; }
+      const current = provenance.current || {};
+      appearances.set(row.source_identifier, row);
+      const organizer = current.organizer || current.venue;
+      if (organizer) organizers.add(String(organizer).toLocaleLowerCase('nl-NL'));
+    }
+    if (appearances.size < 4 || organizers.size < 3) return false;
+    context.r8 = { appearances: [...appearances.values()], organizers: [...organizers] };
+    return Number(event.id) === Math.max(...[...appearances.values()].map(row => Number(row.id)));
+  },
+  async createSignal(event, context) {
+    const person = context.entities.find(entity => entity.entity_type === 'person');
+    return {
+      title: `Vaak geprogrammeerd: ${person.canonical_name}`,
+      summary: `${person.canonical_name} verschijnt bij ${context.r8.appearances.length} verschillende openbare evenementen van minimaal ${context.r8.organizers.length} organisatoren of locaties binnen 90 dagen. Dit is een ontdekkingstip, geen bewijs van bijzondere maatschappelijke betekenis.`,
+      category: 'cultuur', tier: 3, noveltyScore: 45,
+      evidence: context.r8.appearances.map(row => row.source_identifier),
+      entityPath: `lokale persoonsrelatie → ${context.r8.appearances.length} agenda-optredens → ${context.r8.organizers.length} organisatoren/locaties`,
+      dedupeKey: `R8:${Number(person.entity_id || person.id)}:${new Date(event.occurred_at || event.fetched_at).toISOString().slice(0, 7)}`,
+      provenance: { soft_context_only: true, review_required: true, window_days: 90 },
+      entities: [{ entityId: Number(person.entity_id || person.id), relevance: 'subject' }],
     };
   },
 };
@@ -580,6 +624,30 @@ const R14_NDW_IMPACT = {
       entityPath: `NDW-geometrie → ${p.current?.municipality || 'doelgebied'}`, entities: [] }; },
 };
 
+/** R15: materiële jaar-op-jaarverandering in openbare zorgverantwoording. */
+const R15_CARE_YEAR_OVER_YEAR = {
+  id: 'R15', name: 'Materiële jaar-op-jaarverandering zorg', eventTypes: ['CARE_FINANCIAL_ANOMALY'],
+  async condition(event) { let p = {}; try { p = JSON.parse(event.provenance || '{}'); } catch { return false; }
+    return p.journalistically_relevant === true && Math.abs(Number(p.absolute_change)) >= 250000 && Math.abs(Number(p.relative_change)) >= 0.15; },
+  async createSignal(event, context) { const p = JSON.parse(event.provenance || '{}'); const org = context.entities?.[0];
+    return { title: event.title, summary: `${event.summary} De cijfers zijn door de aanbieder aangeleverd en niet inhoudelijk door CIBG gecontroleerd.`,
+      category: 'zorg-welzijn', tier: Math.abs(Number(p.absolute_change)) >= 1000000 ? 2 : 3, noveltyScore: 65,
+      evidence: [...(p.evidence || []), event.source_url].filter(Boolean), entityPath: org ? `${org.canonical_name} → openbare jaarverantwoording → jaar-op-jaarvergelijking` : null,
+      provenance: { uncertainty: p.uncertainty, review_required: true }, entities: org ? [{ entityId: Number(org.entity_id || org.id), relevance: 'subject' }] : [] }; },
+};
+
+/** R16: materiële jaar-op-jaarverschuiving in lokale dPi-plannen. */
+const R16_HOUSING_YEAR_OVER_YEAR = {
+  id: 'R16', name: 'Materiële jaar-op-jaarverandering woningcorporatieplan', eventTypes: ['HOUSING_INVESTMENT_ANOMALY'],
+  async condition(event) { let p = {}; try { p = JSON.parse(event.provenance || '{}'); } catch { return false; }
+    const absolute = Math.abs(Number(p.absolute_change)); const relative = Math.abs(Number(p.relative_change));
+    return p.journalistically_relevant === true && (absolute >= 25 || (absolute >= 10 && relative >= 0.20)); },
+  async createSignal(event, context) { const p = JSON.parse(event.provenance || '{}'); const org = context.entities?.[0];
+    return { title: event.title, summary: `${event.summary} dPi beschrijft prognoses, geen gerealiseerde woningen of investeringen.`, category: 'wonen', tier: 2, noveltyScore: 70,
+      evidence: [...(p.evidence || []), event.source_url].filter(Boolean), entityPath: org ? `${org.canonical_name} → dPi → gemeente Amersfoort/Leusden` : null,
+      provenance: { uncertainty: p.uncertainty, review_required: true }, entities: org ? [{ entityId: Number(org.entity_id || org.id), relevance: 'subject' }] : [] }; },
+};
+
 /**
  * Registreer de productie-detectieregels bij een DetectionEngine.
  */
@@ -591,12 +659,15 @@ function registerPhase2Rules(engine) {
   engine.register(R5_CRIME_ANOMALY);
   engine.register(R6_CHILDCARE_INSPECTION);
   engine.register(R7_UTILITY_OUTAGE);
+  engine.register(R8_FREQUENT_LOCAL_SPEAKER);
   engine.register(R9_REGISTER_CHANGE);
   engine.register(R10_MULTI_SOURCE);
   engine.register(R11_SCHOOL_ENROLLMENT);
   engine.register(R12_SCHOOL_FORECAST);
   engine.register(R13_SCHOOL_INSPECTION);
   engine.register(R14_NDW_IMPACT);
+  engine.register(R15_CARE_YEAR_OVER_YEAR);
+  engine.register(R16_HOUSING_YEAR_OVER_YEAR);
   console.log(`[DetectionRules] ${engine.rules.size} regels geregistreerd: ${[...engine.rules.keys()].join(', ')}`);
 }
 
@@ -646,11 +717,14 @@ module.exports = {
   R5_CRIME_ANOMALY,
   R6_CHILDCARE_INSPECTION,
   R7_UTILITY_OUTAGE,
+  R8_FREQUENT_LOCAL_SPEAKER,
   R9_REGISTER_CHANGE,
   R10_MULTI_SOURCE,
   R11_SCHOOL_ENROLLMENT,
   R12_SCHOOL_FORECAST,
   R13_SCHOOL_INSPECTION,
   R14_NDW_IMPACT,
+  R15_CARE_YEAR_OVER_YEAR,
+  R16_HOUSING_YEAR_OVER_YEAR,
   registerPhase2Rules,
 };
