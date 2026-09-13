@@ -3,11 +3,12 @@
 **Status:** de mijlpaal is bereikt; formele slotaudit blijft open.
 
 Het datamodel, adaptercontract, provenancecontract, testfundament en de
-productiebaseline zijn aangelegd. Controleer vóór definitieve afsluiting alle
-fase-0-punten uit het leidende uitbreidingsplan één voor één, inclusief de
-KOOP-duplicatie-audit, meetbare baselines, rollback en de status van feature
-flags. Ontbrekende punten worden uitgevoerd of expliciet gemotiveerd in
-`../DECISIONS.md`.
+productiebaseline zijn aangelegd. De duurzame migratieprincipes staan nu in
+`../ARCHITECTURE.md`, `../SOURCES.md` en `../TESTING.md`; besluiten over schema-
+autoriteit en feature flags staan in `../DECISIONS.md`. Controleer vóór
+definitieve afsluiting de resterende fase-0-punten uit het leidende
+uitbreidingsplan één voor één, waaronder de KOOP-duplicatie-audit, herleidbare
+baselinemetingen en aantoonbaar herstelgedrag.
 
 **Afsluitvoorwaarde:** migraties en regressietests slagen, de bestaande pipeline
 blijft groen en de oorspronkelijke baselinecijfers zijn herleidbaar vastgelegd.

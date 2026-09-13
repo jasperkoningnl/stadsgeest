@@ -48,5 +48,17 @@ baselinegedrag, verwijderingsbetekenis, foutisolatie, tests en bekende
 beperkingen. Een parserwijziging mag zonder betekenisvolle bronwijziging geen
 events veroorzaken.
 
+Gebruik voor KG-bronnen waar passend de bronklassen
+`AUTHORITATIVE_REGISTER`, `AUTHORITATIVE_EVENT`, `DECLARED_BY_ENTITY`,
+`STRUCTURED_CONTEXT`, `MEASUREMENT` en `DISCOVERY_ONLY`. Een adapter doorloopt
+conceptueel `discover → fetch → parse → normalize → diff → emit`; de actuele
+implementatie staat in `scraper/src/kg/base-adapter.cjs`.
+
+Provenance van een event of signaal bevat minimaal bron en bronklasse, bron- of
+document-URL, stabiele bronidentifier, publicatie-/gebeurtenis-/ophaaltijd,
+parser- of adapterversie, bewijsvelden of fragmenten en de methode en zekerheid
+van een eventuele entiteitsmatch. Bewaar bij een relevant relatiepad ook hoe de
+lokale relevantie tot stand kwam.
+
 Grote exports en brononderzoek horen bij fixtures, rapporten of geschiedenis en
 zijn nooit verplichte startcontext.

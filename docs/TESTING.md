@@ -28,6 +28,23 @@ productietoegang en behandel ze als gerichte livecontrole.
 - Een exitcode 0 zonder controle van uitvoer, rijen of zichtbare toestand is
   geen volledige verificatie.
 
+## Adapter- en migratiecontract
+
+Een nieuwe bron krijgt kleine, geanonimiseerde fixtures met de vastgelegde
+bronrespons en verwachte genormaliseerde records; voeg verwachte entiteiten toe
+wanneer matching onderdeel van de adapter is. Dek minimaal af:
+
+- parsercontract en lokale filtering;
+- identieke herhaalrun/idempotentie;
+- baseline zonder historisch event;
+- betekenisvolle wijziging versus parser- of metadatawijziging;
+- schema-drift, lege of afgeschermde waarden en verwijderingsgedrag;
+- foutisolatie en dry-run zonder productiewrites.
+
+Schema- en seedmigraties vereisen daarnaast controle van tabellen, kolommen,
+indexen, herhaalbaarheid en behoud van bestaande data. Gebruik de ingebouwde
+Node-testrunner en voeg geen testdependency toe zonder concrete noodzaak.
+
 Gebruik nooit productiegeheimen in testfixtures of CI. GitHub Actions bouwt
 zonder `.env` en mag daarom alleen paden uitvoeren die netjes met ontbrekende
 productievariabelen omgaan.

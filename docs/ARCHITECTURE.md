@@ -1,7 +1,7 @@
 # Architectuur
 
 **Doel:** technische kaart van de actieve keten.
-**Status:** actueel op hoofdlijnen per 12 september 2026.
+**Status:** actueel op hoofdlijnen per 13 september 2026.
 **Lees wanneer:** bij frontend-, scraper-, database- of detectiewerk.
 
 ## Uitvoeringsomgeving
@@ -40,6 +40,30 @@
 - Een event of signaal moet provenance naar officiële bron of bronrecord hebben.
 - Spiegelbronnen bevestigen of ontdubbelen, maar dragen geen tip.
 
+## Schema en migraties
+
+Schemawijzigingen zijn bij voorkeur additief, zodat de klassieke keten tijdens
+de overgang blijft werken. `scraper/migrate-kg-m1m2m3.cjs` en
+`scraper/migrate-kg-m4-seed.cjs` leggen het uitgevoerde KG-fundament vast. De
+actuele database en migratiecode zijn gezaghebbend; voer SQL uit oude plannen
+niet rechtstreeks uit. Controleer vóór schemawerk de productieversie en maak
+een gerichte herstel- of voorwaartse migratie in plaats van tabellen generiek te
+verwijderen.
+
+De kern bestaat uit `kg_entities`, identifiers, aliassen, locaties, relaties,
+events, `source_records`, `fetch_runs` en de handmatige mergewachtrij. De
+klassieke tabellen blijven daarnaast bestaan zolang intake en KG-detectie
+afzonderlijke productiepaden zijn.
+
+## Entity-resolutiecontract
+
+De actuele implementatie staat in `scraper/src/kg/entity-resolver.cjs`. Sterke
+identifiers wegen 100 punten, website 45, BAG-adres 40, exacte naam 35,
+genormaliseerde naam 25, gedeelde bestuurder 20, postcode/huisnummer 15 en
+werkgebied 10. Vanaf 90 volgt automatisch samenvoegen, 70–89 vereist review en
+onder 70 volgt geen merge. Personen vereisen minimaal 110 punten en worden dus
+nooit uitsluitend op naam automatisch samengevoegd.
+
 ## Belangrijkste codegebieden
 
 | Gebied | Locatie |
@@ -51,6 +75,7 @@
 | Detectieorkestratie | `scraper/src/kg/detection-run.cjs` |
 | Detectieregels | `scraper/src/kg/detection-rules.cjs` |
 | Entity resolution | `scraper/src/kg/entity-resolver.cjs` |
+| Uitgevoerde KG-migraties | `scraper/migrate-kg-m1m2m3.cjs`, `scraper/migrate-kg-m4-seed.cjs` |
 | Tests en fixtures | `scraper/__tests__/` |
 
 Exacte schema-aannames moeten altijd tegen migraties en de actuele database

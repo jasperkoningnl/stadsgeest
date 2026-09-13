@@ -9,11 +9,12 @@
 Het volledige `Stadsgeest_uitbreidingsplan_Claude.md` is leidend. Alles daarin
 wordt uitgevoerd, tenzij een aantoonbare technische, juridische, redactionele
 of broninhoudelijke reden afwijking noodzakelijk maakt. Leg zo'n afwijking met
-reden en gevolg vast in `docs/DECISIONS.md`; stilzwijgend schrappen mag niet.
+reden en gevolg vast in `DECISIONS.md`; stilzwijgend schrappen mag niet.
 
-Het migratieplan is een technische uitwerking van het fundament. Waar het
-migratieplan botst met later geverifieerde productie-inzichten, geldt het
-uitbreidingsplan plus de vastgelegde beslissing.
+De duurzame delen van het voormalige migratieplan zijn geïntegreerd in
+`ARCHITECTURE.md`, `SOURCES.md`, `TESTING.md`, `PHASES/phase-0.md` en
+`DECISIONS.md`. Bij verschil met oude details gelden actuele code, database en
+de vastgelegde beslissing.
 
 ## Stand
 

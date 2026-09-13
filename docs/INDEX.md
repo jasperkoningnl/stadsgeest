@@ -1,7 +1,7 @@
 # Documentatiekaart
 
 **Doel:** minimale, betrouwbare leesroute voor Stadsgeest-taken.
-**Status:** gezaghebbend; bijgewerkt 2026-09-12.
+**Status:** gezaghebbend; bijgewerkt 2026-09-13.
 **Lees wanneer:** altijd, direct na `AGENTS.md`.
 
 ## Standaard
@@ -17,6 +17,7 @@ Lees `CURRENT.md`. Kies daarna alleen de route die bij de taak past:
 | Deployment | `RUNBOOKS/deployment.md`, `TESTING.md` |
 | Roadmap of uitbreidingsplan | `ROADMAP.md`, `PHASES/README.md`, daarna zo nodig het volledige `Stadsgeest_uitbreidingsplan_Claude.md` |
 | Werk aan een specifieke fase | `PHASES/README.md`, daarna alleen het betreffende fasebestand |
+| Roadmapafwijking of technische ontwerpbeslissing | `DECISIONS.md` en het relevante gezaghebbende document |
 | Dagelijkse redactionele weging | `../operations/WEGER.md`, `EDITORIAL-PROFILE.md` |
 | Historische vraag | `HISTORY/INDEX.md`, daarna gericht zoeken |
 
@@ -32,5 +33,6 @@ Lees `CURRENT.md`. Kies daarna alleen de route die bij de taak past:
 
 Actuele toestand staat alleen in `CURRENT.md`; duurzame projectuitleg in
 `PROJECT-OVERVIEW.md`; techniek in `ARCHITECTURE.md`; bronbeleid in `SOURCES.md`;
-uitvoering in `RUNBOOKS/`; roadmap in `ROADMAP.md`; actieve scope in `PHASES/`. Andere bestanden linken
+uitvoering in `RUNBOOKS/`; roadmap in `ROADMAP.md`; actieve scope in `PHASES/`;
+afwijkingen en ontwerpbesluiten in `DECISIONS.md`. Andere bestanden linken
 hiernaar en kopiëren de inhoud niet.
