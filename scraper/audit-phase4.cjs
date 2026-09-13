@@ -23,7 +23,7 @@ async function main() {
       const manifest = JSON.parse(source.source_manifest || '{}');
       for (const field of ['owner', 'license', 'identity', 'local_filter', 'semantic_fields']) if (!manifest[field]) throw new Error(`${name}: manifestveld ${field} ontbreekt`);
       const baseline = Number((await db.execute({ sql: `SELECT COUNT(*) count FROM source_records WHERE source_id=? AND source_key='__baseline_complete__'`, args: [source.id] })).rows[0].count);
-      const runs = (await db.execute({ sql: `SELECT status,records_new,records_changed,records_removed,error_message,finished_at FROM fetch_runs WHERE source_id=? ORDER BY id DESC LIMIT 2`, args: [source.id] })).rows;
+      const runs = (await db.execute({ sql: `SELECT status,records_found,records_new,records_changed,records_removed,error_message,finished_at FROM fetch_runs WHERE source_id=? ORDER BY id DESC LIMIT 2`, args: [source.id] })).rows;
       if (!baseline || runs.length < 2 || runs.some(run => run.status !== 'ok')) throw new Error(`${name}: baseline of twee geslaagde productieruns ontbreken`);
       const latest = runs[0]; if (Number(latest.records_new) || Number(latest.records_changed) || Number(latest.records_removed)) throw new Error(`${name}: herhaalrun was niet idempotent`);
       report.push({ name, class: source.source_class, baseline: true, repeat: latest.finished_at, unchanged: true });

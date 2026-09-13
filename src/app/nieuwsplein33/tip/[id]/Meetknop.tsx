@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 
 /**
@@ -19,22 +19,31 @@ export default function Meetknop({
 }) {
   const router = useRouter()
   const [url, setUrl] = useState(artikelUrl ?? '')
-  const [vondst, setVondst] = useState(eigenVondst === 1)
+  const [zonderStadsgeest, setZonderStadsgeest] = useState<'ja' | 'nee' | ''>(
+    eigenVondst === 1 ? 'ja' : eigenVondst === 0 ? 'nee' : '',
+  )
   const [nietGebruikt, setNietGebruikt] = useState(false)
   const [fout, setFout] = useState<string | null>(null)
   const [bezig, startTransition] = useTransition()
+  const requestId = useRef<string | null>(null)
 
   if (!['goedgekeurd', 'in_behandeling', 'gepubliceerd', 'niet_gebruikt'].includes(status)) return null
 
   async function opslaan(alsNietGebruikt = false) {
     setFout(null)
+    if (!alsNietGebruikt && !zonderStadsgeest) {
+      setFout('Kies of dit artikel er zonder Stadsgeest ook was geweest.')
+      return
+    }
+    requestId.current ??= crypto.randomUUID()
     const res = await fetch(`/api/tip/${tipId}/artikel`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         artikel_url: alsNietGebruikt ? null : url.trim() || null,
-        eigen_vondst: vondst,
+        zonder_stadsgeest: alsNietGebruikt ? null : zonderStadsgeest,
         niet_gebruikt: alsNietGebruikt,
+        request_id: requestId.current,
       }),
     })
     if (!res.ok) {
@@ -42,6 +51,7 @@ export default function Meetknop({
       setFout(body.fout ?? 'Opslaan is niet gelukt.')
       return
     }
+    requestId.current = null
     startTransition(() => router.refresh())
   }
 
@@ -59,10 +69,17 @@ export default function Meetknop({
         />
       </label>
 
-      <label className="np-vink">
-        <input type="checkbox" checked={vondst} onChange={(e) => setVondst(e.target.checked)} />
-        <span>Dit hadden we zonder Stadsgeest niet gehad</span>
-      </label>
+      <fieldset className="np-uitkomst-keuze">
+        <legend>Was dit artikel er zonder Stadsgeest ook geweest?</legend>
+        <label className="np-vink">
+          <input type="radio" name="zonder-stadsgeest" checked={zonderStadsgeest === 'ja'} onChange={() => setZonderStadsgeest('ja')} />
+          <span>Nee — dit hadden we zonder Stadsgeest niet gehad</span>
+        </label>
+        <label className="np-vink">
+          <input type="radio" name="zonder-stadsgeest" checked={zonderStadsgeest === 'nee'} onChange={() => setZonderStadsgeest('nee')} />
+          <span>Ja — dit onderwerp was al op een andere manier gevonden</span>
+        </label>
+      </fieldset>
 
       {fout && <p className="np-fout">{fout}</p>}
 

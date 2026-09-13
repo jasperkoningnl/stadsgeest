@@ -95,3 +95,27 @@ De audit vereist per fase-4-bron een baseline, twee geslaagde productieruns en
 een laatste run zonder nieuwe, gewijzigde of verwijderde records. Samen Meten
 wordt voor die gecontroleerde nulmeting tijdelijk aangezet en blijft daarna in
 de gewone planning uitgeschakeld.
+
+## Fase-5-verificatie
+
+De gevolgde fixturetest `scraper/__tests__/phase5/learning-loop.test.cjs`
+controleert URL- en feedbackdeduplicatie, reden/dimensies, unieke
+artikeluitkomsten en de exacte identiteit van R1–R16. De integratietest
+controleert de additieve tabellen, kolommen, unieke indexen, volledige
+feedbackcontexten en het verbod op ongeldige toegepaste kalibraties.
+
+Voor productiecontrole:
+
+```powershell
+node scraper/migrate-phase5.cjs
+node scraper/migrate-phase5.cjs
+node scraper/run-phase5-evaluation.cjs --rolling-days=28
+node scraper/run-phase5-evaluation.cjs --rolling-days=28
+node scraper/audit-phase5.cjs
+node scraper/retain-phase5-feedback.cjs
+```
+
+Beide migraties moeten dezelfde telling tonen en beide evaluaties dezelfde ID en
+invoerhash. De audit moet nul verweesde feedback, nul ongeldige automatische
+aanpassingen en nul ontbrekende of dubbele artikeluitkomsten melden. Een kleine
+steekproef bewijst alleen reproduceerbaarheid, niet kwaliteitsverbetering.

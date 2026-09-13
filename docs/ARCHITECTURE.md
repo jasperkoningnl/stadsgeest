@@ -30,6 +30,10 @@
    `dossiers` en `dossier_facts`.
 7. Het dashboard leest de productiedata. `LOGBOEK.md` wordt bij de Vercel-build
    meegeleverd als redactioneel productlogboek.
+8. Redactionele besluiten leggen in `tip_feedback` een idempotent verzoek en in
+   `editorial_feedback_contexts` de toenmalige signalen, regels, bronnen en
+   entiteiten vast. Unieke artikeluitkomsten en hun tipkoppelingen staan apart;
+   periode-evaluaties gebruiken een invoerhash en wijzigen de detectieketen niet.
 
 ## Belangrijke grenzen
 
@@ -70,6 +74,14 @@ bestand en daarnaast een reproduceerbaar runmanifest. Jaar-op-jaarrecords hebben
 een stabiele sleutel zonder boekjaar, zodat een nieuwe uitgave een inhoudelijke
 wijziging is en geen los historisch object.
 
+`scraper/migrate-phase5.cjs` verrijkt feedback additief en maakt tabellen voor
+bevroren feedbackcontexten, unieke artikeluitkomsten, tip-uitkomstkoppelingen,
+append-only uitkomst- en reviewevents, reproduceerbare evaluaties,
+reviewcycli, kalibratievoorstellen en retentieruns. Een canonieke artikel-URL en
+een verzoek-ID hebben unieke indexen. De dagelijkse detectietaak start na de
+detectie een geplande maandevaluatie en privacyretentie; fouten daarin veranderen
+de uitkomst van adapters niet en activeren nooit zelfstandig een voorstel.
+
 Fase-3-adapters delen `phase3-core.cjs`: canonieke semantische hashing,
 schema-/volumecontrole, retry met backoff, bronmetadata, baseline, semantische
 diff en tweerunsbevestiging voor verwijderingen. Een herstelde tijdelijke
@@ -100,6 +112,8 @@ nooit uitsluitend op naam automatisch samengevoegd.
 | Fase-3-migratie en gedeelde diff | `scraper/migrate-phase3.cjs`, `scraper/src/kg/phase3-core.cjs` |
 | Fase-3-audit en backtest | `scraper/audit-phase3.cjs`, `scraper/backtest-phase3.cjs` |
 | Fase-4-audit en backtest | `scraper/audit-phase4.cjs`, `scraper/backtest-phase4.cjs` |
+| Fase-5-meting en audit | `scraper/run-phase5-evaluation.cjs`, `scraper/audit-phase5.cjs` |
+| Fase-5-feedbackcontract | `docs/EDITORIAL-LEARNING.md` |
 | NDW-taak | `scraper/run-ndw-task.ps1` |
 | Tests en fixtures | `scraper/__tests__/` |
 

@@ -12,11 +12,14 @@ const required = [
   'docs/ARCHITECTURE.md',
   'docs/SOURCES.md',
   'docs/EDITORIAL-PROFILE.md',
+  'docs/EDITORIAL-LEARNING.md',
   'docs/TESTING.md',
   'docs/RUNBOOKS/operations.md',
   'docs/RUNBOOKS/incident-response.md',
   'docs/RUNBOOKS/deployment.md',
   'docs/PHASES/phase-3.md',
+  'docs/PHASES/phase-4.md',
+  'docs/PHASES/phase-5.md',
   'operations/WEGER.md',
 ]
 

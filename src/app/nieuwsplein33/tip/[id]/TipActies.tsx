@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { noteerBeslissing } from '../../feedbackTeller'
 
@@ -30,6 +30,10 @@ const REDENEN: Record<Exclude<Actie, 'wachtrij'>, { code: string; label: string 
     { code: 'geen_nieuwswaarde', label: 'Geen nieuwswaarde' },
     { code: 'buiten_gebied', label: 'Valt buiten Amersfoort en Leusden' },
     { code: 'te_dun', label: 'Te dun onderbouwd' },
+    { code: 'duplicaat', label: 'Dubbele tip' },
+    { code: 'verkeerd_geclusterd', label: 'Verkeerd geclusterd' },
+    { code: 'feitelijk_fout', label: 'Fout in de tip' },
+    { code: 'bron_fout', label: 'Fout in de bron' },
   ],
 }
 
@@ -46,18 +50,25 @@ export default function TipActies({ tipId, status }: { tipId: number; status: st
   const [tekst, setTekst] = useState('')
   const [fout, setFout] = useState<string | null>(null)
   const [bezig, startTransition] = useTransition()
+  const requestId = useRef<string | null>(null)
 
   async function verstuur(actie: Actie) {
     setFout(null)
+    if (actie === 'afgekeurd' && !code) {
+      setFout('Kies eerst waarom de tip niet bruikbaar is.')
+      return
+    }
+    requestId.current ??= crypto.randomUUID()
     const res = await fetch(`/api/tip/${tipId}/beslis`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ actie, reden_code: code || null, reden_tekst: tekst || null }),
+      body: JSON.stringify({ actie, reden_code: code || null, reden_tekst: tekst || null, request_id: requestId.current }),
     })
     if (!res.ok) {
       setFout('Opslaan is niet gelukt. Probeer het opnieuw; er is niets gewijzigd.')
       return
     }
+    requestId.current = null
     setOpen(null); setCode(''); setTekst('')
     // Telt mee voor de vraag om feedback op het dashboard, die verschijnt zodra
     // er die dag een paar tips zijn afgehandeld. Terugzetten telt niet: dat is

@@ -19,6 +19,14 @@
 Brongezondheid wordt gemeten per uitgevoerde run, niet per kalenderdag. Een
 bewust uitgeschakelde taak of een stille publicatieperiode is geen bronstoring.
 
+Redactionele feedback wordt per bron uitsluitend via de bevroren tipcontext
+geëvalueerd. `te_zwak`, `niet_relevant`, timing, clustervorming en een technisch
+bronprobleem zijn verschillende oorzaken en mogen niet op één hoop worden
+geteld. Onder tien beoordelingen wordt geen broncijfer gerapporteerd; een
+bron- of regelwijziging vereist minstens vijftig relevante beoordelingen, twee
+maandcycli en menselijke goedkeuring. Productie past geen brongewicht automatisch
+aan.
+
 ## Actieve KG-adapters
 
 De code onder `scraper/src/kg/adapters/` is gezaghebbend voor URL, parsing en

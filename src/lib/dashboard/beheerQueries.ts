@@ -431,3 +431,114 @@ export async function getWegingSamenvatting(dagen = 7): Promise<WegingSamenvatti
     watching: watching[0]?.cnt ?? 0,
   }
 }
+
+// ── Fase 5: redactionele leerloop ───────────────────────────────────────
+
+export interface LeerVerdeling {
+  label: string
+  aantal: number
+}
+
+export interface LeerAttributie {
+  sleutel: string
+  naam: string
+  beoordeeld: number
+  bruikbaar: number
+  bewijs: 'te_weinig' | 'beschrijvend' | 'handmatig_beoordelen'
+}
+
+export interface LeerDashboard {
+  beoordeeld: number
+  bruikbaar: number
+  meetbaar: number
+  precision: number | null
+  duplicaten: number
+  duplicateRate: number | null
+  signalen: number
+  ongebruikt: number
+  zonderStadsgeest: number
+  artikelen: number
+  ontbrekendeContext: number
+  onderdrukteDubbeleFeedback: number
+  verdicten: LeerVerdeling[]
+  dimensies: LeerVerdeling[]
+  bronnen: LeerAttributie[]
+  regels: LeerAttributie[]
+  reviewMaand: string | null
+  reviewStatus: string | null
+}
+
+const LATEST_FEEDBACK = `
+  WITH ranked AS (
+    SELECT tf.*,ROW_NUMBER() OVER(PARTITION BY tf.tip_id ORDER BY datetime(tf.created_at) DESC,tf.id DESC) rn
+    FROM tip_feedback tf
+    WHERE datetime(tf.created_at)>=datetime('now','-' || ? || ' days') AND tf.duplicate_of IS NULL
+  ) SELECT * FROM ranked WHERE rn=1 AND actie<>'heropend'
+`
+
+function evidenceLabel(n: number): LeerAttributie['bewijs'] {
+  return n < 10 ? 'te_weinig' : n < 30 ? 'beschrijvend' : 'handmatig_beoordelen'
+}
+
+export async function getLeerDashboard(dagen = 30): Promise<LeerDashboard> {
+  const [feedback, contexts, signalRows, outcomeRows, duplicates, review] = await Promise.all([
+    q<any>(LATEST_FEEDBACK, [dagen]),
+    q<any>(`SELECT c.feedback_id,c.context_json FROM editorial_feedback_contexts c
+      JOIN tip_feedback tf ON tf.id=c.feedback_id
+      WHERE datetime(tf.created_at)>=datetime('now','-' || ? || ' days')`, [dagen]),
+    q<any>(`SELECT COUNT(*) total,SUM(CASE WHEN NOT EXISTS(SELECT 1 FROM tip_signals ts WHERE ts.signal_id=s.id) THEN 1 ELSE 0 END) unused
+      FROM signals s WHERE datetime(s.created_at)>=datetime('now','-' || ? || ' days')`, [dagen]),
+    q<any>(`SELECT COUNT(DISTINCT eo.normalized_url) artikelen,
+      COUNT(DISTINCT CASE WHEN eo.without_stadsgeest=1 THEN eo.normalized_url END) zonder
+      FROM editorial_outcomes eo JOIN tip_outcomes tpo ON tpo.outcome_id=eo.id
+      WHERE tpo.active=1 AND eo.status='published'`),
+    q<any>(`SELECT COUNT(*) n FROM tip_feedback WHERE duplicate_of IS NOT NULL
+      AND datetime(created_at)>=datetime('now','-' || ? || ' days')`, [dagen]),
+    q<any>(`SELECT review_month,status FROM phase5_review_cycles ORDER BY review_month DESC LIMIT 1`),
+  ])
+  const contextMap = new Map(contexts.map((row: any) => [Number(row.feedback_id), JSON.parse(row.context_json)]))
+  const verdicten = new Map<string, number>()
+  const dimensies = new Map<string, number>()
+  const bronMap = new Map<string, { naam: string; tips: Set<number>; bruikbaar: Set<number> }>()
+  const regelMap = new Map<string, { naam: string; tips: Set<number>; bruikbaar: Set<number> }>()
+  let missingContext = 0
+  for (const row of feedback) {
+    const verdict = String(row.verdict || 'onbekend')
+    const dimension = String(row.dimension || 'onbekend')
+    verdicten.set(verdict, (verdicten.get(verdict) || 0) + 1)
+    dimensies.set(dimension, (dimensies.get(dimension) || 0) + 1)
+    const context = contextMap.get(Number(row.id))
+    if (!context) { missingContext++; continue }
+    for (const signal of context.signals || []) {
+      if (signal.rule) {
+        const entry = regelMap.get(signal.rule) || { naam: signal.rule, tips: new Set<number>(), bruikbaar: new Set<number>() }
+        entry.tips.add(Number(row.tip_id)); if (verdict === 'bruikbaar') entry.bruikbaar.add(Number(row.tip_id)); regelMap.set(signal.rule, entry)
+      }
+      for (const source of signal.sources || []) {
+        if (source.role === 'spiegel') continue
+        const key = String(source.id ?? source.name)
+        const entry = bronMap.get(key) || { naam: source.name || key, tips: new Set<number>(), bruikbaar: new Set<number>() }
+        entry.tips.add(Number(row.tip_id)); if (verdict === 'bruikbaar') entry.bruikbaar.add(Number(row.tip_id)); bronMap.set(key, entry)
+      }
+    }
+  }
+  const usable = Number(verdicten.get('bruikbaar') || 0)
+  const duplicate = Number(verdicten.get('duplicaat') || 0)
+  const measurable = usable + duplicate + Number(verdicten.get('niet_lokaal') || 0) + Number(verdicten.get('te_zwak') || 0)
+    + Number(verdicten.get('feitelijk_fout') || 0) + Number(verdicten.get('niet_relevant') || 0)
+  const attributes = (map: typeof bronMap): LeerAttributie[] => [...map].map(([sleutel, value]) => ({
+    sleutel, naam: value.naam, beoordeeld: value.tips.size, bruikbaar: value.bruikbaar.size, bewijs: evidenceLabel(value.tips.size),
+  })).sort((a, b) => b.beoordeeld - a.beoordeeld || a.naam.localeCompare(b.naam)).slice(0, 20)
+  return {
+    beoordeeld: feedback.length, bruikbaar: usable, meetbaar: measurable,
+    precision: measurable ? usable / measurable : null,
+    duplicaten: duplicate, duplicateRate: measurable ? duplicate / measurable : null,
+    signalen: Number(signalRows[0]?.total || 0), ongebruikt: Number(signalRows[0]?.unused || 0),
+    artikelen: Number(outcomeRows[0]?.artikelen || 0), zonderStadsgeest: Number(outcomeRows[0]?.zonder || 0),
+    ontbrekendeContext: missingContext, onderdrukteDubbeleFeedback: Number(duplicates[0]?.n || 0),
+    verdicten: [...verdicten].map(([label,aantal]) => ({ label,aantal })).sort((a,b) => b.aantal-a.aantal),
+    dimensies: [...dimensies].map(([label,aantal]) => ({ label,aantal })).sort((a,b) => b.aantal-a.aantal),
+    bronnen: attributes(bronMap), regels: attributes(regelMap),
+    reviewMaand: review[0]?.review_month ?? null, reviewStatus: review[0]?.status ?? null,
+  }
+}

@@ -23,6 +23,18 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-09-13 — Duidelijker leren van redactionele keuzes
+
+Bij afwijzen kies je voortaan ook eenvoudig “duplicaat” of “feitelijke fout”.
+Bij een gepubliceerd artikel geef je verplicht ja of nee aan of de redactie dit
+verhaal zonder Stadsgeest ook had gehad; hetzelfde artikel wordt nooit dubbel
+geteld. Jasper ziet in Beheer onder Leren een compacte maandstand per reden,
+bron en detectieregel, met waarschuwingen wanneer er nog te weinig beoordelingen
+zijn. Daar kan ook de maandelijkse controle worden afgerond. Stadsgeest verandert
+op basis hiervan niet zelfstandig regels of brongewichten.
+
+---
+
 ## 2026-09-13 — Meer openbare registers geven achtergrond en veranderingen
 
 Stadsgeest volgt nu ook zorgverantwoordingen, woningbouwplannen van corporaties,

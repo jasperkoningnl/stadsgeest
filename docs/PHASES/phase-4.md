@@ -1,6 +1,6 @@
 # Fase 4 — periodieke en experimentele bronnen
 
-**Status:** technisch afgerond en productieactief op 13 september 2026; identieke live herhaalrun op verzoek afgebroken.
+**Status:** afgerond en productieactief op 13 september 2026; identieke live herhaalcontrole geslaagd.
 
 ## Opgeleverd
 
@@ -67,10 +67,11 @@ documentatiecontrole, lint en productiebuild.
   dekking; Leusdense evenementen blijven via de gevalideerde UITagenda lopen.
 - Samen Meten blijft uitgeschakeld totdat de redactie sensordrempels met
   voldoende dekking heeft gekalibreerd. De bron verrijkt nu alleen reproduceerbaar.
-- De eerste productienulmeting van alle acht adapters is geslaagd met nul events.
-  De identieke herhaalrun is op uitdrukkelijk verzoek afgebroken; de eerstvolgende
-  geplande run moet daarom het ontbrekende live idempotentiebewijs leveren.
+- De volledige productieherhaalrun zag bij zeven adapters uitsluitend
+  ongewijzigde records en nul events. Governance kreeg een geïsoleerde timeout;
+  de directe gerichte herhaling zag 17 ongewijzigde records en nul events. De
+  gerepareerde audit leest ook `records_found` en is vervolgens volledig groen.
 
-**Afsluitvoorwaarde:** technisch en operationeel gehaald met de in `CURRENT.md`
-genoemde nulmeting en suite, met expliciet resterend live-herhaalbewijs; langzame bronnen zijn versieerbaar,
-schemawijzigingen worden afgevangen en zachte bronnen genereren geen harde claims.
+**Afsluitvoorwaarde:** gehaald. Nulmeting en identieke live herhaling zijn
+vastgelegd; langzame bronnen zijn versieerbaar, schemawijzigingen worden
+afgevangen en zachte bronnen genereren geen harde claims.

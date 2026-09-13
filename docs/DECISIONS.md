@@ -98,3 +98,38 @@ uitdrukkelijk verzoek afgebroken om direct af te ronden. Dit geldt niet als
 technisch bewijs van live idempotentie; de eerstvolgende geplande detectierun
 moet aantonen dat productie uitsluitend ongewijzigde records ziet en niets
 dupliceert.
+
+## 2026-09-13 — Fase-5-uitkomsten en historische herkomst zijn aparte eenheden
+
+Een redactioneel tipbesluit, zijn bevroren herkomst en een gepubliceerd artikel
+worden afzonderlijk opgeslagen. Eén canonieke Nieuwsplein33-URL is één uitkomst,
+ook bij meerdere tips; de vraag of het artikel zonder Stadsgeest was ontstaan is
+verplicht ja/nee. Dit voorkomt dat ontbrekende antwoorden als negatief gelden of
+een artikel dubbel wordt geteld. Historische feedback is additief verrijkt; één
+exacte bestaande dubbele handeling is gemarkeerd en niet verwijderd.
+
+## 2026-09-13 — Geen zelfoptimalisatie vóór harde bewijs- en reviewgrenzen
+
+De leerloop rapporteert vanaf tien beoordelingen alleen beschrijvend. Handmatige
+kalibratie wordt pas vanaf dertig onderzocht. Een bron- of regelwijziging vereist
+minstens vijftig relevante beoordelingen en twee afgeronde maandreviews; een
+geleerd rangmodel minstens tweehonderd voorbeelden met vijftig positieve en
+vijftig negatieve. Geen productiescript past drempels, gewichten of regels toe.
+Reden: de huidige 23 unieke beoordelingen en één artikeluitkomst zijn nuttig als
+beginmeting, maar onvoldoende voor causale of betrouwbare optimalisatie.
+
+## 2026-09-13 — Feedbackretentie beperkt vrije tekst tot 24 maanden
+
+Feedbackcategorieën, provenancehashes en uitkomsten blijven beschikbaar voor
+langetermijnmeting. Vrije notities worden na 24 maanden verwijderd en de actor
+wordt geanonimiseerd; iedere retentierun is controleerbaar. Feedback blijft voor
+ingelogde redacteuren, terwijl geaggregeerde leer- en reviewinformatie Jasper-only
+is. Dit beperkt privacyrisico zonder de telbare kwaliteitsgeschiedenis te wissen.
+
+## 2026-09-13 — Fase-4-herhaalbewijs alsnog voltooid
+
+De eerstvolgende volledige run zag bij zeven adapters uitsluitend ongewijzigde
+records en nul events. Governance faalde geïsoleerd op een timeout en zag bij de
+directe gerichte herhaling 17 ongewijzigde records en nul events. De fase-4-audit
+bleek zelf `records_found` niet te selecteren terwijl zij dit veld controleerde;
+alleen die auditquery is gerepareerd. Er is geen fase-4-functionaliteit uitgebreid.

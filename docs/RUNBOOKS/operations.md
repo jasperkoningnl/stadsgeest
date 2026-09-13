@@ -16,6 +16,8 @@ Belangrijke ingangen:
 - `scraper/intake-run.mjs`
 - `scraper/src/kg/detection-run.cjs`
 - `scraper/run-detection-task.ps1`
+- `scraper/run-phase5-evaluation.cjs`
+- `scraper/retain-phase5-feedback.cjs`
 - `scraper/pm2-healthcheck.ps1`
 
 ## Veiligheidsregels
@@ -46,3 +48,20 @@ streamparser voorkomt volledig uitpakken, maar de vijf ODS-bestanden blijven
 CPU-intensief. Een zorgfout mag nooit aanleiding zijn om de lock te verwijderen
 zolang het proces nog bestaat. Gebruik `audit-phase4.cjs` en
 `backtest-phase4.cjs` na een gecontroleerde dubbele nulmeting.
+
+## Fase-5-evaluatie en retentie
+
+Na de detectierun maakt dezelfde taak alleen indien nodig de evaluatie van de
+vorige kalendermaand en voert zij de 24-maandsretentie uit. Beide stappen loggen
+afzonderlijk, zijn idempotent en kunnen elkaars of de adapteruitkomst niet
+overschrijven. Controleer met:
+
+```powershell
+node scraper/run-phase5-evaluation.cjs --scheduled
+node scraper/audit-phase5.cjs
+node scraper/retain-phase5-feedback.cjs
+```
+
+Het laatste commando is een dry-run. Gebruik `--apply` alleen voor de geplande
+retentie of een bewuste beheerhandeling. Een evaluatie of maandreview geeft nooit
+toestemming om drempels, brongewichten of regels automatisch te veranderen.

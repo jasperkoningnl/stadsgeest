@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-const TABS = ['Bronnen', 'Intake', 'Weging'] as const
+const TABS = ['Bronnen', 'Intake', 'Weging', 'Leren'] as const
 export type BeheerTab = (typeof TABS)[number]
 
 const PERIODES = [
@@ -17,6 +17,7 @@ interface BeheerTabsProps {
   bronnenContent: ReactNode
   intakeContent: ReactNode
   wegingContent: ReactNode
+  lerenContent: ReactNode
   periode: number
 }
 
@@ -25,6 +26,7 @@ export default function BeheerTabs({
   bronnenContent,
   intakeContent,
   wegingContent,
+  lerenContent,
   periode,
 }: BeheerTabsProps) {
   const [actief, setActief] = useState<BeheerTab>('Bronnen')
@@ -76,6 +78,7 @@ export default function BeheerTabs({
         {actief === 'Bronnen' && bronnenContent}
         {actief === 'Intake' && intakeContent}
         {actief === 'Weging' && wegingContent}
+        {actief === 'Leren' && lerenContent}
       </div>
     </div>
   )

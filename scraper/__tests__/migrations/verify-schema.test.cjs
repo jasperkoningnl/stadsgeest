@@ -161,6 +161,34 @@ describe('M6: fase-4-audit en jaar-op-jaarbacktests', () => {
   });
 });
 
+describe('M7: fase-5-leerloop', () => {
+  it('feedback heeft idempotentie, dimensie en bevroren attributie', async () => {
+    const columns = await getColumns('tip_feedback');
+    for (const column of ['request_id','verdict','dimension','feedback_schema_version','duplicate_of']) assert.ok(columns.includes(column));
+    const orphan = await db.execute(`SELECT COUNT(*) n FROM tip_feedback tf LEFT JOIN editorial_feedback_contexts c ON c.feedback_id=tf.id WHERE c.feedback_id IS NULL`);
+    assert.equal(Number(orphan.rows[0].n), 0);
+  });
+
+  it('uitkomsten en evaluaties hebben additieve tabellen', async () => {
+    for (const table of ['editorial_outcomes','tip_outcomes','editorial_outcome_events','phase5_evaluations','phase5_review_cycles','phase5_review_events','phase5_calibration_proposals','phase5_retention_runs']) {
+      assert.ok((await getColumns(table)).length > 0, `${table} ontbreekt`);
+    }
+  });
+
+  it('een gepubliceerd artikel kan maar eenmaal meetellen', async () => {
+    const duplicates = await db.execute(`SELECT normalized_url,COUNT(*) n FROM editorial_outcomes GROUP BY normalized_url HAVING COUNT(*)>1`);
+    assert.equal(duplicates.rows.length, 0);
+    const missing = await db.execute(`SELECT COUNT(*) n FROM editorial_outcomes WHERE status='published' AND without_stadsgeest NOT IN (0,1)`);
+    assert.equal(Number(missing.rows[0].n), 0);
+  });
+
+  it('geen kalibratie is zonder bewijs en menselijke goedkeuring toegepast', async () => {
+    const invalid = await db.execute(`SELECT COUNT(*) n FROM phase5_calibration_proposals WHERE status='applied'
+      AND (sample_size<minimum_sample OR monthly_cycles<2 OR approved_by IS NULL OR approved_at IS NULL)`);
+    assert.equal(Number(invalid.rows[0].n), 0);
+  });
+});
+
 describe('Integriteit', () => {
   it('geen kg_entities zonder type', async () => {
     const r = await db.execute("SELECT COUNT(*) as n FROM kg_entities WHERE entity_type IS NULL");

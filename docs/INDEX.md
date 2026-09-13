@@ -19,6 +19,7 @@ Lees `CURRENT.md`. Kies daarna alleen de route die bij de taak past:
 | Werk aan een specifieke fase | `PHASES/README.md`, daarna alleen het betreffende fasebestand |
 | Roadmapafwijking of technische ontwerpbeslissing | `DECISIONS.md` en het relevante gezaghebbende document |
 | Dagelijkse redactionele weging | `../operations/WEGER.md`, `EDITORIAL-PROFILE.md` |
+| Feedback, kwaliteitsmeting of privacy | `EDITORIAL-LEARNING.md`, `TESTING.md` |
 | Historische vraag | `HISTORY/INDEX.md`, daarna gericht zoeken |
 
 ## Niet standaard lezen
@@ -33,6 +34,7 @@ Lees `CURRENT.md`. Kies daarna alleen de route die bij de taak past:
 
 Actuele toestand staat alleen in `CURRENT.md`; duurzame projectuitleg in
 `PROJECT-OVERVIEW.md`; techniek in `ARCHITECTURE.md`; bronbeleid in `SOURCES.md`;
-uitvoering in `RUNBOOKS/`; roadmap in `ROADMAP.md`; actieve scope in `PHASES/`;
+uitvoering in `RUNBOOKS/`; leer- en privacycontract in `EDITORIAL-LEARNING.md`;
+roadmap in `ROADMAP.md`; actieve scope in `PHASES/`;
 afwijkingen en ontwerpbesluiten in `DECISIONS.md`. Andere bestanden linken
 hiernaar en kopiëren de inhoud niet.

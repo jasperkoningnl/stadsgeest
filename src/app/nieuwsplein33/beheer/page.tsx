@@ -7,12 +7,14 @@ import {
   getIntakeRuns, getTierAggregates, getSourcesOverview, getSourceErrors,
   getIntakeFunnel, getIntakeDecisions, getTopFilterReasons, getTopEntities,
   getRecentTips, getAfgewezenSignalen, getWegingSamenvatting,
+  getLeerDashboard,
 } from '@/lib/dashboard/beheerQueries'
 import GeenDatabase from '../GeenDatabase'
 import BronnenTabel from './BronnenTabel'
 import BeheerTabs from './BeheerTabs'
 import IntakeTab from './IntakeTab'
 import WegingTab from './WegingTab'
+import LerenTab from './LerenTab'
 
 export const metadata: Metadata = {
   title: 'Beheer — Nieuwsplein33',
@@ -40,7 +42,7 @@ export default async function BeheerPagina({ searchParams }: BeheerPaginaProps) 
   const [
     runs, tiers, bronnen, bronFouten,
     funnel, decisions, filterReasons, topEntities,
-    tips, afgewezen, wegingSamenvatting,
+    tips, afgewezen, wegingSamenvatting, leren,
   ] = await Promise.all([
     getIntakeRuns(10),
     getTierAggregates(),
@@ -53,6 +55,7 @@ export default async function BeheerPagina({ searchParams }: BeheerPaginaProps) 
     getRecentTips(dagen, 20),
     getAfgewezenSignalen(dagen, 20),
     getWegingSamenvatting(dagen),
+    getLeerDashboard(dagen),
   ])
 
   const laatsteRun = runs[0] ?? null
@@ -82,6 +85,7 @@ export default async function BeheerPagina({ searchParams }: BeheerPaginaProps) 
           periodeLabel={periodeLabel}
         />
       }
+      lerenContent={<LerenTab data={leren} periodeLabel={periodeLabel} />}
     />
   )
 }

@@ -671,6 +671,17 @@ function registerPhase2Rules(engine) {
   console.log(`[DetectionRules] ${engine.rules.size} regels geregistreerd: ${[...engine.rules.keys()].join(', ')}`);
 }
 
+// Publiek regressiecontract voor evaluaties en audits. De ids blijven stabiel:
+// redactionele uitkomsten per regel zijn anders niet over de tijd vergelijkbaar.
+const RULE_IDENTITIES = Object.freeze(Object.fromEntries([
+  R1_BUSINESS_EXPANSION, R2_GOVERNANCE_NETWORK, R3_NATIONAL_SANCTION,
+  R4_LOCAL_PERSON_EXTERNAL, R5_CRIME_ANOMALY, R6_CHILDCARE_INSPECTION,
+  R7_UTILITY_OUTAGE, R8_FREQUENT_LOCAL_SPEAKER, R9_REGISTER_CHANGE,
+  R10_MULTI_SOURCE, R11_SCHOOL_ENROLLMENT, R12_SCHOOL_FORECAST,
+  R13_SCHOOL_INSPECTION, R14_NDW_IMPACT, R15_CARE_YEAR_OVER_YEAR,
+  R16_HOUSING_YEAR_OVER_YEAR,
+].map(rule => [rule.id, rule.name])));
+
 // --- CLI: evalueer regels tegen recente events ---
 if (require.main === module) {
   const path = require('path');
@@ -726,5 +737,6 @@ module.exports = {
   R14_NDW_IMPACT,
   R15_CARE_YEAR_OVER_YEAR,
   R16_HOUSING_YEAR_OVER_YEAR,
+  RULE_IDENTITIES,
   registerPhase2Rules,
 };
