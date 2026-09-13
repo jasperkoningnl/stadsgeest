@@ -15,8 +15,8 @@ Lees `CURRENT.md`. Kies daarna alleen de route die bij de taak past:
 | Scraper, intake, detectie of database | `ARCHITECTURE.md`, `SOURCES.md`, `RUNBOOKS/operations.md`, `TESTING.md` |
 | Productiestoring of herstel | `RUNBOOKS/incident-response.md` en daarna alleen relevante logs |
 | Deployment | `RUNBOOKS/deployment.md`, `TESTING.md` |
-| Roadmap of uitbreidingsplan | `ROADMAP.md`, daarna het volledige `Stadsgeest_uitbreidingsplan_Claude.md` |
-| Actueel werk in fase 3 | `PHASES/phase-3.md` |
+| Roadmap of uitbreidingsplan | `ROADMAP.md`, `PHASES/README.md`, daarna zo nodig het volledige `Stadsgeest_uitbreidingsplan_Claude.md` |
+| Werk aan een specifieke fase | `PHASES/README.md`, daarna alleen het betreffende fasebestand |
 | Dagelijkse redactionele weging | `../operations/WEGER.md`, `EDITORIAL-PROFILE.md` |
 | Historische vraag | `HISTORY/INDEX.md`, daarna gericht zoeken |
 

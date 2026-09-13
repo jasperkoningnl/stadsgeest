@@ -17,16 +17,17 @@ uitbreidingsplan plus de vastgelegde beslissing.
 
 ## Stand
 
-- Fase 0 — inventarisatie en contracten: afgerond.
-- Fase 1 — entiteitenfundament: afgerond voor het productiepad; resterende
-  onderdelen blijven onderdeel van het uitbreidingsplan.
-- Fase 2 — eerste eventbronnen en graph matching: productierijp basispad;
-  resterende bron- en regelonderdelen blijven open.
+- Fase 0 — inventarisatie en contracten: mijlpaal bereikt; slotaudit open.
+- Fase 1 — entiteitenfundament: productiepad aanwezig; slotaudit open.
+- Fase 2 — eerste eventbronnen en graph matching: productiepad actief;
+  slotaudit open.
 - Fase 3 — sectorregisters en statistiek: actief. DUO en Onderwijsinspectie zijn
   ver gevorderd; zie `PHASES/phase-3.md`.
 - Fase 4 — periodieke en experimentele bronnen: volgt na fase 3.
 - Fase 5 — redactionele leerloop: volgt na fase 4, met vroege feedbackmeting
   waar dat al zinvol is.
+
+Zie `PHASES/README.md` voor de status en afsluitvoorwaarde per fase.
 
 ## Werkwijze
 
