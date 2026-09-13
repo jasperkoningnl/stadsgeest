@@ -17,6 +17,13 @@ const { LrkKinderopvangAdapter } = require('./adapters/lrk-kinderopvang.cjs');
 const { DuoSchoolvestigingenAdapter } = require('./adapters/duo-schoolvestigingen.cjs');
 const { DuoLeerlingaantallenAdapter } = require('./adapters/duo-leerlingaantallen.cjs');
 const { DuoPrognosesAdapter } = require('./adapters/duo-prognoses.cjs');
+const { AfmRegisterAdapter } = require('./adapters/afm-register.cjs');
+const { DnbRegisterAdapter } = require('./adapters/dnb-register.cjs');
+const { PolitieCbsAdapter } = require('./adapters/politie-cbs-anomalies.cjs');
+const { NdwPlanningAdapter } = require('./adapters/ndw-planning.cjs');
+const { RvoProjectenAdapter } = require('./adapters/rvo-projecten.cjs');
+const { KoopNonMunicipalAdapter } = require('./adapters/koop-nonmunicipal.cjs');
+const { OnderwijsinspectieKwaliteitAdapter } = require('./adapters/onderwijsinspectie-kwaliteit.cjs');
 
 const LOCK_PATH = path.join(__dirname, '../../.detection-run.lock');
 const STALE_LOCK_MS = 6 * 60 * 60 * 1000;
@@ -32,7 +39,27 @@ const ADAPTERS = [
   ['duo', DuoSchoolvestigingenAdapter],
   ['duo-leerlingen', DuoLeerlingaantallenAdapter],
   ['duo-prognoses', DuoPrognosesAdapter],
+  ['inspectie-kwaliteit', OnderwijsinspectieKwaliteitAdapter, { sourceName: 'Onderwijsinspectie — kwaliteitsoordelen', minimumHours: 144 }],
+  ['koop', KoopNonMunicipalAdapter, { sourceName: 'KOOP — niet-gemeentelijke officiële publicaties', minimumHours: 20 }],
+  ['afm', AfmRegisterAdapter, { sourceName: 'AFM — register financiële dienstverleners', minimumHours: 20 }],
+  ['dnb', DnbRegisterAdapter, { sourceName: 'DNB — openbaar register', minimumHours: 20 }],
+  ['politie-cbs', PolitieCbsAdapter, { sourceName: 'Politie/CBS — geregistreerde misdrijven per buurt', minimumHours: 650 }],
+  ['ndw', NdwPlanningAdapter, { sourceName: 'NDW — wegwerkzaamheden en evenementen', minimumHours: 0.2 }],
+  ['rvo', RvoProjectenAdapter, { sourceName: 'RVO — Projectendatabase', minimumHours: 144 }],
 ];
+
+function isDueAt(lastFinishedAt, minimumHours, now = Date.now()) {
+  if (!lastFinishedAt) return true;
+  const timestamp = Date.parse(lastFinishedAt);
+  return !Number.isFinite(timestamp) || now - timestamp >= minimumHours * 3600000;
+}
+
+async function adapterIsDue(db, schedule) {
+  if (!schedule) return true;
+  const result = await db.execute({ sql: `SELECT MAX(fr.finished_at) AS last_finished_at
+    FROM fetch_runs fr JOIN sources s ON s.id=fr.source_id WHERE s.name=? AND fr.status='ok'`, args: [schedule.sourceName] });
+  return isDueAt(result.rows[0]?.last_finished_at, schedule.minimumHours);
+}
 
 function numberFrom(result, keys, fallback = 0) {
   for (const key of keys) {
@@ -135,8 +162,12 @@ async function main(argv = process.argv.slice(2)) {
     console.log(`[DetectionRun] Start ${new Date().toISOString()}${options.dryRun ? ' (DRY RUN)' : ''}`);
 
     if (!options.skipAdapters) {
-      for (const [name, Adapter] of ADAPTERS) {
+      for (const [name, Adapter, schedule] of ADAPTERS) {
         if (options.adapterNames && !options.adapterNames.has(name)) continue;
+        if (!options.adapterNames && !options.dryRun && !(await adapterIsDue(db, schedule))) {
+          adapterResults.push({ name, status: 'not_due' });
+          continue;
+        }
         const startedAt = new Date().toISOString();
         const adapter = new Adapter({ db, dryRun: options.dryRun });
         try {
@@ -186,4 +217,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { ADAPTERS, summarizeRun, parseOptions, main };
+module.exports = { ADAPTERS, adapterIsDue, isDueAt, summarizeRun, parseOptions, main };

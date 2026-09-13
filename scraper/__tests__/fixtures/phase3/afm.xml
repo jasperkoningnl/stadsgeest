@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WfdExternRegister xmlns="http://www.afm.nl/WfdExternRegister/Export/3.0">
+  <Instellingen>
+    <Instelling InstellingID="local-1">
+      <Bedrijfsgegevens>
+        <StatutaireNaam>Kei Financieel B.V.</StatutaireNaam>
+        <StatutaireZetel>Amersfoort</StatutaireZetel>
+        <KVKNummer>12345678</KVKNummer>
+        <Rechtsvorm>Besloten Vennootschap</Rechtsvorm>
+        <Handelsnamen><Handelsnaam Naam="Kei Advies" StartDatum="2020-01-01" /></Handelsnamen>
+        <VestigingsAdres />
+      </Bedrijfsgegevens>
+      <Vergunningen>
+        <Vergunning Vergunningnummer="12000001" StartDatum="2020-02-01">
+          <PDCs><Product Omschrijving="Hypothecair krediet"><Dienst Omschrijving="Adviseren" StartDatum="2020-02-01" /></Product></PDCs>
+        </Vergunning>
+      </Vergunningen>
+    </Instelling>
+    <Instelling InstellingID="outside-1">
+      <Bedrijfsgegevens><StatutaireNaam>Amersfoortse Adviesnaam B.V.</StatutaireNaam><StatutaireZetel>Utrecht</StatutaireZetel><VestigingsAdres><Plaats>Utrecht</Plaats></VestigingsAdres></Bedrijfsgegevens>
+    </Instelling>
+  </Instellingen>
+</WfdExternRegister>

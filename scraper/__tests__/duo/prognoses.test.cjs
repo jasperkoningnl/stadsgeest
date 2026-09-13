@@ -13,7 +13,7 @@ const {
   parseCommaCsv,
   selectForecastResource,
 } = require('../../src/kg/adapters/duo-prognoses.cjs');
-const { R11_SCHOOL_FORECAST } = require('../../src/kg/detection-rules.cjs');
+const { R12_SCHOOL_FORECAST } = require('../../src/kg/detection-rules.cjs');
 
 function fixture(name) {
   return fs.readFileSync(path.join(__dirname, '../fixtures/duo-prognoses', name), 'utf8');
@@ -161,7 +161,7 @@ describe('DUO prognoses — journalistieke drempels', () => {
     assert.equal(realization.type, 'SCHOOL_FORECAST_OVERSHOOT');
   });
 
-  it('laat R11 alleen gevalideerde, materiële prognose-events door', async () => {
+  it('laat R12 alleen gevalideerde, materiële prognose-events door', async () => {
     const event = {
       event_type: 'SCHOOL_FORECAST_REVISED_DOWN',
       title: 'Prognose bijgesteld',
@@ -177,8 +177,8 @@ describe('DUO prognoses — journalistieke drempels', () => {
         current: { naam: 'Testschool', forecasts: [{ year: 2027, pupils: 250 }] },
       }),
     };
-    assert.equal(await R11_SCHOOL_FORECAST.condition(event), true);
-    const signal = await R11_SCHOOL_FORECAST.createSignal(event, { entities: [] });
+    assert.equal(await R12_SCHOOL_FORECAST.condition(event), true);
+    const signal = await R12_SCHOOL_FORECAST.createSignal(event, { entities: [] });
     assert.equal(signal.category, 'onderwijs');
     assert.match(signal.title, /omlaag/);
   });

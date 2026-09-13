@@ -1,5 +1,5 @@
 // Detectieregels voor Stadsgeest 2.0 — fase 2 en 3
-// R1, R2, R3, R4, R6, R7, R9, R10
+// R1-R7, R9-R14. R8 hoort bij fase 4.
 // Worden geregistreerd bij de DetectionEngine.
 
 const { DetectionEngine } = require('./detection-engine.cjs');
@@ -218,6 +218,28 @@ const R4_LOCAL_PERSON_EXTERNAL = {
   },
 };
 
+/** R5: Robuuste anomalie in geregistreerde politiedata. */
+const R5_CRIME_ANOMALY = {
+  id: 'R5',
+  name: 'Robuuste anomalie geregistreerde misdrijven',
+  eventTypes: ['CRIME_ANOMALY_DETECTED'],
+  async condition(event) {
+    let p = {}; try { p = JSON.parse(event.provenance || '{}'); } catch { return false; }
+    return Number(p.observed) >= 5 && Number(p.expected) > 0 && Number(p.robustZ) >= 3.5 &&
+      Number(p.observed) >= Math.max(2 * Number(p.expected), Number(p.expected) + 5) && p.reason === 'trigger';
+  },
+  async createSignal(event) {
+    const p = JSON.parse(event.provenance || '{}');
+    return { title: event.title, summary: `${event.summary} Het gaat om geregistreerde misdrijven; registratie-effecten blijven mogelijk.`,
+      category: 'veiligheid', tier: 2, noveltyScore: Math.min(90, 60 + Math.round(Number(p.robustZ))),
+      evidence: [`${p.observed} geregistreerd`, `verwachting ${Number(p.expected).toFixed(1)}`, `robuuste z-score ${Number(p.robustZ).toFixed(1)}`,
+        `gebiedsversie ${p.map_year}`, event.source_url],
+      entityPath: `${p.area_name || p.area_code} → ${p.crime_name || p.crime_code} → ${p.period}`,
+      provenance: { absolute_count: p.observed, expected_count: p.expected, area_version: p.map_year,
+        methodology_warning: p.warning, municipal_trend_ratio: p.cityRatio }, entities: [] };
+  },
+};
+
 /**
  * R6: Kinderopvang met nieuwe tekortkomingen
  */
@@ -311,8 +333,14 @@ const R9_REGISTER_CHANGE = {
     'SCHOOL_OPENED', 'SCHOOL_CLOSED', 'SCHOOL_RENAMED',
     'SCHOOL_ADDRESS_CHANGED', 'SCHOOL_BOARD_CHANGED',
     'SCHOOL_DENOMINATION_CHANGED', 'SCHOOL_PROGRAMME_CHANGED',
+    'AFM_REGISTRATION_ADDED', 'AFM_REGISTRATION_CHANGED', 'AFM_REGISTRATION_REMOVED',
+    'DNB_REGISTRATION_ADDED', 'DNB_REGISTRATION_CHANGED', 'DNB_REGISTRATION_REMOVED',
+    'RVO_PROJECT_ADDED', 'RVO_PROJECT_CHANGED', 'RVO_FUNDING_CHANGED',
   ],
   async condition(event, context) {
+    let provenance = {};
+    try { provenance = JSON.parse(event.provenance || '{}'); } catch { /* geen extra poort */ }
+    if (provenance.journalistically_relevant === false) return false;
     if (event.event_type === 'CHILDCARE_CLOSED') {
       const sourceId = event.source_identifier || '';
       if (sourceId) {
@@ -337,6 +365,8 @@ const R9_REGISTER_CHANGE = {
     let category = 'overig';
     if (event.event_type.startsWith('CHILDCARE_')) category = 'zorg-welzijn';
     if (event.event_type.startsWith('SCHOOL_')) category = 'onderwijs';
+    if (event.event_type.startsWith('AFM_') || event.event_type.startsWith('DNB_')) category = 'economie-werk';
+    if (event.event_type.startsWith('RVO_')) category = 'economie-werk';
     const typeLabels = {
       'CHILDCARE_OPENED': 'Nieuwe kinderopvang',
       'CHILDCARE_CLOSED': 'Kinderopvang gesloten',
@@ -350,6 +380,15 @@ const R9_REGISTER_CHANGE = {
       'SCHOOL_BOARD_CHANGED': 'Schoolbestuur gewijzigd',
       'SCHOOL_DENOMINATION_CHANGED': 'Denominatie school gewijzigd',
       'SCHOOL_PROGRAMME_CHANGED': 'Onderwijsaanbod gewijzigd',
+      'AFM_REGISTRATION_ADDED': 'Nieuwe AFM-registratie',
+      'AFM_REGISTRATION_CHANGED': 'AFM-registratie gewijzigd',
+      'AFM_REGISTRATION_REMOVED': 'AFM-registratie verdwenen',
+      'DNB_REGISTRATION_ADDED': 'Nieuwe DNB-registratie',
+      'DNB_REGISTRATION_CHANGED': 'DNB-registratie gewijzigd',
+      'DNB_REGISTRATION_REMOVED': 'DNB-registratie verdwenen',
+      'RVO_PROJECT_ADDED': 'Nieuw lokaal RVO-project',
+      'RVO_PROJECT_CHANGED': 'Lokaal RVO-project gewijzigd',
+      'RVO_FUNDING_CHANGED': 'RVO-financiering gewijzigd',
     };
     return {
       title: `${typeLabels[event.event_type] || 'Registerwijziging'}: ${orgName || event.title}`,
@@ -363,13 +402,56 @@ const R9_REGISTER_CHANGE = {
   },
 };
 
+/** R10: versterking door onafhankelijke bronnen rond dezelfde entiteit. */
+const R10_MULTI_SOURCE = {
+  id: 'R10', name: 'Multi-source versterking', eventTypes: null,
+  async condition(event, context) {
+    const ids = (context.entities || []).map(entity => Number(entity.entity_id || entity.id)).filter(Boolean);
+    if (!ids.length || !event.occurred_at) return false;
+    const placeholders = ids.map(() => '?').join(',');
+    const result = await context.db.execute({
+      sql: `SELECT DISTINCT e.id,e.source_id,e.source_identifier,e.event_type,e.title,e.occurred_at,s.name source_name
+            FROM kg_events e JOIN event_entities ee ON ee.event_id=e.id LEFT JOIN sources s ON s.id=e.source_id
+            WHERE ee.entity_id IN (${placeholders}) AND e.occurred_at BETWEEN datetime(?, '-90 days') AND datetime(?, '+90 days')
+            ORDER BY e.occurred_at,e.id`, args: [...ids, event.occurred_at, event.occurred_at],
+    });
+    const independent = new Map();
+    for (const row of result.rows) {
+      const officialId = String(row.source_identifier || '').replace(/:(changed|added|removed).*/i, '');
+      const key = `${row.source_id}:${officialId}`;
+      if (!independent.has(key)) independent.set(key, row);
+    }
+    const sources = new Set([...independent.values()].map(row => Number(row.source_id)).filter(Boolean));
+    if (sources.size < 2) return false;
+    const newest = Math.max(...[...independent.values()].map(row => Number(row.id)));
+    context.multiSource = { events: [...independent.values()], sources: [...sources], entityIds: ids };
+    return Number(event.id) === newest;
+  },
+  async createSignal(event, context) {
+    const evidenceEvents = context.multiSource.events; const entity = context.entities[0];
+    const names = [...new Set(evidenceEvents.map(item => item.source_name).filter(Boolean))];
+    const dates = evidenceEvents.map(item => new Date(item.occurred_at).getTime()).filter(Number.isFinite);
+    const spanDays = dates.length ? Math.round((Math.max(...dates) - Math.min(...dates)) / 86400000) : 90;
+    const window = spanDays <= 30 ? 30 : spanDays <= 60 ? 60 : 90;
+    const entityId = Number(entity.entity_id || entity.id);
+    return { title: `Meerdere onafhankelijke bronnen rond ${entity.canonical_name}`,
+      summary: `${names.length} onafhankelijke bronnen raken binnen ${window} dagen dezelfde lokale entiteit: ${names.join(', ')}.`,
+      category: 'overig', tier: names.length >= 3 ? 1 : 2, noveltyScore: names.length >= 3 ? 85 : 70,
+      evidence: evidenceEvents.map(item => `${item.source_name}: ${item.title}`),
+      entityPath: `${names.join(' + ')} → ${entity.canonical_name}`,
+      dedupeKey: `R10:${entityId}:${new Date(event.occurred_at).toISOString().slice(0, 7)}:${window}`,
+      provenance: { independent_sources: names, supporting_event_ids: evidenceEvents.map(item => Number(item.id)), window_days: window },
+      entities: [{ entityId, relevance: 'subject' }] };
+  },
+};
+
 /**
- * R10: Uitzonderlijke groei of krimp van een lokale schoolvestiging.
+ * R11: Uitzonderlijke groei of krimp van een lokale schoolvestiging.
  * De adapter past de empirisch gekozen absolute én relatieve drempels toe;
  * deze regel controleert de provenance nogmaals voordat een signaal ontstaat.
  */
-const R10_SCHOOL_ENROLLMENT = {
-  id: 'R10',
+const R11_SCHOOL_ENROLLMENT = {
+  id: 'R11',
   name: 'Opvallende ontwikkeling leerlingaantal',
   eventTypes: ['SCHOOL_ENROLLMENT_GROWTH', 'SCHOOL_ENROLLMENT_DECLINE'],
   async condition(event) {
@@ -410,12 +492,12 @@ const R10_SCHOOL_ENROLLMENT = {
 };
 
 /**
- * R11: Materiële DUO-prognosetrend, herziening of afwijking van realisatie.
- * Dezelfde conservatieve absolute/relatieve band als bij R10 voorkomt dat
+ * R12: Materiële DUO-prognosetrend, herziening of afwijking van realisatie.
+ * Dezelfde conservatieve absolute/relatieve band als bij R11 voorkomt dat
  * normale modelruis of afronding een redactiesignaal wordt.
  */
-const R11_SCHOOL_FORECAST = {
-  id: 'R11',
+const R12_SCHOOL_FORECAST = {
+  id: 'R12',
   name: 'Opvallende ontwikkeling schoolprognose',
   eventTypes: [
     'SCHOOL_FORECAST_GROWTH', 'SCHOOL_FORECAST_DECLINE',
@@ -468,6 +550,36 @@ const R11_SCHOOL_FORECAST = {
   },
 };
 
+const R13_SCHOOL_INSPECTION = {
+  id: 'R13', name: 'Betekenisvolle wijziging Onderwijsinspectie',
+  eventTypes: ['SCHOOL_INSPECTION_JUDGMENT_CHANGED', 'SCHOOL_INSPECTION_REPORT_PUBLISHED'],
+  async condition(event) {
+    let p = {}; try { p = JSON.parse(event.provenance || '{}'); } catch { return false; }
+    const current = String(p.current?.judgment || '').toLowerCase();
+    const previous = String(p.previous?.judgment || '').toLowerCase();
+    if (!current) return false;
+    return ['onvoldoende', 'zeer zwak'].includes(current) || (previous && current !== previous);
+  },
+  async createSignal(event, context) {
+    const p = JSON.parse(event.provenance || '{}'); const org = context.entities?.[0];
+    return { title: event.title, summary: event.summary, category: 'onderwijs', tier: /zeer zwak/i.test(event.title) ? 1 : 2, noveltyScore: 75,
+      evidence: [...(p.evidence || []), event.source_url].filter(Boolean),
+      entityPath: org ? `${org.canonical_name} → BRIN ${p.current?.brinBranch} → Onderwijsinspectie` : null,
+      entities: org ? [{ entityId: Number(org.entity_id || org.id), relevance: 'subject' }] : [] };
+  },
+};
+
+const R14_NDW_IMPACT = {
+  id: 'R14', name: 'Grote lokale verkeersmaatregel',
+  eventTypes: ['ROADWORK_PLANNED', 'ROAD_CLOSURE_CHANGED', 'EVENT_TRAFFIC_MEASURE'],
+  async condition(event) { let p = {}; try { p = JSON.parse(event.provenance || '{}'); } catch { return false; }
+    return p.journalistically_relevant === true; },
+  async createSignal(event) { const p = JSON.parse(event.provenance || '{}');
+    return { title: event.title, summary: event.summary, category: 'verkeer-infra', tier: p.current?.closure ? 2 : 3, noveltyScore: 65,
+      evidence: [...(p.evidence || []), event.source_url].filter(Boolean),
+      entityPath: `NDW-geometrie → ${p.current?.municipality || 'doelgebied'}`, entities: [] }; },
+};
+
 /**
  * Registreer de productie-detectieregels bij een DetectionEngine.
  */
@@ -476,11 +588,15 @@ function registerPhase2Rules(engine) {
   engine.register(R2_GOVERNANCE_NETWORK);
   engine.register(R3_NATIONAL_SANCTION);
   engine.register(R4_LOCAL_PERSON_EXTERNAL);
+  engine.register(R5_CRIME_ANOMALY);
   engine.register(R6_CHILDCARE_INSPECTION);
   engine.register(R7_UTILITY_OUTAGE);
   engine.register(R9_REGISTER_CHANGE);
-  engine.register(R10_SCHOOL_ENROLLMENT);
-  engine.register(R11_SCHOOL_FORECAST);
+  engine.register(R10_MULTI_SOURCE);
+  engine.register(R11_SCHOOL_ENROLLMENT);
+  engine.register(R12_SCHOOL_FORECAST);
+  engine.register(R13_SCHOOL_INSPECTION);
+  engine.register(R14_NDW_IMPACT);
   console.log(`[DetectionRules] ${engine.rules.size} regels geregistreerd: ${[...engine.rules.keys()].join(', ')}`);
 }
 
@@ -527,10 +643,14 @@ module.exports = {
   R2_GOVERNANCE_NETWORK,
   R3_NATIONAL_SANCTION,
   R4_LOCAL_PERSON_EXTERNAL,
+  R5_CRIME_ANOMALY,
   R6_CHILDCARE_INSPECTION,
   R7_UTILITY_OUTAGE,
   R9_REGISTER_CHANGE,
-  R10_SCHOOL_ENROLLMENT,
-  R11_SCHOOL_FORECAST,
+  R10_MULTI_SOURCE,
+  R11_SCHOOL_ENROLLMENT,
+  R12_SCHOOL_FORECAST,
+  R13_SCHOOL_INSPECTION,
+  R14_NDW_IMPACT,
   registerPhase2Rules,
 };

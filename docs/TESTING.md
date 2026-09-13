@@ -51,3 +51,26 @@ productievariabelen omgaan.
 
 De lokale map `scraper/__tests__/detection-engine/` was bij de migratie nog
 niet gevolgd. Classificeer en commit die niet automatisch.
+
+## Fase-3-verificatie
+
+De gevolgde suite `scraper/__tests__/phase3/adapters.test.cjs` gebruikt kleine
+fixtures voor AFM XML/CSV, DNB, RVO, KOOP en NDW. Zij dekt daarnaast Inspectie-
+BRIN/oordeeldrempels, politie-kleine-aantallen en robuuste trigger, geometrische
+buffer, broncadans, stabiele feedidentiteit, tweerunsverwijdering en beide
+24-maandsbacktests. De volledige AFM-ZIP, RVO-export, NDW-gzip en CBS-OData
+blijven live/dry-run-controles en worden niet in Git opgenomen.
+
+Voor fase 3 is naast `npm test` vereist:
+
+```powershell
+node scraper/audit-phase3.cjs
+node scraper/backtest-phase3.cjs
+node scraper/src/kg/detection-run.cjs --dry-run --skip-rules --adapters=<bron>
+npm --prefix scraper run test:integration
+```
+
+Een productiebaseline moet `baseline:true` en nul events tonen; de onmiddellijke
+herhaalrun moet `baseline:false`, uitsluitend `unchanged` en nul events tonen.
+Controleer na installatie van `Stadsgeest NDW` zowel het log als
+`LastTaskResult = 0`.

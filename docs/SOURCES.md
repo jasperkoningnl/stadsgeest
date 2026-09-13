@@ -30,6 +30,10 @@ semantische diff. De orkestrator registreert momenteel onder meer:
 - Autoriteit Persoonsgegevens en ACM-publicaties;
 - LRK-kinderopvang;
 - DUO-schoolvestigingen, leerlingaantallen en BO-prognoses;
+- Onderwijsinspectie-kwaliteitsoordelen, gekoppeld aan DUO-vestigingen;
+- KOOP niet-gemeentelijke officiële publicaties;
+- AFM volledig vergunningenregister en zes DNB-deelregisters;
+- Politie/CBS-buurtmaanden, NDW-planning en RVO-projecten;
 - een geparkeerde of beperkte tuchtrechtbron.
 
 De klassieke bronlaag bevat daarnaast gemeentelijke bekendmakingen,
@@ -39,6 +43,25 @@ toezichtresultaten exact voor Amersfoort en Leusden en gebruikt rapportnummer en
 detail-URL als stabiele identiteit. Gebruik databasequeries of de
 bronnenwacht voor de actuele lijst en opbrengst; kopieer aantallen niet naar dit
 document.
+
+## Fase-3-broncontracten
+
+AFM gebruikt de volledige `WfdExternRegister`-ZIP/XML en niet de beperkte
+zoekresultaat-CSV. DNB haalt de actuele codes `WFTKF`, `WFTBI`, `WFTVE`,
+`WTTTK`, `WFTEG` en `PWPNF` afzonderlijk op. RVO ontdekt de huidige CSV-link op
+de zoekpagina. KOOP gebruikt collectie `officielepublicaties` en ontdubbelt op
+de officiële identifier.
+
+Politie/CBS bouwt de lokale codeset uit de dimensietabel, bewaart het kaartjaar
+en haalt 60 maanden op voor de detector. NDW gebruikt de officiële CBS/PDOK-
+gemeentegeometrie met een buffer van één kilometer; een straatnaam is nooit een
+lokaal bewijs. Onderwijsinspectie behandelt een lege vigerend-oordeelrespons als
+ontbrekende data, niet als een negatief oordeel.
+
+De productie-enums blijven grof (`registry`/`data` en
+`hourly`/`daily`/`weekly`). Het manifest bewaart de echte domeinen en cadans.
+De dagelijkse orkestrator respecteert minimumintervallen; `Stadsgeest NDW`
+draait daarnaast werkelijk iedere vijftien minuten.
 
 ## Contract voor nieuwe bronnen
 

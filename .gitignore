@@ -58,4 +58,5 @@ dwarsverbanden/rapport-*.md
 .intake-lock
 /scraper/.detection-run.lock
 /scraper/logs/
+/scraper/data/phase3-snapshots/
 /scraper/.stilte-alarm-laatste-melding

@@ -1,5 +1,5 @@
 // Migratie-verificatietests — Stadsgeest 2.0
-// Controleert dat alle M1-M4 tabellen en kolommen bestaan en correct gevuld zijn.
+// Controleert dat alle M1-M5 tabellen en kolommen bestaan en correct gevuld zijn.
 // Draait met: node --test __tests__/migrations/verify-schema.test.cjs
 const { describe, it, before } = require('node:test');
 const assert = require('node:assert/strict');
@@ -111,6 +111,38 @@ describe('M4: data-seed is uitgevoerd', () => {
   it('entity_identifiers bevat handmatige seeds', async () => {
     const n = await getCount('entity_identifiers');
     assert.ok(n >= 20, `Verwacht >= 20 identifiers, kreeg ${n}`);
+  });
+});
+
+describe('M5: fase-3-provenance en backtests', () => {
+  it('sources heeft controlevelden en alle fase-3-tabellen bestaan', async () => {
+    const sourceColumns = await getColumns('sources');
+    for (const column of ['last_verified_at', 'terms_checked_at', 'owner_contact']) assert.ok(sourceColumns.includes(column));
+    for (const table of ['source_snapshots', 'statistical_baselines', 'area_versions', 'phase3_backtests']) {
+      assert.ok((await getColumns(table)).length > 0, `${table} ontbreekt`);
+    }
+  });
+
+  it('fase-3-bronnen hebben een baseline en succesvolle run', async () => {
+    const names = ['Onderwijsinspectie — kwaliteitsoordelen', 'KOOP — niet-gemeentelijke officiële publicaties',
+      'AFM — register financiële dienstverleners', 'DNB — openbaar register',
+      'Politie/CBS — geregistreerde misdrijven per buurt', 'NDW — wegwerkzaamheden en evenementen', 'RVO — Projectendatabase'];
+    for (const name of names) {
+      const result = await db.execute({ sql: `SELECT s.id,
+        EXISTS(SELECT 1 FROM source_records sr WHERE sr.source_id=s.id AND sr.source_key='__baseline_complete__') baseline,
+        EXISTS(SELECT 1 FROM fetch_runs fr WHERE fr.source_id=s.id AND fr.status='ok') successful_run
+        FROM sources s WHERE s.name=?`, args: [name] });
+      assert.equal(result.rows.length, 1, `${name} ontbreekt`);
+      assert.equal(Number(result.rows[0].baseline), 1, `${name} heeft geen baseline`);
+      assert.equal(Number(result.rows[0].successful_run), 1, `${name} heeft geen succesvolle run`);
+    }
+  });
+
+  it('beide fase-3-backtests beslaan minimaal 24 maanden', async () => {
+    for (const testName of ['politie-r5', 'eventclusters-r10']) {
+      const result = await db.execute({ sql: 'SELECT MAX(months) months FROM phase3_backtests WHERE test_name=?', args: [testName] });
+      assert.ok(Number(result.rows[0].months) >= 24, `${testName} mist 24 maanden`);
+    }
   });
 });
 

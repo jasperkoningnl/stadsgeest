@@ -1,8 +1,12 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
-const { DetectionEngine } = require('../../src/kg/detection-engine.cjs');
+const { DetectionEngine, evidenceUrl } = require('../../src/kg/detection-engine.cjs');
 
 describe('DetectionEngine bewijsbrug', () => {
+  it('maakt voor feedrecords een bewijs-URL per officiële bronidentifier', () => {
+    assert.equal(evidenceUrl({ source_url: 'https://bron/feed', source_identifier: 'record:1' }),
+      'https://bron/feed#stadsgeest-event=record%3A1');
+  });
   it('maakt één raw_item en koppelt dat idempotent aan het signaal', async () => {
     let rawItemId = null;
     const rawWrites = [];

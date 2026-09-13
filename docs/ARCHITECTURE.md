@@ -9,7 +9,7 @@
 - Next.js/TypeScript-dashboard in `src/`, gedeployed via Vercel vanaf `main`.
 - Node-scrapers en verwerkingsjobs in `scraper/` op een Windows-notebook.
 - PM2 beheert periodieke scraper- en intakeprocessen; Windows Taakplanner start
-  de zelfstandige detectierun.
+  de zelfstandige detectierun en de vijftienminuten-NDW-run.
 - Turso/libsql is de gedeelde productiedatabase.
 - Lokale geheimen staan in genegeerde `.env`-bestanden en Vercel-variabelen.
 
@@ -55,6 +55,19 @@ events, `source_records`, `fetch_runs` en de handmatige mergewachtrij. De
 klassieke tabellen blijven daarnaast bestaan zolang intake en KG-detectie
 afzonderlijke productiepaden zijn.
 
+`scraper/migrate-phase3.cjs` voegt broncontrolevelden en de tabellen
+`source_snapshots`, `statistical_baselines`, `area_versions` en
+`phase3_backtests` idempotent toe. Grote ruwe responses staan gecomprimeerd en
+genegeerd onder `scraper/data/phase3-snapshots/`; de database bewaart hash,
+media-type, omvang en opslagpad. Politiecorrecties krijgen een nieuwe
+`source_records`-versie, nooit een stille overschrijving.
+
+Fase-3-adapters delen `phase3-core.cjs`: canonieke semantische hashing,
+schema-/volumecontrole, retry met backoff, bronmetadata, baseline, semantische
+diff en tweerunsbevestiging voor verwijderingen. Een herstelde tijdelijke
+afwezigheid maakt geen event. Feed-events gebruiken officiële identifiers voor
+exact-once signalen en een afzonderlijk bewijsrecord per identifier.
+
 ## Entity-resolutiecontract
 
 De actuele implementatie staat in `scraper/src/kg/entity-resolver.cjs`. Sterke
@@ -76,6 +89,9 @@ nooit uitsluitend op naam automatisch samengevoegd.
 | Detectieregels | `scraper/src/kg/detection-rules.cjs` |
 | Entity resolution | `scraper/src/kg/entity-resolver.cjs` |
 | Uitgevoerde KG-migraties | `scraper/migrate-kg-m1m2m3.cjs`, `scraper/migrate-kg-m4-seed.cjs` |
+| Fase-3-migratie en gedeelde diff | `scraper/migrate-phase3.cjs`, `scraper/src/kg/phase3-core.cjs` |
+| Fase-3-audit en backtest | `scraper/audit-phase3.cjs`, `scraper/backtest-phase3.cjs` |
+| NDW-taak | `scraper/run-ndw-task.ps1` |
 | Tests en fixtures | `scraper/__tests__/` |
 
 Exacte schema-aannames moeten altijd tegen migraties en de actuele database

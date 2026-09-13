@@ -22,9 +22,9 @@ de vastgelegde beslissing.
 - Fase 1 — entiteitenfundament: productiepad aanwezig; slotaudit open.
 - Fase 2 — eerste eventbronnen en graph matching: productiepad actief;
   slotaudit open.
-- Fase 3 — sectorregisters en statistiek: actief. DUO en Onderwijsinspectie zijn
-  ver gevorderd; zie `PHASES/phase-3.md`.
-- Fase 4 — periodieke en experimentele bronnen: volgt na fase 3.
+- Fase 3 — sectorregisters en statistiek: afgerond en productieactief; zie
+  `PHASES/phase-3.md`.
+- Fase 4 — periodieke en experimentele bronnen: eerstvolgende productfase.
 - Fase 5 — redactionele leerloop: volgt na fase 4, met vroege feedbackmeting
   waar dat al zinvol is.
 

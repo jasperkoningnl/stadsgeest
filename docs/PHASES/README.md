@@ -12,7 +12,7 @@ stilzwijgend laten vervallen.
 | 0 — inventarisatie en contracten | mijlpaal bereikt; slotaudit nodig | `phase-0.md` |
 | 1 — entiteitenfundament | productiepad aanwezig; slotaudit nodig | `phase-1.md` |
 | 2 — eventbronnen en graph matching | productiepad actief; slotaudit nodig | `phase-2.md` |
-| 3 — sectorregisters en statistiek | actief | `phase-3.md` |
+| 3 — sectorregisters en statistiek | afgerond; productieactief | `phase-3.md` |
 | 4 — periodieke en experimentele bronnen | gepland | `phase-4.md` |
 | 5 — redactionele leerloop | gepland | `phase-5.md` |
 

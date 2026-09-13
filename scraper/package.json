@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Scrapers en verwerkingsjobs voor Stadsgeest 033",
   "scripts": {
-    "test": "node --test __tests__/asbest/adapter.test.cjs __tests__/duo/leerlingaantallen.test.cjs __tests__/duo/prognoses.test.cjs __tests__/duo/schoolvestigingen.test.cjs __tests__/entity-resolution/scoring.test.cjs __tests__/intake-matching/matching.test.mjs __tests__/intake-matching/notubiz-fulltext.test.mjs __tests__/onderwijsinspectie.test.mjs __tests__/orchestration/detection-evidence.test.cjs __tests__/orchestration/detection-run.test.cjs __tests__/weger/apply-validation.test.cjs",
+    "test": "node --test __tests__/asbest/adapter.test.cjs __tests__/duo/leerlingaantallen.test.cjs __tests__/duo/prognoses.test.cjs __tests__/duo/schoolvestigingen.test.cjs __tests__/entity-resolution/scoring.test.cjs __tests__/intake-matching/matching.test.mjs __tests__/intake-matching/notubiz-fulltext.test.mjs __tests__/onderwijsinspectie.test.mjs __tests__/orchestration/detection-evidence.test.cjs __tests__/orchestration/detection-run.test.cjs __tests__/phase3/adapters.test.cjs __tests__/weger/apply-validation.test.cjs",
     "test:integration": "node --test __tests__/entity-resolution/merge.test.cjs __tests__/migrations/verify-schema.test.cjs"
   },
   "dependencies": {

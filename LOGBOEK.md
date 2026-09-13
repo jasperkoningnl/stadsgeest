@@ -25,6 +25,10 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ---
 
+## 2026-09-13 — Nieuwe registers en lokale patronen worden gevolgd
+
+Stadsgeest volgt nu ook niet-gemeentelijke officiële bekendmakingen, actuele oordelen van de Onderwijsinspectie, financiële registers van AFM en DNB, politiecijfers per buurt, verkeersmaatregelen van NDW en subsidieprojecten van RVO. De eerste meting is steeds alleen als nulpunt opgeslagen. Gewone bestandsupdates en kleine cijferbewegingen vullen de wachtrij niet; alleen betekenisvolle wijzigingen of een streng getoetst patroon kunnen later een signaal opleveren.
+
 ## 2026-09-12 — Opvallende schoolprognoses komen in beeld
 
 Stadsgeest bewaart nu ook de officiële DUO-prognoses voor basisscholen in Amersfoort en Leusden. De eerste uitgave is alleen als nulpunt opgeslagen en vult de wachtrij dus niet. Bij een volgende uitgave kan een tip ontstaan als DUO voor een school een duidelijke meerjarige groei of krimp verwacht, een eerder cijfer fors bijstelt of als het werkelijke leerlingaantal duidelijk van de eerdere prognose afwijkt. Kleine modelverschillen worden genegeerd.

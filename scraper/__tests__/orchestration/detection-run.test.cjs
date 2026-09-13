@@ -1,7 +1,7 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
-const { summarizeRun, parseOptions } = require('../../src/kg/detection-run.cjs');
-const { DetectionEngine } = require('../../src/kg/detection-engine.cjs');
+const { isDueAt, summarizeRun, parseOptions } = require('../../src/kg/detection-run.cjs');
+const { DetectionEngine, sourceUrlFallback } = require('../../src/kg/detection-engine.cjs');
 
 describe('detection-run orchestration', () => {
   it('normaliseert de verschillende adapterresultaten voor fetch_runs', () => {
@@ -24,6 +24,18 @@ describe('detection-run orchestration', () => {
     assert.equal(options.dryRun, true);
     assert.equal(options.days, 5);
     assert.deepEqual([...options.adapterNames], ['liander', 'lrk']);
+  });
+
+  it('respecteert broncadans maar laat een ontbrekende of oude run opnieuw toe', () => {
+    const now = Date.parse('2026-09-13T12:00:00Z');
+    assert.equal(isDueAt(null, 24, now), true);
+    assert.equal(isDueAt('2026-09-13T00:00:00Z', 20, now), false);
+    assert.equal(isDueAt('2026-09-12T12:00:00Z', 20, now), true);
+  });
+
+  it('dedupliceert een feeditem op officiële identifier en niet op de gedeelde feed-URL', () => {
+    assert.equal(sourceUrlFallback({ source_url: 'https://bron/feed', source_identifier: 'item-1' }), null);
+    assert.equal(sourceUrlFallback({ source_url: 'https://bron/los-item' }), 'https://bron/los-item');
   });
 
   it('telt een al verwerkt event niet opnieuw als signaal of bevestiging', async () => {

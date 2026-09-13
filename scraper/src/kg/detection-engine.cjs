@@ -14,6 +14,15 @@ function createDb() {
   });
 }
 
+function sourceUrlFallback(event) {
+  return event?.source_identifier ? null : (event?.source_url || null);
+}
+
+function evidenceUrl(event) {
+  if (!event?.source_url || !event?.source_identifier) return event?.source_url || null;
+  return `${event.source_url}#stadsgeest-event=${encodeURIComponent(event.source_identifier)}`;
+}
+
 class DetectionEngine {
   constructor(config = {}) {
     this.db = config.db || createDb();
@@ -133,10 +142,13 @@ class DetectionEngine {
     // als bevestiging of nieuw signaal tellen. Oude signalen hebben nog geen
     // event_id in provenance; voor die records vallen we terug op de unieke
     // bron-URL of bronidentifier.
+    const dedupeKey = signalData.dedupeKey || null;
+    const fallbackUrl = sourceUrlFallback(event);
     const existing = await this.db.execute({
       sql: `SELECT id FROM signals
             WHERE detection_rule = ? AND (
               json_extract(provenance, '$.event_id') = ?
+              OR (? IS NOT NULL AND json_extract(provenance, '$.signal_key') = ?)
               OR (? IS NOT NULL AND json_extract(provenance, '$.source_url') = ?)
               OR (? IS NOT NULL AND json_extract(provenance, '$.source_identifier') = ?)
             )
@@ -144,8 +156,10 @@ class DetectionEngine {
       args: [
         rule.id,
         event.id,
-        event.source_url || null,
-        event.source_url || null,
+        dedupeKey,
+        dedupeKey,
+        fallbackUrl,
+        fallbackUrl,
         event.source_identifier || null,
         event.source_identifier || null,
       ],
@@ -166,6 +180,8 @@ class DetectionEngine {
       event_id: event.id,
       evidence: signalData.evidence || [],
       entity_path: signalData.entityPath || null,
+      signal_key: dedupeKey,
+      ...(signalData.provenance || {}),
     });
 
     const result = await this.db.execute({
@@ -213,9 +229,10 @@ class DetectionEngine {
 
   async linkEvidenceForSignal(signalId, event) {
     if (this.dryRun || !signalId || !event?.source_url || !event?.source_id) return null;
+    const externalUrl = evidenceUrl(event);
     let found = await this.db.execute({
       sql: `SELECT id FROM raw_items WHERE source_id=? AND external_url=? ORDER BY id LIMIT 1`,
-      args: [event.source_id, event.source_url],
+      args: [event.source_id, externalUrl],
     });
     let rawItemId = found.rows[0]?.id ? Number(found.rows[0].id) : null;
     if (!rawItemId) {
@@ -229,7 +246,7 @@ class DetectionEngine {
               VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`,
         args: [
           event.source_id,
-          event.source_url,
+          externalUrl,
           event.title || '(geen titel)',
           event.provenance || event.summary || '',
           event.summary || event.title || '',
@@ -240,7 +257,7 @@ class DetectionEngine {
       });
       found = await this.db.execute({
         sql: `SELECT id FROM raw_items WHERE source_id=? AND external_url=? ORDER BY id LIMIT 1`,
-        args: [event.source_id, event.source_url],
+        args: [event.source_id, externalUrl],
       });
       rawItemId = found.rows[0]?.id ? Number(found.rows[0].id) : null;
     }
@@ -327,4 +344,4 @@ function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-module.exports = { DetectionEngine, createDb };
+module.exports = { DetectionEngine, createDb, evidenceUrl, sourceUrlFallback };

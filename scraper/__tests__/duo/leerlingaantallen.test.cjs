@@ -13,7 +13,7 @@ const {
   parsePublishedCount,
   parseSemicolonCsv,
 } = require('../../src/kg/adapters/duo-leerlingaantallen.cjs');
-const { R10_SCHOOL_ENROLLMENT } = require('../../src/kg/detection-rules.cjs');
+const { R11_SCHOOL_ENROLLMENT } = require('../../src/kg/detection-rules.cjs');
 
 function fixture(name) {
   return fs.readFileSync(path.join(__dirname, '../fixtures/duo-leerlingen', name), 'utf8');
@@ -160,7 +160,7 @@ describe('DUO leerlingaantallen — journalistieke drempels', () => {
     assert.equal(assessEnrollmentChange(record(26, 57).previous, record(26, 57)).type, 'SCHOOL_ENROLLMENT_GROWTH');
   });
 
-  it('laat R10 alleen door bij aantoonbaar relevante DUO-provenance', async () => {
+  it('laat R11 alleen door bij aantoonbaar relevante DUO-provenance', async () => {
     const event = {
       event_type: 'SCHOOL_ENROLLMENT_DECLINE',
       title: 'Opvallende leerlingkrimp',
@@ -174,8 +174,8 @@ describe('DUO leerlingaantallen — journalistieke drempels', () => {
         current: { aantalLeerlingen: 350, naam: 'Testschool', peiljaar: 2026 },
       }),
     };
-    assert.equal(await R10_SCHOOL_ENROLLMENT.condition(event), true);
-    const signal = await R10_SCHOOL_ENROLLMENT.createSignal(event, { entities: [] });
+    assert.equal(await R11_SCHOOL_ENROLLMENT.condition(event), true);
+    const signal = await R11_SCHOOL_ENROLLMENT.createSignal(event, { entities: [] });
     assert.equal(signal.category, 'onderwijs');
     assert.match(signal.title, /leerlingkrimp/);
   });
