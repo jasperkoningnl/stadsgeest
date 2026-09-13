@@ -24,7 +24,7 @@ function parseLimit(argv) {
   return value;
 }
 
-function jsonValue(value) {
+function jsonValue(_key, value) {
   return typeof value === 'bigint' ? Number(value) : value;
 }
 
@@ -199,4 +199,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { clip, parseLimit };
+module.exports = { clip, jsonValue, parseLimit };

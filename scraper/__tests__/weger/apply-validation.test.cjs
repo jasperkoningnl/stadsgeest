@@ -3,6 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { validatePlan, words } = require('../../src/weger-apply.cjs');
+const { jsonValue } = require('../../src/weger-workset.cjs');
 
 function validPlan() {
   return {
@@ -58,4 +59,9 @@ test('grenzen en vaste waarden worden gecontroleerd', () => {
 
 test('woorden telt lege ruimte niet mee', () => {
   assert.equal(words('  een   twee\n drie '), 3);
+});
+
+test('werkset-JSON behoudt het hoofdobject en zet bigint om', () => {
+  const output = JSON.stringify({ signal_id: 42, confirmations: 3n }, jsonValue);
+  assert.deepEqual(JSON.parse(output), { signal_id: 42, confirmations: 3 });
 });
