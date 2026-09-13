@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { hasTurso } from '@/lib/turso'
 import { AUTH_COOKIE, sessieGebruiker } from '@/lib/dashboardAuth'
 import {
-  getIntakeRuns, getTierAggregates, getSourcesOverview, getSourceErrors,
+  getIntakeRuns, getTierAggregates, getSourcesOverview,
   getIntakeFunnel, getIntakeDecisions, getTopFilterReasons, getTopEntities,
   getRecentTips, getAfgewezenSignalen, getWegingSamenvatting,
   getLeerDashboard,
@@ -40,14 +40,13 @@ export default async function BeheerPagina({ searchParams }: BeheerPaginaProps) 
 
   // Alle data parallel ophalen — elke tab krijgt precies wat hij nodig heeft.
   const [
-    runs, tiers, bronnen, bronFouten,
+    runs, tiers, bronnen,
     funnel, decisions, filterReasons, topEntities,
     tips, afgewezen, wegingSamenvatting, leren,
   ] = await Promise.all([
     getIntakeRuns(10),
     getTierAggregates(),
     getSourcesOverview(),
-    getSourceErrors(),
     getIntakeFunnel(dagen),
     getIntakeDecisions(50),
     getTopFilterReasons(dagen, 10),

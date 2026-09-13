@@ -28,7 +28,6 @@
 // omdat scrapers niet uit runnerlijsten worden gehaald; hij is daar alleen sneller
 // klaar dan de rest.
 
-import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
 import { pathToFileURL } from 'node:url';
 
@@ -124,9 +123,10 @@ export function selecteerRapporten(rapporten) {
     Number(a.rapportnummer) - Number(b.rapportnummer));
 }
 
-export async function scrape({ database = db, fetchImpl = fetch, dryRun = false, pauseMs = PAUZE_MS } = {}) {
+export async function scrape({ database, fetchImpl = fetch, dryRun = false, pauseMs = PAUZE_MS } = {}) {
   let sourceId = null;
   if (!dryRun) {
+    database ??= (await import('../db.js')).default;
     sourceId = await getOrCreateSource(database, {
       name: SOURCE_NAME,
       url: SOURCE_URL,
