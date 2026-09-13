@@ -18,6 +18,14 @@ const CERTAINTIES = new Set([
   'bevestigd', 'officieel', 'claim_belanghebbende', 'verwachting',
   'theoretisch', 'onbevestigd', 'betwist',
 ]);
+const REQUIRED_BRIEFING_HEADINGS = [
+  'WAT WE WETEN',
+  'BETROKKEN PERSONEN EN ORGANISATIES',
+  'HOE DIT IS GEVONDEN',
+  'WAT WE NIET WETEN',
+  'WAT HIER NIET IN MAG',
+  'ELDERS GEBRACHT',
+];
 
 function usage() {
   return `Gebruik: node scraper/src/weger-apply.cjs plan.json [--apply]\n\n` +
@@ -66,6 +74,11 @@ function validatePlan(plan) {
     requiredString(tip?.briefing, `${field}.briefing`, errors);
     requiredString(tip?.categorie, `${field}.categorie`, errors);
     requiredString(tip?.score_motivatie, `${field}.score_motivatie`, errors);
+    for (const heading of REQUIRED_BRIEFING_HEADINGS) {
+      if (!new RegExp(`^\\s*${heading}\\s*$`, 'm').test(tip?.briefing ?? '')) {
+        errors.push(`${field}.briefing mist de kop ${heading} op een eigen regel.`);
+      }
+    }
     if (words(tip?.titel) > 10) errors.push(`${field}.titel mag maximaal 10 woorden bevatten.`);
     if (words(tip?.kern) > 30) errors.push(`${field}.kern mag maximaal 30 woorden bevatten.`);
     if (!TIP_TYPES.has(tip?.soort)) errors.push(`${field}.soort is ongeldig.`);
@@ -103,8 +116,15 @@ function validatePlan(plan) {
   const thinTips = tips.filter((tip) => Number.isInteger(tip?.score) && tip.score < 6);
   if (thinTips.length > 1) errors.push('Maximaal één tip per run mag onder de gewone scoredrempel liggen.');
   for (const tip of thinTips) {
-    if (!/onder.{0,20}drempel/i.test(tip.score_motivatie ?? '')) {
-      errors.push(`Tip "${tip.titel ?? '?'}" ligt onder de drempel; vermeld dat expliciet in score_motivatie.`);
+    if (/onder.{0,20}drempel/i.test(tip.score_motivatie ?? '')) {
+      errors.push(`Tip "${tip.titel ?? '?'}" mag de drempelwaarschuwing niet in score_motivatie tonen.`);
+    }
+    const warningSection = String(tip.briefing ?? '').match(
+      /^\s*WAT HIER NIET IN MAG\s*$([\s\S]*?)^\s*ELDERS GEBRACHT\s*$/m
+    )?.[1] ?? '';
+    const lastWarningLine = warningSection.trim().split(/\r?\n/).filter(Boolean).at(-1) ?? '';
+    if (!/onder.{0,20}drempel/i.test(lastWarningLine)) {
+      errors.push(`Tip "${tip.titel ?? '?'}" ligt onder de drempel; vermeld dat als laatste waarschuwing onder WAT HIER NIET IN MAG.`);
     }
   }
 

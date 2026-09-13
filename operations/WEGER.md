@@ -100,7 +100,9 @@ en zo nodig dossierfeit. Rek scores niet op.
 
 Als geen enkel signaal 6 haalt, mag de beste kandidaat met een geldige dragende
 bron als dunne dagtip worden geselecteerd. Noteer dan expliciet dat de score
-onder de gewone drempel lag. Bij meer dan twee tips en een meerderheid uit één
+onder de gewone drempel lag. Zet die waarschuwing als laatste punt onder
+`WAT HIER NIET IN MAG`, niet in `score_motivatie`: dat laatste veld staat al in
+de wachtrij. Bij meer dan twee tips en een meerderheid uit één
 broncategorie: bekijk de beste geldige kandidaat uit een andere categorie en
 voeg die alleen toe als redactionele verbreding werkelijk waarde heeft.
 
@@ -118,6 +120,9 @@ voeg die alleen toe als redactionele verbreding werkelijk waarde heeft.
   register waar mogelijk.
 
 Gebruik in `briefing` uitsluitend deze blokken:
+
+Zet iedere kop exact zoals hieronder, zonder nummer ervoor, op een eigen regel.
+Nummer alleen de feiten onder `WAT WE WETEN` en gebruik streepjes voor de lijsten.
 
 1. WAT WE WETEN — genummerde feiten met bron, URL en datum.
 2. CONTEXT EN ACHTERGROND — alleen als begrippen uitleg nodig hebben.

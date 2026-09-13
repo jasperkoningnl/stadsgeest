@@ -11,7 +11,7 @@ function validPlan() {
     tips: [{
       titel: 'Raad besluit over nieuwe woonwijk',
       kern: 'Het raadsbesluit maakt een eerder voornemen concreet en controleerbaar.',
-      briefing: 'Controleer planning, geld en gevolgen bij gemeente en betrokken bewoners.',
+      briefing: 'WAT WE WETEN\n1. De raad nam een besluit. — Gemeente Amersfoort, tier 1, https://voorbeeld.invalid/besluit, 12 september 2026\n\nBETROKKEN PERSONEN EN ORGANISATIES\n- Gemeente Amersfoort — besluitvormer\n\nHOE DIT IS GEVONDEN\nHet raadsbesluit is volledig gelezen.\n\nWAT WE NIET WETEN\n- Wanneer de uitvoering begint\n\nWAT HIER NIET IN MAG\n- Stellen dat de uitvoering al begonnen is\n\nELDERS GEBRACHT\nNiet aangetroffen.',
       vervolgvragen: ['Wanneer begint de uitvoering?'],
       soort: 'nieuwsfeit',
       gemeente: 'Amersfoort',
@@ -64,4 +64,24 @@ test('woorden telt lege ruimte niet mee', () => {
 test('werkset-JSON behoudt het hoofdobject en zet bigint om', () => {
   const output = JSON.stringify({ signal_id: 42, confirmations: 3n }, jsonValue);
   assert.deepEqual(JSON.parse(output), { signal_id: 42, confirmations: 3 });
+});
+
+test('een dunne tip zet de drempelwaarschuwing onderaan en niet in de wachtrijmotivatie', () => {
+  const plan = validPlan();
+  plan.tips[0].score = 5;
+  plan.tips[0].briefing = plan.tips[0].briefing.replace(
+    '- Stellen dat de uitvoering al begonnen is',
+    '- Stellen dat de uitvoering al begonnen is\n- Redactionele waarschuwing: deze tip blijft onder de gewone drempel'
+  );
+  assert.deepEqual(validatePlan(plan), []);
+
+  plan.tips[0].score_motivatie = 'Deze tip ligt onder de gewone drempel.';
+  const errors = validatePlan(plan).join('\n');
+  assert.match(errors, /niet in score_motivatie/);
+});
+
+test('briefingkoppen moeten exact op een eigen regel staan', () => {
+  const plan = validPlan();
+  plan.tips[0].briefing = plan.tips[0].briefing.replace('WAT WE WETEN', '1. WAT WE WETEN');
+  assert.match(validatePlan(plan).join('\n'), /mist de kop WAT WE WETEN/);
 });
