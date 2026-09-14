@@ -66,10 +66,11 @@ de officiële identifier.
 ANBI downloadt het gecomprimeerde Excelbestand van de Belastingdienst open data,
 filtert op `vestigingsplaats` Amersfoort/Leusden, diff op RSIN/dossiernummer en
 detecteert `ANBI_ADDED`, `ANBI_REMOVED`, `ANBI_NAME_CHANGED` en
-`ANBI_WEBSITE_CHANGED`. Baseline slaat het snapshot op zonder events.
-Bestuurswijzigingen (`BOARD_MEMBER_ADDED/REMOVED`) vereisen een aparte
-websitescraper die nog niet bestaat; die extractie staat gepland in fase 4
-("Bestuur/RvT-extractie uit openbare organisatiepagina's en documenten").
+`ANBI_WEBSITE_CHANGED`. Baseline slaat het snapshot op zonder events. Een
+afzonderlijke bestuurdersmonitor kan `BOARD_MEMBER_ADDED/REMOVED` uit HTML van
+expliciet toegestane organisatiepagina's halen. Deze pilot heeft nog een lege
+allowlist, draait standaard dry-run en is niet operationeel ingepland; PDF-
+documenten worden nog niet verwerkt.
 
 GLEIF bevraagt de JSON:API op `api.gleif.org/api/v1/lei-records` met
 adresfilter (`legalAddress.city` en `headquartersAddress.city`) voor

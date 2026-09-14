@@ -134,17 +134,16 @@ directe gerichte herhaling 17 ongewijzigde records en nul events. De fase-4-audi
 bleek zelf `records_found` niet te selecteren terwijl zij dit veld controleerde;
 alleen die auditquery is gerepareerd. Er is geen fase-4-functionaliteit uitgebreid.
 
-## 2026-09-14 — ANBI-adapter: geen bestuurswijzigingsdetectie
+## 2026-09-14 — ANBI-registeradapter en afzonderlijke bestuurdersmonitor
 
-De ANBI-adapter detecteert registratiewijzigingen (ANBI_ADDED, ANBI_REMOVED,
-ANBI_NAME_CHANGED, ANBI_WEBSITE_CHANGED) op basis van het gecomprimeerde
-Excelbestand van de Belastingdienst open data. Bestuurswijzigingen
-(BOARD_MEMBER_ADDED/REMOVED) vereisen een aparte websitescraper die organisatie-
-pagina's en -documenten crawlt voor bestuur/RvT-informatie. Die scraper ontbreekt
-nog. Het uitbreidingsplan noemt dit expliciet in fase 4 ("Bestuur/RvT-extractie
-uit openbare organisatiepagina's en documenten"). De ANBI-adapter is zonder deze
-functionaliteit volledig bruikbaar voor registerdiff; de websitescraper is een
-apart bouwblok dat onafhankelijk kan worden ingepland.
+De ANBI-registeradapter detecteert registratiewijzigingen (ANBI_ADDED,
+ANBI_REMOVED, ANBI_NAME_CHANGED, ANBI_WEBSITE_CHANGED) op basis van het
+gecomprimeerde Excelbestand van de Belastingdienst open data. Bestuurswijzigingen
+(BOARD_MEMBER_ADDED/REMOVED) komen uit een afzonderlijke bestuurdersmonitor voor
+expliciet toegestane openbare organisatiepagina's. Die monitor is als veilige
+HTML-pilot gebouwd, maar heeft nog een lege allowlist, draait standaard dry-run
+en is niet in de productie-orkestrator of planning opgenomen. PDF-pagina's vallen
+buiten de pilot. De registeradapter blijft hiervan onafhankelijk bruikbaar.
 
 ## 2026-09-14 — GLEIF: verdwenen LEI's als statuswijziging, niet als verwijdering
 
@@ -206,17 +205,16 @@ De tuchtrechtadapter (`tuchtrecht-sru.cjs`) is functioneel maar heeft drie
 structurele beperkingen die samen verklaren waarom SOURCES.md het "geparkeerd of
 beperkt" noemt:
 
-1. **Eventtypes niet aangesloten op detectieregels.** De adapter emitteert
-   `DISCIPLINARY_RULING_PUBLISHED` en `DISCIPLINARY_MEASURE_IMPOSED`, maar R3
-   (`R3_NATIONAL_SANCTION`) vangt uitsluitend ACM-, AP-, asbest- en SEVESO-events
-   op. Tuchtrechtevents in de database genereren dus nooit signalen. Dit is te
-   repareren door de twee eventtypes aan R3 toe te voegen.
+1. ~~**Eventtypes niet aangesloten op detectieregels.**~~ **Uitgevoerd.**
+   `DISCIPLINARY_RULING_PUBLISHED` en `DISCIPLINARY_MEASURE_IMPOSED` zijn
+   toegevoegd aan de `eventTypes`-array van R3 (`R3_NATIONAL_SANCTION`).
+   Tuchtrechtevents worden nu geëvalueerd; de bestaande R3-veiligheidsgrens
+   (alleen gekoppelde lokale entiteiten, geen plaatsnaam-fallback) blijft intact.
 
-2. **Geen schedule in de orkestrator.** De adapter draait zonder
-   `{ sourceName, minimumHours }` in de ADAPTERS-array, waardoor `adapterIsDue()`
-   altijd `true` retourneert en de adapter bij elke detectierun draait. De
-   SRU-tuchtrechtcollectie wordt niet dagelijks bijgewerkt; een `minimumHours`
-   van 144 (wekelijks) is passend.
+2. ~~**Geen schedule in de orkestrator.**~~ **Uitgevoerd.** De
+   tuchtrechtadapter heeft nu `{ sourceName: 'Open Data Tuchtrecht',
+   minimumHours: 144 }` in de ADAPTERS-array, zodat `adapterIsDue()` de bron
+   maximaal wekelijks ophaalt.
 
 3. **Anonimisering beperkt entity-resolutie structureel.** Tuchtuitspraken worden
    in Nederland vaak geanonimiseerd gepubliceerd: geen namen, geen exacte
@@ -236,14 +234,16 @@ anonimisering (punt 3). De quickwins zijn: (a) eventtypes toevoegen aan R3,
 het base-adapter contract is pas nuttig als de bron aantoonbaar lokale matches
 oplevert. Tot die tijd is "beperkt" de juiste kwalificatie.
 
-## 2026-09-14 — ANBI-websitescraper: ontbrekend fase-4-bouwblok
+## 2026-09-14 — ANBI-bestuurdersmonitor: begrensde pilot
 
 Het uitbreidingsplan noemt in fase 4 "Bestuur/RvT-extractie uit openbare
-organisatiepagina's en documenten." De ANBI-adapter detecteert register-
-wijzigingen (naam, website, toevoeging, verwijdering) maar kan geen bestuurders
-identificeren — dat vereist een aparte websitescraper die per ANBI de openbare
-organisatiepagina crawlt en bestuursnamen extraheert. De Governance-adapter
-(`phase4-context-sources.cjs`) doet dit voor een handmatig gekozen set
-ankerorganisaties, maar niet systematisch voor alle ~500 lokale ANBI's. De
-websitescraper is een apart bouwblok dat onafhankelijk kan worden ingepland;
-de ANBI-registeradapter is zonder deze functionaliteit volledig bruikbaar.
+organisatiepagina's en documenten." Daarvoor bestaat nu een afzonderlijke
+ANBI-bestuurdersmonitor. De pilot verwerkt uitsluitend HTML van een expliciete
+allowlist, gebruikt per organisatiebron een geïsoleerde baseline en bevestigt
+verwijderingen pas na twee afwezigheden. Personen krijgen een brongebonden
+identiteit; materialisatie en relatie-expiratie zijn idempotent en rolgericht.
+De allowlist is nog leeg, de adapter draait standaard dry-run en is niet in de
+dagelijkse orkestrator of planning opgenomen. PDF-ondersteuning en gecontroleerde
+bronselectie blijven aparte vervolgstappen. De Governance-adapter
+(`phase4-context-sources.cjs`) blijft de bestaande handmatig gekozen
+ankerorganisaties volgen.

@@ -42,7 +42,7 @@ const ADAPTERS = [
   ['liander', LianderStoringenAdapter],
   ['acm', AcmPublicatiesAdapter],
   ['ap', ApSanctiesAdapter],
-  ['tuchtrecht', TuchtrechtSruAdapter],
+  ['tuchtrecht', TuchtrechtSruAdapter, { sourceName: 'Open Data Tuchtrecht', minimumHours: 144 }],
   ['asbest', AsbestovertredingenAdapter],
   ['lrk', LrkKinderopvangAdapter],
   ['duo', DuoSchoolvestigingenAdapter],
