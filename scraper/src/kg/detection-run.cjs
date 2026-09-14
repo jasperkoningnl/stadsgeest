@@ -30,6 +30,9 @@ const {
 const {
   GovernanceAdapter, MunicipalEventsAdapter, SamenMetenAdapter, UitAgendaAdapter,
 } = require('./adapters/phase4-context-sources.cjs');
+const { AnbiRegisterAdapter } = require('./adapters/anbi-register.cjs');
+const { GleifRegisterAdapter } = require('./adapters/gleif-register.cjs');
+const { OsmContextAdapter } = require('./adapters/osm-context.cjs');
 
 const LOCK_PATH = path.join(__dirname, '../../.detection-run.lock');
 const STALE_LOCK_MS = 6 * 60 * 60 * 1000;
@@ -60,6 +63,9 @@ const ADAPTERS = [
   ['seveso', SevesoScopeAdapter, { sourceName: 'SEVESO+ — inrichtingenlijst', minimumHours: 650 }],
   ['governance', GovernanceAdapter, { sourceName: 'Openbare governancepagina’s — lokale ankerorganisaties', minimumHours: 144 }],
   ['samen-meten', SamenMetenAdapter, { sourceName: 'RIVM Samen Meten — experimenteel', minimumHours: 1, featureFlag: 'STADSGEEST_ENABLE_SAMEN_METEN' }],
+  ['anbi', AnbiRegisterAdapter, { sourceName: 'ANBI-register — Belastingdienst open data', minimumHours: 144 }],
+  ['gleif', GleifRegisterAdapter, { sourceName: 'GLEIF — LEI-register', minimumHours: 144 }],
+  ['osm', OsmContextAdapter, { sourceName: 'OpenStreetMap — Overpass contextlaag', minimumHours: 144 }],
 ];
 
 function isDueAt(lastFinishedAt, minimumHours, now = Date.now()) {

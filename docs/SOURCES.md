@@ -42,6 +42,9 @@ semantische diff. De orkestrator registreert momenteel onder meer:
 - KOOP niet-gemeentelijke officiële publicaties;
 - AFM volledig vergunningenregister en zes DNB-deelregisters;
 - Politie/CBS-buurtmaanden, NDW-planning en RVO-projecten;
+- ANBI-register — Belastingdienst open data (wekelijks, RSIN-diff);
+- GLEIF — LEI-register (wekelijks, LEI-diff op adres en watchlist);
+- OpenStreetMap — Overpass contextlaag (wekelijks, fysieke objecten);
 - een geparkeerde of beperkte tuchtrechtbron.
 
 De klassieke bronlaag bevat daarnaast gemeentelijke bekendmakingen,
@@ -59,6 +62,29 @@ zoekresultaat-CSV. DNB haalt de actuele codes `WFTKF`, `WFTBI`, `WFTVE`,
 `WTTTK`, `WFTEG` en `PWPNF` afzonderlijk op. RVO ontdekt de huidige CSV-link op
 de zoekpagina. KOOP gebruikt collectie `officielepublicaties` en ontdubbelt op
 de officiële identifier.
+
+ANBI downloadt het gecomprimeerde Excelbestand van de Belastingdienst open data,
+filtert op `vestigingsplaats` Amersfoort/Leusden, diff op RSIN/dossiernummer en
+detecteert `ANBI_ADDED`, `ANBI_REMOVED`, `ANBI_NAME_CHANGED` en
+`ANBI_WEBSITE_CHANGED`. Baseline slaat het snapshot op zonder events.
+Bestuurswijzigingen (`BOARD_MEMBER_ADDED/REMOVED`) vereisen een aparte
+websitescraper die nog niet bestaat; die extractie staat gepland in fase 4
+("Bestuur/RvT-extractie uit openbare organisatiepagina's en documenten").
+
+GLEIF bevraagt de JSON:API op `api.gleif.org/api/v1/lei-records` met
+adresfilter (`legalAddress.city` en `headquartersAddress.city`) voor
+Amersfoort en Leusden, aangevuld met een watchlist van bekende lokale LEI's
+uit `entity_identifiers`. Diff op LEI met snapshot; verlopen of verdwenen
+LEI's worden als statuswijziging behandeld, niet als verwijdering. Parent-
+relaties worden apart opgehaald en naar `kg_relations` geschreven.
+
+OpenStreetMap bevraagt de Overpass API met gebiedsquery's op de bestuurlijke
+grenzen van Amersfoort (relation 419556) en Leusden (relation 161446). Haalt
+nodes, ways en relations op met tags `office`, `shop`, `amenity`, `tourism`,
+`leisure` en `healthcare`. Bronklasse `STRUCTURED_CONTEXT`: standaard geen
+harde events; optioneel `OSM_ENTITY_CANDIDATE` en `OSM_LOCATION_CHANGED` met
+lage confidence. Coördinaten worden op 4 decimalen afgerond (~11m) voor de
+hash. Rate limit: 10 seconden pauze tussen gemeentequery's.
 
 Politie/CBS bouwt de lokale codeset uit de dimensietabel, bewaart het kaartjaar
 en haalt 60 maanden op voor de detector. NDW gebruikt de officiële CBS/PDOK-

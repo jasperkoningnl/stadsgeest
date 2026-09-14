@@ -133,3 +133,117 @@ records en nul events. Governance faalde geïsoleerd op een timeout en zag bij d
 directe gerichte herhaling 17 ongewijzigde records en nul events. De fase-4-audit
 bleek zelf `records_found` niet te selecteren terwijl zij dit veld controleerde;
 alleen die auditquery is gerepareerd. Er is geen fase-4-functionaliteit uitgebreid.
+
+## 2026-09-14 — ANBI-adapter: geen bestuurswijzigingsdetectie
+
+De ANBI-adapter detecteert registratiewijzigingen (ANBI_ADDED, ANBI_REMOVED,
+ANBI_NAME_CHANGED, ANBI_WEBSITE_CHANGED) op basis van het gecomprimeerde
+Excelbestand van de Belastingdienst open data. Bestuurswijzigingen
+(BOARD_MEMBER_ADDED/REMOVED) vereisen een aparte websitescraper die organisatie-
+pagina's en -documenten crawlt voor bestuur/RvT-informatie. Die scraper ontbreekt
+nog. Het uitbreidingsplan noemt dit expliciet in fase 4 ("Bestuur/RvT-extractie
+uit openbare organisatiepagina's en documenten"). De ANBI-adapter is zonder deze
+functionaliteit volledig bruikbaar voor registerdiff; de websitescraper is een
+apart bouwblok dat onafhankelijk kan worden ingepland.
+
+## 2026-09-14 — GLEIF: verdwenen LEI's als statuswijziging, niet als verwijdering
+
+Het uitbreidingsplan specificeert: "verlopen of verdwenen LEI's worden als
+statuswijziging behandeld, niet als verwijdering." De adapter implementeert dit
+door bij een diff een verdwenen LEI te controleren op de laatst bekende status.
+Was die al INACTIVE of RETIRED, dan wordt het record stilzwijgend verwijderd uit
+het snapshot zonder event. Was de status actief (ACTIVE, PENDING_VALIDATION,
+e.d.), dan emitteert de adapter een ENTITY_STATUS_CHANGED-event met
+`newStatus: 'DISAPPEARED'`. Dit voorkomt vals-positieve verwijderevents bij
+regulier aflopende registraties, terwijl onverwachte verdwijningen wél worden
+gesignaleerd.
+
+## 2026-09-14 — GLEIF: dubbele adresquery en watchlist
+
+De GLEIF JSON:API ondersteunt geen OR-filter op stad. De adapter voert daarom
+twee afzonderlijke query's uit: één op `legalAddress.city` en één op
+`headquartersAddress.city`, elk voor Amersfoort en Leusden (vier query's totaal).
+Resultaten worden samengevoegd en ontdubbeld op LEI. Daarnaast onderhoudt de
+adapter een watchlist van bekende lokale LEI's uit `entity_identifiers`, die bij
+iedere run apart worden opgehaald — ook als ze niet meer via adresfilter worden
+gevonden. Dit vangt verhuizingen op: een bedrijf dat verhuist maar eerder lokaal
+was geïdentificeerd blijft in beeld.
+
+## 2026-09-14 — OSM Overpass: geen harde events, alleen contextlaag
+
+De OSM-adapter gebruikt bronklasse STRUCTURED_CONTEXT en emitteert standaard
+geen harde events. Dit is een bewuste keuze: OpenStreetMap is door vrijwilligers
+onderhouden en heeft geen officieel gezag. De adapter legt fysieke objecten vast
+(winkels, kantoren, voorzieningen) als contextlaag voor entiteitsverrijking en
+graph matching. Optioneel kunnen zachte events (OSM_ENTITY_CANDIDATE,
+OSM_LOCATION_CHANGED) worden ingeschakeld via `emitSoftEvents: true` of de
+CLI-vlag `--emit-soft`, maar deze hebben standaard lage confidence en genereren
+geen signalen. Coördinaten worden afgerond op 4 decimalen (~11 meter) om
+GPS-driftruis in de semantische hash te voorkomen.
+
+## 2026-09-14 — OSM: Overpass area-ID's in plaats van bounding box
+
+Het uitbreidingsplan specificeert "gebiedsquery's op de bestuurlijke grenzen."
+De adapter gebruikt Overpass area-ID's afgeleid van OSM-relatie-ID's
+(relatie + 3600000000): Amersfoort = 3600419556, Leusden = 3600161446. Dit
+volgt exact de bestuurlijke grenzen in plaats van een bounding box, wat
+nauwkeuriger is en geen handmatige coördinaten vereist. Rate limiting: 10
+seconden pauze tussen gemeentequery's om de Overpass-API niet te overbelasten.
+
+## 2026-09-14 — Geen PostGIS; geofilters via code met officiële polygonen
+
+Het uitbreidingsplan noemt "BAG-adresnormalisatie en PostGIS-geofilter" in
+fase 1. De database is Turso (libsql/SQLite) en heeft geen PostGIS-extensie.
+Geofilters worden in code uitgevoerd met officiële CBS/PDOK-gemeentepolygonen
+en punt-in-polygoonberekeningen (NDW, Samen Meten, Rijksmonumenten). Dit is
+functioneel equivalent: de exacte officiële gemeentegrenzen worden gebruikt,
+alleen de uitvoering is in JavaScript in plaats van in de database. Geen actie
+nodig tenzij schaal of complexiteit een database-geïntegreerde oplossing vereist.
+
+## 2026-09-14 — Tuchtrechtbron: status opgehelderd
+
+De tuchtrechtadapter (`tuchtrecht-sru.cjs`) is functioneel maar heeft drie
+structurele beperkingen die samen verklaren waarom SOURCES.md het "geparkeerd of
+beperkt" noemt:
+
+1. **Eventtypes niet aangesloten op detectieregels.** De adapter emitteert
+   `DISCIPLINARY_RULING_PUBLISHED` en `DISCIPLINARY_MEASURE_IMPOSED`, maar R3
+   (`R3_NATIONAL_SANCTION`) vangt uitsluitend ACM-, AP-, asbest- en SEVESO-events
+   op. Tuchtrechtevents in de database genereren dus nooit signalen. Dit is te
+   repareren door de twee eventtypes aan R3 toe te voegen.
+
+2. **Geen schedule in de orkestrator.** De adapter draait zonder
+   `{ sourceName, minimumHours }` in de ADAPTERS-array, waardoor `adapterIsDue()`
+   altijd `true` retourneert en de adapter bij elke detectierun draait. De
+   SRU-tuchtrechtcollectie wordt niet dagelijks bijgewerkt; een `minimumHours`
+   van 144 (wekelijks) is passend.
+
+3. **Anonimisering beperkt entity-resolutie structureel.** Tuchtuitspraken worden
+   in Nederland vaak geanonimiseerd gepubliceerd: geen namen, geen exacte
+   adressen. Dit maakt entiteitsmatching onmogelijk voor het merendeel van de
+   uitspraken. De adapter filtert op plaatsnaam als fallback, maar het gros van
+   de uitspraken bevat ook geen plaatsnaam in de metadata. Dit is een eigenschap
+   van de bron, niet van de adapter.
+
+4. **Volgt niet het base-adapter contract.** De adapter erft niet van
+   `BaseAdapter`, heeft geen snapshot-diff, geen `health()` en geen provenance
+   volgens het standaardcontract. Dit is een oudere adapter die vóór het
+   fase-1-entiteitencontract is geschreven.
+
+**Aanbeveling:** de tuchtrechtbron is functioneel laag-rendement vanwege de
+anonimisering (punt 3). De quickwins zijn: (a) eventtypes toevoegen aan R3,
+(b) schedule toevoegen aan de ADAPTERS-array. Een volledige herschrijving naar
+het base-adapter contract is pas nuttig als de bron aantoonbaar lokale matches
+oplevert. Tot die tijd is "beperkt" de juiste kwalificatie.
+
+## 2026-09-14 — ANBI-websitescraper: ontbrekend fase-4-bouwblok
+
+Het uitbreidingsplan noemt in fase 4 "Bestuur/RvT-extractie uit openbare
+organisatiepagina's en documenten." De ANBI-adapter detecteert register-
+wijzigingen (naam, website, toevoeging, verwijdering) maar kan geen bestuurders
+identificeren — dat vereist een aparte websitescraper die per ANBI de openbare
+organisatiepagina crawlt en bestuursnamen extraheert. De Governance-adapter
+(`phase4-context-sources.cjs`) doet dit voor een handmatig gekozen set
+ankerorganisaties, maar niet systematisch voor alle ~500 lokale ANBI's. De
+websitescraper is een apart bouwblok dat onafhankelijk kan worden ingepland;
+de ANBI-registeradapter is zonder deze functionaliteit volledig bruikbaar.
