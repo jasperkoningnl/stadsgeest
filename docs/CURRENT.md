@@ -1,7 +1,7 @@
 # Actuele toestand — Stadsgeest
 
 **Doel:** compacte herschrijfbare momentopname.
-**Status:** actueel per 13 september 2026.
+**Status:** actueel per 20 september 2026.
 **Lees wanneer:** bij iedere nieuwe taak. Historische details staan elders.
 
 ## Productie
@@ -17,6 +17,11 @@ iedere vijftien minuten. Na iedere dagelijkse detectierun worden de geplande
 fase-5-maandevaluatie en privacyretentie uitgevoerd. Adapter-, evaluatie- en
 retentiefouten zijn van elkaar geïsoleerd; dezelfde invoer levert geen dubbele
 metingen of uitkomsten op.
+
+De dagelijkse taak en de NDW-taak eindigen weer met resultaatcode 0. Een dode
+proceslock wordt direct herkend en opgeruimd. De gecombineerde detectierun heeft
+een heaplimiet van 1,5 GB; de eerdere 768 MB bleek na activering van de volledige
+bronset onvoldoende.
 
 ## Afgeronde implementatie
 
@@ -43,6 +48,12 @@ De fase-5-leerloop is technisch en operationeel opgeleverd:
 - feedbacknotities zijn alleen voor ingelogde redacteuren zichtbaar; het
   leer-/reviewscherm blijft Jasper-only. Vrije tekst wordt na 24 maanden gewist
   en de actor geanonimiseerd, terwijl telbare categorieën behouden blijven.
+
+De fase-1-bronnen ANBI, GLEIF en OpenStreetMap zijn operationeel gebaselined.
+ANBI leest het actuele XML-bestand van de Belastingdienst (707 lokale records),
+GLEIF gebruikt de actuele fulltext-API met exact lokaal nafilter (2.073 records)
+en OSM gebruikt de correcte gemeentegrenzen (15.521 contextobjecten). Directe
+herhalingen leverden voor alle drie nul wijzigingen en nul events op.
 
 ## Laatste verificatie en bewijsgrens
 
@@ -79,5 +90,9 @@ schoolprognose, R13 Onderwijsinspectie en R14 verkeersmaatregel ongewijzigd.
 4. RVO-graphmatches, NDW-bufferrecords en experimentele Samen Meten-data houden
    hun bestaande onzekerheidswaarschuwing en menselijke beoordeling.
 5. Onbekende niet-gevolgde bestanden blijven buiten de fase-5-wijziging.
+6. De formele slotaudits van fase 0, 1 en 2 blijven open. Met name de
+   herleidbare fase-0-baseline/herstelproef, de fase-1-golden set inclusief
+   BAG-koppeling en merge/unmerge, en de fase-2-demonstratie van minimaal vijf
+   aantoonbaar graph-gevonden signalen zijn nog niet als sluitbewijs vastgelegd.
 
 Details staan in `PHASES/phase-5.md` en `EDITORIAL-LEARNING.md`.

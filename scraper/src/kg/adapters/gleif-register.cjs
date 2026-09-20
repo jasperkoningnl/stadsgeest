@@ -11,7 +11,6 @@ const { createClient } = require('@libsql/client');
 
 const SOURCE_NAME = 'GLEIF — LEI-register';
 const API_BASE = 'https://api.gleif.org/api/v1/lei-records';
-const RELATIONS_BASE = 'https://api.gleif.org/api/v1/lei-records';
 const FILTER_CITIES = new Set(['amersfoort', 'leusden']);
 const PAGE_SIZE = 100;
 const MAX_PAGES = 50; // vangnet: max 5000 records per query
@@ -98,6 +97,8 @@ function compactRecord(entity) {
     expiration: ent.expiration?.date || '',
     successorLei: ent.successorEntity?.lei || '',
     lastUpdate: reg.lastUpdateDate || '',
+    directParentRelationshipUrl:
+      entity.relationships?.['direct-parent']?.links?.['relationship-record'] || '',
   };
 }
 
@@ -156,6 +157,10 @@ class GleifRegisterAdapter {
       this.sourceId = existing.rows[0].id;
       return;
     }
+    if (this.dryRun) {
+      this.sourceId = -1;
+      return;
+    }
     const result = await this.db.execute({
       sql: `INSERT INTO sources (name, url, source_type, reliability, category, scrape_frequency,
               is_active, created_at, source_class, adapter_version)
@@ -192,12 +197,13 @@ class GleifRegisterAdapter {
 
   /**
    * Haal GLEIF-records op via de API.
-   * Twee queries: (1) adresfilter op Amersfoort/Leusden, (2) watchlist-LEI's.
+   * De API accepteert sinds september 2026 geen city-fieldfilters meer. Gebruik
+   * daarom de ondersteunde fulltextzoekopdracht en valideer lokaal exact op stad.
    */
   async _fetchAndParse() {
     const allRecords = new Map(); // lei -> compactRecord
 
-    // Query 1: lokale entities op adres
+    // Query 1: brede zoekopdracht per stad, daarna exact lokaal adresfilter
     for (const city of FILTER_CITIES) {
       console.log(`[GLEIF] Ophalen voor ${city}...`);
       let page = 1;
@@ -205,7 +211,7 @@ class GleifRegisterAdapter {
 
       while (hasMore && page <= MAX_PAGES) {
         const url = new URL(API_BASE);
-        url.searchParams.set('filter[entity.legalAddress.city]', city);
+        url.searchParams.set('filter[fulltext]', city);
         url.searchParams.set('page[size]', String(PAGE_SIZE));
         url.searchParams.set('page[number]', String(page));
 
@@ -220,6 +226,7 @@ class GleifRegisterAdapter {
         const data = json.data || [];
 
         for (const entity of data) {
+          if (!isLocalEntity(entity)) continue;
           const record = compactRecord(entity);
           if (record.lei) allRecords.set(record.lei, record);
         }
@@ -228,35 +235,6 @@ class GleifRegisterAdapter {
         page++;
       }
 
-      // Ook op headquartersAddress zoeken
-      page = 1;
-      hasMore = true;
-      while (hasMore && page <= MAX_PAGES) {
-        const url = new URL(API_BASE);
-        url.searchParams.set('filter[entity.headquartersAddress.city]', city);
-        url.searchParams.set('page[size]', String(PAGE_SIZE));
-        url.searchParams.set('page[number]', String(page));
-
-        const response = await this.fetchImpl(url.toString(), {
-          headers: {
-            Accept: 'application/vnd.api+json',
-            'User-Agent': 'Stadsgeest/1.0 (nieuwsmonitoring Amersfoort)',
-          },
-        });
-        if (!response.ok) throw new Error(`GLEIF API fout (HQ): ${response.status}`);
-        const json = await response.json();
-        const data = json.data || [];
-
-        for (const entity of data) {
-          const record = compactRecord(entity);
-          if (record.lei && !allRecords.has(record.lei)) {
-            allRecords.set(record.lei, record);
-          }
-        }
-
-        hasMore = data.length >= PAGE_SIZE && json.links?.next;
-        page++;
-      }
     }
 
     // Query 2: watchlist-LEI's die niet al gevonden zijn
@@ -298,12 +276,15 @@ class GleifRegisterAdapter {
   /**
    * Haal parent/child-relaties op voor een lijst LEI's.
    */
-  async _fetchRelationships(leis) {
+  async _fetchRelationships(records) {
     const relations = new Map(); // lei -> [relaties]
-    for (const lei of leis) {
+    const linkedRecords = records.filter(record => record.directParentRelationshipUrl);
+    if (linkedRecords.length > 0) {
+      console.log(`[GLEIF] ${linkedRecords.length} expliciete bovenliggende relaties ophalen...`);
+    }
+    for (const record of linkedRecords) {
       try {
-        const url = `${RELATIONS_BASE}/${lei}/direct-parent-relationships`;
-        const response = await this.fetchImpl(url, {
+        const response = await this.fetchImpl(record.directParentRelationshipUrl, {
           headers: {
             Accept: 'application/vnd.api+json',
             'User-Agent': 'Stadsgeest/1.0 (nieuwsmonitoring Amersfoort)',
@@ -312,7 +293,7 @@ class GleifRegisterAdapter {
         if (response.ok) {
           const json = await response.json();
           const parsed = parseRelationships(json.data);
-          if (parsed.length > 0) relations.set(lei, parsed);
+          if (parsed.length > 0) relations.set(record.lei, parsed);
         }
       } catch {
         // Relatie-ophaal mislukt is niet fataal
@@ -579,7 +560,7 @@ class GleifRegisterAdapter {
     try {
       const url = new URL(API_BASE);
       url.searchParams.set('page[size]', '1');
-      url.searchParams.set('filter[entity.legalAddress.city]', 'Amersfoort');
+      url.searchParams.set('filter[fulltext]', 'Amersfoort');
       const response = await this.fetchImpl(url.toString(), {
         headers: {
           Accept: 'application/vnd.api+json',
@@ -602,7 +583,7 @@ class GleifRegisterAdapter {
     await this._loadWatchlist();
 
     const records = await this._fetchAndParse();
-    const relations = await this._fetchRelationships(records.map(r => r.lei));
+    const relations = await this._fetchRelationships(records);
     const previousState = await this._getPreviousSnapshot();
     const previousSnapshot = previousState?.snapshot || null;
     const events = this._diff(records, relations, previousSnapshot);

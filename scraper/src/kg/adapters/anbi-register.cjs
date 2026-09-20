@@ -36,28 +36,68 @@ function normalizePlace(value) {
  */
 function discoverDownloadUrl(html) {
   const $ = load(html);
-  let downloadUrl = null;
+  const candidates = [];
 
   $('a[href]').each((_, element) => {
     const href = $(element).attr('href') || '';
     const text = $(element).text() || '';
-    // Zoek naar een link naar een ZIP/gecomprimeerd bestand met ANBI-data
-    if (/\.(zip|xlsx)(\?|$)/i.test(href) || /download|gecomprimeerd|excel/i.test(text)) {
-      if (/anbi/i.test(href) || /anbi/i.test(text)) {
-        downloadUrl = href.startsWith('http') ? href : new URL(href, LANDING_URL).href;
-      }
-    }
+    if (!/anbi/i.test(`${href} ${text}`)) return;
+    const url = new URL(href, LANDING_URL);
+    const directArchive = /\.(zip|xlsx)(?:\?|$)/i.test(url.pathname + url.search);
+    if (!directArchive && !/download|gecomprimeerd|excel/i.test(text)) return;
+    const isReader = /readspeaker|docreader/i.test(url.hostname + url.pathname);
+    const isOfficialDownload = url.hostname === 'download.belastingdienst.nl';
+    candidates.push({
+      url: url.href,
+      score: (directArchive ? 10 : 0) + (isOfficialDownload ? 10 : 0) - (isReader ? 100 : 0),
+    });
   });
 
-  // Fallback: zoek naar elke ZIP-link op de pagina
-  if (!downloadUrl) {
+  // Fallback: zoek naar elke directe ZIP/XLSX-link op de pagina.
+  if (!candidates.length) {
     $('a[href*=".zip"], a[href*=".xlsx"]').each((_, element) => {
       const href = $(element).attr('href') || '';
-      downloadUrl = downloadUrl || (href.startsWith('http') ? href : new URL(href, LANDING_URL).href);
+      const url = new URL(href, LANDING_URL);
+      if (!/readspeaker|docreader/i.test(url.hostname + url.pathname)) {
+        candidates.push({ url: url.href, score: url.hostname === 'download.belastingdienst.nl' ? 10 : 0 });
+      }
     });
   }
 
-  return downloadUrl;
+  candidates.sort((a, b) => b.score - a.score);
+  return candidates[0]?.url || null;
+}
+
+function decodeXml(value) {
+  return String(value || '')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'").replace(/&amp;/g, '&')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(Number.parseInt(code, 16)));
+}
+
+/** Parseer het actuele openbare ANBI-XML in het officiële ZIP-archief. */
+function parseAnbiXml(buffer) {
+  const xml = buffer.toString('latin1');
+  const tag = (block, name) => normalizeText(decodeXml(
+    new RegExp(`<${name}>([\\s\\S]*?)<\\/${name}>`, 'i').exec(block)?.[1] || '',
+  ));
+  const records = [];
+  for (const match of xml.matchAll(/<beschikking>([\s\S]*?)<\/beschikking>/gi)) {
+    const block = match[1];
+    const record = {
+      rsin: tag(block, 'fiscaalNummer'),
+      dossiernummer: tag(block, 'dossierNummer'),
+      naam: tag(block, 'naam'),
+      vestigingsplaats: tag(block, 'vestigingsPlaats'),
+      website: tag(block, 'webSite'),
+      ingangsdatum: tag(block, 'ingangsDatum'),
+      alias: tag(block, 'aliasNaam'),
+    };
+    if (record.rsin || record.dossiernummer) records.push(record);
+  }
+  if (!records.length) throw new Error('ANBI schemadrift: geen beschikkingen in XML');
+  return records;
 }
 
 /**
@@ -152,6 +192,7 @@ function anbiSemanticHash(record) {
     record.naam || '',
     record.vestigingsplaats || '',
     record.website || '',
+    record.alias || '',
   ].join('::');
 }
 
@@ -171,6 +212,10 @@ class AnbiRegisterAdapter {
     });
     if (existing.rows.length > 0) {
       this.sourceId = existing.rows[0].id;
+      return;
+    }
+    if (this.dryRun) {
+      this.sourceId = -1;
       return;
     }
     const result = await this.db.execute({
@@ -213,22 +258,22 @@ class AnbiRegisterAdapter {
     const buffer = Buffer.from(await fileResponse.arrayBuffer());
     console.log(`[ANBI] ${buffer.length} bytes ontvangen`);
 
-    // Parse: probeer eerst als ZIP (gecomprimeerd Excel), dan als directe XLSX
-    let sheets;
-    try {
-      sheets = parseXlsx(buffer);
-    } catch {
-      // Mogelijk een ZIP met daarin een XLSX
-      const zlib = require('zlib');
-      const { zipEntries } = require('../phase4-core.cjs');
-      const entries = zipEntries(buffer);
-      const xlsxEntry = [...entries.entries()].find(([name]) => /\.xlsx$/i.test(name));
-      if (!xlsxEntry) throw new Error('ANBI schemadrift: geen XLSX gevonden in ZIP');
-      sheets = parseXlsx(xlsxEntry[1]);
+    if (buffer.length > 100 * 1024 * 1024) throw new Error(`ANBI download onveilig groot: ${buffer.length} bytes`);
+    if (buffer.readUInt32LE(0) !== 0x04034b50) {
+      throw new Error(`ANBI download is geen ZIP/XLSX (${fileResponse.headers?.get?.('content-type') || 'onbekend type'})`);
     }
 
-    // Parse rijen uit de sheets
-    const allRecords = parseAnbiRecords(sheets);
+    const { zipEntries } = require('../phase4-core.cjs');
+    const entries = zipEntries(buffer);
+    const xmlEntry = [...entries.entries()].find(([name]) => /(?:^|\/)anbi\.xml$/i.test(name));
+    const xlsxEntry = [...entries.entries()].find(([name]) => /\.xlsx$/i.test(name));
+    const allRecords = xmlEntry
+      ? parseAnbiXml(xmlEntry[1])
+      : xlsxEntry
+        ? parseAnbiRecords(parseXlsx(xlsxEntry[1]))
+        : [...entries.keys()].some(name => /^xl\//.test(name))
+          ? parseAnbiRecords(parseXlsx(buffer))
+          : (() => { throw new Error('ANBI schemadrift: geen ANBI-XML of XLSX gevonden in ZIP'); })();
     console.log(`[ANBI] ${allRecords.length} records totaal geparsed`);
 
     const localRecords = filterLocal(allRecords);
@@ -269,6 +314,7 @@ class AnbiRegisterAdapter {
         naam: record.naam || '',
         vestigingsplaats: record.vestigingsplaats || '',
         website: record.website || '',
+        alias: record.alias || '',
       };
     }
     // Voeg pending removals toe zodat de volgende run ze herkent
@@ -508,6 +554,7 @@ module.exports = {
   AnbiRegisterAdapter,
   // Geëxporteerd voor testen
   parseAnbiRecords,
+  parseAnbiXml,
   filterLocal,
   recordKey,
   anbiSemanticHash,

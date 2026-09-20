@@ -14,11 +14,12 @@ const SOURCE_NAME = 'OpenStreetMap — Overpass contextlaag';
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 
 // Bestuurlijke grenzen: area-ID's voor Overpass
-// Amersfoort: relation 419556 → area 3600419556
-// Leusden: relation 161446 → area 3600161446
+// Gemeentegrenzen (admin_level=8), gecontroleerd via OSM/Nominatim.
+// Amersfoort: relation 419152 → area 3600419152
+// Leusden: relation 310005 → area 3600310005
 const AREA_IDS = {
-  amersfoort: 3600419556,
-  leusden: 3600161446,
+  amersfoort: 3600419152,
+  leusden: 3600310005,
 };
 
 // Relevante OSM-tags voor de contextlaag
@@ -132,6 +133,7 @@ class OsmContextAdapter {
     this.dryRun = config.dryRun || false;
     this.sourceId = null;
     this.fetchImpl = config.fetchImpl || globalThis.fetch;
+    this.lastFetchOk = false;
     // Optioneel: emit zachte events (standaard uit per spec)
     this.emitSoftEvents = config.emitSoftEvents || false;
   }
@@ -145,10 +147,14 @@ class OsmContextAdapter {
       this.sourceId = existing.rows[0].id;
       return;
     }
+    if (this.dryRun) {
+      this.sourceId = -1;
+      return;
+    }
     const result = await this.db.execute({
       sql: `INSERT INTO sources (name, url, source_type, reliability, category, scrape_frequency,
               is_active, created_at, source_class, adapter_version)
-            VALUES (?, ?, 'api', 'context', 'context', 'weekly',
+            VALUES (?, ?, 'api', 'secondary', 'data', 'weekly',
               1, datetime('now'), 'STRUCTURED_CONTEXT', '1.0')`,
       args: [SOURCE_NAME, OVERPASS_URL],
     });
@@ -197,6 +203,7 @@ class OsmContextAdapter {
     }
 
     console.log(`[OSM] ${allRecords.size} unieke records opgehaald`);
+    this.lastFetchOk = true;
     return [...allRecords.values()];
   }
 
@@ -344,6 +351,13 @@ class OsmContextAdapter {
   }
 
   async health() {
+    if (this.lastFetchOk) {
+      return {
+        status: 'ok',
+        message: 'Overpass succesvol gebruikt tijdens deze run',
+        timestamp: new Date().toISOString(),
+      };
+    }
     try {
       // Minimale Overpass-query om bereikbaarheid te testen
       const testQuery = '[out:json][timeout:10];node(52.15,5.37,52.16,5.38)[amenity=restaurant];out count;';

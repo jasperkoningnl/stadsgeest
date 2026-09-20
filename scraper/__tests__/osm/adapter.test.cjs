@@ -91,6 +91,43 @@ describe('AREA_IDS', () => {
     assert.ok(AREA_IDS.amersfoort > 3600000000);
     assert.ok(AREA_IDS.leusden > 3600000000);
   });
+
+  it('gebruikt de actuele gemeentelijke relation-ID\'s', () => {
+    assert.equal(AREA_IDS.amersfoort, 3600419152);
+    assert.equal(AREA_IDS.leusden, 3600310005);
+  });
+});
+
+describe('bronregistratie', () => {
+  it('schrijft in dry-run geen ontbrekende bron', async () => {
+    const statements = [];
+    const adapter = new OsmContextAdapter({
+      dryRun: true,
+      db: { execute: async statement => {
+        statements.push(statement);
+        return { rows: [] };
+      } },
+    });
+    await adapter._ensureSource();
+    assert.equal(adapter.sourceId, -1);
+    assert.equal(statements.length, 1);
+    assert.ok(statements[0].sql.startsWith('SELECT'));
+  });
+});
+
+describe('health', () => {
+  it('doet na een geslaagde run geen extra rate-limitgevoelige API-oproep', async () => {
+    let calls = 0;
+    const adapter = new OsmContextAdapter({
+      dryRun: true,
+      db: {},
+      fetchImpl: async () => { calls++; throw new Error('mag niet worden aangeroepen'); },
+    });
+    adapter.lastFetchOk = true;
+    const health = await adapter.health();
+    assert.equal(health.status, 'ok');
+    assert.equal(calls, 0);
+  });
 });
 
 // --- Parsercontract ---

@@ -168,6 +168,15 @@ iedere run apart worden opgehaald — ook als ze niet meer via adresfilter worde
 gevonden. Dit vangt verhuizingen op: een bedrijf dat verhuist maar eerder lokaal
 was geïdentificeerd blijft in beeld.
 
+## 2026-09-19 — GLEIF: fulltextzoekopdracht met exact lokaal nafilter
+
+De GLEIF-API accepteert de eerder gebruikte filters op `legalAddress.city` en
+`headquartersAddress.city` niet meer. De adapter gebruikt nu de ondersteunde
+fulltextzoekopdracht per plaats en accepteert daaruit alleen records waarvan een
+legal-, hoofd- of ander adres exact Amersfoort of Leusden vermeldt. De bestaande
+LEI-watchlist blijft verhuizingen afvangen. Dit herstelt de bron zonder de lokale
+bewijsgrens te verruimen.
+
 ## 2026-09-14 — OSM Overpass: geen harde events, alleen contextlaag
 
 De OSM-adapter gebruikt bronklasse STRUCTURED_CONTEXT en emitteert standaard
@@ -184,10 +193,15 @@ GPS-driftruis in de semantische hash te voorkomen.
 
 Het uitbreidingsplan specificeert "gebiedsquery's op de bestuurlijke grenzen."
 De adapter gebruikt Overpass area-ID's afgeleid van OSM-relatie-ID's
-(relatie + 3600000000): Amersfoort = 3600419556, Leusden = 3600161446. Dit
+(relatie + 3600000000): Amersfoort = 3600419152, Leusden = 3600310005. Dit
 volgt exact de bestuurlijke grenzen in plaats van een bounding box, wat
 nauwkeuriger is en geen handmatige coördinaten vereist. Rate limiting: 10
 seconden pauze tussen gemeentequery's om de Overpass-API niet te overbelasten.
+
+De aanvankelijk vastgelegde relation-ID's bleken bij de livecontrole van 20
+september geen objecten op te leveren. De gecorrigeerde waarden zijn de actuele
+gemeenterelaties uit OSM/Nominatim: 419152 voor Amersfoort en 310005 voor
+Leusden.
 
 ## 2026-09-14 — Geen PostGIS; geofilters via code met officiële polygonen
 

@@ -72,15 +72,18 @@ expliciet toegestane organisatiepagina's halen. Deze pilot heeft nog een lege
 allowlist, draait standaard dry-run en is niet operationeel ingepland; PDF-
 documenten worden nog niet verwerkt.
 
-GLEIF bevraagt de JSON:API op `api.gleif.org/api/v1/lei-records` met
-adresfilter (`legalAddress.city` en `headquartersAddress.city`) voor
-Amersfoort en Leusden, aangevuld met een watchlist van bekende lokale LEI's
-uit `entity_identifiers`. Diff op LEI met snapshot; verlopen of verdwenen
+GLEIF bevraagt de JSON:API op `api.gleif.org/api/v1/lei-records` met de
+ondersteunde fulltextzoekopdracht voor Amersfoort en Leusden en controleert de
+gevonden records daarna exact op legal-, hoofd- of ander adres in een van beide
+plaatsen. Dit vervangt de niet langer geaccepteerde city-fieldfilters. Een
+watchlist van bekende lokale LEI's uit `entity_identifiers` vult dit aan. Diff
+op LEI met snapshot; verlopen of verdwenen
 LEI's worden als statuswijziging behandeld, niet als verwijdering. Parent-
-relaties worden apart opgehaald en naar `kg_relations` geschreven.
+relaties worden alleen apart opgehaald wanneer het LEI-record daarvoor een
+expliciete GLEIF-relatielink bevat, en naar `kg_relations` geschreven.
 
-OpenStreetMap bevraagt de Overpass API met gebiedsquery's op de bestuurlijke
-grenzen van Amersfoort (relation 419556) en Leusden (relation 161446). Haalt
+OpenStreetMap bevraagt de Overpass API met gebiedsquery's op de gemeentelijke
+grenzen van Amersfoort (relation 419152) en Leusden (relation 310005). Haalt
 nodes, ways en relations op met tags `office`, `shop`, `amenity`, `tourism`,
 `leisure` en `healthcare`. Bronklasse `STRUCTURED_CONTEXT`: standaard geen
 harde events; optioneel `OSM_ENTITY_CANDIDATE` en `OSM_LOCATION_CHANGED` met

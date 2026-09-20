@@ -108,10 +108,25 @@ async function acquireLock() {
   } catch (error) {
     if (error.code !== 'EEXIST') throw error;
     const stat = await fs.stat(LOCK_PATH);
-    if (Date.now() - stat.mtimeMs <= STALE_LOCK_MS) {
+    let ownerAlive = null;
+    try {
+      const lock = JSON.parse(await fs.readFile(LOCK_PATH, 'utf8'));
+      if (Number.isInteger(lock.pid) && lock.pid > 0) {
+        try { process.kill(lock.pid, 0); ownerAlive = true; }
+        catch (processError) {
+          if (processError.code === 'ESRCH') ownerAlive = false;
+          else if (processError.code === 'EPERM') ownerAlive = true;
+        }
+      }
+    } catch {
+      // Een beschadigde lock valt terug op de bestaande tijdsgrens.
+    }
+    if (ownerAlive === true || (ownerAlive === null && Date.now() - stat.mtimeMs <= STALE_LOCK_MS)) {
       throw new Error('Er draait al een detection-run (actieve lock).');
     }
-    await fs.unlink(LOCK_PATH);
+    await fs.unlink(LOCK_PATH).catch(unlinkError => {
+      if (unlinkError.code !== 'ENOENT') throw unlinkError;
+    });
     return acquireLock();
   }
   const heartbeat = setInterval(() => {

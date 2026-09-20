@@ -49,6 +49,7 @@ function makeEntity(overrides = {}) {
         lastUpdateDate: overrides.lastUpdate || '2024-06-01',
       },
     },
+    relationships: overrides.relationships || {},
   };
 }
 
@@ -106,6 +107,13 @@ describe('compactRecord', () => {
     const entity = makeEntity({ otherNames: [{ name: 'Alias' }, { name: 'Handelsn.' }] });
     const record = compactRecord(entity);
     assert.deepEqual(record.otherNames, ['Alias', 'Handelsn.']);
+  });
+
+  it('neemt alleen de door GLEIF geleverde directe-parentrelatielink over', () => {
+    const entity = makeEntity({ relationships: {
+      'direct-parent': { links: { 'relationship-record': 'https://api.gleif.org/relatie/1' } },
+    } });
+    assert.equal(compactRecord(entity).directParentRelationshipUrl, 'https://api.gleif.org/relatie/1');
   });
 });
 
@@ -183,6 +191,32 @@ describe('isWatchlisted', () => {
   });
 });
 
+describe('API-query', () => {
+  it('gebruikt fulltext en filtert zoekresultaten exact op lokale stad', async () => {
+    const urls = [];
+    const local = makeEntity({ lei: 'LOCAL', legalCity: 'Amersfoort' });
+    const falsePositive = makeEntity({ lei: 'ELDERS', legalCity: 'Utrecht', hqCity: 'Utrecht' });
+    const adapter = new GleifRegisterAdapter({
+      db: {},
+      dryRun: true,
+      watchlist: new Set(),
+      fetchImpl: async url => {
+        urls.push(url);
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ data: urls.length === 1 ? [local, falsePositive] : [], links: {} }),
+        };
+      },
+    });
+
+    const records = await adapter._fetchAndParse();
+    assert.deepEqual(records.map(record => record.lei), ['LOCAL']);
+    assert.ok(urls.every(url => url.includes('filter%5Bfulltext%5D=')));
+    assert.ok(urls.every(url => !url.includes('legalAddress.city') && !url.includes('headquartersAddress.city')));
+  });
+});
+
 // --- Semantische hash ---
 
 describe('gleifSemanticHash', () => {
@@ -248,6 +282,26 @@ describe('parseRelationships', () => {
   it('retourneert lege array bij null/undefined', () => {
     assert.deepEqual(parseRelationships(null), []);
     assert.deepEqual(parseRelationships(undefined), []);
+  });
+});
+
+describe('relatie-opvraag', () => {
+  it('bevraagt alleen records met een expliciete relatielink', async () => {
+    const urls = [];
+    const adapter = new GleifRegisterAdapter({
+      db: {}, dryRun: true,
+      fetchImpl: async url => {
+        urls.push(url);
+        return { ok: true, json: async () => ({ data: [makeRelation({ startLei: 'A1' })] }) };
+      },
+    });
+    const relations = await adapter._fetchRelationships([
+      { lei: 'A1', directParentRelationshipUrl: 'https://api.gleif.org/relatie/A1' },
+      { lei: 'A2', directParentRelationshipUrl: '' },
+    ]);
+    assert.deepEqual(urls, ['https://api.gleif.org/relatie/A1']);
+    assert.equal(relations.get('A1').length, 1);
+    assert.ok(!relations.has('A2'));
   });
 });
 

@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 
 const {
   parseAnbiRecords,
+  parseAnbiXml,
   filterLocal,
   recordKey,
   anbiSemanticHash,
@@ -42,7 +43,28 @@ const LANDING_HTML_XLSX = `
 </body></html>
 `;
 
+const LANDING_HTML_WITH_READER = `
+<html><body>
+  <a href="//download.belastingdienst.nl/data/anbi/anbi.zip">Downloaden</a>
+  <a href="//docreader.readspeaker.com/docreader/?url=https://download.belastingdienst.nl/data/anbi/anbi.zip">Lees voor</a>
+</body></html>
+`;
+
 describe('ANBI-adapter parsercontract', () => {
+  it('parseert het actuele XML-contract inclusief latin1 en alias', () => {
+    const xml = Buffer.from(`<?xml version="1.0" encoding="ISO-8859-1"?>
+      <publicatieAnbiInstellingen><beschikking><fiscaalNummer>123</fiscaalNummer>
+      <dossierNummer>7</dossierNummer><naam>Stichting Caf\u00e9 &amp; Cultuur</naam>
+      <aliasNaam>Het Caf\u00e9</aliasNaam><vestigingsPlaats>AMERSFOORT</vestigingsPlaats>
+      <webSite>https://voorbeeld.nl</webSite><ingangsDatum>2020-01-01</ingangsDatum>
+      </beschikking></publicatieAnbiInstellingen>`, 'latin1');
+    const records = parseAnbiXml(xml);
+    assert.equal(records.length, 1);
+    assert.equal(records[0].naam, 'Stichting Caf\u00e9 & Cultuur');
+    assert.equal(records[0].alias, 'Het Caf\u00e9');
+    assert.equal(filterLocal(records).length, 1);
+  });
+
   it('parseert sheets en vindt records met RSIN-kolom', () => {
     const sheets = makeSheets(ROWS_BASIC);
     const records = parseAnbiRecords(sheets);
@@ -260,6 +282,10 @@ describe('ANBI-adapter downloadlink-detectie', () => {
     const url = discoverDownloadUrl(LANDING_HTML_XLSX);
     assert.ok(url, 'moet een URL vinden');
     assert.ok(url.includes('.xlsx'), 'moet een XLSX-link zijn');
+  });
+
+  it('verkiest de echte Belastingdienst-download boven een ReadSpeaker-link', () => {
+    assert.equal(discoverDownloadUrl(LANDING_HTML_WITH_READER), 'https://download.belastingdienst.nl/data/anbi/anbi.zip');
   });
 
   it('retourneert null wanneer geen downloadlink bestaat', () => {
