@@ -117,7 +117,8 @@ class DetectionEngine {
           } else {
             details.push({
               ruleId, eventId: event.id, signalId: null,
-              title: signal.title, action: 'dry_run',
+              title: signal.title, entityPath: signal.entityPath || null,
+              evidence: signal.evidence || [], action: 'dry_run',
             });
             signalsCreated++;
           }

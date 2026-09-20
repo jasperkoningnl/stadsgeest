@@ -55,9 +55,12 @@ een gerichte herstel- of voorwaartse migratie in plaats van tabellen generiek te
 verwijderen.
 
 De kern bestaat uit `kg_entities`, identifiers, aliassen, locaties, relaties,
-events, `source_records`, `fetch_runs` en de handmatige mergewachtrij. De
-klassieke tabellen blijven daarnaast bestaan zolang intake en KG-detectie
-afzonderlijke productiepaden zijn.
+events, `source_records`, `fetch_runs` en de handmatige mergewachtrij. Iedere
+uitgevoerde merge bewaart de betrokken rij-ID's in `entity_merge_audits`, zodat
+een beheerder de verplaatsing transactioneel kan terugdraaien. Handmatige
+kernseeds en hun bron-, reden- en reviewmetadata staan in
+`manual_entity_seeds`. De klassieke tabellen blijven daarnaast bestaan zolang
+intake en KG-detectie afzonderlijke productiepaden zijn.
 
 `scraper/migrate-phase3.cjs` voegt broncontrolevelden en de tabellen
 `source_snapshots`, `statistical_baselines`, `area_versions` en

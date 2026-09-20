@@ -1,12 +1,23 @@
 # Fase 2 — eerste eventbronnen en graph matching
 
-**Status:** het dagelijkse productiepad is actief; formele slotaudit blijft open.
+**Status:** graph-exitbewijs geslaagd op 20 september 2026; formele sluiting
+wacht op de vergunning-naar-BAG-koppeling uit fase 1.
 
-Meerdere eerste eventbronnen draaien met baseline, semantische diff,
-provenance en detectieregels. Audit nog ieder fase-2-onderdeel uit het leidende
-uitbreidingsplan: alle genoemde bronnen, vergunningkoppeling, regels R1–R4 en
-R6–R9, relatiepad/bewijs in de signaalweergave en de end-to-end demonstratie.
+Alle genoemde eventbronnen zijn aanwezig en hebben een geslaagde productierun.
+De vaste regels R1–R4 en R6–R9 bestaan ongewijzigd. Signalen bewaren bron,
+event, bewijs en relatiepad in provenance; dit wordt ook in de bevroren
+redactionele context en de tipuitleg meegenomen.
 
-**Afsluitvoorwaarde:** minimaal vijf echte of historisch gereplayde signalen zijn
-aantoonbaar gevonden dankzij de graph. Ieder ontbrekend onderdeel wordt alsnog
-uitgevoerd of gemotiveerd vastgelegd in `../DECISIONS.md`.
+`audit-phase2.cjs` replayde 258 productie-events en vond 39 regelsignalen.
+Daarvan zijn 37 uniek en graph-afhankelijk: ieder event heeft een gekoppelde
+entiteit met een vestiging in Amersfoort of Leusden. De expliciete contraproef
+met dezelfde events maar zonder graphcontext leverde nul R3-matches. Vijf
+concrete voorbeelden met officiële identifier, bron-URL en relatiepad worden
+door de audit afgedrukt; twee daarvan bevatten zelfs geen plaatsnaam in titel of
+samenvatting.
+
+Het graphcriterium is behaald met 37 historisch gereplayde graph-afhankelijke
+signalen, ruim boven het minimum van vijf. Het leidende plan vereist daarnaast
+dat bestaande vergunningevents via BAG aan lokale entiteiten worden gekoppeld.
+Omdat de BAG-backfill nog niet is uitgevoerd, blijft dat laatste onderdeel en
+daarmee de formele fasesluiting open.

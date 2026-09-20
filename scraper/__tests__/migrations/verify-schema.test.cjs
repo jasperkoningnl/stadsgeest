@@ -114,6 +114,19 @@ describe('M4: data-seed is uitgevoerd', () => {
   });
 });
 
+describe('M4b: handmatige seed- en mergeprovenance', () => {
+  for (const table of ['manual_entity_seeds', 'entity_merge_audits']) {
+    it(`${table} bestaat`, async () => assert.ok((await getColumns(table)).length > 0));
+  }
+
+  it('kernseeds hebben bron, reden en reviewdatum', async () => {
+    const invalid = await db.execute(`SELECT COUNT(*) n FROM manual_entity_seeds
+      WHERE source_url NOT LIKE 'https://%' OR reason IS NULL OR length(reason)<20 OR review_due_at IS NULL`);
+    assert.equal(Number(invalid.rows[0].n), 0);
+    assert.ok(await getCount('manual_entity_seeds') >= 6);
+  });
+});
+
 describe('M5: fase-3-provenance en backtests', () => {
   it('sources heeft controlevelden en alle fase-3-tabellen bestaan', async () => {
     const sourceColumns = await getColumns('sources');

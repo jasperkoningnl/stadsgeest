@@ -9,9 +9,9 @@ stilzwijgend laten vervallen.
 
 | Fase | Status | Document |
 |---|---|---|
-| 0 — inventarisatie en contracten | mijlpaal bereikt; slotaudit nodig | `phase-0.md` |
+| 0 — inventarisatie en contracten | afgerond; productie-audit groen | `phase-0.md` |
 | 1 — entiteitenfundament | productiepad aanwezig; slotaudit nodig | `phase-1.md` |
-| 2 — eventbronnen en graph matching | productiepad actief; slotaudit nodig | `phase-2.md` |
+| 2 — eventbronnen en graph matching | graphbewijs groen; BAG-koppeling open | `phase-2.md` |
 | 3 — sectorregisters en statistiek | afgerond; productieactief | `phase-3.md` |
 | 4 — periodieke en experimentele bronnen | afgerond; productieactief | `phase-4.md` |
 | 5 — redactionele leerloop | productierijp; effectbewijs loopt | `phase-5.md` |

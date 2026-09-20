@@ -90,6 +90,11 @@ harde events; optioneel `OSM_ENTITY_CANDIDATE` en `OSM_LOCATION_CHANGED` met
 lage confidence. Coördinaten worden op 4 decimalen afgerond (~11m) voor de
 hash. Rate limit: 10 seconden pauze tussen gemeentequery's.
 
+BAG-normalisatie gebruikt de openbare PDOK Locatieserver `v3_1/free`. Alleen
+een exacte combinatie van BAG-bron, adrestype, postcode, volledig huisnummer en
+gemeente Amersfoort/Leusden wordt geaccepteerd. De nummeraanduiding-ID is de
+stabiele BAG-sleutel; een fuzzy resultaat wordt niet opgeslagen.
+
 Politie/CBS bouwt de lokale codeset uit de dimensietabel, bewaart het kaartjaar
 en haalt 60 maanden op voor de detector. NDW gebruikt de officiële CBS/PDOK-
 gemeentegeometrie met een buffer van één kilometer; een straatnaam is nooit een

@@ -89,6 +89,11 @@ mechanisme productiegeschikt, maar zijn hogere precisie, betere brondekking en
 causale redactionele meerwaarde nog niet aangetoond. Er worden daarom geen
 gewichten, drempels, detectieregels of rangmodellen aangepast.
 
+De hercontrole van 20 september bevestigt dit beeld. De actuele rollende
+28-dagenmeting bevat 14 beoordelingen, waarvan 6 bruikbaar, en blijft
+`descriptive`. De reviewcyclus over augustus bevat 15 beoordelingen en staat nog
+open; dit is een bewuste menselijke stap en wordt niet automatisch gesloten.
+
 **Afsluitvoorwaarde:** de implementatievoorwaarden zijn gehaald. De fase wordt
 pas ook op effect gesloten wanneer voldoende echte redactionele data over
 meerdere maandcycli aantoonbare verbetering tegenover de baseline laat zien,

@@ -119,3 +119,18 @@ Beide migraties moeten dezelfde telling tonen en beide evaluaties dezelfde ID en
 invoerhash. De audit moet nul verweesde feedback, nul ongeldige automatische
 aanpassingen en nul ontbrekende of dubbele artikeluitkomsten melden. Een kleine
 steekproef bewijst alleen reproduceerbaarheid, niet kwaliteitsverbetering.
+
+## Slotaudits fase 0–2
+
+```powershell
+node scraper/audit-phase0.cjs
+node scraper/audit-phase1.cjs
+node scraper/audit-phase2.cjs
+```
+
+Fase 0 controleert de historische en actuele baseline, tabellen, ruwe
+herverwerkingsinvoer en KOOP-deduplicatie. Fase 1 rapporteert BAG-dekking,
+seedprovenance, mergeveiligheid en de handmatig gelabelde golden set; status
+`open` is correct zolang een blokker resteert. Fase 2 replayt productie-events,
+eist minimaal vijf graph-afhankelijke matches en voert dezelfde R3-controle
+zonder graphcontext uit.

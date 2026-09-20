@@ -65,3 +65,23 @@ node scraper/retain-phase5-feedback.cjs
 Het laatste commando is een dry-run. Gebruik `--apply` alleen voor de geplande
 retentie of een bewuste beheerhandeling. Een evaluatie of maandreview geeft nooit
 toestemming om drempels, brongewichten of regels automatisch te veranderen.
+
+## Entitybeheer en fase-1-audit
+
+Controleer de actuele dekking en openstaande fase-1-eisen met:
+
+```powershell
+node scraper/audit-phase1.cjs
+node scraper/backfill-bag-locations.cjs
+node scraper/manage-entity-merge.cjs list
+```
+
+De BAG-opdracht draait standaard als dry-run en accepteert alleen exacte
+adresmatches in Amersfoort of Leusden. Gebruik `--apply` pas na beoordeling van
+de uitvoer. Hiervoor worden bestaande volledige adressen naar de openbare PDOK
+Locatieserver gestuurd; voer de opdracht daarom alleen uit met expliciete
+toestemming voor die gegevensoverdracht.
+
+Een merge wordt pas uitgevoerd met een expliciete actor en reden. De beheerder
+kan iedere geaudite merge via `manage-entity-merge.cjs unmerge` transactioneel
+terugdraaien. Handmatige seeds bewaren bron, reden en eerstvolgende reviewdatum.

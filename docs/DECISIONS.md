@@ -213,6 +213,23 @@ functioneel equivalent: de exacte officiële gemeentegrenzen worden gebruikt,
 alleen de uitvoering is in JavaScript in plaats van in de database. Geen actie
 nodig tenzij schaal of complexiteit een database-geïntegreerde oplossing vereist.
 
+## 2026-09-20 — BAG-normalisatie via exacte PDOK Locatieserver-match
+
+De bestaande locaties worden aangevuld via de actuele PDOK Locatieserver
+`v3_1/free`. Een match wordt alleen geaccepteerd als bron BAG, type adres,
+postcode, volledig huisnummer en doelgemeente exact overeenkomen. Alleen dan
+worden nummeraanduiding-ID en coördinaten opgeslagen. De backfill is standaard
+dry-run; het doorgeven van de 82 bestaande adressen aan PDOK vereist expliciete
+toestemming.
+
+## 2026-09-20 — Iedere entity-merge transactioneel en omkeerbaar
+
+Een merge vereist voortaan actor en reden en bewaart vóór de wijziging alle
+betrokken rij-ID's. `manage-entity-merge.cjs` kan een kandidaat goedkeuren,
+afwijzen of via het audit-ID terugdraaien. Twijfelkandidaten blijven tot de
+menselijke beslissing als afzonderlijke entiteit bestaan; er is geen
+automatische persoonsmerge op naam.
+
 ## 2026-09-14 — Tuchtrechtbron: status opgehelderd
 
 De tuchtrechtadapter (`tuchtrecht-sru.cjs`) is functioneel maar heeft drie

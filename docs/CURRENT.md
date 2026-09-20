@@ -23,6 +23,12 @@ proceslock wordt direct herkend en opgeruimd. De gecombineerde detectierun heeft
 een heaplimiet van 1,5 GB; de eerdere 768 MB bleek na activering van de volledige
 bronset onvoldoende.
 
+De fase-0-audit is groen: baseline, actuele meting, KOOP-deduplicatie en
+herstelcontract zijn herleidbaar. Het graphbewijs van fase 2 is groen: een
+productie-replay vond 37 graph-afhankelijke signalen; dezelfde R3-events leveren
+zonder graphcontext nul matches op. Formele sluiting wacht op de
+vergunning-naar-BAG-koppeling uit fase 1.
+
 ## Afgeronde implementatie
 
 Fase 3 en fase 4 zijn productieactief. De vereiste fase-4-herhaalcontrole is op
@@ -55,11 +61,15 @@ GLEIF gebruikt de actuele fulltext-API met exact lokaal nafilter (2.073 records)
 en OSM gebruikt de correcte gemeentegrenzen (15.521 contextobjecten). Directe
 herhalingen leverden voor alle drie nul wijzigingen en nul events op.
 
+Handmatige kernseeds hebben nu bron-, reden- en reviewmetadata. Merge/review en
+unmerge zijn transactioneel en geaudit. Fase 1 blijft desondanks open totdat de
+BAG-backfill en de handmatige golden set zijn afgerond.
+
 ## Laatste verificatie en bewijsgrens
 
 De productiedatabase bevat 30 historische feedbackregels. Eén exacte dubbele
-handeling is gemarkeerd en telt niet mee. Alle feedback heeft nu een bevroren
-context. Er is één unieke gepubliceerde artikeluitkomst, expliciet gemarkeerd
+handeling is gemarkeerd en telt niet mee. Alle feedback heeft een bevroren
+context. Er is één gepubliceerde artikeluitkomst, gemarkeerd
 als een vondst die zonder Stadsgeest niet was ontstaan; ontbrekende of dubbele
 artikeluitkomsten zijn nul.
 
@@ -90,9 +100,13 @@ schoolprognose, R13 Onderwijsinspectie en R14 verkeersmaatregel ongewijzigd.
 4. RVO-graphmatches, NDW-bufferrecords en experimentele Samen Meten-data houden
    hun bestaande onzekerheidswaarschuwing en menselijke beoordeling.
 5. Onbekende niet-gevolgde bestanden blijven buiten de fase-5-wijziging.
-6. De formele slotaudits van fase 0, 1 en 2 blijven open. Met name de
-   herleidbare fase-0-baseline/herstelproef, de fase-1-golden set inclusief
-   BAG-koppeling en merge/unmerge, en de fase-2-demonstratie van minimaal vijf
-   aantoonbaar graph-gevonden signalen zijn nog niet als sluitbewijs vastgelegd.
+6. Fase 1 blijft formeel open: BAG-dekking is 0 van 82 adresseerbare locaties
+   en de vereiste handmatig gelabelde organisatie-golden-set staat op 0 van
+   200. De veilige backfill en een export van 250 kandidaten zijn gereed. Door
+   dezelfde ontbrekende BAG-koppeling blijft ook het vergunningonderdeel van
+   fase 2 formeel open, hoewel het afzonderlijke graphcriterium groen is.
+7. De augustus-reviewcyclus van fase 5 staat nog open. De actuele rollende
+   meting telt 14 beoordelingen en 6 bruikbare tips; dit blijft beschrijvend en
+   is onvoldoende voor kalibratie of effectsluiting.
 
 Details staan in `PHASES/phase-5.md` en `EDITORIAL-LEARNING.md`.

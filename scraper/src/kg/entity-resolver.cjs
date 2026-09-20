@@ -269,53 +269,105 @@ class EntityResolver {
    * Merge entity B in entity A.
    * Verplaatst aliassen, identifiers en relaties van B naar A.
    */
-  async mergeEntities(keepId, mergeId) {
+  async mergeEntities(keepId, mergeId, options = {}) {
     if (this.dryRun) {
       console.log(`[DRY RUN] Zou entity ${mergeId} mergen in ${keepId}`);
+      return null;
+    }
+    if (!Number.isInteger(keepId) || !Number.isInteger(mergeId) || keepId === mergeId) {
+      throw new Error('Merge vereist twee verschillende geldige entity-id’s.');
+    }
+    const actor = String(options.actor || '').trim();
+    const reason = String(options.reason || '').trim();
+    if (!actor || !reason) throw new Error('Merge vereist actor en reden voor de auditlog.');
+
+    const tx = await this.db.transaction('write');
+    try {
+      const entities = (await tx.execute({
+        sql: 'SELECT id,merged_into_id FROM kg_entities WHERE id IN (?,?) ORDER BY id', args: [keepId, mergeId],
+      })).rows;
+      if (entities.length !== 2) throw new Error('Een van de merge-entiteiten bestaat niet.');
+      if (entities.some(row => row.merged_into_id !== null)) throw new Error('Een al gemergede entiteit kan niet opnieuw worden gemergd.');
+
+      const ids = async (table, column) => (await tx.execute({
+        sql: `SELECT id FROM ${table} WHERE ${column}=? ORDER BY id`, args: [mergeId],
+      })).rows.map(row => Number(row.id));
+      const snapshot = {
+        aliasIds: await ids('kg_aliases', 'entity_id'),
+        identifierIds: await ids('entity_identifiers', 'entity_id'),
+        relationSubjectIds: await ids('kg_relations', 'subject_id'),
+        relationObjectIds: await ids('kg_relations', 'object_id'),
+        locationLinkIds: await ids('entity_locations', 'entity_id'),
+        eventEntityIds: await ids('event_entities', 'entity_id'),
+      };
+
+      for (const table of ['kg_aliases', 'entity_identifiers', 'entity_locations', 'event_entities']) {
+        await tx.execute({ sql: `UPDATE OR IGNORE ${table} SET entity_id=? WHERE entity_id=?`, args: [keepId, mergeId] });
+      }
+      await tx.execute({ sql: 'UPDATE kg_relations SET subject_id=? WHERE subject_id=?', args: [keepId, mergeId] });
+      await tx.execute({ sql: 'UPDATE kg_relations SET object_id=? WHERE object_id=?', args: [keepId, mergeId] });
+      await tx.execute({ sql: `UPDATE kg_entities SET merged_into_id=?,updated_at=datetime('now') WHERE id=?`, args: [keepId, mergeId] });
+      const audit = await tx.execute({
+        sql: `INSERT INTO entity_merge_audits
+              (keep_entity_id,merged_entity_id,candidate_id,snapshot_json,reason,actor)
+              VALUES (?,?,?,?,?,?)`,
+        args: [keepId, mergeId, options.candidateId || null, JSON.stringify(snapshot), reason, actor],
+      });
+      if (options.candidateId) await tx.execute({
+        sql: `UPDATE entity_merge_candidates SET status='merged',reviewed_by=?,reviewed_at=datetime('now') WHERE id=?`,
+        args: [actor, options.candidateId],
+      });
+      await tx.commit();
+      return Number(audit.lastInsertRowid);
+    } catch (error) {
+      await tx.rollback();
+      throw error;
+    }
+  }
+
+  async unmerge(auditId, options = {}) {
+    if (this.dryRun) {
+      console.log(`[DRY RUN] Zou merge-audit ${auditId} terugdraaien`);
       return;
     }
-
-    // Verplaats aliassen
-    await this.db.execute({
-      sql: `UPDATE OR IGNORE kg_aliases SET entity_id = ? WHERE entity_id = ?`,
-      args: [keepId, mergeId],
-    });
-
-    // Verplaats identifiers
-    await this.db.execute({
-      sql: `UPDATE OR IGNORE entity_identifiers SET entity_id = ? WHERE entity_id = ?`,
-      args: [keepId, mergeId],
-    });
-
-    // Verplaats relaties (subject)
-    await this.db.execute({
-      sql: `UPDATE kg_relations SET subject_id = ? WHERE subject_id = ?`,
-      args: [keepId, mergeId],
-    });
-
-    // Verplaats relaties (object)
-    await this.db.execute({
-      sql: `UPDATE kg_relations SET object_id = ? WHERE object_id = ?`,
-      args: [keepId, mergeId],
-    });
-
-    // Verplaats entity_locations
-    await this.db.execute({
-      sql: `UPDATE OR IGNORE entity_locations SET entity_id = ? WHERE entity_id = ?`,
-      args: [keepId, mergeId],
-    });
-
-    // Verplaats event_entities
-    await this.db.execute({
-      sql: `UPDATE OR IGNORE event_entities SET entity_id = ? WHERE entity_id = ?`,
-      args: [keepId, mergeId],
-    });
-
-    // Markeer als gemerged
-    await this.db.execute({
-      sql: `UPDATE kg_entities SET merged_into_id = ?, updated_at = datetime('now') WHERE id = ?`,
-      args: [keepId, mergeId],
-    });
+    const actor = String(options.actor || '').trim();
+    const reason = String(options.reason || '').trim();
+    if (!actor || !reason) throw new Error('Unmerge vereist actor en reden voor de auditlog.');
+    const tx = await this.db.transaction('write');
+    try {
+      const audit = (await tx.execute({ sql: 'SELECT * FROM entity_merge_audits WHERE id=?', args: [auditId] })).rows[0];
+      if (!audit) throw new Error(`Merge-audit ${auditId} bestaat niet.`);
+      if (audit.action !== 'merged') throw new Error(`Merge-audit ${auditId} is al teruggedraaid.`);
+      const keepId = Number(audit.keep_entity_id);
+      const mergeId = Number(audit.merged_entity_id);
+      const snapshot = JSON.parse(String(audit.snapshot_json));
+      const restore = async (table, column, rowIds) => {
+        if (!rowIds?.length) return;
+        await tx.execute({
+          sql: `UPDATE ${table} SET ${column}=? WHERE id IN (${rowIds.map(() => '?').join(',')}) AND ${column}=?`,
+          args: [mergeId, ...rowIds, keepId],
+        });
+      };
+      await restore('kg_aliases', 'entity_id', snapshot.aliasIds);
+      await restore('entity_identifiers', 'entity_id', snapshot.identifierIds);
+      await restore('kg_relations', 'subject_id', snapshot.relationSubjectIds);
+      await restore('kg_relations', 'object_id', snapshot.relationObjectIds);
+      await restore('entity_locations', 'entity_id', snapshot.locationLinkIds);
+      await restore('event_entities', 'entity_id', snapshot.eventEntityIds);
+      await tx.execute({ sql: `UPDATE kg_entities SET merged_into_id=NULL,updated_at=datetime('now') WHERE id=? AND merged_into_id=?`, args: [mergeId, keepId] });
+      await tx.execute({
+        sql: `UPDATE entity_merge_audits SET action='reversed',reversed_at=datetime('now'),reversed_by=?,reverse_reason=? WHERE id=?`,
+        args: [actor, reason, auditId],
+      });
+      if (audit.candidate_id) await tx.execute({
+        sql: `UPDATE entity_merge_candidates SET status='review',reviewed_by=?,reviewed_at=datetime('now') WHERE id=?`,
+        args: [actor, audit.candidate_id],
+      });
+      await tx.commit();
+    } catch (error) {
+      await tx.rollback();
+      throw error;
+    }
   }
 
   /**
@@ -357,9 +409,10 @@ class EntityResolver {
     }
 
     if (result.action === 'review') {
-      // Maak merge-kandidaat voor handmatige review, retourneer bestaande entity
-      await this.createMergeCandidate(result.match.entityId, null, result.score, result.details);
-      return { entityId: result.match.entityId, action: 'review', score: result.score };
+      // Bewaar de kandidaat als afzonderlijke entity totdat een mens beslist.
+      const candidateId = await this.createEntity(candidate);
+      await this.createMergeCandidate(result.match.entityId, candidateId, result.score, result.details);
+      return { entityId: candidateId, action: 'review', score: result.score };
     }
 
     return { entityId: null, action: 'none', score: 0 };

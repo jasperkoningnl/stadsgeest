@@ -13,10 +13,11 @@ reden en gevolg in `DECISIONS.md`; stilzwijgend schrappen mag niet.
 
 ## Stand
 
-- Fase 0 — inventarisatie en contracten: mijlpaal bereikt; slotaudit open.
+- Fase 0 — inventarisatie en contracten: afgerond; productie-audit groen.
 - Fase 1 — entiteitenfundament: productiepad aanwezig; slotaudit open.
-- Fase 2 — eerste eventbronnen en graph matching: productiepad actief;
-  slotaudit open.
+- Fase 2 — eerste eventbronnen en graph matching: graph-exitbewijs groen met
+  37 graph-afhankelijke signalen; formele sluiting wacht nog op de
+  vergunning-naar-BAG-koppeling uit fase 1.
 - Fase 3 — sectorregisters en statistiek: afgerond en productieactief.
 - Fase 4 — periodieke en experimentele bronnen: afgerond en productieactief;
   de identieke productieherhaalrun en audit zijn geslaagd.
