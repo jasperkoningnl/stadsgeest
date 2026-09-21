@@ -1,7 +1,7 @@
 # Actuele toestand — Stadsgeest
 
 **Doel:** compacte herschrijfbare momentopname.
-**Status:** actueel per 20 september 2026.
+**Status:** actueel per 21 september 2026.
 **Lees wanneer:** bij iedere nieuwe taak. Historische details staan elders.
 
 ## Productie
@@ -23,11 +23,9 @@ proceslock wordt direct herkend en opgeruimd. De gecombineerde detectierun heeft
 een heaplimiet van 1,5 GB; de eerdere 768 MB bleek na activering van de volledige
 bronset onvoldoende.
 
-De fase-0-audit is groen: baseline, actuele meting, KOOP-deduplicatie en
-herstelcontract zijn herleidbaar. Het graphbewijs van fase 2 is groen: een
-productie-replay vond 37 graph-afhankelijke signalen; dezelfde R3-events leveren
-zonder graphcontext nul matches op. Formele sluiting wacht op de
-vergunning-naar-BAG-koppeling uit fase 1.
+De fase-0-audit is groen. Ook fase 2 is gesloten: de productie-replay vond 37
+graph-afhankelijke signalen en nul R3-matches zonder graphcontext. Zes bestaande
+vergunningrecords zijn exact via BAG aan lokale organisaties gekoppeld.
 
 ## Afgeronde implementatie
 
@@ -61,9 +59,10 @@ GLEIF gebruikt de actuele fulltext-API met exact lokaal nafilter (2.073 records)
 en OSM gebruikt de correcte gemeentegrenzen (15.521 contextobjecten). Directe
 herhalingen leverden voor alle drie nul wijzigingen en nul events op.
 
-Handmatige kernseeds hebben nu bron-, reden- en reviewmetadata. Merge/review en
-unmerge zijn transactioneel en geaudit. Fase 1 blijft desondanks open totdat de
-BAG-backfill en de handmatige golden set zijn afgerond.
+Handmatige kernseeds hebben bron-, reden- en reviewmetadata. Merge/review en
+unmerge zijn transactioneel en geaudit. De BAG-backfill koppelde 79 van 82
+locaties exact; drie niet-eenduidige gevallen zijn vastgelegd. Fase 1 wacht
+alleen nog op de handmatige golden set.
 
 ## Laatste verificatie en bewijsgrens
 
@@ -100,11 +99,8 @@ schoolprognose, R13 Onderwijsinspectie en R14 verkeersmaatregel ongewijzigd.
 4. RVO-graphmatches, NDW-bufferrecords en experimentele Samen Meten-data houden
    hun bestaande onzekerheidswaarschuwing en menselijke beoordeling.
 5. Onbekende niet-gevolgde bestanden blijven buiten de fase-5-wijziging.
-6. Fase 1 blijft formeel open: BAG-dekking is 0 van 82 adresseerbare locaties
-   en de vereiste handmatig gelabelde organisatie-golden-set staat op 0 van
-   200. De veilige backfill en een export van 250 kandidaten zijn gereed. Door
-   dezelfde ontbrekende BAG-koppeling blijft ook het vergunningonderdeel van
-   fase 2 formeel open, hoewel het afzonderlijke graphcriterium groen is.
+6. Fase 1 blijft open op de handmatig gelabelde organisatie-golden-set: 0 van
+   200. Een export van 250 kandidaten is gereed.
 7. De augustus-reviewcyclus van fase 5 staat nog open. De actuele rollende
    meting telt 14 beoordelingen en 6 bruikbare tips; dit blijft beschrijvend en
    is onvoldoende voor kalibratie of effectsluiting.

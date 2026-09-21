@@ -222,6 +222,10 @@ worden nummeraanduiding-ID en coördinaten opgeslagen. De backfill is standaard
 dry-run; het doorgeven van de 82 bestaande adressen aan PDOK vereist expliciete
 toestemming.
 
+Na toestemming zijn 79 van 82 locaties exact gekoppeld. Drie resultaten zijn
+bewust geweigerd omdat zij niet één BAG-adres aanwijzen; die uitzonderingen
+worden afzonderlijk en herleidbaar bewaard.
+
 ## 2026-09-20 — Iedere entity-merge transactioneel en omkeerbaar
 
 Een merge vereist voortaan actor en reden en bewaart vóór de wijziging alle

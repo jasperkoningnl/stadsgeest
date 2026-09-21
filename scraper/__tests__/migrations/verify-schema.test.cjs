@@ -115,7 +115,7 @@ describe('M4: data-seed is uitgevoerd', () => {
 });
 
 describe('M4b: handmatige seed- en mergeprovenance', () => {
-  for (const table of ['manual_entity_seeds', 'entity_merge_audits']) {
+  for (const table of ['manual_entity_seeds', 'entity_merge_audits', 'bag_match_exceptions']) {
     it(`${table} bestaat`, async () => assert.ok((await getColumns(table)).length > 0));
   }
 

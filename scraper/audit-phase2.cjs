@@ -60,8 +60,18 @@ async function main() {
     const unique = [...new Map(graphCandidates.map(item => [`${item.rule}:${item.sourceIdentifier || item.eventId}`, item])).values()];
     const provenanceMissing = Number((await db.execute(`SELECT COUNT(*) n FROM signals WHERE detection_rule IN ('R1','R2','R3','R4','R6','R7','R9')
       AND (provenance IS NULL OR json_valid(provenance)=0)`)).rows[0].n);
+    const permitRow = (await db.execute(`SELECT COUNT(DISTINCT e.id) events,
+      COUNT(DISTINCT CASE WHEN l.bag_id IS NOT NULL AND l.bag_id<>'' AND el.id IS NOT NULL THEN e.id END) bag_linked
+      FROM kg_events e
+      LEFT JOIN event_entities ee ON ee.event_id=e.id
+      LEFT JOIN locations l ON l.id=CAST(json_extract(e.provenance,'$.location_id') AS INTEGER)
+      LEFT JOIN entity_locations el ON el.entity_id=ee.entity_id AND el.location_id=l.id
+      WHERE e.parser_version='permit-bag-bridge/1.0.0'`)).rows[0];
+    const permitCoverage = { events: Number(permitRow.events), bagLinked: Number(permitRow.bag_linked) };
     const result = {
-      status: missingRules.length === 0 && sources.every(source => source.present && source.successfulRun) && unique.length >= 5 && provenanceMissing === 0 ? 'pass' : 'fail',
+      status: missingRules.length === 0 && sources.every(source => source.present && source.successfulRun) &&
+        unique.length >= 5 && provenanceMissing === 0 && permitCoverage.events > 0 &&
+        permitCoverage.events === permitCoverage.bagLinked ? 'pass' : 'fail',
       requiredRules: { expected: REQUIRED_RULES, missing: missingRules },
       sources,
       replay: {
@@ -71,6 +81,7 @@ async function main() {
         graphDependentWithoutPlaceName: unique.filter(item => item.placeNameAbsent).length,
         counterfactualWithoutGraph: 0,
       },
+      permitCoverage,
       examples: unique.slice(0, 5),
       invalidSignalProvenance: provenanceMissing,
     };

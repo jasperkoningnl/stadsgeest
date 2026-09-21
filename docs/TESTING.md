@@ -133,4 +133,6 @@ herverwerkingsinvoer en KOOP-deduplicatie. Fase 1 rapporteert BAG-dekking,
 seedprovenance, mergeveiligheid en de handmatig gelabelde golden set; status
 `open` is correct zolang een blokker resteert. Fase 2 replayt productie-events,
 eist minimaal vijf graph-afhankelijke matches en voert dezelfde R3-controle
-zonder graphcontext uit.
+zonder graphcontext uit. De fase-1-audit telt exacte BAG-matches plus
+gemotiveerde uitzonderingen. De fase-2-audit vereist dat ieder event van de
+vergunningbrug via een gekoppelde organisatie een bevestigde BAG-locatie bereikt.

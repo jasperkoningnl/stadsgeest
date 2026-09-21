@@ -73,6 +73,7 @@ Controleer de actuele dekking en openstaande fase-1-eisen met:
 ```powershell
 node scraper/audit-phase1.cjs
 node scraper/backfill-bag-locations.cjs
+node scraper/backfill-permit-events.cjs
 node scraper/manage-entity-merge.cjs list
 ```
 
@@ -85,3 +86,7 @@ toestemming voor die gegevensoverdracht.
 Een merge wordt pas uitgevoerd met een expliciete actor en reden. De beheerder
 kan iedere geaudite merge via `manage-entity-merge.cjs unmerge` transactioneel
 terugdraaien. Handmatige seeds bewaren bron, reden en eerstvolgende reviewdatum.
+
+De vergunningbackfill koppelt alleen bestaande records op exact
+postcode-huisnummer aan een bevestigde BAG-locatie. Ook deze opdracht is
+standaard een dry-run; gebruik `--apply` pas na controle van de aantallen.

@@ -17,13 +17,13 @@ reden, seeddatum en herzieningsdatum. Mergebesluiten zijn transactioneel,
 geaudit en via `manage-entity-merge.cjs` terug te draaien; de offline proef
 herstelt aliassen, identifiers, locaties, relaties en eventkoppelingen.
 
-`audit-phase1.cjs` noemt nog precies twee sluitblokkades: geen van de 82
-adresseerbare locaties heeft al een BAG-nummer en de handmatig gelabelde
-organisatie-golden-set bevat nog 0 van de vereiste 200 gevallen. Er staan 250
-brononderbouwde kandidaten klaar via `export-phase1-golden-candidates.cjs`.
-De BAG-backfill is gebouwd en weigert niet-exacte postcode-, huisnummer- of
-gemeentematches, maar mag pas na expliciete toestemming de adressen bij PDOK
-opvragen.
+De BAG-backfill is afgerond: 79 van 82 adresseerbare locaties kregen een exacte
+BAG-match. De drie resterende gevallen zijn aantoonbaar niet eenduidig — een
+huisnummerbereik, een niet-bestaand nummer en een basisnummer met meerdere
+toevoegingen — en staan als beoordeelde uitzondering vast. De enige resterende
+sluitblokkade is de handmatig gelabelde organisatie-golden-set: 0 van 200. Er
+staan 250 brononderbouwde kandidaten klaar via
+`export-phase1-golden-candidates.cjs`.
 
 **Afsluitvoorwaarde:** de lokale graph is zoekbaar en herleidbaar, en organisatie-
 en vestigingsmatches voldoen aantoonbaar aan de golden set. Ieder niet-uitgevoerd

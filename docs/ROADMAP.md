@@ -15,9 +15,8 @@ reden en gevolg in `DECISIONS.md`; stilzwijgend schrappen mag niet.
 
 - Fase 0 — inventarisatie en contracten: afgerond; productie-audit groen.
 - Fase 1 — entiteitenfundament: productiepad aanwezig; slotaudit open.
-- Fase 2 — eerste eventbronnen en graph matching: graph-exitbewijs groen met
-  37 graph-afhankelijke signalen; formele sluiting wacht nog op de
-  vergunning-naar-BAG-koppeling uit fase 1.
+- Fase 2 — eerste eventbronnen en graph matching: afgerond; graph-exitbewijs en
+  vergunning-naar-BAG-koppeling zijn groen.
 - Fase 3 — sectorregisters en statistiek: afgerond en productieactief.
 - Fase 4 — periodieke en experimentele bronnen: afgerond en productieactief;
   de identieke productieherhaalrun en audit zijn geslaagd.

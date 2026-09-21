@@ -59,8 +59,11 @@ events, `source_records`, `fetch_runs` en de handmatige mergewachtrij. Iedere
 uitgevoerde merge bewaart de betrokken rij-ID's in `entity_merge_audits`, zodat
 een beheerder de verplaatsing transactioneel kan terugdraaien. Handmatige
 kernseeds en hun bron-, reden- en reviewmetadata staan in
-`manual_entity_seeds`. De klassieke tabellen blijven daarnaast bestaan zolang
-intake en KG-detectie afzonderlijke productiepaden zijn.
+`manual_entity_seeds`; `bag_match_exceptions` legt bewust geweigerde,
+niet-eenduidige BAG-matches vast. Vergunningevents bereiken hun exacte
+BAG-locatie via `event_entities` en `entity_locations`. De klassieke tabellen
+blijven daarnaast bestaan zolang intake en KG-detectie afzonderlijke
+productiepaden zijn.
 
 `scraper/migrate-phase3.cjs` voegt broncontrolevelden en de tabellen
 `source_snapshots`, `statistical_baselines`, `area_versions` en
