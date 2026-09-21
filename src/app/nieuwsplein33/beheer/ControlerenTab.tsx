@@ -5,9 +5,11 @@ import { useEffect, useState } from 'react'
 type Candidate = {
   id: number
   referenceName: string
+  candidateName: string
+  candidatePlace: string | null
+  sourceLabel: string
   identifierType: string
   identifierValue: string
-  evidenceUrl: string
 }
 
 type GoldenStatus = {
@@ -74,16 +76,19 @@ export default function ControlerenTab() {
         </div>
       ) : data.candidate ? (
         <div className="np-beheer-kaart">
-          <p className="np-golden-vraag">Hoort deze registratie bij deze organisatie?</p>
-          <h2 className="np-golden-titel">{data.candidate.referenceName}</h2>
-          <dl className="np-golden-gegevens">
-            <div><dt>{data.candidate.identifierType.toUpperCase()}</dt><dd>{data.candidate.identifierValue}</dd></div>
-            <div><dt>Bewijs</dt><dd><a href={data.candidate.evidenceUrl} target="_blank" rel="noreferrer">Open bron ↗</a></dd></div>
-          </dl>
+          <p className="np-golden-vraag">Vergelijk de naamvariant met de organisatie. Bedoelen ze dezelfde organisatie?</p>
+          <div className="np-golden-vergelijking">
+            <div><span>Naamvariant</span><strong>{data.candidate.candidateName}</strong><small>{data.candidate.sourceLabel}{data.candidate.candidatePlace ? ` · ${data.candidate.candidatePlace}` : ''}</small></div>
+            <div><span>Gekoppeld aan</span><strong>{data.candidate.referenceName}</strong><small>Organisatie in Stadsgeest</small></div>
+          </div>
+          <p className="np-golden-kvk">
+            {data.candidate.identifierType.toUpperCase()} {data.candidate.identifierValue}
+            {' · '}<a href={`https://www.kvk.nl/zoeken/?source=all&q=${encodeURIComponent(data.candidate.identifierValue)}`} target="_blank" rel="noreferrer">Controleer bij KVK ↗</a>
+          </p>
           <div className="np-acties-knoppen np-golden-acties">
-            <button type="button" className="np-knop np-knop-ja" disabled={busy} onClick={() => beoordeel('same')}>Ja, dezelfde</button>
-            <button type="button" className="np-knop np-knop-nee" disabled={busy} onClick={() => beoordeel('different')}>Nee, andere</button>
-            <button type="button" className="np-knop np-knop-stil" disabled={busy} onClick={() => beoordeel('skipped')}>Overslaan</button>
+            <button type="button" className="np-knop np-knop-ja" disabled={busy} onClick={() => beoordeel('same')}>Ja, dezelfde organisatie</button>
+            <button type="button" className="np-knop np-knop-nee" disabled={busy} onClick={() => beoordeel('different')}>Nee, niet dezelfde</button>
+            <button type="button" className="np-knop np-knop-stil" disabled={busy} onClick={() => beoordeel('skipped')}>Weet ik niet</button>
           </div>
           {fout && <div className="np-beheer-fout">{fout}</div>}
         </div>

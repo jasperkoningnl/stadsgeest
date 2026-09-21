@@ -59,6 +59,9 @@ GLEIF gebruikt de actuele fulltext-API met exact lokaal nafilter (2.073 records)
 en OSM gebruikt de correcte gemeentegrenzen (15.521 contextobjecten). Directe
 herhalingen leverden voor alle drie nul wijzigingen en nul events op.
 
+De zorg-ODS-parser scheidt organisatienamen nu van persoons- en bestandsvelden.
+178 verkeerd benoemde importorganisaties zijn hersteld uit KVK-identiteitsregels.
+
 Handmatige kernseeds hebben bron-, reden- en reviewmetadata. Merge/review en
 unmerge zijn transactioneel en geaudit. De BAG-backfill koppelde 79 van 82
 locaties exact; drie niet-eenduidige gevallen zijn vastgelegd. In Beheer staat
@@ -101,8 +104,8 @@ schoolprognose, R13 Onderwijsinspectie en R14 verkeersmaatregel ongewijzigd.
    hun bestaande onzekerheidswaarschuwing en menselijke beoordeling.
 5. Onbekende niet-gevolgde bestanden blijven buiten de fase-5-wijziging.
 6. Fase 1 blijft open op de handmatig gelabelde organisatie-golden-set: 0 van
-   200. Het dashboard bevat 238 brononderbouwde automatische matches om met
-   ja, nee of overslaan te beoordelen; alleen ja en nee tellen mee.
+   200. Het dashboard bevat 223 naamvariant-versus-organisatieparen om met ja,
+   nee of “weet ik niet” te beoordelen; alleen ja en nee tellen mee.
 7. De augustus-reviewcyclus van fase 5 staat nog open. De actuele rollende
    meting telt 14 beoordelingen en 6 bruikbare tips; dit blijft beschrijvend en
    is onvoldoende voor kalibratie of effectsluiting.

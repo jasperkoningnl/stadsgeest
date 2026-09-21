@@ -8,13 +8,16 @@ const VERDICTS = new Set(['same', 'different', 'skipped'])
 async function status() {
   if (!turso) throw new Error('Geen database')
   const counts = (await turso.execute(`SELECT
-    (SELECT COUNT(*) FROM phase1_golden_candidates) total,
-    (SELECT COUNT(*) FROM phase1_golden_reviews WHERE verdict IN ('same','different')) labeled,
-    (SELECT COUNT(*) FROM phase1_golden_reviews WHERE verdict='skipped') skipped`)).rows[0]
-  const next = (await turso.execute(`SELECT c.id,c.reference_name,c.identifier_type,c.identifier_value,c.evidence_url
+    (SELECT COUNT(*) FROM phase1_golden_candidates WHERE active=1 AND dataset_version=3) total,
+    (SELECT COUNT(*) FROM phase1_golden_reviews r JOIN phase1_golden_candidates c ON c.id=r.candidate_id
+      WHERE c.active=1 AND c.dataset_version=3 AND r.verdict IN ('same','different')) labeled,
+    (SELECT COUNT(*) FROM phase1_golden_reviews r JOIN phase1_golden_candidates c ON c.id=r.candidate_id
+      WHERE c.active=1 AND c.dataset_version=3 AND r.verdict='skipped') skipped`)).rows[0]
+  const next = (await turso.execute(`SELECT c.id,c.reference_name,c.identifier_type,c.identifier_value,
+      c.candidate_name,c.candidate_place,c.source_label
     FROM phase1_golden_candidates c
     LEFT JOIN phase1_golden_reviews r ON r.candidate_id=c.id
-    WHERE r.id IS NULL ORDER BY c.id LIMIT 1`)).rows[0] ?? null
+    WHERE c.active=1 AND c.dataset_version=3 AND r.id IS NULL ORDER BY c.id LIMIT 1`)).rows[0] ?? null
   return {
     total: Number(counts.total),
     labeled: Number(counts.labeled),
@@ -23,9 +26,11 @@ async function status() {
     candidate: next ? {
       id: Number(next.id),
       referenceName: String(next.reference_name),
+      candidateName: String(next.candidate_name),
+      candidatePlace: next.candidate_place ? String(next.candidate_place) : null,
+      sourceLabel: String(next.source_label),
       identifierType: String(next.identifier_type),
       identifierValue: String(next.identifier_value),
-      evidenceUrl: String(next.evidence_url),
     } : null,
   }
 }
@@ -52,7 +57,7 @@ export async function POST(request: Request) {
 
   const existingRequest = await turso.execute({ sql: 'SELECT id FROM phase1_golden_reviews WHERE request_id=?', args: [requestId] })
   if (!existingRequest.rows.length) {
-    const candidate = await turso.execute({ sql: 'SELECT id FROM phase1_golden_candidates WHERE id=?', args: [candidateId] })
+    const candidate = await turso.execute({ sql: 'SELECT id FROM phase1_golden_candidates WHERE id=? AND active=1 AND dataset_version=3', args: [candidateId] })
     if (!candidate.rows.length) return NextResponse.json({ fout: 'Kandidaat niet gevonden' }, { status: 404 })
     await turso.execute({
       sql: `INSERT OR IGNORE INTO phase1_golden_reviews(candidate_id,verdict,actor,request_id) VALUES (?,?,?,?)`,

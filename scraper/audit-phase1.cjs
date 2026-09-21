@@ -18,16 +18,16 @@ async function main() {
     const invalidSeeds = Number((await db.execute(`SELECT COUNT(*) n FROM manual_entity_seeds
       WHERE source_url NOT LIKE 'https://%' OR reason IS NULL OR length(reason)<20 OR review_due_at IS NULL`)).rows[0].n);
     const expiredSeeds = Number((await db.execute("SELECT COUNT(*) n FROM manual_entity_seeds WHERE review_due_at<date('now') AND reviewed_at IS NULL")).rows[0].n);
-    const golden = (await db.execute(`SELECT c.reference_entity_id,c.reference_name,c.identifier_type,c.identifier_value,r.verdict
+    const golden = (await db.execute(`SELECT c.reference_entity_id,c.candidate_name,c.identifier_type,c.identifier_value,r.verdict
       FROM phase1_golden_candidates c JOIN phase1_golden_reviews r ON r.candidate_id=c.id
-      WHERE r.verdict IN ('same','different') ORDER BY c.id`)).rows;
+      WHERE c.active=1 AND c.dataset_version=3 AND r.verdict IN ('same','different') ORDER BY c.id`)).rows;
     let automatic = 0;
     let truePositive = 0;
     let falsePositive = 0;
     for (const item of golden) {
       const resolver = new EntityResolver({ db, dryRun: true });
       const result = await resolver.resolve({
-        name: String(item.reference_name),
+        name: String(item.candidate_name),
         entityType: 'organization',
         identifiers: [{ type: String(item.identifier_type), value: String(item.identifier_value) }],
       });

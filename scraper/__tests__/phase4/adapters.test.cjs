@@ -11,7 +11,7 @@ const {
 } = require('../../src/kg/detection-rules.cjs');
 const { ADAPTERS, summarizeRun } = require('../../src/kg/detection-run.cjs');
 const { extractGovernanceFacts, parseMunicipalCalendar, summarizeSensorThings } = require('../../src/kg/adapters/phase4-context-sources.cjs');
-const { buildCareComparisons, buildDpiComparisons, eventForCare, eventForDpi } = require('../../src/kg/adapters/phase4-official-datasets.cjs');
+const { buildCareComparisons, buildDpiComparisons, eventForCare, eventForDpi, rememberCareIdentity } = require('../../src/kg/adapters/phase4-official-datasets.cjs');
 const { siteNameMatches } = require('../../src/kg/adapters/phase4-official-datasets.cjs');
 
 const FIXTURES = path.join(__dirname, '../fixtures/phase4');
@@ -70,6 +70,17 @@ test('jaar-op-jaarvergelijkingen gebruiken stabiele identiteiten en maken uitslu
   const newDpi = { ...oldDpi, data: { ...oldDpi.data, waarde: '140' }, sourceUrl: 'dpi-2025' };
   const dpi = buildDpiComparisons([oldDpi], [newDpi], 2024, 2025); assert.equal(dpi.length, 1);
   const event = eventForDpi('changed', dpi[0], null, 1); assert.equal(event.type, 'HOUSING_INVESTMENT_ANOMALY'); assert.equal(event.journalisticallyRelevant, true);
+});
+
+test('zorgidentiteit gebruikt alleen de organisatieregel en nooit een persoonsnaam', () => {
+  const identities = new Map();
+  assert.equal(rememberCareIdentity(identities, { data: {
+    concerncode_code: 'zorg-1', kvknummer_externalorganizationid: '88657531', naam_name: 'StandUp Zorg', plaats_town: 'Leusden',
+  } }), true);
+  assert.equal(rememberCareIdentity(identities, { data: {
+    concerncode_code: 'zorg-1', naam_name: 'Sander Gijselhart Sander Zijdewind Lucinda Looijenga',
+  } }), false);
+  assert.deepEqual(identities.get('zorg-1'), { kvk: '88657531', name: 'StandUp Zorg' });
 });
 
 test('SEVESO-identiteit verdraagt alleen een kleine officiële naamvariant', () => {

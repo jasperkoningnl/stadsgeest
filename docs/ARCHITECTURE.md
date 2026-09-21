@@ -66,8 +66,9 @@ blijven daarnaast bestaan zolang intake en KG-detectie afzonderlijke
 productiepaden zijn.
 
 De fase-1-golden-set staat in `phase1_golden_candidates` en
-`phase1_golden_reviews`. Kandidaten zijn een bevroren steekproef van automatische
-organisatiematches op sterke identifiers met een bron-URL. Alleen Jasper kan ze
+`phase1_golden_reviews`. Kandidaten zijn een bevroren steekproef van
+naamvarianten tegenover de gekoppelde organisatie; een sterk KVK-identifier
+maakt dit dezelfde invoer die de resolver automatisch zou samenvoegen. Alleen Jasper kan ze
 via Beheer > Controleren beoordelen; verzoek-ID en unieke kandidaatkoppeling
 maken iedere beoordeling idempotent.
 

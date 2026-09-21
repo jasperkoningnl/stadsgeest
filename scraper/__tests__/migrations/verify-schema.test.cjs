@@ -209,7 +209,8 @@ describe('M8: fase-1-golden-setbeoordeling', () => {
 
   it('heeft minimaal 200 brononderbouwde automatische matches', async () => {
     const result = await db.execute(`SELECT COUNT(*) n FROM phase1_golden_candidates
-      WHERE identifier_type IN ('kvk','rsin','lei') AND evidence_url LIKE 'https://%'`);
+      WHERE active=1 AND dataset_version=3 AND candidate_name IS NOT NULL
+        AND identifier_type='kvk' AND evidence_url LIKE 'https://%'`);
     assert.ok(Number(result.rows[0].n) >= 200);
   });
 });

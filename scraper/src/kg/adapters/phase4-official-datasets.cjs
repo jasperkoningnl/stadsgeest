@@ -143,6 +143,17 @@ function careOrganization(record) {
   return { name, kvk, sourceUrl: record.sourceUrl, sourceKey: record.sourceKey };
 }
 
+function rememberCareIdentity(identityMap, record) {
+  const data = record.data || {};
+  const sourceIdentity = Object.entries(data).find(([key]) => /concerncode/i.test(key))?.[1];
+  const kvk = Object.entries(data).find(([key]) => /kvk|handelsregister/i.test(key))?.[1];
+  const name = data.naam_name || data.handelsnaam || Object.entries(data)
+    .find(([key]) => /naam van de organisatie.*geregistreerd/i.test(key))?.[1];
+  if (!sourceIdentity || !kvk || !name || identityMap.has(sourceIdentity)) return false;
+  identityMap.set(sourceIdentity, { kvk: String(kvk).replace(/\D/g, ''), name: String(name) });
+  return true;
+}
+
 function dpiIdentity(record) {
   const d = record.data || {}; return semanticHash({ kvk: d.kvk_nummer, institutionType: d.soort_instelling, daeb: d.daeb_indicatie, targetYear: d.jaar,
     metric: d.omschrijving, type: d.type_veld, municipality: d.gemeente });
@@ -264,12 +275,7 @@ class CareAccountabilityAdapter {
       const sheets = await parseOdsFiltered(fetched.buffer, { localKvks: identity.kvks, localSourceIds }); nationalRows += sheets.totalRows || sheets.reduce((sum, sheet) => sum + sheet.rows.length, 0);
       const local = tabularLocalRecords(sheets, { prefix: `care:${link.year}`, sourceUrl: fetched.url, localKvks: identity.kvks, localSourceIds });
       for (const record of local) { const kvk = Object.entries(record.data || {}).find(([key]) => /kvk|handelsregister/i.test(key))?.[1]; if (kvk) identity.kvks.add(String(kvk).replace(/\D/g, '')); }
-      for (const record of local) {
-        const sourceIdentity = Object.entries(record.data || {}).find(([key]) => /concerncode/i.test(key))?.[1];
-        const kvk = Object.entries(record.data || {}).find(([key]) => /kvk|handelsregister/i.test(key))?.[1];
-        const name = Object.entries(record.data || {}).find(([key]) => /(^|_)naam(_|$)|naam_name/i.test(key))?.[1];
-        if (sourceIdentity && (kvk || name)) sourceIdentityMap.set(sourceIdentity, { kvk: String(kvk || '').replace(/\D/g, ''), name });
-      }
+      for (const record of local) rememberCareIdentity(sourceIdentityMap, record);
       for (const record of local) {
         const sourceIdentity = Object.entries(record.data || {}).find(([key]) => /concerncode/i.test(key))?.[1]; const resolved = sourceIdentityMap.get(sourceIdentity);
         if (resolved) { record.data._resolved_kvk = resolved.kvk; record.data._resolved_name = resolved.name; record.semanticFields = record.data; }
@@ -432,5 +438,5 @@ class SevesoScopeAdapter {
 module.exports = {
   CARE_PAGE, DPI_PAGE, DPI_PREVIOUS_PAGE, METAS, MONUMENT_API, MONUMENT_PAGE, SEVESO_COMPLIANCE_PAGE, SEVESO_PAGE, SEVESO_REGION_PAGE,
   CareAccountabilityAdapter, DpiHousingAdapter, RijksmonumentenAdapter, SevesoScopeAdapter,
-  buildCareComparisons, buildDpiComparisons, careOrganization, ensureSevesoEntity, eventForCare, eventForDpi, eventForMonument, eventForSeveso, numberValue, pdfTextLines, recordBacktest, rowsFromMonumentZip, siteNameMatches, yearFromText,
+  buildCareComparisons, buildDpiComparisons, careOrganization, ensureSevesoEntity, eventForCare, eventForDpi, eventForMonument, eventForSeveso, numberValue, pdfTextLines, recordBacktest, rememberCareIdentity, rowsFromMonumentZip, siteNameMatches, yearFromText,
 };

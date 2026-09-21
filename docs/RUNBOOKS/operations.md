@@ -96,3 +96,8 @@ terugdraaien. Handmatige seeds bewaren bron, reden en eerstvolgende reviewdatum.
 De vergunningbackfill koppelt alleen bestaande records op exact
 postcode-huisnummer aan een bevestigde BAG-locatie. Ook deze opdracht is
 standaard een dry-run; gebruik `--apply` pas na controle van de aantallen.
+
+Controleer bij een afwijkende organisatienaam uit de zorgjaarverantwoording met
+`node scraper/repair-care-organization-names.cjs`. Dit is standaard een dry-run;
+`--apply` herstelt uitsluitend door die import aangemaakte organisaties vanuit
+de aparte KVK-identiteitsregel en laat bestaande beheerde organisaties ongemoeid.

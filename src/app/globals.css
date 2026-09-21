@@ -1314,11 +1314,13 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 .np-golden-voortgang span { display: block; height: 100%; border-radius: inherit; background: var(--np-accent); transition: width .2s ease; }
 .np-golden-vraag { margin: 0 0 8px; color: var(--np-inkt2); }
 .np-golden-titel { margin: 0 0 18px; font-family: var(--f-d); font-size: 22px; line-height: 1.25; }
-.np-golden-gegevens { margin: 0; }
-.np-golden-gegevens div { display: grid; grid-template-columns: 90px 1fr; gap: 12px; padding: 9px 0; border-top: 1px solid var(--np-rand-z); }
-.np-golden-gegevens dt { color: var(--np-inkt3); font-size: 12px; font-weight: 700; }
-.np-golden-gegevens dd { margin: 0; overflow-wrap: anywhere; }
-.np-golden-gegevens a { color: var(--np-accent); }
+.np-golden-vergelijking { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+.np-golden-vergelijking div { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 14px; border: 1px solid var(--np-rand-z); border-radius: 10px; background: var(--np-zacht); }
+.np-golden-vergelijking span { color: var(--np-inkt3); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.np-golden-vergelijking strong { overflow-wrap: anywhere; font-family: var(--f-d); font-size: 17px; line-height: 1.3; }
+.np-golden-vergelijking small { color: var(--np-inkt3); line-height: 1.4; }
+.np-golden-kvk { color: var(--np-inkt2); font-size: 13px; }
+.np-golden-kvk a { color: var(--np-accent); }
 .np-golden-acties { margin-top: 20px; }
 .np-beheer-history summary:hover { color: var(--np-inkt); }
 
@@ -1380,6 +1382,7 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 .np-th-pijl { color: var(--np-accent); }
 
 @media (max-width: 640px) {
+  .np-golden-vergelijking { grid-template-columns: 1fr; }
   .np-meter { flex-direction: column; align-items: flex-start; gap: 10px; }
   .np-tijdlijn > li { flex-direction: column; gap: 4px; }
   .np-tijdlijn-datum { width: auto; }
