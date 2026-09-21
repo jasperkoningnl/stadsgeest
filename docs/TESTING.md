@@ -136,3 +136,8 @@ eist minimaal vijf graph-afhankelijke matches en voert dezelfde R3-controle
 zonder graphcontext uit. De fase-1-audit telt exacte BAG-matches plus
 gemotiveerde uitzonderingen. De fase-2-audit vereist dat ieder event van de
 vergunningbrug via een gekoppelde organisatie een bevestigde BAG-locatie bereikt.
+
+Voer vóór de fase-1-audit de idempotente migratie
+`node scraper/migrate-phase1-golden-review.cjs` uit. De audit leest de
+Jasper-only beoordelingen uit Turso; alleen `same` en `different` tellen mee
+voor het minimum van 200 en de vereiste precision van 98%.

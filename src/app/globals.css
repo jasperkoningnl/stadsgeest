@@ -1309,6 +1309,17 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 }
 .np-beheer-history { margin-bottom: 8px; font-size: 13px; color: var(--np-inkt3); }
 .np-beheer-history summary { cursor: pointer; padding: 6px 0; }
+.np-golden { max-width: 700px; }
+.np-golden-voortgang { height: 7px; overflow: hidden; margin: 8px 0 18px; border-radius: 8px; background: var(--np-rand-z); }
+.np-golden-voortgang span { display: block; height: 100%; border-radius: inherit; background: var(--np-accent); transition: width .2s ease; }
+.np-golden-vraag { margin: 0 0 8px; color: var(--np-inkt2); }
+.np-golden-titel { margin: 0 0 18px; font-family: var(--f-d); font-size: 22px; line-height: 1.25; }
+.np-golden-gegevens { margin: 0; }
+.np-golden-gegevens div { display: grid; grid-template-columns: 90px 1fr; gap: 12px; padding: 9px 0; border-top: 1px solid var(--np-rand-z); }
+.np-golden-gegevens dt { color: var(--np-inkt3); font-size: 12px; font-weight: 700; }
+.np-golden-gegevens dd { margin: 0; overflow-wrap: anywhere; }
+.np-golden-gegevens a { color: var(--np-accent); }
+.np-golden-acties { margin-top: 20px; }
 .np-beheer-history summary:hover { color: var(--np-inkt); }
 
 .np-beheer-tabel-wrap { overflow-x: auto; margin-bottom: 8px; }

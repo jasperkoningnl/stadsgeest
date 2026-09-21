@@ -71,11 +71,17 @@ toestemming om drempels, brongewichten of regels automatisch te veranderen.
 Controleer de actuele dekking en openstaande fase-1-eisen met:
 
 ```powershell
+node scraper/migrate-phase1-golden-review.cjs
 node scraper/audit-phase1.cjs
 node scraper/backfill-bag-locations.cjs
 node scraper/backfill-permit-events.cjs
 node scraper/manage-entity-merge.cjs list
 ```
+
+De golden set wordt handmatig gevuld via Beheer > Controleren. Beoordeel ten
+minste 200 kandidaten met ja of nee; overgeslagen kandidaten tellen niet mee.
+Daarna rapporteert `audit-phase1.cjs` de precision van de automatische merges
+en slaagt fase 1 alleen bij minimaal 98%.
 
 De BAG-opdracht draait standaard als dry-run en accepteert alleen exacte
 adresmatches in Amersfoort of Leusden. Gebruik `--apply` pas na beoordeling van

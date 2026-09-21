@@ -61,8 +61,9 @@ herhalingen leverden voor alle drie nul wijzigingen en nul events op.
 
 Handmatige kernseeds hebben bron-, reden- en reviewmetadata. Merge/review en
 unmerge zijn transactioneel en geaudit. De BAG-backfill koppelde 79 van 82
-locaties exact; drie niet-eenduidige gevallen zijn vastgelegd. Fase 1 wacht
-alleen nog op de handmatige golden set.
+locaties exact; drie niet-eenduidige gevallen zijn vastgelegd. In Beheer staat
+onder Controleren een Jasper-only beoordelingsscherm voor de resterende
+handmatige golden set.
 
 ## Laatste verificatie en bewijsgrens
 
@@ -100,7 +101,8 @@ schoolprognose, R13 Onderwijsinspectie en R14 verkeersmaatregel ongewijzigd.
    hun bestaande onzekerheidswaarschuwing en menselijke beoordeling.
 5. Onbekende niet-gevolgde bestanden blijven buiten de fase-5-wijziging.
 6. Fase 1 blijft open op de handmatig gelabelde organisatie-golden-set: 0 van
-   200. Een export van 250 kandidaten is gereed.
+   200. Het dashboard bevat 238 brononderbouwde automatische matches om met
+   ja, nee of overslaan te beoordelen; alleen ja en nee tellen mee.
 7. De augustus-reviewcyclus van fase 5 staat nog open. De actuele rollende
    meting telt 14 beoordelingen en 6 bruikbare tips; dit blijft beschrijvend en
    is onvoldoende voor kalibratie of effectsluiting.

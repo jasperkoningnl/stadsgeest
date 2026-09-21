@@ -65,6 +65,12 @@ BAG-locatie via `event_entities` en `entity_locations`. De klassieke tabellen
 blijven daarnaast bestaan zolang intake en KG-detectie afzonderlijke
 productiepaden zijn.
 
+De fase-1-golden-set staat in `phase1_golden_candidates` en
+`phase1_golden_reviews`. Kandidaten zijn een bevroren steekproef van automatische
+organisatiematches op sterke identifiers met een bron-URL. Alleen Jasper kan ze
+via Beheer > Controleren beoordelen; verzoek-ID en unieke kandidaatkoppeling
+maken iedere beoordeling idempotent.
+
 `scraper/migrate-phase3.cjs` voegt broncontrolevelden en de tabellen
 `source_snapshots`, `statistical_baselines`, `area_versions` en
 `phase3_backtests` idempotent toe. Grote ruwe responses staan gecomprimeerd en

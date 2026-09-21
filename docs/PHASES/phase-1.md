@@ -22,8 +22,10 @@ BAG-match. De drie resterende gevallen zijn aantoonbaar niet eenduidig — een
 huisnummerbereik, een niet-bestaand nummer en een basisnummer met meerdere
 toevoegingen — en staan als beoordeelde uitzondering vast. De enige resterende
 sluitblokkade is de handmatig gelabelde organisatie-golden-set: 0 van 200. Er
-staan 250 brononderbouwde kandidaten klaar via
-`export-phase1-golden-candidates.cjs`.
+staan 238 brononderbouwde automatische matches klaar onder Beheer > Controleren.
+Alleen Jasper kan daar per kandidaat dezelfde organisatie, een andere
+organisatie of overslaan vastleggen. De database bewaart actor, moment en een
+uniek verzoek-ID; de slotaudit leest uitsluitend de ja/nee-beoordelingen.
 
 **Afsluitvoorwaarde:** de lokale graph is zoekbaar en herleidbaar, en organisatie-
 en vestigingsmatches voldoen aantoonbaar aan de golden set. Ieder niet-uitgevoerd

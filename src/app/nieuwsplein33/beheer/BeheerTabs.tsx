@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-const TABS = ['Bronnen', 'Intake', 'Weging', 'Leren'] as const
+const TABS = ['Bronnen', 'Intake', 'Weging', 'Leren', 'Controleren'] as const
 export type BeheerTab = (typeof TABS)[number]
 
 const PERIODES = [
@@ -18,6 +18,7 @@ interface BeheerTabsProps {
   intakeContent: ReactNode
   wegingContent: ReactNode
   lerenContent: ReactNode
+  controlerenContent: ReactNode
   periode: number
 }
 
@@ -27,6 +28,7 @@ export default function BeheerTabs({
   intakeContent,
   wegingContent,
   lerenContent,
+  controlerenContent,
   periode,
 }: BeheerTabsProps) {
   const [actief, setActief] = useState<BeheerTab>('Bronnen')
@@ -57,8 +59,8 @@ export default function BeheerTabs({
           </button>
         ))}
 
-        {/* Periodeselector (niet voor Bronnen) */}
-        {actief !== 'Bronnen' && (
+        {/* Periodeselector voor de tijdgebonden overzichten */}
+        {['Intake', 'Weging', 'Leren'].includes(actief) && (
           <div className="np-periode-kiezer">
             {PERIODES.map((p) => (
               <button
@@ -79,6 +81,7 @@ export default function BeheerTabs({
         {actief === 'Intake' && intakeContent}
         {actief === 'Weging' && wegingContent}
         {actief === 'Leren' && lerenContent}
+        {actief === 'Controleren' && controlerenContent}
       </div>
     </div>
   )

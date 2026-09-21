@@ -15,6 +15,7 @@ import BeheerTabs from './BeheerTabs'
 import IntakeTab from './IntakeTab'
 import WegingTab from './WegingTab'
 import LerenTab from './LerenTab'
+import ControlerenTab from './ControlerenTab'
 
 export const metadata: Metadata = {
   title: 'Beheer — Nieuwsplein33',
@@ -85,6 +86,7 @@ export default async function BeheerPagina({ searchParams }: BeheerPaginaProps) 
         />
       }
       lerenContent={<LerenTab data={leren} periodeLabel={periodeLabel} />}
+      controlerenContent={<ControlerenTab />}
     />
   )
 }

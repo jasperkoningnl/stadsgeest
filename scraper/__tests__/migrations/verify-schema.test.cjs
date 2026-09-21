@@ -202,6 +202,18 @@ describe('M7: fase-5-leerloop', () => {
   });
 });
 
+describe('M8: fase-1-golden-setbeoordeling', () => {
+  for (const table of ['phase1_golden_candidates', 'phase1_golden_reviews']) {
+    it(`${table} bestaat`, async () => assert.ok((await getColumns(table)).length > 0));
+  }
+
+  it('heeft minimaal 200 brononderbouwde automatische matches', async () => {
+    const result = await db.execute(`SELECT COUNT(*) n FROM phase1_golden_candidates
+      WHERE identifier_type IN ('kvk','rsin','lei') AND evidence_url LIKE 'https://%'`);
+    assert.ok(Number(result.rows[0].n) >= 200);
+  });
+});
+
 describe('Integriteit', () => {
   it('geen kg_entities zonder type', async () => {
     const r = await db.execute("SELECT COUNT(*) as n FROM kg_entities WHERE entity_type IS NULL");

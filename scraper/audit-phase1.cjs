@@ -1,10 +1,7 @@
-const fs = require('node:fs');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { createClient } = require('@libsql/client');
 const { EntityResolver } = require('./src/kg/entity-resolver.cjs');
-
-const GOLDEN_SET = path.join(__dirname, 'data', 'phase1-golden-set.json');
 
 async function main() {
   const db = createClient({ url: process.env.TURSO_URL, authToken: process.env.TURSO_AUTH_TOKEN });
@@ -21,16 +18,22 @@ async function main() {
     const invalidSeeds = Number((await db.execute(`SELECT COUNT(*) n FROM manual_entity_seeds
       WHERE source_url NOT LIKE 'https://%' OR reason IS NULL OR length(reason)<20 OR review_due_at IS NULL`)).rows[0].n);
     const expiredSeeds = Number((await db.execute("SELECT COUNT(*) n FROM manual_entity_seeds WHERE review_due_at<date('now') AND reviewed_at IS NULL")).rows[0].n);
-    const golden = fs.existsSync(GOLDEN_SET) ? JSON.parse(fs.readFileSync(GOLDEN_SET, 'utf8')) : [];
+    const golden = (await db.execute(`SELECT c.reference_entity_id,c.reference_name,c.identifier_type,c.identifier_value,r.verdict
+      FROM phase1_golden_candidates c JOIN phase1_golden_reviews r ON r.candidate_id=c.id
+      WHERE r.verdict IN ('same','different') ORDER BY c.id`)).rows;
     let automatic = 0;
     let truePositive = 0;
     let falsePositive = 0;
     for (const item of golden) {
       const resolver = new EntityResolver({ db, dryRun: true });
-      const result = await resolver.resolve(item.candidate);
+      const result = await resolver.resolve({
+        name: String(item.reference_name),
+        entityType: 'organization',
+        identifiers: [{ type: String(item.identifier_type), value: String(item.identifier_value) }],
+      });
       if (result.action !== 'auto_merge') continue;
       automatic++;
-      if (Number(result.match?.entityId) === Number(item.expectedEntityId)) truePositive++;
+      if (item.verdict === 'same' && Number(result.match?.entityId) === Number(item.reference_entity_id)) truePositive++;
       else falsePositive++;
     }
     const precision = automatic ? truePositive / automatic : null;
@@ -45,7 +48,7 @@ async function main() {
         completed: bagMatched + bagExceptions === addressable, coverage: addressable ? bagMatched / addressable : null },
       manualSeeds: { total: counts.manual_entity_seeds, invalid: invalidSeeds, expired: expiredSeeds },
       mergeSafety: { auditTable: true, reversibleOfflineTest: '__tests__/entity-resolution/reversible-merge.test.cjs' },
-      goldenSet: { path: fs.existsSync(GOLDEN_SET) ? GOLDEN_SET : null, labeled: golden.length, automatic, truePositive, falsePositive, precision },
+      goldenSet: { source: 'phase1_golden_reviews', labeled: golden.length, automatic, truePositive, falsePositive, precision },
       blockers,
     };
     console.log(JSON.stringify(result, null, 2));
