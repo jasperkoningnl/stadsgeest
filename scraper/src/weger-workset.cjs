@@ -134,6 +134,63 @@ async function loadNerKgCandidates(db, signalId) {
   }));
 }
 
+// Adreskoppeling (2026-09-23): per exact BAG-adres in dit signaal de andere
+// documenten, registers en KG-organisaties op precies dat adres (nummeraanduiding).
+// Alleen adressen met minstens één treffer elders gaan mee. Een adres dat in meer
+// dan 50 documenten staat (gemeentehuis, postadres) krijgt geen documentlijst.
+async function loadAddressLinks(db, signalId) {
+  if (!(await tableExists(db, 'document_addresses'))) return [];
+  const haveRegisters = await tableExists(db, 'register_addresses');
+  const addresses = (await db.execute({
+    sql: `SELECT da.nummeraanduiding_id AS bag_id, MIN(da.address_text) AS adres, MIN(da.buurtcode) AS buurtcode
+          FROM signal_items si JOIN document_addresses da ON da.raw_item_id = si.raw_item_id
+          WHERE si.signal_id = ? AND da.match_status = 'exact'
+          GROUP BY da.nummeraanduiding_id LIMIT 10`,
+    args: [signalId],
+  })).rows;
+  const out = [];
+  for (const a of addresses) {
+    const others = (await db.execute({
+      sql: `SELECT r.id, r.title, s.name AS bron, COALESCE(r.published_at, r.scraped_at) AS datum
+            FROM document_addresses da
+            JOIN raw_items r ON r.id = da.raw_item_id
+            JOIN sources s ON s.id = r.source_id
+            WHERE da.nummeraanduiding_id = ? AND da.match_status = 'exact'
+              AND da.raw_item_id NOT IN (SELECT raw_item_id FROM signal_items WHERE signal_id = ?)
+            ORDER BY r.id DESC LIMIT 51`,
+      args: [a.bag_id, signalId],
+    })).rows;
+    const registers = haveRegisters ? (await db.execute({
+      sql: `SELECT s.name AS register, ra.label, ra.role
+            FROM register_addresses ra JOIN sources s ON s.id = ra.source_id
+            WHERE ra.nummeraanduiding_id = ? AND ra.match_status = 'exact' LIMIT 10`,
+      args: [a.bag_id],
+    })).rows : [];
+    const kg = (await db.execute({
+      sql: `SELECT DISTINCT ke.id AS kg_entity_id, ke.canonical_name AS naam, el.relation_type AS relatie
+            FROM locations l
+            JOIN entity_locations el ON el.location_id = l.id
+            JOIN kg_entities ke ON ke.id = el.entity_id
+            WHERE l.bag_id = ? LIMIT 10`,
+      args: [a.bag_id],
+    })).rows;
+    if (!others.length && !registers.length && !kg.length) continue;
+    const veel = others.length > 50;
+    out.push({
+      adres: a.adres,
+      bag_nummeraanduiding: a.bag_id,
+      buurtcode: a.buurtcode,
+      andere_documenten: veel ? 'meer dan 50 (veelvoorkomend adres, niet gelijst)' : others.slice(0, 5).map((o) => ({
+        raw_item_id: Number(o.id), titel: clip(o.title), bron: o.bron, datum: o.datum,
+      })),
+      andere_documenten_aantal: veel ? '>50' : others.length,
+      registers,
+      kg_organisaties: kg.map((k) => ({ ...k, kg_entity_id: Number(k.kg_entity_id) })),
+    });
+  }
+  return out;
+}
+
 async function loadRecentEvents(db, signalId) {
   if (!(await tableExists(db, 'signal_events'))) return [];
   const result = await db.execute({
@@ -186,11 +243,12 @@ async function main(argv = process.argv.slice(2)) {
     const candidates = [];
     for (const signal of signals.rows) {
       const signalId = Number(signal.id);
-      const [itemSet, entities, recentEvents, nerKgCandidates] = await Promise.all([
+      const [itemSet, entities, recentEvents, nerKgCandidates, addressLinks] = await Promise.all([
         loadItems(db, signalId),
         loadEntities(db, signalId),
         loadRecentEvents(db, signalId),
         loadNerKgCandidates(db, signalId),
+        loadAddressLinks(db, signalId),
       ]);
       candidates.push({
         signal: { ...signal, id: signalId },
@@ -199,6 +257,7 @@ async function main(argv = process.argv.slice(2)) {
         items_omitted: Math.max(0, itemSet.total - itemSet.items.length),
         entities,
         ner_kg_kandidaten: nerKgCandidates,
+        adres_koppelingen: addressLinks,
         recent_events: recentEvents,
       });
     }
@@ -239,4 +298,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { clip, jsonValue, parseLimit, loadNerKgCandidates };
+module.exports = { clip, jsonValue, parseLimit, loadNerKgCandidates, loadAddressLinks };

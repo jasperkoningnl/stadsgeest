@@ -70,6 +70,14 @@ moet lezen. Ken punten zoals 'bekende bestuurder direct betrokken' alleen toe
 als het gelezen document het bevestigt, en let op naamgenoten bij gewone namen.
 Zie `docs/NER.md`.
 
+`adres_koppelingen` noemt per exact BAG-adres in het signaal de andere
+documenten, registers (kinderopvang, GLEIF, DUO) en KG-organisaties op precies
+datzelfde adres. Gebruik dat om verbanden tussen bronnen te zoeken. Een gedeeld
+adres is een aanwijzing, geen verband: lees beide stukken voordat je een
+patroon of relatie claimt. GLEIF bevat ook persoonlijke holdings op
+woonadressen: noem bij een particulier adres geen holding of bewoner in een tip.
+Zie `docs/ADRESKOPPELING.md`.
+
 Lees bij een dragende officiële bron de volledige beschikbare tekst. Als de
 opgeslagen tekst zichtbaar is afgekapt of leeg is, open dan de officiële URL.
 Ken geen patroon of detail toe dat niet uit het gelezen materiaal blijkt.

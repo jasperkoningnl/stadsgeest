@@ -87,9 +87,9 @@ De beschermde regelidentiteiten blijven R1–R16. In het bijzonder zijn R5
 misdrijfanomalie, R10 multibronversterking, R11 leerlingontwikkeling, R12
 schoolprognose, R13 Onderwijsinspectie en R14 verkeersmaatregel ongewijzigd.
 
-## NER (spoor 1)
+## NER en adressen
 
-spaCy-vermeldingen staan los van de KG, draaien dagelijks; zie `NER.md`.
+Los van de KG, dagelijks: zie `NER.md` en `ADRESKOPPELING.md`.
 
 ## Open bewijs en risico's
 

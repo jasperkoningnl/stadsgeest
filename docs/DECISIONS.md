@@ -295,6 +295,15 @@ burgers in staan. De weger krijgt alleen KG-kandidaten; onopgeloste
 vermeldingen zijn daarvoor te ruisig (organisatieprecisie 25-58%). De
 bestaande aliasextractie blijft ongewijzigd leidend. Zie `NER.md`.
 
+## 2026-09-23 — BAG-nummeraanduiding als koppelsleutel voor adressen
+
+Documenten en registers worden alleen aan elkaar gekoppeld via een exacte
+BAG-nummeraanduiding, niet via straatnaam of afstand. Beide gaven in de proef
+van 23 september valse verbanden (buurpand, zelfde straat). Zonder exacte
+treffer is er geen koppeling; bij twijfel over letter of toevoeging wordt niet
+gekozen. Monumenten wachten daarom op een BAG-adres uit het RCE-register.
+Zie `ADRESKOPPELING.md`.
+
 ## 2026-09-23 — Betaalde OpenKvK-bron via overheid.io
 
 Het uitbreidingsplan zegt "Geen betaalde KVK- of Kadasterproducten toevoegen."

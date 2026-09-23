@@ -47,5 +47,11 @@ $retentionExit = Invoke-NodeStep @('retain-phase5-feedback.cjs', '--apply')
 # komt uit scraper\.ner-venv (zie extract-ner.cjs).
 $nerExit = Invoke-NodeStep @('src\extract-ner.cjs', '--limit', '500')
 
-if ($detectionExit -ne 0 -or $evaluationExit -ne 0 -or $retentionExit -ne 0 -or $nerExit -ne 0) { exit 1 }
+# Adreskoppeling (docs/ADRESKOPPELING.md): adressen uit nieuwe items en uit de
+# registers LRK, GLEIF en DUO exact aan de BAG koppelen. PDOK-antwoorden komen
+# grotendeels uit bag_lookup_cache.
+$adresExit = Invoke-NodeStep @('src\extract-addresses.cjs', '--limit', '500')
+$registerExit = Invoke-NodeStep @('src\link-register-addresses.cjs')
+
+if ($detectionExit -ne 0 -or $evaluationExit -ne 0 -or $retentionExit -ne 0 -or $nerExit -ne 0 -or $adresExit -ne 0 -or $registerExit -ne 0) { exit 1 }
 exit 0
