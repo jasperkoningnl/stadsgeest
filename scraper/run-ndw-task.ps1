@@ -14,5 +14,7 @@ New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 [Console]::OutputEncoding = $utf8
 $OutputEncoding = $utf8
 Set-Location -LiteralPath $scriptDir
-& $nodeExe 'src\kg\detection-run.cjs' '--adapters=ndw' 2>&1 | Out-File -LiteralPath $logFile -Encoding utf8 -Append
+# Zie run-detection-task.ps1: met 'Stop' breekt elke stderr-regel de taak af.
+$ErrorActionPreference = 'Continue'
+& $nodeExe 'src\kg\detection-run.cjs' '--adapters=ndw' 2>&1 | ForEach-Object { "$_" } | Out-File -LiteralPath $logFile -Encoding utf8 -Append
 exit $LASTEXITCODE

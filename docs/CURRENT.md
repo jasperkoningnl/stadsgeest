@@ -89,7 +89,7 @@ schoolprognose, R13 Onderwijsinspectie en R14 verkeersmaatregel ongewijzigd.
 
 ## NER (spoor 1)
 
-spaCy-vermeldingen staan los van de KG, nog ongepland; zie `NER.md`.
+spaCy-vermeldingen staan los van de KG, draaien dagelijks; zie `NER.md`.
 
 ## Open bewijs en risico's
 

@@ -14,19 +14,38 @@ New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 [Console]::OutputEncoding = $utf8
 $OutputEncoding = $utf8
 Set-Location -LiteralPath $scriptDir
-# De gecombineerde run houdt meerdere datasets en adaptermodules tegelijk vast.
-# 768 MB bleek na activering van ANBI/GLEIF/OSM onvoldoende; de notebook heeft
-# ruim voldoende fysiek geheugen voor deze begrensde 1,5 GB-run.
-& $nodeExe '--max-old-space-size=1536' 'src\kg\detection-run.cjs' 2>&1 | Out-File -LiteralPath $logFile -Encoding utf8 -Append
-$detectionExit = $LASTEXITCODE
+
+# Windows PowerShell 5 maakt van elke stderr-regel van een native proces een
+# foutrecord. Met 'Stop' brak een enkele waarschuwing de hele taak af (23-9:
+# detectierun gestopt tijdens Asbest, evaluatie en retentie overgeslagen,
+# resultaatcode 1). Daarom draait elke stap met 'Continue' en telt alleen de
+# exitcode van het proces.
+function Invoke-NodeStep {
+  param([string[]]$Arguments)
+  $previous = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    & $nodeExe @Arguments 2>&1 | ForEach-Object { "$_" } | Out-File -LiteralPath $logFile -Encoding utf8 -Append
+    return $LASTEXITCODE
+  } finally {
+    $ErrorActionPreference = $previous
+  }
+}
+
+# De gecombineerde run houdt meerdere datasets en adaptermodules tegelijk vast;
+# 768 MB bleek na activering van ANBI/GLEIF/OSM onvoldoende.
+$detectionExit = Invoke-NodeStep @('--max-old-space-size=1536', 'src\kg\detection-run.cjs')
 
 # De leerloop draait in dezelfde dagelijkse taak, maar is transactioneel en
-# foutgeïsoleerd. De evaluatie maakt hoogstens één open maandreview; de
+# foutgeisoleerd. De evaluatie maakt hoogstens een open maandreview; de
 # bewaarroutine anonimiseert pas na 24 maanden. Geen van beide past regels aan.
-& $nodeExe 'run-phase5-evaluation.cjs' '--scheduled' 2>&1 | Out-File -LiteralPath $logFile -Encoding utf8 -Append
-$evaluationExit = $LASTEXITCODE
-& $nodeExe 'retain-phase5-feedback.cjs' '--apply' 2>&1 | Out-File -LiteralPath $logFile -Encoding utf8 -Append
-$retentionExit = $LASTEXITCODE
+$evaluationExit = Invoke-NodeStep @('run-phase5-evaluation.cjs', '--scheduled')
+$retentionExit = Invoke-NodeStep @('retain-phase5-feedback.cjs', '--apply')
 
-if ($detectionExit -ne 0 -or $evaluationExit -ne 0 -or $retentionExit -ne 0) { exit 1 }
+# NER spoor 1 (docs/NER.md): nieuwe items uit het bronbereik, na de detectie en
+# voor de weger. Schrijft alleen naar document_mentions en ner_scans. Python
+# komt uit scraper\.ner-venv (zie extract-ner.cjs).
+$nerExit = Invoke-NodeStep @('src\extract-ner.cjs', '--limit', '500')
+
+if ($detectionExit -ne 0 -or $evaluationExit -ne 0 -or $retentionExit -ne 0 -or $nerExit -ne 0) { exit 1 }
 exit 0

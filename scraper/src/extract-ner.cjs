@@ -8,7 +8,7 @@
 // Aanroep:
 //   node src/extract-ner.cjs [--limit N] [--dry-run] [--ids 1,2,3] [--before-id N]
 //   --dry-run  leest alleen; schrijft rapport naar tmp/ner-dryrun-<tijd>.json
-// Python: NER_PYTHON of %LOCALAPPDATA%\stadsgeest-ner\venv\Scripts\python.exe
+// Python: NER_PYTHON of scraper\.ner-venv\Scripts\python.exe
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -32,8 +32,11 @@ const DRY = process.argv.includes('--dry-run');
 const LIMIT = parseInt(arg('--limit', '300'), 10);
 const IDS = arg('--ids', null);
 const BEFORE_ID = parseInt(arg('--before-id', '0'), 10) || null;
+// Venv in scraper/.ner-venv (genegeerd door git). Niet in %LOCALAPPDATA%: vanuit de
+// Claude-app belandt die map in een gevirtualiseerde pakketmap die de Taakplanner
+// niet ziet (23-9: ENOENT in de geplande taak).
 const PYTHON = process.env.NER_PYTHON
-  || path.join(process.env.LOCALAPPDATA || '', 'stadsgeest-ner', 'venv', 'Scripts', 'python.exe');
+  || path.join(__dirname, '..', '.ner-venv', 'Scripts', 'python.exe');
 const WORKER = path.join(__dirname, 'ner', 'spacy_worker.py');
 
 async function tableExists(name) {

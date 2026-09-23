@@ -1,7 +1,7 @@
 # NER-documentvermeldingen (spoor 1)
 
 **Doel:** vastleggen hoe de spaCy-extractie werkt, wat ze wel en niet mag, en hoe goed ze is.
-**Status:** gezaghebbend; ingevoerd 2026-09-23. Draait nog niet gepland.
+**Status:** gezaghebbend; ingevoerd 2026-09-23. Draait dagelijks in `Stadsgeest Detection`.
 **Lees wanneer:** bij werk aan `extract-ner.cjs`, `document_mentions`, de weger-werkset of entiteitskwaliteit.
 
 ## Wat het doet
@@ -72,11 +72,28 @@ node src/extract-ner.cjs --limit 3000 --before-id N   # backfill ouder dan id N
 node src/extract-ner.cjs --ids 9550,9551              # expliciet (ook buiten bronbereik)
 ```
 
-Python staat in een aparte venv buiten de repo:
-`%LOCALAPPDATA%\stadsgeest-ner\venv` (Python 3.14, spaCy 3.8.16,
-`nl_core_news_lg` 3.8.0, ca. 600 MB). Overschrijven kan met `NER_PYTHON`.
-Draait een geplande taak onder een ander account, zet dan `NER_PYTHON`
-expliciet. `scraper/node_modules` is niet aangeraakt.
+Python staat in een aparte venv `scraper\.ner-venv` (genegeerd door git;
+Python 3.14, spaCy 3.8.16, `nl_core_news_lg` 3.8.0, ca. 600 MB). Overschrijven
+kan met `NER_PYTHON`. `scraper/node_modules` is niet aangeraakt.
+
+Zet de venv niet in `%LOCALAPPDATA%`. Vanuit de Claude-desktopapp belandt die
+map in de gevirtualiseerde pakketmap `AppData\Local\Packages\Claude_...\LocalCache`,
+die de Taakplanner niet ziet (23-9: ENOENT in de geplande taak). Opnieuw
+opbouwen:
+
+```powershell
+py -3.14 -m venv scraper\.ner-venv
+scraper\.ner-venv\Scripts\python.exe -m pip install spacy==3.8.16
+scraper\.ner-venv\Scripts\python.exe -m spacy download nl_core_news_lg
+```
+
+## Planning
+
+De stap draait in de dagelijkse taak `Stadsgeest Detection` (06.15 uur), na
+detectie, evaluatie en retentie: `extract-ner.cjs --limit 500`, nieuwste
+ongescande items eerst. Daarna gaat hij vanzelf verder met oudere items tot het
+bronbereik helemaal is gescand. Een NER-fout maakt de taakuitkomst 1, maar
+houdt de andere stappen niet tegen.
 
 Snelheid op de notebook: 3.000 items in 372 s NER (Python-proces ca. 1 GB
 geheugen) plus ca. 7 minuten wegschrijven, één databasebatch per item.
@@ -128,7 +145,7 @@ Lees dit zo:
 
 ## Open
 
-1. Planning: nog niet in een dagelijkse taak opgenomen (besluit Jasper).
+1. Bij NS-storingen komt steeds 'NS' als kandidaat mee in de werkset (ruis).
 2. Review-ingang voor `candidate`/`ambiguous` ontbreekt; hoort bij het
    dashboardontwerp.
 3. Organisatiefilter opnieuw meten na filter-7, en pas daarna onopgeloste
