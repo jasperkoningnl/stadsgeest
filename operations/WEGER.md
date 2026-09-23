@@ -20,9 +20,9 @@ Werk rechtstreeks in de lokale repository. Productiegeheimen staan in
 actief is. Wijzig tijdens een normale run geen Git-bestanden, `CURRENT.md` of
 `LOGBOEK.md`.
 
-Het doel van een run is de achterstand wegwerken en verbanden tussen bronnen
-vinden. Het aantal tips is geen doel. Nul tips is een geldige uitkomst, mits
-de verbandencheck (sectie 3a) is gedaan en vastgelegd.
+Iedere run levert minimaal één bruikbare tip op. De weger werkt daarvoor de
+achterstand weg en zoekt actief naar verbanden tussen bronnen (sectie 3a en
+3b). Een tip met een geverifieerd verband gaat vóór een tip uit één bron.
 
 Lees vóór de eerste beoordeling de laatste twintig redactieoordelen
 (`tip_feedback`, gekoppeld aan `tips`) en houd rekening met de redenen.
@@ -98,15 +98,15 @@ de juiste afbakening inhoudelijk onzeker is; meld dat als voorgestelde actie.
 ## 3a. Verbandencheck
 
 Doe deze check vóór elk oordeel, ook bij routine, voor elk signaal met een
-adres, een organisatie of een publiek persoon. Kijk 24 maanden terug. De
-hulpscripts staan buiten de repo in `C:\Users\Jasper Koning\stadsgeest-werk` en
-lezen alleen:
+adres, een organisatie of een publiek persoon. Kijk 24 maanden terug. Beide
+hulpscripts lezen alleen:
 
-- `node adres.cjs "<straat nr plaats>"` geeft het BAG-adres, de
-  nummeraanduiding, de buurtcode en rijksmonumenten binnen 10 m. Nabijheid is
+- `node scraper/src/weger-adres.cjs "<straat nr plaats>"` geeft het BAG-adres,
+  de nummeraanduiding, de buurtcode en rijksmonumenten binnen 10 m. Nabijheid is
   een aanwijzing. Bevestig een monument in het monumentenregister: het adres
   moet exact kloppen.
-- `node q.cjs "<SELECT ...>"` voert een zoekvraag uit tegen de database.
+- `node scraper/src/weger-query.cjs "<SELECT ...>"` voert een zoekvraag uit
+  tegen de database en weigert alles wat schrijft.
 
 Waar zoek je:
 - **Adres:** andere vergunningen op hetzelfde adres, asbest
@@ -128,6 +128,31 @@ routine meer. Noem geen particulieren.
 
 Leg in het rapport vast welke verbanden je vond en welke koppelgaten er waren:
 waar een verband niet te controleren was, en welke sleutel of bron ontbrak.
+
+## 3b. Sweep als de werkset geen tip oplevert
+
+Levert de werkset geen tip van 6 of hoger op, zoek dan zelf over de hele
+database. Kies een sweep die in recente runs niet is gedaan; dat zie je aan de
+redenen in `signal_events` en aan bestaande tips.
+
+1. Vergunningen van de laatste 60 dagen (bronnen 109, 123 en 127) ×
+   rijksmonumenten, via `weger-adres.cjs` en bevestigd in het register.
+2. Subsidieontvangers (`subsidies`, hoogste bedragen, laatste twee jaar,
+   geen particulieren) × rechtspraak, asbest, ANBI, zorgjaarverantwoording en
+   TenderNed.
+3. ANBI- en governancebestuurders (158, 156, `kg_relations`) × raadsleden,
+   wethouders en subsidieontvangers.
+4. Winnaars van gemeentelijke aanbestedingen × asbest, Arbeidsinspectie en
+   rechtspraak.
+5. Buurten met de sterkste misdrijfstijging (149) × raadsvragen en B&W-besluiten.
+6. Scholen met dalende leerlingaantallen of een dalende prognose (141, 142) ×
+   inspectieoordeel (144) × huisvestingsbesluiten.
+7. Zorg- en jeugdaanbieders met gemeentelijke contracten × jaarverantwoording
+   (150).
+
+Een tip uit een sweep koppel je aan het best passende bestaande signaal. Als
+er geen signaal is, gebruik je een signaal dat de sweep ondersteunt, met de rol
+`context`. De harde bronregel blijft gelden.
 
 ## 4. Spiegelcheck
 
@@ -166,9 +191,20 @@ Gebruik in `weging` voor de laatste twee de sleutels `kruisbronverband` en
 `alleen_naamovereenkomst`.
 
 Score 6 of hoger wordt een tip. Daaronder blijft het bij een gemotiveerd oordeel
-en zo nodig dossierfeit. Rek scores niet op. Maak geen dunne dagtips: als geen
-signaal 6 haalt, levert de run nul tips op. Maak hoogstens drie tips per run.
-Een los incident van één klein bedrijf is geen tip.
+en zo nodig dossierfeit. Rek scores niet op. Maak hoogstens drie tips per run.
+
+Haalt niets 6, ook niet na een sweep (3b), kies dan de beste kandidaat met een
+geldige dragende bron als dunne dagtip. Een dunne dagtip mag nooit het volgende
+zijn:
+- een routinehandeling;
+- een los incident van één klein bedrijf;
+- iets buiten Amersfoort of Leusden;
+- iets wat de redactie al had.
+
+Zet de melding dat de score onder de drempel ligt als laatste punt onder
+`WAT HIER NIET IN MAG`, niet in `score_motivatie`: dat veld staat in de
+wachtrij. Lever alleen nul tips als na de sweep werkelijk geen geldige kandidaat
+overblijft. Leg dan uit waarom ook de beste kandidaat niet kon.
 
 Bij meer dan twee tips en een meerderheid uit één
 broncategorie: bekijk de beste geldige kandidaat uit een andere categorie en
@@ -234,11 +270,12 @@ Rapporteer getelde resultaten:
 - gevonden verbanden, met sleutel, bronnen en status (tip, hypothese of
   verworpen);
 - koppelgaten;
+- de uitgevoerde sweep (nummer uit 3b) en wat die opleverde;
 - bronproblemen en niet-geverifieerde punten;
 - de resterende achterstand (`weger-workset.cjs --limit 50 --summary`).
 
 Controleer de databaseaantallen na de write.
 
-Geen werk is een geldige uitkomst. Wijzig bij een normale run geen documentatie
+Ook als de werkset leeg is, voer je een sweep (3b) uit. Wijzig bij een normale run geen documentatie
 en maak geen Git-commit. Meld alleen een structureel defect, vereiste keuze of
 onveilige toestand aan Jasper.
