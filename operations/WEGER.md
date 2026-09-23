@@ -20,19 +20,42 @@ Werk rechtstreeks in de lokale repository. Productiegeheimen staan in
 actief is. Wijzig tijdens een normale run geen Git-bestanden, `CURRENT.md` of
 `LOGBOEK.md`.
 
+Het doel van een run is de achterstand wegwerken en verbanden tussen bronnen
+vinden. Het aantal tips is geen doel. Nul tips is een geldige uitkomst, mits
+de verbandencheck (sectie 3a) is gedaan en vastgelegd.
+
+Lees vóór de eerste beoordeling de laatste twintig redactieoordelen
+(`tip_feedback`, gekoppeld aan `tips`) en houd rekening met de redenen.
+Bekende afwijzingen zijn: buiten het gebied, te niche, al bekend, en naming and
+shaming bij een los incident van één klein bedrijf.
+
 ## 1. Werkset ophalen
 
 Voer vanuit de repowortel uit:
 
 ```powershell
-node scraper/src/weger-workset.cjs --limit 10
+node scraper/src/weger-workset.cjs --limit 25
 ```
 
 Het script selecteert signalen zonder eerder weger-oordeel en signalen waarvan
-`last_seen_at` nieuwer is dan het laatste weger-oordeel. Verwerk maximaal tien
-tegelijk, nieuwste eerst. Per signaal komen maximaal zes meest dragende
-documenten en per document hoogstens 4.000 tekens mee. Dit houdt de standaardrun
-klein. Haal alleen voor kansrijke of onduidelijke signalen extra brontekst op.
+`last_seen_at` nieuwer is dan het laatste weger-oordeel, nieuwste eerst. Per
+signaal komen maximaal zes meest dragende documenten en per document hoogstens
+4.000 tekens mee. Is de selectie vol (25), haal dan na het wegschrijven een
+tweede batch op. De achterstand van ongelezen signalen moet per run krimpen.
+
+**Snelle triage.** Zet een routinesignaal zonder verband (zie 3a) op
+`discarded`, met een korte, specifieke reden: wat, waar, waarom routine, en
+"verbandencheck: niets". Voor routine is de titel met de eerste alinea genoeg.
+Routine is:
+- container, steiger, verhuislift, dixi of bouwplaats op de weg;
+- dakkapel, kozijnen, gevelletters of dakopbouw bij een particulier;
+- kap van één boom;
+- een verlengde beslistermijn;
+- een NDW-mutatie zonder straat of volledige afsluiting;
+- een GGD- of provinciebericht zonder Amersfoorts of Leusdens gegeven;
+- niet-lokale RVO-, TenderNed- of rechtspraakitems.
+
+Lees kansrijke en onduidelijke signalen volledig.
 
 Beoordeel een eerder bekeken signaal alleen opnieuw wanneer het bronmateriaal
 inhoudelijk nieuw is. Een verse scrape van hetzelfde stuk of een spiegelartikel
@@ -72,6 +95,40 @@ tip wordt. Overschrijf geen dossierfeiten en los tegenstrijdige bronnen niet op
 door er één te negeren. Maak tijdens de automatische run geen nieuw dossier als
 de juiste afbakening inhoudelijk onzeker is; meld dat als voorgestelde actie.
 
+## 3a. Verbandencheck
+
+Doe deze check vóór elk oordeel, ook bij routine, voor elk signaal met een
+adres, een organisatie of een publiek persoon. Kijk 24 maanden terug. De
+hulpscripts staan buiten de repo in `C:\Users\Jasper Koning\stadsgeest-werk` en
+lezen alleen:
+
+- `node adres.cjs "<straat nr plaats>"` geeft het BAG-adres, de
+  nummeraanduiding, de buurtcode en rijksmonumenten binnen 10 m. Nabijheid is
+  een aanwijzing. Bevestig een monument in het monumentenregister: het adres
+  moet exact kloppen.
+- `node q.cjs "<SELECT ...>"` voert een zoekvraag uit tegen de database.
+
+Waar zoek je:
+- **Adres:** andere vergunningen op hetzelfde adres, asbest
+  (`source_records` 138), NVWA, en de misdrijventrend in dezelfde buurtcode
+  (149).
+- **Organisatie:** `kg_entities` en `kg_relations` (bestuurders), `subsidies`,
+  TenderNed, rechtspraak, asbest, RVO (146), ANBI (158),
+  jaarverantwoording zorg (150), B&W-besluitenlijsten en raadsstukken.
+- **Publiek persoon:** `kg_relations` en de raads- en B&W-stukken.
+- **School:** DUO (141/142) en Onderwijsinspectie (144).
+
+Bekijk van een register eerst één `raw_object`; de vorm verschilt per bron.
+
+Een verband telt alleen met een geverifieerde sleutel: exact BAG-adres, KvK- of
+LEI-nummer, of naam plus plaats plus rol. Alleen een gelijke naam is een
+hypothese. Die noem je hooguit onder `WAT WE NIET WETEN`. Een routinesignaal met
+een geverifieerd verband, zoals een verbouwing van een rijksmonument, is geen
+routine meer. Noem geen particulieren.
+
+Leg in het rapport vast welke verbanden je vond en welke koppelgaten er waren:
+waar een verband niet te controleren was, en welke sleutel of bron ontbrak.
+
 ## 4. Spiegelcheck
 
 Zoek vóór iedere tip gericht bij Nieuwsplein33 en de spiegelbronnen uit
@@ -102,15 +159,18 @@ Gebruik deze gewichten en bewaar de uitsplitsing als JSON:
 | Los incident zonder patroon of gewichtige betrokkene | −2 |
 | Routinehandeling zonder afwijking | −3 |
 | Onbeantwoorde raadsvraag als enige dragende bron | −3 |
+| Geverifieerd kruisbronverband, per onafhankelijke bron (max. +6) | +3 |
+| Verband rust alleen op naamovereenkomst | −3 |
+
+Gebruik in `weging` voor de laatste twee de sleutels `kruisbronverband` en
+`alleen_naamovereenkomst`.
 
 Score 6 of hoger wordt een tip. Daaronder blijft het bij een gemotiveerd oordeel
-en zo nodig dossierfeit. Rek scores niet op.
+en zo nodig dossierfeit. Rek scores niet op. Maak geen dunne dagtips: als geen
+signaal 6 haalt, levert de run nul tips op. Maak hoogstens drie tips per run.
+Een los incident van één klein bedrijf is geen tip.
 
-Als geen enkel signaal 6 haalt, mag de beste kandidaat met een geldige dragende
-bron als dunne dagtip worden geselecteerd. Noteer dan expliciet dat de score
-onder de gewone drempel lag. Zet die waarschuwing als laatste punt onder
-`WAT HIER NIET IN MAG`, niet in `score_motivatie`: dat laatste veld staat al in
-de wachtrij. Bij meer dan twee tips en een meerderheid uit één
+Bij meer dan twee tips en een meerderheid uit één
 broncategorie: bekijk de beste geldige kandidaat uit een andere categorie en
 voeg die alleen toe als redactionele verbreding werkelijk waarde heeft.
 
@@ -142,7 +202,8 @@ Nummer alleen de feiten onder `WAT WE WETEN` en gebruik streepjes voor de lijste
 
 ## 7. Gecontroleerd wegschrijven
 
-Maak één JSON-bestand buiten de repository op basis van
+Maak per batch één JSON-bestand buiten de repository (bij voorkeur in
+`C:\Users\Jasper Koning\stadsgeest-werk\plannen`) op basis van
 `operations/weger-plan.example.json`. Neem voor ieder bekeken signaal een
 specifieke reden op; “niet nieuwswaardig” is onvoldoende.
 
@@ -164,10 +225,19 @@ bruikbare signalen blijven `watching`.
 
 ## 8. Afronding
 
-Rapporteer getelde resultaten: bekeken signalen, tips met titel en score,
-dossierfeiten, voorgestelde nieuwe dossiers, patronen, afwijzingsredenen,
-bronproblemen en niet-geverifieerde punten. Controleer databaseaantallen na de
-write.
+Rapporteer getelde resultaten:
+- bekeken signalen, gesplitst in `discarded` en `watching`;
+- tips met titel en score;
+- dossierfeiten en voorgestelde nieuwe dossiers;
+- patronen;
+- afwijzingsredenen, gegroepeerd;
+- gevonden verbanden, met sleutel, bronnen en status (tip, hypothese of
+  verworpen);
+- koppelgaten;
+- bronproblemen en niet-geverifieerde punten;
+- de resterende achterstand (`weger-workset.cjs --limit 50 --summary`).
+
+Controleer de databaseaantallen na de write.
 
 Geen werk is een geldige uitkomst. Wijzig bij een normale run geen documentatie
 en maak geen Git-commit. Meld alleen een structureel defect, vereiste keuze of
