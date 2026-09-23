@@ -20,6 +20,7 @@ Lees `CURRENT.md`. Kies daarna alleen de route die bij de taak past:
 | Roadmapafwijking of technische ontwerpbeslissing | `DECISIONS.md` en het relevante gezaghebbende document |
 | Dagelijkse redactionele weging | `../operations/WEGER.md`, `EDITORIAL-PROFILE.md` |
 | Feedback, kwaliteitsmeting of privacy | `EDITORIAL-LEARNING.md`, `TESTING.md` |
+| NER, documentvermeldingen of entiteitskwaliteit | `NER.md`, `ARCHITECTURE.md` |
 | Historische vraag | `HISTORY/INDEX.md`, daarna gericht zoeken |
 
 ## Niet standaard lezen

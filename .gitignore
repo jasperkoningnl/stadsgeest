@@ -60,3 +60,6 @@ dwarsverbanden/rapport-*.md
 /scraper/logs/
 /scraper/data/phase3-snapshots/
 /scraper/.stilte-alarm-laatste-melding
+# Tijdelijke inspectie- en dry-runbestanden; Python-bytecode van de NER-worker
+/scraper/tmp/
+__pycache__/

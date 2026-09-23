@@ -282,3 +282,15 @@ dagelijkse orkestrator of planning opgenomen. PDF-ondersteuning en gecontroleerd
 bronselectie blijven aparte vervolgstappen. De Governance-adapter
 (`phase4-context-sources.cjs`) blijft de bestaande handmatig gekozen
 ankerorganisaties volgen.
+
+## 2026-09-23 — NER-vermeldingen in eigen tabel, personen alleen via de KG
+
+spaCy-vermeldingen gaan naar `document_mentions`, niet naar `entities`,
+`entity_identifiers` of `kg_aliases`. Een naamtreffer is een identificerend
+signaal van hooguit 35 punten in de resolver en rechtvaardigt dus geen
+identifier of merge; in de nieuwe tabel is het een kandidaat die een mens kan
+bevestigen of afwijzen. Onbekende personen worden niet opgeslagen en sociale,
+community- en noodbronnen vallen buiten het bereik, omdat daar namen van
+burgers in staan. De weger krijgt alleen KG-kandidaten; onopgeloste
+vermeldingen zijn daarvoor te ruisig (organisatieprecisie 25-58%). De
+bestaande aliasextractie blijft ongewijzigd leidend. Zie `NER.md`.

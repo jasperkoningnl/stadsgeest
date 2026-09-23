@@ -39,6 +39,14 @@ inhoudelijk nieuw is. Een verse scrape van hetzelfde stuk of een spiegelartikel
 alleen is geen nieuwe beoordeling. Schrijf alleen een oordeel voor een signaal
 dat werkelijk is gelezen.
 
+Per signaal staat in de werkset ook `ner_kg_kandidaten`: KG-entiteiten die
+spaCy in de documenten vond en die niet al in `entities` staan, vaak afgekorte
+namen als 'Portefeuillehouder J. Bulthuis'. Dit zijn koppelvoorstellen op
+exacte naam of alias, geen bevestigde feiten. Gebruik ze als aanwijzing waar je
+moet lezen. Ken punten zoals 'bekende bestuurder direct betrokken' alleen toe
+als het gelezen document het bevestigt, en let op naamgenoten bij gewone namen.
+Zie `docs/NER.md`.
+
 Lees bij een dragende officiële bron de volledige beschikbare tekst. Als de
 opgeslagen tekst zichtbaar is afgekapt of leeg is, open dan de officiële URL.
 Ken geen patroon of detail toe dat niet uit het gelezen materiaal blijkt.

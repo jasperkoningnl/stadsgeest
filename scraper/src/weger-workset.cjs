@@ -96,6 +96,44 @@ async function loadEntities(db, signalId) {
   return result.rows;
 }
 
+// Spoor 1 (NER, 2026-09-23): KG-entiteiten die spaCy in de documenten van dit
+// signaal vond en die niet al via de aliasextractie in `entities` staan. Alleen
+// koppelkandidaten op exacte naam/alias; onopgeloste vermeldingen gaan bewust
+// niet mee (te veel ruis, zie docs/NER.md).
+async function loadNerKgCandidates(db, signalId) {
+  if (!(await tableExists(db, 'document_mentions'))) return [];
+  const result = await db.execute({
+    sql: `SELECT dm.resolved_entity_id AS kg_entity_id, ke.entity_type,
+                 ke.canonical_name AS kg_naam,
+                 GROUP_CONCAT(DISTINCT dm.mention_text) AS vormen,
+                 SUM(dm.occurrences) AS vermeldingen,
+                 MIN(dm.context_snippet) AS context,
+                 MAX(dm.resolution_status) AS status
+          FROM signal_items si
+          JOIN document_mentions dm ON dm.raw_item_id = si.raw_item_id
+          JOIN kg_entities ke ON ke.id = dm.resolved_entity_id
+          WHERE si.signal_id = ?
+            AND dm.resolution_status IN ('candidate', 'confirmed')
+            AND NOT EXISTS (
+              SELECT 1 FROM signal_items si2
+              JOIN entities e ON e.raw_item_id = si2.raw_item_id
+              WHERE si2.signal_id = si.signal_id
+                AND ((ke.source_person_id IS NOT NULL AND e.person_id = ke.source_person_id)
+                  OR (ke.source_org_id IS NOT NULL AND e.organization_id = ke.source_org_id))
+            )
+          GROUP BY dm.resolved_entity_id
+          ORDER BY vermeldingen DESC
+          LIMIT 25`,
+    args: [signalId],
+  });
+  return result.rows.map((row) => ({
+    ...row,
+    kg_entity_id: Number(row.kg_entity_id),
+    vermeldingen: Number(row.vermeldingen),
+    context: clip(row.context),
+  }));
+}
+
 async function loadRecentEvents(db, signalId) {
   if (!(await tableExists(db, 'signal_events'))) return [];
   const result = await db.execute({
@@ -148,10 +186,11 @@ async function main(argv = process.argv.slice(2)) {
     const candidates = [];
     for (const signal of signals.rows) {
       const signalId = Number(signal.id);
-      const [itemSet, entities, recentEvents] = await Promise.all([
+      const [itemSet, entities, recentEvents, nerKgCandidates] = await Promise.all([
         loadItems(db, signalId),
         loadEntities(db, signalId),
         loadRecentEvents(db, signalId),
+        loadNerKgCandidates(db, signalId),
       ]);
       candidates.push({
         signal: { ...signal, id: signalId },
@@ -159,6 +198,7 @@ async function main(argv = process.argv.slice(2)) {
         item_count: itemSet.total,
         items_omitted: Math.max(0, itemSet.total - itemSet.items.length),
         entities,
+        ner_kg_kandidaten: nerKgCandidates,
         recent_events: recentEvents,
       });
     }
@@ -199,4 +239,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { clip, jsonValue, parseLimit };
+module.exports = { clip, jsonValue, parseLimit, loadNerKgCandidates };

@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-09-23 — De weger herkent vaker welke bestuurder of organisatie in een stuk staat
+
+Stadsgeest herkent nu ook namen die in een andere vorm in documenten staan, zoals "Portefeuillehouder J. Bulthuis" in een B&W-besluitenlijst of een bedrijfsnaam in een bekendmaking. De weger krijgt die als aanwijzing mee, niet als vaststaand feit, dus een tip noemt vaker de betrokken wethouder of organisatie. Keerzijde: bij een veelvoorkomende naam kan een naamgenoot voor een bekende persoon worden aangezien; controleer dat in de bron.
+
 ## 2026-09-13 — Duidelijker leren van redactionele keuzes
 
 Bij afwijzen kies je voortaan ook eenvoudig “duplicaat” of “feitelijke fout”.

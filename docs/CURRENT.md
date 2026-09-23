@@ -1,7 +1,7 @@
 # Actuele toestand — Stadsgeest
 
 **Doel:** compacte herschrijfbare momentopname.
-**Status:** actueel per 21 september 2026.
+**Status:** actueel per 23 september 2026.
 **Lees wanneer:** bij iedere nieuwe taak. Historische details staan elders.
 
 ## Productie
@@ -87,6 +87,18 @@ verbetering.
 De beschermde regelidentiteiten blijven R1–R16. In het bijzonder zijn R5
 misdrijfanomalie, R10 multibronversterking, R11 leerlingontwikkeling, R12
 schoolprognose, R13 Onderwijsinspectie en R14 verkeersmaatregel ongewijzigd.
+
+## NER-documentvermeldingen (spoor 1, 23 september)
+
+spaCy-NER draait naast de aliasextractie en schrijft naar de nieuwe tabellen
+`document_mentions` en `ner_scans`; de KG zelf wordt niet gewijzigd. Eén
+backfill heeft 3.050 items uit officiële bronnen en lokaal nieuws gescand
+(10.912 vermeldingen, 753 persoons- en 261 organisatiekandidaten richting KG).
+Onbekende personen worden niet bewaard. De weger-werkset toont per signaal
+alleen KG-kandidaten die de aliasextractie miste (`ner_kg_kandidaten`).
+De extractie is nog niet gepland: nieuwe items krijgen pas vermeldingen na een
+handmatige run of na opname in een dagelijkse taak. Details en gemeten
+precisie in `NER.md`.
 
 ## Open bewijs en risico's
 
