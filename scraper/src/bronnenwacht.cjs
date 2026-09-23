@@ -4,13 +4,22 @@
 // - 'verdacht': laatste 6 runs allemaal 0 items terwijl expected_yield > 0.3, of >=3 fouten in laatste 6
 // - 'dood'    : laatste 12 runs allemaal 0 items of fout
 // Schrijft health/health_note in sources, rapport naar ../bronnenwacht/, en een
-// WAARSCHUWING in STATUS.md als de zojuist afgeronde job < 10 nieuwe items opleverde.
+// WAARSCHUWING in het rapport als de zojuist afgeronde job < 10 nieuwe items opleverde, en
+// health 'geen_runs' voor actieve bronnen waarvoor niets meer draait (zie 2026-09-23 hieronder).
 //
 // 2026-08-23: reces-bewustheid toegevoegd. Bronnen in category 'government' met
 // 'raad' of 'raadsinformatie' in de naam worden in juli–augustus niet als verdacht
 // of dood gemarkeerd — de raad vergadert dan niet. Ze krijgen health 'reces' met
 // een verklarende note, zodat de bronnenwacht ze niet elke dag rapporteert maar
 // ze na het reces (september) weer normaal oppikt.
+//
+// 2026-09-23: bronnen zonder runs. Een actieve bron waarvoor nooit (of al 30 dagen
+// niet) een run in scrape_runs of fetch_runs staat én die in die periode geen
+// raw_item opleverde, viel buiten elke beoordeling (< 6 runs → overgeslagen) en
+// bleef op 'ok' staan. Zo stond het Centraal Insolventieregister maandenlang als
+// gezond terwijl er nooit een scraper voor bestond. Zulke bronnen krijgen nu
+// health 'geen_runs'. Dit is geen oordeel over een stille feed (dat blijft in
+// runs gemeten) maar over de vraag of er überhaupt iets draait.
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
@@ -51,13 +60,44 @@ async function main() {
     WHERE id IN (SELECT source_id FROM scrape_runs GROUP BY source_id HAVING COUNT(*) >= 10)
   `);
 
-  const sources = (await db.execute("SELECT id, name, url, category, expected_yield, health FROM sources WHERE COALESCE(health,'ok') != 'uitgeschakeld'")).rows;
+  const sources = (await db.execute("SELECT id, name, url, category, expected_yield, health, is_active, scrape_frequency FROM sources WHERE COALESCE(health,'ok') != 'uitgeschakeld'")).rows;
   const regels = [];
-  let nVerdacht = 0, nDood = 0, nReces = 0;
+  let nVerdacht = 0, nDood = 0, nReces = 0, nGeenRuns = 0;
+
+  // Laatste teken van leven per bron: een scraperrun, een adapterrun of een nieuw item.
+  const GEEN_RUNS_DAGEN = 30;
+  const laatsteRun = new Map((await db.execute("SELECT source_id, MAX(started_at) m FROM scrape_runs GROUP BY source_id")).rows.map(r => [Number(r.source_id), r.m]));
+  const laatsteFetch = new Map((await db.execute("SELECT source_id, MAX(started_at) m FROM fetch_runs GROUP BY source_id")).rows.map(r => [Number(r.source_id), r.m]));
+  const laatsteItem = new Map((await db.execute("SELECT source_id, MAX(scraped_at) m FROM raw_items GROUP BY source_id")).rows.map(r => [Number(r.source_id), r.m]));
+  const grens = new Date(Date.now() - GEEN_RUNS_DAGEN * 86400000).toISOString().substring(0, 10);
 
   for (const s of sources) {
+    // Draait er voor deze actieve bron eigenlijk iets? (Alleen voor bronnen met een
+    // uurlijkse, dagelijkse of wekelijkse cadans; jaarlijkse bronnen zijn vaak lang stil.)
+    const cadans = String(s.scrape_frequency || '').toLowerCase();
+    if (Number(s.is_active) === 1 && ['hourly', 'daily', 'weekly'].includes(cadans)) {
+      const tekens = [laatsteRun.get(Number(s.id)), laatsteFetch.get(Number(s.id)), laatsteItem.get(Number(s.id))].filter(Boolean).map(t => String(t).substring(0, 10));
+      const laatst = tekens.sort().pop() || null;
+      if (!laatst || laatst < grens) {
+        const note = laatst
+          ? `actief (${cadans}), maar geen run en geen nieuw item sinds ${laatst} — draait er nog een scraper of adapter voor deze bron?`
+          : `actief (${cadans}), maar nooit een run of item gelogd — er lijkt geen scraper of adapter voor deze bron te bestaan`;
+        await db.execute({ sql: "UPDATE sources SET health = 'geen_runs', health_note = ?, last_health_check = datetime('now') WHERE id = ?", args: [note, s.id] });
+        nGeenRuns++;
+        regels.push(`- GEEN RUNS: ${s.name} (bron ${s.id}) — ${note}`);
+        continue;
+      }
+    }
+
     const runs = (await db.execute({ sql: "SELECT items_found, status FROM scrape_runs WHERE source_id = ? ORDER BY id DESC LIMIT 12", args: [s.id] })).rows;
-    if (runs.length < 6) continue; // te weinig actieve runs om iets te zeggen — géén kalenderoordeel
+    if (runs.length < 6) {
+      // Te weinig runs voor een oordeel over de feed. Een eerder 'geen_runs' is
+      // inmiddels achterhaald (er draait weer iets), dus terug naar 'ok'.
+      if (s.health === 'geen_runs') {
+        await db.execute({ sql: "UPDATE sources SET health = 'ok', health_note = NULL, last_health_check = datetime('now') WHERE id = ?", args: [s.id] });
+      }
+      continue;
+    }
     const l6 = runs.slice(0, 6);
     const yieldVerwacht = s.expected_yield == null ? 0.5 : s.expected_yield;
     const leeg6 = l6.every(r => (r.items_found || 0) === 0);
@@ -105,18 +145,20 @@ async function main() {
   const dir = path.join(__dirname, '..', '..', 'bronnenwacht');
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   const datum = new Date().toISOString().substring(0, 10);
-  const kop = `# Bronnenwacht ${datum}${jobName ? ` (na job ${jobName})` : ''}\n\nGemeten in runs (niet kalendertijd). ${nVerdacht} verdacht, ${nDood} dood${nReces ? `, ${nReces} reces` : ''}.\n\n`;
+  const kop = `# Bronnenwacht ${datum}${jobName ? ` (na job ${jobName})` : ''}\n\nGemeten in runs (niet kalendertijd). ${nVerdacht} verdacht, ${nDood} dood${nReces ? `, ${nReces} reces` : ''}${nGeenRuns ? `, ${nGeenRuns} zonder runs (${GEEN_RUNS_DAGEN} dagen geen run of item)` : ''}.\n\n`;
   fs.writeFileSync(path.join(dir, `rapport-${datum}.md`), kop + (regels.length ? regels.join('\n') : 'Geen afwijkingen.') + '\n', 'utf8');
-  console.log(`Bronnenwacht: ${sources.length} bronnen gecheckt, ${nVerdacht} verdacht, ${nDood} dood${nReces ? `, ${nReces} reces` : ''}. Rapport: bronnenwacht/rapport-${datum}.md`);
+  console.log(`Bronnenwacht: ${sources.length} bronnen gecheckt, ${nVerdacht} verdacht, ${nDood} dood${nReces ? `, ${nReces} reces` : ''}${nGeenRuns ? `, ${nGeenRuns} zonder runs` : ''}. Rapport: bronnenwacht/rapport-${datum}.md`);
 
-  // heartbeat: leverde deze job < 10 nieuwe items, waarschuw in STATUS.md
+  // heartbeat: leverde deze job < 10 nieuwe items, dan een waarschuwing in het rapport.
+  // (Tot 2026-09-23 filterde deze query op scrape_runs.created_at, een kolom die niet
+  // bestaat; de query faalde altijd en de waarschuwing is nooit afgegaan. Hij schreef
+  // toen naar STATUS.md, maar dat is sinds de Codex-overgang alleen nog een verwijzer.)
   if (jobName) {
-    const tot = (await db.execute({ sql: "SELECT COALESCE(SUM(items_new),0) n FROM scrape_runs WHERE job_name = ? AND created_at > datetime('now','-2 hours')", args: [jobName] })).rows[0].n;
+    const tot = (await db.execute({ sql: "SELECT COALESCE(SUM(items_new),0) n FROM scrape_runs WHERE job_name = ? AND started_at > datetime('now','-2 hours')", args: [jobName] })).rows[0].n;
     if (Number(tot) < 10) {
-      const statusPad = path.join(__dirname, '..', '..', 'STATUS.md');
       try {
-        fs.appendFileSync(statusPad, `\n**WAARSCHUWING bronnenwacht ${new Date().toISOString()}:** job ${jobName} leverde slechts ${tot} nieuwe items. Check bronnenwacht/rapport-${datum}.md.\n`, 'utf8');
-      } catch (e) { console.error('Kon STATUS.md niet bijwerken:', e.message); }
+        fs.appendFileSync(path.join(dir, `rapport-${datum}.md`), `\n**Waarschuwing:** job ${jobName} leverde in de laatste twee uur slechts ${tot} nieuwe items.\n`, 'utf8');
+      } catch (e) { console.error('Kon rapport niet aanvullen:', e.message); }
       console.log(`WAARSCHUWING: job ${jobName} leverde slechts ${tot} nieuwe items.`);
     }
   }

@@ -14,7 +14,7 @@
 
 import * as cheerio from 'cheerio';
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
-import { createDb, ensureSource } from '../lib.js';
+import { createDb, ensureSource, log } from '../lib.js';
 
 const db = createDb();
 const PAGE_URL = 'https://www.amersfoort.nl/subsidieregister';
@@ -181,7 +181,7 @@ async function parsePdf(url) {
 async function run() {
   console.log(`\n[SUBSIDIES] gestart ${new Date().toISOString()}`);
   await ensureTable();
-  await ensureSource(db, {
+  const sourceId = await ensureSource(db, {
     name: 'Subsidieregister gemeente Amersfoort',
     url: PAGE_URL,
     source_type: 'scrape',
@@ -194,13 +194,14 @@ async function run() {
   const pdfs = await findPdfs();
   console.log(`[SUBSIDIES] ${pdfs.length} registers gevonden: ${pdfs.map(p => p.jaar).join(', ')}`);
 
-  let totaalNieuw = 0;
+  let totaalNieuw = 0, totaalGelezen = 0, fouten = 0;
   for (const pdf of pdfs) {
     let records;
     try {
       records = await parsePdf(pdf.url);
     } catch (e) {
       console.error(`[SUBSIDIES] fout bij ${pdf.url}: ${e.message}`);
+      fouten++;
       continue;
     }
 
@@ -226,6 +227,7 @@ async function run() {
       }
     }
     totaalNieuw += nieuw;
+    totaalGelezen += records.length;
     console.log(`[SUBSIDIES] ${pdf.jaar}: ${records.length} regels gelezen, ${nieuw} nieuw, ${dubbel} al bekend`);
   }
 
@@ -236,6 +238,12 @@ async function run() {
       WHERE o.normalized_name = subsidies.ontvanger_normalized
     ) WHERE organization_id IS NULL AND is_particulier = 0`);
   console.log(`[SUBSIDIES] klaar: ${totaalNieuw} nieuwe records, ${koppel.rowsAffected} gekoppeld aan organisaties`);
+
+  // Run vastleggen in scrape_runs (2026-09-23). Zonder deze regel zag de
+  // bronnenwacht geen enkele run van deze bron: de records gaan naar de tabel
+  // `subsidies`, niet naar raw_items. Omdat elk register wordt vervangen, is
+  // 'nieuw' hier het aantal ingevoegde regels van deze run.
+  await log(db, sourceId, 'Subsidieregister gemeente Amersfoort', { new: totaalNieuw, skipped: Math.max(0, totaalGelezen - totaalNieuw), errors: fouten }, totaalGelezen);
 }
 
 run().catch(e => { console.error('[SUBSIDIES] fataal:', e); process.exit(1); });
