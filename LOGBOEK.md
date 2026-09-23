@@ -23,6 +23,12 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-09-23 — Faillissementen in Amersfoort en Leusden komen binnen
+
+Stadsgeest volgt nu het Centraal Insolventieregister. Gaat een bedrijf, stichting of vereniging uit Amersfoort of Leusden failliet, krijgt het surseance of wordt een faillissement afgesloten, dan verschijnt dat in de wachtrij met naam, KvK-nummer, vestigingsadres en curator. Faillissementen van particulieren, eenmanszaken en schuldsaneringen nemen we bewust niet op. De eerste drie staan er al in, waaronder het faillissement van Houtindustrie Amersfoort van 22 september.
+
+Daarnaast leest Stadsgeest nu ook de bijlagen van Woo-besluiten van de gemeente, zoals het besluit zelf, de inventarislijst en de openbaar gemaakte stukken. Namen en adressen in die stukken worden daardoor herkend. Oudere Woo-besluiten die zo binnenkomen, leveren geen nieuwe tips op; ze dienen als achtergrond.
+
 ## 2026-09-23 — Moties uit de gemeenteraad komen weer binnen
 
 Sinds half juli kwamen er geen nieuwe moties en amendementen van de Amersfoortse raad meer in Stadsgeest. Ze komen nu weer binnen via RaadKijker, met de volledige tekst van de motie en de indienende partij. De zeven moties van de raadsvergadering van vandaag staan er al in, en bij ruim twintig oudere moties is de volledige tekst aangevuld. Keerzijde: de uitslag (aangenomen of verworpen) verschijnt pas als de griffie het gestempelde stuk publiceert, en die komt in de titel te staan zonder aparte nieuwe tip.

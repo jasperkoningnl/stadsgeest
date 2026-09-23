@@ -14,6 +14,7 @@
 
 import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
+import { pdfNaarRegels, parsePartijen, winnaarsWaarde, zorgVoorTabel, slaPartijenOp } from '../tenderned-partijen.js';
 
 const API_BASE = 'https://www.tenderned.nl/papi/tenderned-rs-tns/v2/publicaties';
 const UA = 'Stadsgeest033/1.0 (nieuwssite; contact@stadsgeest.nl)';
@@ -165,7 +166,8 @@ async function scrape() {
     scrapeFrequency: 'daily',
   });
 
-  let saved = 0, skipped = 0, errors = 0;
+  let saved = 0, skipped = 0, errors = 0, partijen = 0;
+  await zorgVoorTabel(db);
 
   const allePublicaties = await fetchAllePublicaties();
   const matches = filterOpAmersfoort(allePublicaties);
@@ -218,7 +220,20 @@ async function scrape() {
             signal: AbortSignal.timeout(25000),
           });
           if (p.ok) {
-            const pdfTekst = await pdfNaarTekst(Buffer.from(await p.arrayBuffer()));
+            const pdfBuffer = Buffer.from(await p.arrayBuffer());
+            const pdfTekst = await pdfNaarTekst(pdfBuffer);
+            // Partijen (koper, inschrijvers, winnaars met KvK en adres) apart vastleggen
+            // in tender_parties, zodat ze aan andere registers te koppelen zijn.
+            try {
+              const regelsPdf = await pdfNaarRegels(pdfBuffer);
+              partijen += await slaPartijenOp(db, {
+                publicatieId, kenmerk: pub.kenmerk, publicatieDatum: papi?.publicatieDatum || pub.publicatieDatum,
+                type: pub.typePublicatie?.code || papi?.aankondigingCode?.code, aanbestedingNaam: pub.aanbestedingNaam,
+                opdrachtgeverNaam: papi?.opdrachtgeverNaam || pub.opdrachtgeverNaam, url: externalUrl,
+              }, parsePartijen(regelsPdf), winnaarsWaarde(regelsPdf));
+            } catch (e) {
+              console.error(`Partijen van publicatie ${publicatieId}: ${e.message}`);
+            }
             const details = gunningUitTekst(pdfTekst);
             if (details.length) regels.push('', ...details);
             regels.push('', `Uit de publicatie-PDF: ${pdfTekst.substring(0, 2500)}`);
@@ -251,6 +266,7 @@ async function scrape() {
     }
   }
 
+  console.log(`TenderNed: ${partijen} partijrijen vastgelegd in tender_parties`);
   await logResult(db, sourceId, 'TenderNed (Amersfoort)', saved, skipped, errors, matches.length);
 }
 

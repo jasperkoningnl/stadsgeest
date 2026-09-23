@@ -210,3 +210,34 @@ lokale relevantie tot stand kwam.
 
 Grote exports en brononderzoek horen bij fixtures, rapporten of geschiedenis en
 zijn nooit verplichte startcontext.
+
+## Centraal Insolventieregister
+
+Scraper `scraper/src/scrapers/insolventies.js`, filterregels in
+`scraper/src/insolventies-lib.js`, dagelijks via `run-all.js`, bron 48. Leest
+de openbare dagoverzichten (`/Services/BekendmakingenService/getAll/` en
+`haalOp/{dag}`), dus ongeveer een maand terug. Alleen publicaties zonder
+geboortedatum en woonadres, buiten de schuldsaneringsclusters en met een
+vestigings- of correspondentieadres in Amersfoort, Leusden, Hoogland,
+Hooglanderveen, Achterveld of Stoutenburg (of postcode 3810-3833). Eenmanszaken
+vallen daarmee bewust af. De zoekservices van het CIR zijn beveiligd met
+anti-CSRF; die gebruiken we niet.
+
+## TenderNed-partijen
+
+`scraper/src/tenderned-partijen.js` leest hoofdstuk 8 (Organisaties) van de
+eForms-publicatie-PDF naar `tender_parties`: naam, registratienummer (meestal
+KvK), adres, rollen, winnaar/koper en de waarde van de winnende inschrijving
+(soms symbolisch, bijvoorbeeld 1 euro). `tenderned.js` doet dit dagelijks voor
+gunningen. `scraper/src/backfill-tenderned-partijen.js` haalt gegunde opdrachten
+(AGO) op via de API-parameter `search=` en is idempotent. De partijen komen niet
+in `raw_items` en maken dus geen signalen.
+
+## iBabs-bijlagen
+
+`scraper/src/scrapers/ibabs-bijlagen.js` (wekelijks, maximaal 25 documenten per
+run) haalt de categorielijsten op via `POST /Reports/GetReportData/{rapport}`
+(Woo-verzoeken, Convenanten). De PDF's komen via `/Document/View/{documentId}`
+binnen en worden in `raw_item_attachments` gezet en samengevoegd in
+`raw_items.full_text`. Klachten (278 rijen) blijven bewust buiten beschouwing.
+Scans zonder tekstlaag krijgen `geen_tekst`.

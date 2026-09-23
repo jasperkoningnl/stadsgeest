@@ -34,6 +34,7 @@ const scrapers = [
 
   // Groep C — server-rendered (geen Playwright nodig)
   'ibabs-woo.js',                 // C7: Bestuurlijke informatie iBabs (Woo-verzoeken, klachten, convenanten)
+  'ibabs-bijlagen.js',            // PDF-bijlagen van Woo-besluiten en convenanten → full_text (2026-09-23)
   // officielebekendmakingen-wekelijks.js UITGESCHAKELD 24-07-2026: de creator-queries
   // stonden op 'Vallei en Veluwe' en 'provincie Utrecht' en haalden landelijke items binnen
   // (Heerhugowaard, Bergambacht, Roelofarendsveen). Vervangen door officielebekendmakingen-repo.js.
