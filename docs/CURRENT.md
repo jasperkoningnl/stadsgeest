@@ -18,10 +18,9 @@ fase-5-maandevaluatie en privacyretentie uitgevoerd. Adapter-, evaluatie- en
 retentiefouten zijn van elkaar geïsoleerd; dezelfde invoer levert geen dubbele
 metingen of uitkomsten op.
 
-De dagelijkse taak en de NDW-taak eindigen weer met resultaatcode 0. Een dode
+De dagelijkse taak en de NDW-taak eindigen met resultaatcode 0. Een dode
 proceslock wordt direct herkend en opgeruimd. De gecombineerde detectierun heeft
-een heaplimiet van 1,5 GB; de eerdere 768 MB bleek na activering van de volledige
-bronset onvoldoende.
+een heaplimiet van 1,5 GB.
 
 De fase-0-audit is groen. Ook fase 2 is gesloten: de productie-replay vond 37
 graph-afhankelijke signalen en nul R3-matches zonder graphcontext. Zes bestaande
@@ -88,17 +87,9 @@ De beschermde regelidentiteiten blijven R1–R16. In het bijzonder zijn R5
 misdrijfanomalie, R10 multibronversterking, R11 leerlingontwikkeling, R12
 schoolprognose, R13 Onderwijsinspectie en R14 verkeersmaatregel ongewijzigd.
 
-## NER-documentvermeldingen (spoor 1, 23 september)
+## NER (spoor 1)
 
-spaCy-NER draait naast de aliasextractie en schrijft naar de nieuwe tabellen
-`document_mentions` en `ner_scans`; de KG zelf wordt niet gewijzigd. Eén
-backfill heeft 3.050 items uit officiële bronnen en lokaal nieuws gescand
-(10.912 vermeldingen, 753 persoons- en 261 organisatiekandidaten richting KG).
-Onbekende personen worden niet bewaard. De weger-werkset toont per signaal
-alleen KG-kandidaten die de aliasextractie miste (`ner_kg_kandidaten`).
-De extractie is nog niet gepland: nieuwe items krijgen pas vermeldingen na een
-handmatige run of na opname in een dagelijkse taak. Details en gemeten
-precisie in `NER.md`.
+spaCy-vermeldingen staan los van de KG, nog ongepland; zie `NER.md`.
 
 ## Open bewijs en risico's
 
