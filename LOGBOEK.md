@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-09-23 — Moties uit de gemeenteraad komen weer binnen
+
+Sinds half juli kwamen er geen nieuwe moties en amendementen van de Amersfoortse raad meer in Stadsgeest. Ze komen nu weer binnen via RaadKijker, met de volledige tekst van de motie en de indienende partij. De zeven moties van de raadsvergadering van vandaag staan er al in, en bij ruim twintig oudere moties is de volledige tekst aangevuld. Keerzijde: de uitslag (aangenomen of verworpen) verschijnt pas als de griffie het gestempelde stuk publiceert, en die komt in de titel te staan zonder aparte nieuwe tip.
+
 ## 2026-09-23 — De weger herkent vaker welke bestuurder of organisatie in een stuk staat
 
 Stadsgeest herkent nu ook namen die in een andere vorm in documenten staan, zoals "Portefeuillehouder J. Bulthuis" in een B&W-besluitenlijst of een bedrijfsnaam in een bekendmaking. De weger krijgt die als aanwijzing mee, niet als vaststaand feit, dus een tip noemt vaker de betrokken wethouder of organisatie. Keerzijde: bij een veelvoorkomende naam kan een naamgenoot voor een bekende persoon worden aangezien; controleer dat in de bron.

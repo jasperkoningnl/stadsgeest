@@ -126,6 +126,37 @@ nalevingslijst plus lokale inspectiesamenvattingen. Samen Meten combineert de
 SensorThings-geoquery met dezelfde officiële polygonen en een gemeentecodecheck;
 de adapter staat standaard uit en emitteert geen harde events.
 
+## RaadKijker — moties en amendementen Amersfoort
+
+Scraper `scraper/src/scrapers/raadkijker-moties.js`, hulpfuncties in
+`scraper/src/raadkijker.mjs`, dagelijks via `run-all.js`. Eigenaar van de lijst
+is RaadKijker (raadkijker.nl/open-data, gebruik vrij met bronvermelding); het
+stuk zelf is de Notubiz-PDF van de griffie en dat is de `external_url`. Sleutel
+`RAADKIJKER_API_KEY` in `scraper/.env`; 60 verzoeken per minuut, 5.000 per dag.
+Cloudflare weigert datacenter-IP's, dus alleen vanaf de notebook.
+
+- Schrijft onder de bestaande rijen 116 (Moties) en 117 (Amendementen).
+- Nieuw item alleen voor moties van de laatste 60 dagen (`RAADKIJKER_DAGEN`).
+  Tot 180 dagen terug (`RAADKIJKER_DAGEN_AANVUL`) vult hij bij bestaande items
+  alleen fulltext en uitslag aan; dat maakt geen nieuwe signalen.
+- Tekst: Notubiz-PDF via pdfjs. Notubiz geeft voor een deel van de nieuwste
+  stukken HTTP 400; dan `document_tekst` van RaadKijker, die bij oudere records
+  vaak alleen het dictum bevat.
+- Identiteit: Notubiz-document-id, anders motienummer (jaar-nummer, zonder
+  letter) plus gedeelde titelwoorden. De griffie hergebruikt nummers
+  (2026-057M bestaat twee keer).
+- Uitslag alleen uit het griffiestempel in de titel ("VERWORPEN Motie ..."). Het
+  veld `uitslag` van RaadKijker is niet betrouwbaar: 2026-054M staat daar als
+  aangenomen terwijl het stempel verworpen zegt. Een definitief stempel wordt
+  nooit overschreven; VERDAAGD en AANGEHOUDEN wel.
+- Een uitslag die later binnenkomt past alleen de titel aan en maakt geen nieuw
+  signaal.
+- Verzamelpunten zonder motienummer en oude stukken met een verkeerde datum
+  worden overgeslagen.
+- Stemgedrag per raadslid en onderwerptags zijn voor Amersfoort leeg bij
+  RaadKijker.
+- `RAADKIJKER_DRYRUN=1` toont wat hij zou doen zonder te schrijven.
+
 ## Contract voor nieuwe bronnen
 
 Leg minimaal vast: eigenaar, officiële URL, bereik, lokale filter,

@@ -32,6 +32,7 @@ const scrapers = [
   'ns-verstoringen.js',           // NS verstoringen en werkzaamheden Amersfoort (AMF + AMR)
   'bluesky.js',                   // Bluesky zoekfeed + Amersfoortse accounts (daily)
 'raadsinformatie-ori.js',       // Raadsinformatie via Open Raadsinformatie API (2026-08-02, vervangt Notubiz-Playwright — Cloudflare)
+'raadkijker-moties.js',         // Moties/amendementen via RaadKijker-API + Notubiz-PDF (2026-09-23); sleutel RAADKIJKER_API_KEY in .env
   // pdok-bag.js en rechtspraak.js draaien wekelijks → run-weekly.js (aangemaakt in Groep B)
 ];
 
