@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-09-23 — Wijzigingen in het KvK-register komen binnen
+
+Stadsgeest leest nu elke dag welke inschrijvingen in Amersfoort en Leusden in het KvK-register zijn gewijzigd. Je krijgt een tip als een organisatie die we al uit andere bronnen kennen wordt uitgeschreven, verhuist of een andere naam krijgt, en als een stichting, vereniging of coöperatie nieuw opduikt of stopt. Nieuwe BV's en eenmanszaken leveren bewust geen tip op, omdat dat de wachtrij met ruis zou vullen. Tot 7 oktober worden alleen gegevens verzameld, dus "nieuw" verschijnt pas daarna. Keerzijde: de bron kent geen inschrijfdatum, dus een organisatie die als nieuw wordt gemeld kan ook al langer bestaan en alleen iets hebben gewijzigd. Kijk bij twijfel op kvk.nl.
+
 ## 2026-09-23 — Faillissementen in Amersfoort en Leusden komen binnen
 
 Stadsgeest volgt nu het Centraal Insolventieregister. Gaat een bedrijf, stichting of vereniging uit Amersfoort of Leusden failliet, krijgt het surseance of wordt een faillissement afgesloten, dan verschijnt dat in de wachtrij met naam, KvK-nummer, vestigingsadres en curator. Faillissementen van particulieren, eenmanszaken en schuldsaneringen nemen we bewust niet op. De eerste drie staan er al in, waaronder het faillissement van Houtindustrie Amersfoort van 22 september.

@@ -141,31 +141,10 @@ async function scrapeRaadVanState() {
 }
 
 // ============================================================
-// 3. OpenKvK — UITGESCHAKELD (vereist API-key)
+// 3. OpenKvK — verhuisd naar de KG-adapter
 // ============================================================
-async function scrapeOpenKvK() {
-  const name = 'OpenKvK — nieuwe inschrijvingen Amersfoort';
-  const stats = { new: 0, skipped: 1, errors: 0 };
-  // 23 september 2026: vervangen door de KG-adapter
-  // src/kg/adapters/openkvk-register.cjs (dagelijkse detectierun, bron
-  // "OpenKvK — overheid.io registerupdates"). Deze stub doet niets meer dan loggen.
-  //
-  // 9 augustus 2026: bewust niet onderzocht. Dit is de enige van de vier
-  // return-bronnen die geld kost; Jasper overlegt daarover met Gideon. De regel
-  // hieronder dat de key gratis is, is achterhaald — api.overheid.io vraagt voor
-  // KvK-data een betaald account. Niets aan doen tot dat besluit er is.
-  //
-  // overheid.io OpenKvK API vereist een API-key. Registreer op overheid.io.
-  // Voeg toe aan scraper/.env: OVERHEID_IO_KEY=<jouw-key>
-  // Daarna: GET https://api.overheid.io/openkvk?filters[]=gemeente:Amersfoort&ovio-api-key=<key>
-  const sid = await ensureSource(db, {
-    name, url: 'https://api.overheid.io/openkvk',
-    source_type: 'api', reliability: 'primary', category: 'registry',
-    scrape_frequency: 'daily', tier: 1,
-  }).catch(() => undefined);
-  await log(db, sid, name, stats);
-  return stats;
-}
+// Sinds 23 september 2026 in src/kg/adapters/openkvk-register.cjs (dagelijkse
+// detectierun). De lege stub en zijn bron 80 zijn verwijderd.
 
 // ============================================================
 // 4. Gemeenschappelijke Regelingen — Officiële Bekendmakingen
@@ -721,7 +700,6 @@ async function main() {
   const scrapers = [
     scrapeRekenkamer,
     scrapeRaadVanState,
-    scrapeOpenKvK,
     scrapeGemeenschappelijkeRegelingen,
     scrapeRegioAmersfoort,
     scrapeDUO,
