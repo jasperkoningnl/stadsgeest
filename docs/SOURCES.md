@@ -45,6 +45,7 @@ semantische diff. De orkestrator registreert momenteel onder meer:
 - ANBI-register — Belastingdienst open data (wekelijks, RSIN-diff);
 - GLEIF — LEI-register (wekelijks, LEI-diff op adres en watchlist);
 - OpenStreetMap — Overpass contextlaag (wekelijks, fysieke objecten);
+- OpenKvK via overheid.io — dagelijkse registerupdates (betaald, zie onder);
 - een geparkeerde of beperkte tuchtrechtbron.
 
 De klassieke bronlaag bevat daarnaast gemeentelijke bekendmakingen,
@@ -156,6 +157,36 @@ Cloudflare weigert datacenter-IP's, dus alleen vanaf de notebook.
 - Stemgedrag per raadslid en onderwerptags zijn voor Amersfoort leeg bij
   RaadKijker.
 - `RAADKIJKER_DRYRUN=1` toont wat hij zou doen zonder te schrijven.
+
+## OpenKvK via overheid.io — registerupdates
+
+Adapter `scraper/src/kg/adapters/openkvk-register.cjs`, bron "OpenKvK —
+overheid.io registerupdates", in de dagelijkse detectierun (`openkvk`). Betaald
+abonnement Small: 2.500 API-calls, 1.000 suggestions, 1.000 geo lookups,
+paginering tot 10 pagina's, geen data-export. overheid.io vermeldt niet per
+welke periode de calls gelden. Sleutel `OVERHEID_IO_KEY` in `scraper/.env`,
+meegestuurd als header `ovio-api-key`.
+
+- Endpoint `api.overheid.io/v3/openkvk` met `filters[bezoeklocatie.plaats]`
+  (Amersfoort, Leusden) en `filters[updated_at]=<dag>`, `size=100`. Normaal
+  één call per plaats per dag; op 22 september waren dat 36 + 4 records.
+- Een volledige lokale baseline kan niet: Amersfoort heeft ruim 70.000 records
+  en een zoekopdracht geeft hooguit 10 pagina's. Daarom een incrementele feed
+  per `updated_at`-dag met een dagcursor, geen `runVersionedDataset`. Een gat
+  wordt tot 7 dagen terug ingehaald; hooguit `OPENKVK_MAX_CALLS_PER_RUN` (12)
+  calls per run.
+- Sorteren werkt niet en er is geen inschrijfdatum. "Nieuw" betekent dus
+  "voor het eerst gezien in de wijzigingen" en draagt die onzekerheid mee.
+- Sleutel `openkvk:<kvk>:<vestigingsnummer|rp>`. Events: `KVK_REGISTRATION_ADDED`,
+  `_CHANGED` (naam, adres, rechtsvorm) en `_DISSOLVED` (`actief` naar false).
+  R9 maakt er alleen een signaal van bij een al elders bekende organisatie of
+  een stichting, vereniging, coöperatie, NV of kerkgenootschap (geen VvE).
+  Een nieuwe BV of eenmanszaak blijft graafcontext.
+- Eenmanszaken, vof's, maatschappen en cv's krijgen geen entiteit tenzij het
+  KVK-nummer al bekend is, omdat de naam vaak een persoonsnaam is.
+- De eerste 14 dagen (vanaf 23 september 2026) alleen opslaan: dan is elk
+  nummer nog onbekend. Een opheffing van een elders bekende organisatie telt
+  wel direct.
 
 ## Contract voor nieuwe bronnen
 

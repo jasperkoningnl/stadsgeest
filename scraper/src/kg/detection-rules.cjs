@@ -381,6 +381,9 @@ const R9_REGISTER_CHANGE = {
     'AFM_REGISTRATION_ADDED', 'AFM_REGISTRATION_CHANGED', 'AFM_REGISTRATION_REMOVED',
     'DNB_REGISTRATION_ADDED', 'DNB_REGISTRATION_CHANGED', 'DNB_REGISTRATION_REMOVED',
     'RVO_PROJECT_ADDED', 'RVO_PROJECT_CHANGED', 'RVO_FUNDING_CHANGED',
+    // OpenKvK: de adapter zet journalistically_relevant alleen aan voor bekende
+    // organisaties en maatschappelijke rechtsvormen; de rest blijft graafcontext.
+    'KVK_REGISTRATION_ADDED', 'KVK_REGISTRATION_CHANGED', 'KVK_REGISTRATION_DISSOLVED',
   ],
   async condition(event, context) {
     let provenance = {};
@@ -412,6 +415,7 @@ const R9_REGISTER_CHANGE = {
     if (event.event_type.startsWith('SCHOOL_')) category = 'onderwijs';
     if (event.event_type.startsWith('AFM_') || event.event_type.startsWith('DNB_')) category = 'economie-werk';
     if (event.event_type.startsWith('RVO_')) category = 'economie-werk';
+    if (event.event_type.startsWith('KVK_')) category = 'economie-werk';
     const typeLabels = {
       'CHILDCARE_OPENED': 'Nieuwe kinderopvang',
       'CHILDCARE_CLOSED': 'Kinderopvang gesloten',
@@ -434,6 +438,9 @@ const R9_REGISTER_CHANGE = {
       'RVO_PROJECT_ADDED': 'Nieuw lokaal RVO-project',
       'RVO_PROJECT_CHANGED': 'Lokaal RVO-project gewijzigd',
       'RVO_FUNDING_CHANGED': 'RVO-financiering gewijzigd',
+      'KVK_REGISTRATION_ADDED': 'Nieuw gezien in KvK',
+      'KVK_REGISTRATION_CHANGED': 'KvK-inschrijving gewijzigd',
+      'KVK_REGISTRATION_DISSOLVED': 'KvK-inschrijving niet meer actief',
     };
     return {
       title: `${typeLabels[event.event_type] || 'Registerwijziging'}: ${orgName || event.title}`,

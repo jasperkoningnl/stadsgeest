@@ -146,6 +146,10 @@ async function scrapeRaadVanState() {
 async function scrapeOpenKvK() {
   const name = 'OpenKvK — nieuwe inschrijvingen Amersfoort';
   const stats = { new: 0, skipped: 1, errors: 0 };
+  // 23 september 2026: vervangen door de KG-adapter
+  // src/kg/adapters/openkvk-register.cjs (dagelijkse detectierun, bron
+  // "OpenKvK — overheid.io registerupdates"). Deze stub doet niets meer dan loggen.
+  //
   // 9 augustus 2026: bewust niet onderzocht. Dit is de enige van de vier
   // return-bronnen die geld kost; Jasper overlegt daarover met Gideon. De regel
   // hieronder dat de key gratis is, is achterhaald — api.overheid.io vraagt voor

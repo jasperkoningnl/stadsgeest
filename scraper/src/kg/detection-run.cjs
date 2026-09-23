@@ -33,6 +33,7 @@ const {
 const { AnbiRegisterAdapter } = require('./adapters/anbi-register.cjs');
 const { GleifRegisterAdapter } = require('./adapters/gleif-register.cjs');
 const { OsmContextAdapter } = require('./adapters/osm-context.cjs');
+const { OpenKvkRegisterAdapter } = require('./adapters/openkvk-register.cjs');
 
 const LOCK_PATH = path.join(__dirname, '../../.detection-run.lock');
 const STALE_LOCK_MS = 6 * 60 * 60 * 1000;
@@ -66,6 +67,9 @@ const ADAPTERS = [
   ['anbi', AnbiRegisterAdapter, { sourceName: 'ANBI-register — Belastingdienst open data', minimumHours: 144 }],
   ['gleif', GleifRegisterAdapter, { sourceName: 'GLEIF — LEI-register', minimumHours: 144 }],
   ['osm', OsmContextAdapter, { sourceName: 'OpenStreetMap — Overpass contextlaag', minimumHours: 144 }],
+  // Betaald (overheid.io Small, 2.500 calls). Twee calls per dag; zie adapter voor de bovengrens per run.
+  // De dagcursor voorkomt dubbel ophalen, dus een korte minimumtijd is veilig.
+  ['openkvk', OpenKvkRegisterAdapter, { sourceName: 'OpenKvK — overheid.io registerupdates', minimumHours: 6 }],
 ];
 
 function isDueAt(lastFinishedAt, minimumHours, now = Date.now()) {

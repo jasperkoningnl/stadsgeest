@@ -294,3 +294,15 @@ community- en noodbronnen vallen buiten het bereik, omdat daar namen van
 burgers in staan. De weger krijgt alleen KG-kandidaten; onopgeloste
 vermeldingen zijn daarvoor te ruisig (organisatieprecisie 25-58%). De
 bestaande aliasextractie blijft ongewijzigd leidend. Zie `NER.md`.
+
+## 2026-09-23 — Betaalde OpenKvK-bron via overheid.io
+
+Het uitbreidingsplan zegt "Geen betaalde KVK- of Kadasterproducten toevoegen."
+Jasper heeft daar bewust van afgeweken en een abonnement Small bij overheid.io
+genomen (2.500 calls). Omdat de API geen volledige lokale export en geen
+inschrijfdatum geeft, volgt de adapter alleen de dagelijkse wijzigingen per
+`updated_at` en niet het hele register. Registerwijzigingen worden eerst
+graafcontext. Via R9 wordt er alleen een signaal van gemaakt bij organisaties
+die we al uit een andere bron kennen, en bij maatschappelijke rechtsvormen.
+Zo blijft de dagelijkse signaalaanmaak binnen de normale bandbreedte. Zie
+`SOURCES.md`.
