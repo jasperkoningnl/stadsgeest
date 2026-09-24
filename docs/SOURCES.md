@@ -242,6 +242,27 @@ binnen en worden in `raw_item_attachments` gezet en samengevoegd in
 `raw_items.full_text`. Klachten (278 rijen) blijven bewust buiten beschouwing.
 Scans zonder tekstlaag krijgen `geen_tekst`.
 
+**Open (vastgesteld 24 september 2026): Woo-bijlagen inhoudelijk meewegen.**
+Besluit van Jasper: Woo-bijlagen moeten voortaan inhoudelijk meegenomen worden.
+Nu gebeurt dat niet, om drie redenen:
+- Van de 116 iBabs-items zijn er 102 bij de backfill van 23 september als
+  `is_historical=1` gemarkeerd, omdat het besluit ouder was dan het venster.
+  Daardoor kregen ze geen signaal en zag de weger ze nooit. Toch kunnen de
+  bijlagen maanden na het besluit nog nieuwswaardig zijn: niemand leest ze.
+- De weger ziet een Woo-besluit als één signaal met een titel. De tekst van
+  soms honderd bijlagen (tot 1,2 miljoen tekens per besluit) weegt niet mee.
+  De inhoud moet doorzocht worden op woorden als liquiditeit, voorschot,
+  fraude, ondermijning, geheimhouding, ingebrekestelling, aansprakelijk en
+  dwangsom, en de treffers moeten naar de weger.
+- Oude bijlagen met status `fout` zijn niet opnieuw geprobeerd. Een steekproef
+  van drie haalde gewoon op via `/Document/View/{id}`, en juist daarin zat de
+  kern van een tip.
+
+Handmatige test: een doorzoeking van één Woo-besluit en een vergelijking met de
+raadsstukken van de zeven regiogemeenten (Open Raadsinformatie) leverden een
+verdiepingstip op met score 20. Zoekhulpjes voor ORI staan buiten de repo in
+`stadsgeest-werk/ori/`. Nog niet gebouwd; eerst met Jasper het ontwerp bespreken.
+
 ## Raad Leusden - vergaderstukken via Notubiz
 
 Scraper `scraper/src/scrapers/notubiz-leusden.js`, hulpfuncties in
