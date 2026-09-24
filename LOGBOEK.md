@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-09-24 - Een rustiger bovenkant en een klikbare teller
+
+De bovenkant van het dashboard is opgeruimd. De tabbladen staan nu als één rij met een streep onder het tabblad waar je bent; Logboek en Beheer staan rechts, los van de werkvoorraad. Boven de wachtrij staat één balk: links kies je de soort (met het aantal tips per soort erbij), rechts staat de teller die nu zegt hoeveel artikelen er zonder Stadsgeest niet waren geschreven. Klik op die teller en je ziet de tips waar die artikelen uit voortkwamen. Kies je een soort, dan verdwijnen ook de dagkopjes waar niets van die soort onder staat. Keerzijde: de teller noemt niet meer hoeveel tips in totaal zijn gepubliceerd; dat zie je onder Archief.
+
 ## 2026-09-24 - Elke donderdag een zoektocht naar een supertip
 
 Vanaf volgende week zoekt Stadsgeest elke donderdag naar één supertip. Dat is een verhaal waarvoor Stadsgeest dieper in het archief duikt: alle nieuwe signalen van de week, maar ook oudere stukken, Woo-bijlagen en raadsstukken van de regiogemeenten. Is er een supertip, dan staat die tot maandag bovenaan de wachtrij onder het kopje Supertip van deze week. Daarna zakt hij terug naar zijn gewone plek op datum. Het kan ook gebeuren dat er een week geen supertip is. Dat is bewust: het label moet iets betekenen. De MetMaya-tip van vandaag is de eerste supertip en staat tot maandag bovenaan.

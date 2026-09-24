@@ -20,8 +20,12 @@ export default async function WachtrijPagina() {
     getMeetstand(),
   ])
 
-  // Verzamel de beschikbare soorten voor de filterpillen.
-  const soorten = [...new Set(tips.map((t) => t.soort))].sort()
+  // Soorten met hun aantal, voor de filterknoppen.
+  const perSoort = new Map<string, number>()
+  for (const t of tips) perSoort.set(t.soort, (perSoort.get(t.soort) ?? 0) + 1)
+  const soorten = [...perSoort.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([soort, aantal]) => ({ soort, aantal }))
 
   // Een supertip staat tot de maandag na de run bovenaan, daarna gewoon in de
   // chronologie.
@@ -45,23 +49,29 @@ export default async function WachtrijPagina() {
 
   return (
     <>
-      {(geparkeerd > 0 || meetstand.gepubliceerd > 0) && (
-        <div className="np-strook">
-          {geparkeerd > 0 && (
-            <Link href="/nieuwsplein33/geparkeerd" className="np-strook-item">
-              {geparkeerd} {geparkeerd === 1 ? 'tip is' : 'tips zijn'} deze week geparkeerd
-            </Link>
-          )}
-          {meetstand.gepubliceerd > 0 && (
-            <span className="np-strook-item np-strook-stil">
-              {meetstand.eigenVondst} van {meetstand.gepubliceerd} gepubliceerde tips waren zonder Stadsgeest niet gevonden
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Filterpillen en sneltoetshint */}
-      <WachtrijFilters soorten={soorten} totaal={tips.length} />
+      {/* Werkbalk: filters links, meldingen rechts. Eén regel in plaats van
+          een losse strook plus een filterbalk tussen lijnen. */}
+      <div className="np-werkbalk">
+        <WachtrijFilters soorten={soorten} totaal={tips.length} />
+        {(geparkeerd > 0 || meetstand.eigenVondst > 0) && (
+          <div className="np-meldingen">
+            {meetstand.eigenVondst > 0 && (
+              <Link href="/nieuwsplein33/archief?eigen=1" className="np-melding np-melding-winst"
+                title="Bekijk de tips waar deze artikelen uit voortkwamen">
+                <span aria-hidden="true">✓</span>
+                {meetstand.eigenVondst} {meetstand.eigenVondst === 1 ? 'artikel was' : 'artikelen waren'} zonder
+                Stadsgeest niet geschreven
+                <span aria-hidden="true" className="np-melding-pijl">→</span>
+              </Link>
+            )}
+            {geparkeerd > 0 && (
+              <Link href="/nieuwsplein33/geparkeerd" className="np-melding np-melding-let-op">
+                {geparkeerd} deze week geparkeerd
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
 
       {tips.length === 0 ? (
         <div className="np-leeg">

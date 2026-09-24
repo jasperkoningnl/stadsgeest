@@ -2206,3 +2206,92 @@ a.np-chip:hover .np-chip-pijl { transform: translateX(2px); }
 }
 .np-detail-super { padding-left: 16px; border-left: 6px solid var(--np-accent); }
 .np-daggroep-super .np-daggroep-kop { color: var(--np-accent); border-bottom-color: var(--np-accent-z); }
+
+/* ── Kop, tabs en werkbalk (herontwerp 24 sep 2026) ─────────────
+   Vijf losse lagen (kop, runregel, grijze navbak, strook, filterbalk
+   tussen lijnen) teruggebracht tot drie: kop met runregel, tabs met
+   één onderlijn, en één werkbalk met filters links en meldingen rechts. */
+.np-kop { padding: 18px 0 4px; }
+.np-kop-rij {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px 16px; flex-wrap: wrap;
+}
+.np-kop-titel { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+.np-kop .np-merk { margin-bottom: 0; }
+.np-kop .np-hdr-titel { font-size: 22px; line-height: 1.2; margin-bottom: 0; }
+.np-kop .np-top-rechts { padding-top: 0; gap: 10px; }
+.np-kop .np-thema-knop { width: 30px; height: 30px; }
+.np-kop .np-sessie { gap: 8px; }
+.np-kop .np-sessie-uitloggen {
+  background: none; border: 0; border-radius: 0; padding: 2px 0;
+  font-size: 12.5px; color: var(--np-inkt3);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.np-kop .np-sessie-uitloggen:hover { color: var(--np-inkt); }
+.np-kop + .np-runregel { padding: 4px 0 12px; }
+
+/* Tabs: tekst met een accentstreep onder de actieve, geen grijze bak. */
+.np-nav {
+  display: flex; flex-wrap: wrap; gap: 0 2px;
+  padding: 0; margin-bottom: 18px;
+  background: none; border-radius: 0;
+  border-bottom: 1px solid var(--np-rand);
+}
+.np-nav-item {
+  padding: 10px 12px 11px; border-radius: 0;
+  box-shadow: inset 0 -2px 0 transparent;
+}
+.np-nav-item-actief,
+html[data-np-thema="donker"] .np-nav-item-actief {
+  background: none; color: var(--np-inkt);
+  box-shadow: inset 0 -2px 0 var(--np-accent);
+}
+.np-nav-item-bijzaak { font-weight: 500; color: var(--np-inkt3); }
+.np-nav-item-bijzaak.np-nav-item-actief { color: var(--np-inkt); }
+.np-nav-item-rechts { margin-left: auto; }
+
+/* Werkbalk boven de wachtrij */
+.np-werkbalk {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 10px 16px; margin-bottom: 22px;
+}
+.np-segment {
+  display: inline-flex; flex-wrap: wrap; gap: 2px;
+  padding: 3px; background: var(--np-zacht); border-radius: 10px;
+}
+.np-segment-knop {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--f-d); font-size: 13px; font-weight: 600;
+  color: var(--np-inkt2); background: none; border: 0; border-radius: 7px;
+  padding: 6px 11px; cursor: pointer;
+  transition: color .16s ease, background .16s ease;
+}
+.np-segment-knop:hover { color: var(--np-inkt); }
+.np-segment-knop-actief { background: var(--np-kaart); color: var(--np-inkt); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.np-segment-tel { font-size: 11.5px; color: var(--np-inkt3); font-variant-numeric: tabular-nums; }
+.np-segment-knop-actief .np-segment-tel { color: var(--np-accent); }
+
+.np-meldingen { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.np-melding {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 600; text-decoration: none;
+  padding: 6px 12px; border-radius: 16px; border: 1px solid transparent;
+  transition: border-color .16s ease;
+}
+.np-melding-winst { background: var(--np-accent-z); color: var(--np-accent); }
+.np-melding-winst:hover { border-color: var(--np-accent); }
+.np-melding-let-op { background: var(--np-amber-z); color: var(--np-amber); }
+.np-melding-let-op:hover { border-color: var(--np-amber); }
+.np-melding-pijl { transition: transform .16s ease; }
+.np-melding:hover .np-melding-pijl { transform: translateX(2px); }
+
+.np-telling-link { color: var(--np-accent); font-weight: 600; }
+
+@media (max-width: 640px) {
+  .np-kop-titel { gap: 8px; }
+  .np-kop .np-hdr-titel { font-size: 20px; }
+  .np-nav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .np-nav::-webkit-scrollbar { display: none; }
+  .np-nav-item { white-space: nowrap; padding: 10px 10px 11px; }
+  .np-meldingen { margin-left: 0; }
+}

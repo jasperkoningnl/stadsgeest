@@ -56,8 +56,14 @@ export default function RedactieNav({
         const actief = item.href === '/nieuwsplein33' ? pathname === '/nieuwsplein33' : pathname.startsWith(item.href)
         const aantal = item.tel.reduce((som, s) => som + (tellingen[s] ?? 0), 0)
         const stip = item.href === LOGBOEK_ITEM.href && ongelezen
+        // Logboek en Beheer zijn geen werkvoorraad: ze staan rechts, iets stiller.
+        const bijzaak = item.href === LOGBOEK_ITEM.href || item.href === BEHEER_ITEM.href
+        const klassen = ['np-nav-item']
+        if (actief) klassen.push('np-nav-item-actief')
+        if (bijzaak) klassen.push('np-nav-item-bijzaak')
+        if (item.href === LOGBOEK_ITEM.href) klassen.push('np-nav-item-rechts')
         return (
-          <Link key={item.href} href={item.href} className={`np-nav-item${actief ? ' np-nav-item-actief' : ''}`}>
+          <Link key={item.href} href={item.href} className={klassen.join(' ')} aria-current={actief ? 'page' : undefined}>
             {item.label}
             {aantal > 0 && <span className="np-nav-tel">{aantal}</span>}
             {stip && <span className="np-nav-stip" title="Er is iets nieuws in het logboek" aria-label="ongelezen" />}

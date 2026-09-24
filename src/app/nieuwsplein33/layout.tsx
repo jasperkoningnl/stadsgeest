@@ -40,25 +40,29 @@ export default async function RedactieLayout({ children }: { children: React.Rea
     <div className="np-vlak">
       <script dangerouslySetInnerHTML={{ __html: THEMA_SCRIPT }} />
       <div className="np-kolom page-in">
-        <header className="np-top np-top-compact">
-          <div>
-            <Link href="/" className="np-merk" title="Naar de voorpagina van Stadsgeest">
-              Stadsgeest<span>*</span>
-            </Link>
-            <div className="np-hdr-titel">Nieuwstips</div>
-          </div>
-          <div className="np-top-rechts">
-            <ThemaSchakelaar />
-            {gebruiker && (
-              <div className="np-sessie">
-                <span className="np-sessie-tekst">
-                  Ingelogd als <strong>{gebruiker}</strong>
-                </span>
-                <form method="POST" action="/api/auth/logout">
-                  <button type="submit" className="np-sessie-uitloggen">Uitloggen</button>
-                </form>
-              </div>
-            )}
+        {/* Kop: merk en titel op één regel, sessie rechts, runregel eronder.
+            Daarna direct de tabs; alles samen vormt één blok. */}
+        <header className="np-kop">
+          <div className="np-kop-rij">
+            <div className="np-kop-titel">
+              <Link href="/" className="np-merk" title="Naar de voorpagina van Stadsgeest">
+                Stadsgeest<span>*</span>
+              </Link>
+              <div className="np-hdr-titel">Nieuwstips</div>
+            </div>
+            <div className="np-top-rechts">
+              <ThemaSchakelaar />
+              {gebruiker && (
+                <div className="np-sessie">
+                  <span className="np-sessie-tekst" title={`Ingelogd als ${gebruiker}`}>
+                    <strong>{gebruiker}</strong>
+                  </span>
+                  <form method="POST" action="/api/auth/logout">
+                    <button type="submit" className="np-sessie-uitloggen">Uitloggen</button>
+                  </form>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
