@@ -232,3 +232,15 @@ te zien waar die nog meer voorkomt. Een tip kan dus vaker zeggen "deze stichting
 kreeg ook subsidie" of "deze aannemer won eerder een aanbesteding van de
 gemeente". Keerzijde: als de koppeling alleen op de naam berust, kan het om een
 naamgenoot gaan. De tip vermeldt dat dan; controleer het KvK-nummer.
+
+## 2026-09-24 — Raadsstukken en moties uit Leusden komen weer binnen
+
+Sinds juli kwam er niets meer uit de Leusdense gemeenteraad in Stadsgeest,
+omdat Leusden na de zomer is overgestapt op een ander raadsinformatiesysteem.
+Stadsgeest leest dat nieuwe systeem nu rechtstreeks: agenda's, raadsvoorstellen,
+besluitenlijsten en ingekomen stukken van de raad en de beeld- en
+oordeelsvormende avonden, met de tekst van de stukken. Moties komen er apart
+bij, met de indienende partij, zoals "Geef Leusdense boeren toekomstperspectief"
+(Pro-Leusden) van de raad van 24 september. Stukken van vergaderingen die al
+langer dan een week geleden waren, dienen als achtergrond en leveren geen tip
+op. Keerzijde: of een Leusdense motie is aangenomen, staat er nog niet bij.

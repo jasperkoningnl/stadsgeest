@@ -241,3 +241,33 @@ run) haalt de categorielijsten op via `POST /Reports/GetReportData/{rapport}`
 binnen en worden in `raw_item_attachments` gezet en samengevoegd in
 `raw_items.full_text`. Klachten (278 rijen) blijven bewust buiten beschouwing.
 Scans zonder tekstlaag krijgen `geen_tekst`.
+
+## Raad Leusden - vergaderstukken via Notubiz
+
+Scraper `scraper/src/scrapers/notubiz-leusden.js`, hulpfuncties in
+`scraper/src/notubiz-lib.js`, drie keer per dag via `run-all.js`. Leusden is na
+de zomer van 2026 van gemeentebestuur.leusden.nl naar Notubiz gegaan
+(leusden.raadsinformatie.nl, organisatie 2090). De ORI-index voor Leusden (bron
+129, pass in `raadsinformatie-ori.js`) stopt bij de raad van 9 juli 2026.
+
+- Openbare API zonder sleutel: `api.notubiz.nl/events?organisation_id=2090`,
+  `/events/assemblies/{id}` (beeld- en oordeelsvormende avonden bestaan uit
+  meerdere vergaderingen) en `/events/meetings/{id}` met agendapunten en
+  documenten. PDF via `api.notubiz.nl/document/{id}/{versie}`.
+- Venster: 45 dagen terug tot 30 dagen vooruit. Elk document één raw_item,
+  ontdubbeld op Notubiz-document-id over alle bronnen.
+- Vergaderingen van langer dan 7 dagen geleden: `is_historical=1`,
+  `is_processed=1` (achtergrond, geen signaal).
+- Hoogstens 20 PDF's en 48 seconden per run; de rest volgt bij de volgende run.
+- Bron: 'Raad Leusden — vergaderstukken (Notubiz)', tier 1, gemeente Leusden.
+- `NOTUBIZ_DRYRUN=1` toont wat hij zou doen zonder te schrijven.
+
+## RaadKijker - moties Leusden
+
+Leusden-pass in `raadkijker-moties.js`, vóór Amersfoort. RaadKijker kent
+Leusden als `gemeente=leusden` (data_level `alleen_documenten`: geen uitslag, de
+partij bij een deel). De griffie nummert Leusdense moties niet in de titel;
+ontdubbelen gaat daarom op de document-url, niet op het motienummer. Titels met
+"Bijlage" vallen af. Alleen Notubiz-PDF's worden opgehaald; oudere links naar
+gemeentebestuur.leusden.nl niet. Moties van langer dan 7 dagen geleden worden
+achtergrond. Bron: 'Raad Leusden — Moties en amendementen', tier 1.

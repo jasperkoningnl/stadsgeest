@@ -107,12 +107,26 @@ export function zelfdeMotie(titelA, titelB) {
 // zonder de bron te kennen.
 export function inhoudskop(m) {
   const regels = [
-    `${m.type === 'amendement' ? 'Amendement' : 'Motie'} gemeenteraad Amersfoort`,
+    `${m.type === 'amendement' ? 'Amendement' : 'Motie'} gemeenteraad ${m.gemeente_naam || 'Amersfoort'}`,
     m.datum ? `Raadsvergadering: ${m.datum}` : null,
     m.indiener_partij ? `Ingediend door: ${m.indiener_partij}` : null,
     `Uitslag: ${uitslagUitStempel(m.titel)?.toLowerCase() || 'nog niet bekend'}`,
   ].filter(Boolean);
   return regels.join('\n');
+}
+
+// Leusden (2026-09-24): de griffie nummert moties niet in de titel, dus geen
+// motienummer als sleutel. Ontdubbelen gaat op de document-url. Bijlagen die
+// RaadKijker als motie labelt ("Mv.1 Motie vreemd - Bijlage RIB ...") vallen af.
+export function isBruikbaarLeusden(m) {
+  if (!m || !m.titel || !m.bron_document_url) return false;
+  return !/\bbijlage\b/i.test(m.titel);
+}
+
+export function titelLeusden(m) {
+  const soort = m.type === 'amendement' ? 'Amendement' : 'Motie';
+  const titel = String(m.titel).trim().replace(/^(motie|amendement)\s*[:-]?\s*/i, '');
+  return `${soort} gemeenteraad Leusden${m.indiener_partij ? ` (${m.indiener_partij})` : ''}: ${titel}`.slice(0, 300);
 }
 
 // Items zonder motienummer overslaan. Dat zijn verzamelpunten van de agenda

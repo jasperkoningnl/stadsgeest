@@ -29,10 +29,10 @@
 // Cloudflare blokkeert RaadKijker vanaf datacenter-IP's; dit draait alleen goed
 // op de notebook.
 import db from '../db.js';
-import { saveRawItem, getOrCreateSource, logResult, makeSummary } from '../utils.js';
+import { saveRawItem, getOrCreateSource, logResult, makeSummary, contentHash, naarPublicatieIso } from '../utils.js';
 import {
   motieSleutel, zelfdeMotie, notubizDocumentId, normaliseerNotubizUrl,
-  uitslagWijziging, inhoudskop, isBruikbaar,
+  uitslagWijziging, inhoudskop, isBruikbaar, isBruikbaarLeusden, titelLeusden,
 } from '../raadkijker.mjs';
 
 const API = 'https://raadkijker.nl/api/v1';
@@ -91,8 +91,69 @@ async function pdfTekst(url) {
   return tekst.length >= 200 ? tekst : null;
 }
 
+// Leusden (toegevoegd 2026-09-24). Kleine pass vóór Amersfoort: Leusden heeft
+// een paar moties per raadsvergadering. De vergaderstukken zelf komen via
+// notubiz-leusden.js; RaadKijker voegt de moties vreemd aan de agenda en de
+// indienende partij toe. Ontdubbeld op Notubiz-document-id in alle bronnen, dus
+// een motie die notubiz-leusden.js al had, komt er niet dubbel in. Moties van
+// langer dan 7 dagen geleden worden achtergrond (is_historical), geen signaal.
+const LEUSDEN_MAX_PDF = parseInt(process.env.RAADKIJKER_LEUSDEN_MAX_PDF || '6', 10);
+const LEUSDEN_BUDGET_MS = parseInt(process.env.RAADKIJKER_LEUSDEN_BUDGET_MS || '15000', 10);
+
+async function leusdenPass() {
+  const bron = DRY ? -1 : await getOrCreateSource(db, {
+    name: 'Raad Leusden — Moties en amendementen', url: 'https://leusden.raadsinformatie.nl/#moties',
+    sourceType: 'api', reliability: 'primary', category: 'government', scrapeFrequency: 'daily',
+  });
+  if (!DRY) {
+    await db.execute({ sql: "UPDATE sources SET tier = 1, gemeente = 'Leusden' WHERE id = ?", args: [bron] })
+      .catch(e => console.error('raadkijker-moties (Leusden): tier/gemeente niet gezet:', e.message));
+  }
+  const sinds = new Date(Date.now() - DAGEN * 864e5).toISOString().slice(0, 10);
+  const vers = new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10);
+  const lijst = ((await api('/moties?gemeente=leusden&limit=100&offset=0')).data || [])
+    .filter(m => String(m.datum || '') >= sinds && isBruikbaarLeusden(m));
+  const eind = Date.now() + LEUSDEN_BUDGET_MS;
+  let nieuw = 0, bekend = 0, fouten = 0, pdfs = 0, uitgesteld = 0;
+  for (const m of lijst) {
+    const url = normaliseerNotubizUrl(m.bron_document_url);
+    const doc = notubizDocumentId(url);
+    const bestaat = await db.execute({
+      sql: 'SELECT id FROM raw_items WHERE external_url = ? OR external_url LIKE ? LIMIT 1',
+      args: [url, doc ? `%notubiz.nl/document/${doc.id}/%` : url],
+    });
+    if (bestaat.rows.length) { bekend++; continue; }
+    if (Date.now() > eind || pdfs >= LEUSDEN_MAX_PDF) { uitgesteld++; continue; }
+    pdfs++;
+    try {
+      // Alleen Notubiz-PDF's ophalen; de oude links naar gemeentebestuur.leusden.nl
+      // (tot juli 2026) reageren traag en die moties zijn toch achtergrond.
+      const pdf = doc ? await pdfTekst(url).catch(() => null) : null;
+      const kop = inhoudskop({ ...m, gemeente_naam: 'Leusden' });
+      const titel = titelLeusden(m);
+      const historisch = String(m.datum || '') < vers;
+      if (DRY) { console.log(`  [dry] Leusden ${historisch ? 'hist ' : 'nieuw'} ${titel.slice(0, 90)} | pdf ${pdf ? pdf.length : 'nee'}`); nieuw++; continue; }
+      await db.execute({
+        sql: `INSERT INTO raw_items (source_id, external_url, title, content, summary, content_hash, published_at,
+                full_text, fulltext_fetched_at, is_processed, is_historical)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        args: [bron, url, titel, `${kop}\n\n${pdf || ''}`.trim().substring(0, 25000), (makeSummary(pdf || '') || kop).substring(0, 500),
+          contentHash(`${titel}${url}`), naarPublicatieIso(m.datum), pdf ? `${kop}\n\n${pdf}` : null,
+          pdf ? new Date().toISOString() : null, historisch ? 1 : 0, historisch ? 1 : 0],
+      });
+      nieuw++;
+    } catch (e) {
+      if (String(e.message).includes('UNIQUE')) bekend++;
+      else { fouten++; console.error(`raadkijker-moties (Leusden): ${m.id}: ${e.message}`); }
+    }
+  }
+  console.log(`raadkijker-moties (Leusden): ${lijst.length} sinds ${sinds}, ${nieuw} nieuw, ${bekend} al bekend, ${uitgesteld} uitgesteld, ${fouten} fouten`);
+  if (!DRY) await logResult(db, bron, 'RaadKijker — Moties Leusden', nieuw, bekend, fouten, lijst.length);
+}
+
 async function scrape() {
   if (!SLEUTEL) throw new Error('RAADKIJKER_API_KEY ontbreekt in scraper/.env');
+  try { await leusdenPass(); } catch (e) { console.error('raadkijker-moties (Leusden):', e.message); }
 
   const bronnen = {
     motie: await getOrCreateSource(db, {

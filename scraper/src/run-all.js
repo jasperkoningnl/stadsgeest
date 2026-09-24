@@ -34,6 +34,7 @@ const scrapers = [
 'raadsinformatie-ori.js',       // Raadsinformatie via Open Raadsinformatie API (2026-08-02, vervangt Notubiz-Playwright — Cloudflare)
 'raadkijker-moties.js',         // Moties/amendementen via RaadKijker-API + Notubiz-PDF (2026-09-23); sleutel RAADKIJKER_API_KEY in .env
 'insolventies.js',             // Centraal Insolventieregister, alleen lokale rechtspersonen (2026-09-23)
+'notubiz-leusden.js',          // Vergaderstukken gemeenteraad Leusden via de Notubiz-API; vervangt de stilgevallen ORI-Leusdenbron 129 (2026-09-24)
   // pdok-bag.js en rechtspraak.js draaien wekelijks → run-weekly.js (aangemaakt in Groep B)
 ];
 
