@@ -64,6 +64,9 @@ const statements = [
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`,
   `CREATE INDEX IF NOT EXISTS idx_dmr_mention ON document_mention_reviews(mention_id)`,
+  // Eén vermelding kan precies één menselijk oordeel krijgen. request_id alleen
+  // beschermt niet tegen twee gelijktijdige verzoeken met verschillende UUID's.
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_dmr_mention_unique ON document_mention_reviews(mention_id)`,
 ];
 
 (async () => {

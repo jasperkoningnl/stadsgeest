@@ -79,7 +79,12 @@ export async function POST(request: Request) {
 
   const existingRequest = await turso.execute({ sql: 'SELECT id FROM document_mention_reviews WHERE request_id = ?', args: [requestId] })
   if (!existingRequest.rows.length) {
-    const mention = await turso.execute({ sql: "SELECT id FROM document_mentions WHERE id = ? AND resolution_status = 'candidate'", args: [mentionId] })
+    const mention = await turso.execute({
+      sql: `SELECT id FROM document_mentions
+            WHERE id = ? AND resolution_status = 'candidate' AND reviewed_at IS NULL
+              AND NOT EXISTS (SELECT 1 FROM document_mention_reviews WHERE mention_id = ?)`,
+      args: [mentionId, mentionId],
+    })
     if (!mention.rows.length) return NextResponse.json({ fout: 'Vermelding niet gevonden of al beoordeeld' }, { status: 404 })
     const stmts = [{
       sql: 'INSERT OR IGNORE INTO document_mention_reviews (mention_id, verdict, actor, request_id) VALUES (?,?,?,?)',
@@ -88,8 +93,11 @@ export async function POST(request: Request) {
     if (verdict !== 'skipped') {
       stmts.push({
         sql: `UPDATE document_mentions SET resolution_status = ?, reviewed_by = ?, reviewed_at = datetime('now'),
-                updated_at = datetime('now') WHERE id = ? AND reviewed_at IS NULL`,
-        args: [verdict === 'correct' ? 'confirmed' : 'rejected', gebruiker, mentionId],
+                updated_at = datetime('now')
+              WHERE id = ? AND reviewed_at IS NULL
+                AND EXISTS (SELECT 1 FROM document_mention_reviews
+                            WHERE mention_id = ? AND request_id = ? AND verdict = ?)`,
+        args: [verdict === 'correct' ? 'confirmed' : 'rejected', gebruiker, mentionId, mentionId, requestId, verdict],
       })
     }
     await turso.batch(stmts, 'write')
