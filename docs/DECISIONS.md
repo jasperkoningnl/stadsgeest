@@ -315,3 +315,13 @@ graafcontext. Via R9 wordt er alleen een signaal van gemaakt bij organisaties
 die we al uit een andere bron kennen, en bij maatschappelijke rechtsvormen.
 Zo blijft de dagelijkse signaalaanmaak binnen de normale bandbreedte. Zie
 `SOURCES.md`.
+
+## 2026-09-24 — Gastouders niet in de adreskoppeling
+
+Van de 345 LRK-records zijn er 115 van het type VGO: gastouders, met hun eigen
+naam op hun woonadres. Dat zijn particulieren. Een exacte adreskoppeling liet de
+weger bij de verbouwing van zo'n woonhuis "kinderopvang op dit adres" zien en
+bracht zo een privépersoon in beeld. `link-register-addresses.cjs` slaat VGO
+daarom over; de 86 bestaande rijen zijn uit `register_addresses` verwijderd.
+Kinderdagverblijven, bso's en gastouderbureaus (KDV, BSO, GOB) blijven
+gekoppeld. Het LRK-record zelf in `source_records` is ongewijzigd.
