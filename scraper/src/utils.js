@@ -119,7 +119,11 @@ export async function logResult(db, sourceId, sourceName, saved, skipped, errors
   console.log(`[${timestamp}] ${sourceName}: ${saved} nieuw, ${skipped} overgeslagen, ${errors} fouten`);
 
   const found = itemsFound ?? (saved + skipped);
-  const status = found === 0 ? 'empty' : 'ok';
+  // Een onbereikbare feed is geen lege feed. Juist dit onderscheid gebruikt
+  // de bronnenwacht om een technisch probleem sneller dan na twaalf nulruns te
+  // herkennen. Bij gedeeltelijk succes blijft de run ok en staat de fouttelling
+  // afzonderlijk in items_error.
+  const status = found === 0 ? (Number(errors) > 0 ? 'error' : 'empty') : 'ok';
 
   try {
     await db.execute({

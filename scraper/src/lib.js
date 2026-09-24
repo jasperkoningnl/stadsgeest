@@ -128,7 +128,7 @@ export async function log(db, sourceId, name, stats, itemsFound) {
   console.log(`[${ts}] ${name}: ${stats.new} nieuw, ${stats.skipped} overgeslagen, ${stats.errors} fouten`);
 
   const found = itemsFound ?? (stats.new + stats.skipped);
-  const status = found === 0 ? 'empty' : 'ok';
+  const status = found === 0 ? (Number(stats.errors) > 0 ? 'error' : 'empty') : 'ok';
 
   try {
     await db.execute({
