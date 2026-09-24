@@ -15,6 +15,17 @@ New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 $OutputEncoding = $utf8
 Set-Location -LiteralPath $scriptDir
 
+# De oorspronkelijke taak schreef het eerste deel als UTF-16 en latere regels
+# als UTF-8. Zo'n gemengd bestand is niet betrouwbaar te herstellen. Bewaar het
+# eenmalig als legacy-log en begin daarna expliciet in UTF-8 zonder BOM.
+if (Test-Path -LiteralPath $logFile) {
+  $eersteBytes = [System.IO.File]::ReadAllBytes($logFile) | Select-Object -First 2
+  if ($eersteBytes.Count -eq 2 -and $eersteBytes[0] -eq 0xFF -and $eersteBytes[1] -eq 0xFE) {
+    $legacyLog = Join-Path $logDir ('detection-run-legacy-mixed-{0}.log' -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
+    Move-Item -LiteralPath $logFile -Destination $legacyLog
+  }
+}
+
 # Windows PowerShell 5 maakt van elke stderr-regel van een native proces een
 # foutrecord. Met 'Stop' brak een enkele waarschuwing de hele taak af (23-9:
 # detectierun gestopt tijdens Asbest, evaluatie en retentie overgeslagen,
@@ -24,10 +35,16 @@ function Invoke-NodeStep {
   param([string[]]$Arguments)
   $previous = $ErrorActionPreference
   $ErrorActionPreference = 'Continue'
+  $writer = New-Object System.IO.StreamWriter($logFile, $true, $utf8)
   try {
-    & $nodeExe @Arguments 2>&1 | ForEach-Object { "$_" } | Out-File -LiteralPath $logFile -Encoding utf8 -Append
-    return $LASTEXITCODE
+    & $nodeExe @Arguments 2>&1 | ForEach-Object {
+      $writer.WriteLine([string]$_)
+      $writer.Flush()
+    }
+    $exitCode = $LASTEXITCODE
+    return $exitCode
   } finally {
+    $writer.Dispose()
     $ErrorActionPreference = $previous
   }
 }
@@ -55,5 +72,11 @@ $registerExit = Invoke-NodeStep @('src\link-register-addresses.cjs')
 # Pand bij nieuwe verblijfsobjecten (zelfde gebouw, ander adres).
 $pandExit = Invoke-NodeStep @('src\link-bag-panden.cjs', '--limit', '2000')
 
-if ($detectionExit -ne 0 -or $evaluationExit -ne 0 -or $retentionExit -ne 0 -or $nerExit -ne 0 -or $adresExit -ne 0 -or $registerExit -ne 0 -or $pandExit -ne 0) { exit 1 }
+# Organisatiekoppeling (docs/KOPPELING.md): organisaties uit registers, geld- en
+# toezichtbronnen over bronnen heen koppelen (Splink, scraper\.koppel-venv).
+# Schrijft alleen naar org_link_records, org_clusters en org_link_runs; slaat
+# het rekenen over als de invoer niet is veranderd.
+$koppelExit = Invoke-NodeStep @('src\koppel-organisaties.cjs')
+
+if ($detectionExit -ne 0 -or $evaluationExit -ne 0 -or $retentionExit -ne 0 -or $nerExit -ne 0 -or $adresExit -ne 0 -or $registerExit -ne 0 -or $pandExit -ne 0 -or $koppelExit -ne 0) { exit 1 }
 exit 0
