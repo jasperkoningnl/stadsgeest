@@ -48,7 +48,7 @@ export default function FeedbackBalk() {
             className="np-fb-balk-sluit"
             onClick={() => setZichtbaar(false)}
             aria-label="Sluiten"
-            title="Sluiten — vandaag niet meer"
+            title="Sluiten, vandaag niet meer"
           >
             ×
           </button>

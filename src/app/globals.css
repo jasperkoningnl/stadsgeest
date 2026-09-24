@@ -1186,28 +1186,12 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 }
 .np-doc-fragment { margin-top: 8px; font-family: var(--f-b); font-size: 14px; line-height: 1.6; color: var(--np-inkt3); }
 
-.np-herkomst { list-style: none; display: flex; flex-direction: column; gap: 12px; }
-.np-herkomst > li {
-  padding-left: 12px; border-left: 3px solid var(--np-accent-z);
-  font-family: var(--f-b); font-size: 14px; color: var(--np-inkt2);
-}
-.np-herkomst strong { font-family: var(--f-d); color: var(--np-inkt); }
-.np-herkomst-bijdrage { margin-top: 3px; line-height: 1.6; }
-.np-herkomst a { color: var(--np-accent); }
-
 .np-weging { width: 100%; border-collapse: collapse; font-size: 14px; max-width: 460px; }
 .np-weging td { padding: 7px 0; border-bottom: 1px solid var(--np-rand-z); font-family: var(--f-b); color: var(--np-inkt2); }
 .np-weging td:last-child { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--f-d); font-weight: 600; }
 .np-plus { color: var(--np-groen); }
 .np-min { color: var(--np-amber); }
 .np-weging-som td { font-family: var(--f-d); font-weight: 700; color: var(--np-inkt); border-bottom: none; }
-
-.np-vragen { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-.np-vragen li {
-  padding: 12px 16px; background: var(--np-kaart);
-  border: 1px solid var(--np-rand-z); border-left: 3px solid var(--np-accent);
-  border-radius: 10px; font-family: var(--f-b); font-size: 15px; line-height: 1.6; color: var(--np-inkt2);
-}
 
 /* ── Dossiertijdlijn ─────────────────────────────────────── */
 .np-tijdlijn { list-style: none; display: flex; flex-direction: column; }
@@ -1495,40 +1479,6 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 
 
 /* ── Tipdetail: gestructureerde briefing (2026-08-15) ────── */
-.np-betrokkenen {
-  margin-bottom: 20px; padding: 16px 18px;
-  background: var(--np-kaart); border: 1px solid var(--np-rand-z); border-radius: 12px;
-}
-.np-betrokkenen .np-kopje { margin-top: 0; }
-.np-betrokkenen ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-.np-betrokkene-naam { font-weight: 700; color: var(--np-accent); text-decoration: none; }
-.np-betrokkene-naam:hover { text-decoration: underline; }
-.np-betrokkene-rol { margin-left: 8px; font-size: 13px; color: var(--np-inkt2); }
-.np-betrokkene-toel {
-  font-family: var(--f-b); font-size: 13.5px; color: var(--np-inkt3);
-  line-height: 1.55; margin-top: 2px;
-}
-
-.np-feiten {
-  list-style: none; counter-reset: feit;
-  display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px;
-}
-.np-feiten > li {
-  counter-increment: feit; position: relative; padding: 12px 16px 12px 48px;
-  background: var(--np-kaart); border: 1px solid var(--np-rand-z); border-radius: 10px;
-}
-.np-feiten > li::before {
-  content: counter(feit); position: absolute; left: 14px; top: 13px;
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--np-accent-z); color: var(--np-accent);
-  font-size: 12px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-}
-.np-feiten p { font-family: var(--f-b); font-size: 15px; line-height: 1.6; color: var(--np-inkt); }
-.np-feit-bron { margin-top: 6px; font-size: 12.5px; color: var(--np-inkt3); }
-.np-feit-bron a { color: var(--np-accent); text-decoration: none; }
-.np-feit-bron a:hover { text-decoration: underline; }
-
 .np-paneel {
   padding: 14px 16px; margin: 16px 0; border-radius: 10px;
   font-family: var(--f-b); font-size: 14px; color: var(--np-inkt2);
@@ -1537,8 +1487,6 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 .np-paneel ul { margin: 0 0 0 18px; display: flex; flex-direction: column; gap: 5px; }
 .np-paneel-open { background: var(--np-amber-z); border: 1px solid var(--np-amber); }
 .np-paneel-open strong { color: var(--np-amber); }
-.np-paneel-context { background: var(--np-paars-z); border: 1px solid var(--np-paars); }
-.np-paneel-context strong { color: var(--np-paars); }
 .np-paneel-nee { background: var(--np-rood-z); border: 1px solid var(--np-rood); }
 .np-paneel-nee strong { color: var(--np-rood); }
 
@@ -1590,12 +1538,6 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 .np-merk:hover { color: var(--np-inkt); }
 
 /* ── Eerdere berichtgeving en vervolgstappen ────────────── */
-.np-paneel-eerder { background: var(--np-blauw-z); border: 1px solid var(--np-blauw); }
-.np-paneel-eerder strong { color: var(--np-blauw); }
-.np-paneel-eerder a { color: var(--np-blauw); font-weight: 600; text-decoration: underline; }
-.np-eerder-medium { font-family: var(--f-d); font-weight: 700; color: var(--np-inkt); }
-.np-eerder-nieuw { margin-top: 10px; }
-.np-eerder-nieuw strong { display: inline; margin: 0; color: var(--np-inkt); }
 
 .np-paneel-verder { background: var(--np-accent-z); border: 1px solid var(--np-accent); }
 .np-paneel-verder strong { color: var(--np-accent); }
@@ -2094,4 +2036,102 @@ html[data-np-thema="donker"] .np-subnav-item-actief { box-shadow: 0 1px 2px rgba
   .np-subnav { gap: 1px; }
   .np-subnav-item { padding: 5px 10px; font-size: 12px; }
   .np-periode-kiezer { margin-left: 0; padding-left: 0; margin-top: 4px; width: 100%; }
+}
+
+/* ── Tipdetail: blokken en chips (2026-09-24) ─────────────
+   Elk onderdeel van het verhaal is een kaart met een gekleurde lijn links.
+   De kleur zegt wat voor informatie het is; namen en bronnen zijn chips. */
+.np-blok {
+  --blok: var(--np-accent);
+  margin: 0 0 16px; padding: 16px 20px 18px;
+  background: var(--np-kaart); border: 1px solid var(--np-rand-z);
+  border-left: 3px solid var(--blok); border-radius: 10px;
+}
+.np-blok-weten, .np-blok-herkomst { --blok: var(--np-accent); }
+.np-blok-open    { --blok: var(--np-amber); }
+.np-blok-context { --blok: var(--np-paars); }
+.np-blok-verder  { --blok: var(--np-blauw); }
+.np-blok-eerder, .np-blok-wie { --blok: var(--np-inkt3); }
+.np-blok-letop   { --blok: var(--np-rood); }
+.np-blok-kop {
+  font-family: var(--f-d); font-size: 12px; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--blok); margin: 0 0 12px;
+}
+.np-blok-tekst { font-family: var(--f-b); font-size: 15px; line-height: 1.65; color: var(--np-inkt2); margin: 0; }
+.np-blok-lijst { list-style: none; margin: 0; padding: 0; }
+.np-blok-lijst > li + li { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--np-rand-z); }
+
+/* Opsommingen: een stip in de kleur van het blok */
+.np-puntlijst > li {
+  position: relative; padding-left: 20px;
+  font-family: var(--f-b); font-size: 15px; line-height: 1.6; color: var(--np-inkt2);
+}
+.np-puntlijst > li::before {
+  content: ''; position: absolute; left: 3px; top: 9px;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--blok);
+}
+.np-puntlijst > li + li::before { top: 21px; }
+
+/* Wat we weten: genummerde feiten met de bron als chip eronder */
+.np-feitlijst > li { display: flex; gap: 12px; }
+.np-feitnr {
+  flex-shrink: 0; width: 22px; height: 22px; margin-top: 1px; border-radius: 50%;
+  background: var(--np-accent-z); color: var(--np-accent);
+  font-family: var(--f-d); font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.np-feit { flex: 1; min-width: 0; }
+.np-feit p { font-family: var(--f-b); font-size: 15px; line-height: 1.6; color: var(--np-inkt); margin: 0; }
+.np-feit-bronnen { margin-top: 8px; }
+
+/* Chips */
+.np-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.np-chip {
+  display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
+  padding: 3px 10px; border-radius: 14px;
+  font-family: var(--f-d); font-size: 12.5px; font-weight: 600; line-height: 1.4;
+  border: 1px solid var(--np-rand); background: var(--np-bg); color: var(--np-inkt2);
+  text-decoration: none; overflow-wrap: anywhere;
+  transition: color .16s ease, border-color .16s ease, background .16s ease;
+}
+a.np-chip { cursor: pointer; }
+.np-chip-link:hover { border-color: var(--np-accent); color: var(--np-accent); }
+.np-chip-bron > span:first-child { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-chip-pijl { flex-shrink: 0; font-size: 11px; opacity: .75; transition: transform .16s ease; }
+a.np-chip:hover .np-chip-pijl { transform: translateX(2px); }
+.np-chip-naam {
+  padding: 5px 12px; font-size: 13.5px; font-weight: 700;
+  border-color: transparent; background: var(--np-accent-z); color: var(--np-accent);
+}
+.np-chip-naam:hover { border-color: var(--np-accent); }
+.np-chip-klein {
+  padding: 4px 11px; font-size: 12.5px; font-weight: 600;
+  background: var(--np-kaart); border-color: var(--np-rand); color: var(--np-inkt);
+}
+.np-chip-klein:hover { border-color: var(--np-accent); color: var(--np-accent); }
+.np-chip-prefix { font-weight: 500; color: var(--np-inkt3); }
+
+/* Wie hierin voorkomen */
+.np-wie-rol { margin-top: 7px; font-family: var(--f-b); font-size: 14px; line-height: 1.5; color: var(--np-inkt2); }
+.np-wie-toel { margin-top: 2px; font-family: var(--f-b); font-size: 13.5px; line-height: 1.55; color: var(--np-inkt3); }
+.np-wie-rol::first-letter { text-transform: uppercase; }
+.np-wie-tekst { font-size: 13px; color: var(--np-inkt3); }
+
+/* Eerdere berichtgeving en herkomst: kop, tekst, chip */
+.np-eerder-kop { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; font-size: 13px; }
+.np-eerder-kop strong { font-family: var(--f-d); font-size: 14.5px; color: var(--np-inkt); }
+.np-eerder .np-blok-tekst { margin-top: 4px; font-size: 14.5px; }
+.np-eerder .np-chips { margin-top: 8px; }
+.np-nieuw { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--np-rand-z); }
+.np-nieuw-label { display: block; margin-bottom: 4px; font-family: var(--f-d); font-size: 12.5px; font-weight: 700; color: var(--np-inkt); }
+
+/* Chips in de dossiertijdlijn */
+.np-tijdlijn-inhoud .np-chips { margin-top: 8px; }
+.np-tijdlijn-inhoud a.np-chip { color: var(--np-inkt2); font-size: 12.5px; }
+.np-tijdlijn-inhoud a.np-chip:hover { color: var(--np-accent); }
+
+@media (max-width: 640px) {
+  .np-blok { padding: 14px 14px 16px; }
+  .np-feitlijst > li { gap: 10px; }
 }

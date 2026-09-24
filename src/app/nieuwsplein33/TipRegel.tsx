@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { TipRij } from '@/lib/dashboard/tipQueries'
 import { formatDate } from '@/lib/dashboard/format'
+import { ontstreep } from '@/lib/dashboard/briefing'
 
 export const SOORT_LABEL: Record<string, string> = {
   nieuwsfeit: 'Nieuwsfeit',
@@ -36,12 +37,12 @@ export default function TipRegel({ tip }: { tip: TipRij }) {
           <span className="np-regel-datum">{formatDate(tip.created_at)}</span>
         </div>
 
-        <span className="np-regel-titel">{tip.titel}</span>
-        {tip.kern && <p className="np-regel-kern">{tip.kern}</p>}
+        <span className="np-regel-titel">{ontstreep(tip.titel)}</span>
+        {tip.kern && <p className="np-regel-kern">{ontstreep(tip.kern)}</p>}
 
         {tip.score_motivatie && (
           <div className="np-regel-waarom">
-            <strong>Waarom:</strong> {tip.score_motivatie}
+            <strong>Waarom:</strong> {ontstreep(tip.score_motivatie)}
           </div>
         )}
 
@@ -51,7 +52,7 @@ export default function TipRegel({ tip }: { tip: TipRij }) {
           ))}
           {dragend.length > 3 && <span className="np-bron np-bron-rest">+{dragend.length - 3}</span>}
           {spiegels.length > 0 && (
-            <span className="np-bron np-bron-spiegel" title="Media waarmee Nieuwsplein33 samenwerkt — hier al gepubliceerd">
+            <span className="np-bron np-bron-spiegel" title="Media waarmee Nieuwsplein33 samenwerkt, hier al gepubliceerd">
               ook bij {spiegels.map((s) => s.naam).join(', ')}
             </span>
           )}

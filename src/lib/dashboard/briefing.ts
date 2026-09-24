@@ -15,6 +15,8 @@ export interface BriefingFeit {
   tekst: string
   bron: string | null
   url: string | null
+  /** Alle links uit de bronregel; `url` is de eerste. */
+  urls: string[]
 }
 
 export interface Betrokkene {
@@ -71,12 +73,14 @@ function knipFeit(regel: string): BriefingFeit {
     const staart = stukken[stukken.length - 1]
     if (/https?:\/\/|tier\s*\d/i.test(staart)) {
       const tekst = stukken.slice(0, -1).join(' — ').trim()
-      const url = (staart.match(/https?:\/\/\S+/) || [null])[0]
-      const bron = staart.replace(/https?:\/\/\S+,?\s*/, '').replace(/\s{2,}/g, ' ').trim().replace(/^,|,$/g, '').trim()
-      return { tekst, bron: bron || null, url: url ? url.replace(/[),.]+$/, '') : null }
+      // Soms noemt de weger twee documenten ("… en https://…"); die worden allebei een link.
+      const urls = (staart.match(/https?:\/\/\S+/g) ?? []).map((u) => u.replace(/[),.]+$/, ''))
+      const bron = staart.replace(/https?:\/\/\S+,?\s*/g, '').replace(/\s{2,}/g, ' ').trim()
+        .replace(/^,|,$/g, '').replace(/\s+(en|of)$/i, '').replace(/^(en|of)$/i, '').trim()
+      return { tekst, bron: bron || null, url: urls[0] ?? null, urls }
     }
   }
-  return { tekst: regel.trim(), bron: null, url: null }
+  return { tekst: regel.trim(), bron: null, url: null, urls: [] }
 }
 
 function parseWeten(tekst: string): BriefingFeit[] {
@@ -95,7 +99,9 @@ function parseBetrokkenen(tekst: string): Betrokkene[] {
   for (const regel of tekst.split(/\n\s*(?=[-•]\s)/)) {
     const schoon = regel.replace(/^[-•]\s*/, '').replace(/\s*\n\s*/g, ' ').trim()
     if (schoon.length < 2) continue
-    const stukken = schoon.split(/\s+—\s+/)
+    let stukken = schoon.split(/\s+—\s+/)
+    // Oudere briefings (augustus) gebruiken een los koppelteken als scheiding.
+    if (stukken.length === 1) stukken = schoon.split(/\s+[–-]\s+/)
     uit.push({
       naam: stukken[0].trim(),
       rol: stukken[1]?.trim() ?? null,
@@ -129,6 +135,14 @@ export function parseBriefing(briefing: string): GeparsedeBriefing {
     nietInMag: secties.has('WAT HIER NIET IN MAG') ? parseLijst(secties.get('WAT HIER NIET IN MAG')!) : [],
     elders: secties.get('ELDERS GEBRACHT')?.replace(/\s*\n\s*/g, ' ').trim() || null,
   }
+}
+
+// Het dashboard toont geen gedachtestreepjes. De weger gebruikt ze wel, als
+// scheidingsteken in de briefing en soms midden in een zin; bij het tonen
+// wordt een los streepje een komma. Voor bronnamen en documenttitels
+// ("Raad Amersfoort — Moties") leest een middenpunt beter.
+export function ontstreep(tekst: string, scheiding = ', '): string {
+  return tekst.replace(/\s+—\s+/g, scheiding).replace(/—/g, '-')
 }
 
 // Zoekterm voor de verkenner: bij "W. Stegeman" zoekt de achternaam beter dan

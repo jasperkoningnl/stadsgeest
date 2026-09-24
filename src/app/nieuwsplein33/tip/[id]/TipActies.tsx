@@ -19,7 +19,7 @@ const REDENEN: Record<Exclude<Actie, 'wachtrij'>, { code: string; label: string 
     { code: 'goede_invalshoek', label: 'Bekend onderwerp, nieuwe invalshoek' },
   ],
   geparkeerd: [
-    { code: 'te_vroeg', label: 'Te vroeg — besluitvorming moet nog komen' },
+    { code: 'te_vroeg', label: 'Te vroeg, besluitvorming moet nog komen' },
     { code: 'geen_tijd', label: 'Interessant, nu geen capaciteit' },
     { code: 'wacht_op_meer', label: 'Wacht op meer materiaal' },
   ],

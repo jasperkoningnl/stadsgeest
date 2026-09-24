@@ -162,7 +162,7 @@ function AfgewezenKaart({ signaal: s }: { signaal: AfgewezenSignaal }) {
             />
           </div>
           <span className={`np-weging-scorebalk-getal ${scoreKleur(s.noveltyScore)}`}>
-            {s.noveltyScore?.toFixed(1) ?? '—'}
+            {s.noveltyScore?.toFixed(1) ?? '–'}
           </span>
         </div>
         <span className="np-weging-chevron">{open ? '▾' : '▸'}</span>

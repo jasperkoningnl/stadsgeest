@@ -8,19 +8,19 @@ const TIJDZONE = 'Europe/Amsterdam'
 
 export function formatDateTime(iso: string | null | undefined): string {
   const d = parseDbDate(iso)
-  if (!d) return '—'
+  if (!d) return '–'
   return d.toLocaleString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: TIJDZONE })
 }
 
 export function formatDate(iso: string | null | undefined): string {
   const d = parseDbDate(iso)
-  if (!d) return '—'
+  if (!d) return '–'
   return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric', timeZone: TIJDZONE })
 }
 
 export function formatTime(iso: string | null | undefined): string {
   const d = parseDbDate(iso)
-  if (!d) return '—'
+  if (!d) return '–'
   return d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', timeZone: TIJDZONE })
 }
 
@@ -31,7 +31,7 @@ export function parseDbDate(iso: string | null | undefined): Date | null {
 }
 
 export function formatDuration(ms: number | null | undefined): string {
-  if (ms === null || ms === undefined) return '—'
+  if (ms === null || ms === undefined) return '–'
   if (ms < 1000) return `${ms}ms`
   const s = ms / 1000
   if (s < 60) return `${s.toFixed(1)}s`

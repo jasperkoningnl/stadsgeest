@@ -14,7 +14,7 @@ export default async function GeparkeerdPagina() {
       <p className="np-telling">
         {tips.length === 0
           ? 'Niets geparkeerd.'
-          : `${tips.length} ${tips.length === 1 ? 'tip' : 'tips'} voor later — hier blijven ze staan tot je ze alsnog oppakt of afwijst.`}
+          : `${tips.length} ${tips.length === 1 ? 'tip' : 'tips'} voor later. Hier blijven ze staan tot je ze alsnog oppakt of afwijst.`}
       </p>
       <div className="np-lijst">
         {tips.map((tip) => <TipRegel key={tip.id} tip={tip} />)}

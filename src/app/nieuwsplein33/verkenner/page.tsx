@@ -61,7 +61,7 @@ export default async function VerkennerPagina({
         <>
           <p className="np-telling">
             Resultaten voor &ldquo;{resultaat.term}&rdquo;
-            {resultaat.verbreedNaar && <> — niets gevonden op de volledige naam, gezocht op &ldquo;{resultaat.verbreedNaar}&rdquo;</>}
+            {resultaat.verbreedNaar && <>. Niets gevonden op de volledige naam, gezocht op &ldquo;{resultaat.verbreedNaar}&rdquo;</>}
           </p>
 
           {/* Springnavigatie: ankers naar de secties met resultaten */}
@@ -107,7 +107,7 @@ export default async function VerkennerPagina({
               <h3 className="np-kopje">Subsidieregister</h3>
               <p className="np-tekst np-stil">
                 Gemeentelijke subsidies waarvan de ontvanger op de zoekterm lijkt.
-                Totaal per jaar: {resultaat.subsidieTotalen.map((t) => `${t.jaar}: € ${euro(t.totaal)} (${t.aantal}×)`).join(' — ')}.
+                Totaal per jaar: {resultaat.subsidieTotalen.map((t) => `${t.jaar}: € ${euro(t.totaal)} (${t.aantal}×)`).join(' · ')}.
               </p>
               <div className="np-beheer-tabel-wrap">
                 <table className="np-tabel">
@@ -208,7 +208,7 @@ export default async function VerkennerPagina({
               <p className="np-leeg-kop">Niets gevonden</p>
               <p>
                 Stadsgeest heeft niets over &ldquo;{resultaat.term}&rdquo;. Probeer een kortere
-                schrijfwijze — alleen een achternaam werkt vaak beter dan een volledige naam.
+                schrijfwijze: alleen een achternaam werkt vaak beter dan een volledige naam.
               </p>
             </div>
           )}

@@ -13,7 +13,7 @@ import { AUTH_COOKIE, sessieGebruiker } from '@/lib/dashboardAuth'
 import { formatDateTime } from '@/lib/dashboard/format'
 
 export const metadata: Metadata = {
-  title: 'Redactie — Nieuwsplein33',
+  title: 'Redactie · Nieuwsplein33',
   robots: { index: false, follow: false },
 }
 
@@ -80,8 +80,8 @@ export default async function RedactieLayout({ children }: { children: React.Rea
           )}
           <UitlegToggle>
             <p className="np-hdr-sub" style={{ marginTop: 8 }}>
-              Stadsgeest doorzoekt dagelijks de openbare bronnen van Amersfoort en Leusden —
-              bekendmakingen, raadsstukken, registers, rechtspraak — en legt hier voor wat de
+              Stadsgeest doorzoekt dagelijks de openbare bronnen van Amersfoort en Leusden
+              (bekendmakingen, raadsstukken, registers, rechtspraak) en legt hier voor wat de
               moeite van het bekijken waard lijkt.
             </p>
           </UitlegToggle>

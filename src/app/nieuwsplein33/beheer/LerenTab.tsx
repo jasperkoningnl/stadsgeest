@@ -1,7 +1,7 @@
 import type { LeerAttributie, LeerDashboard, LeerVerdeling } from '@/lib/dashboard/beheerQueries'
 import Maandreview from './Maandreview'
 
-function pct(value: number | null) { return value === null ? '—' : `${Math.round(value * 100)}%` }
+function pct(value: number | null) { return value === null ? '–' : `${Math.round(value * 100)}%` }
 function label(value: string) { return value.replaceAll('_', ' ') }
 
 function Verdeling({ titel, rijen }: { titel: string; rijen: LeerVerdeling[] }) {
@@ -21,7 +21,7 @@ function Attributie({ titel, rijen }: { titel: string; rijen: LeerAttributie[] }
 export default function LerenTab({ data, periodeLabel }: { data: LeerDashboard; periodeLabel: string }) {
   return <div>
     <div className="np-beheer-kaart">
-      <p className="np-beheer-trechter-titel">Redactionele uitkomsten — {periodeLabel}</p>
+      <p className="np-beheer-trechter-titel">Redactionele uitkomsten, {periodeLabel}</p>
       <div className="np-weging-stats">
         <div className="np-weging-stat"><span className="np-weging-stat-getal">{data.beoordeeld}</span><span className="np-weging-stat-label">unieke oordelen</span></div>
         <div className="np-weging-stat"><span className="np-weging-stat-getal np-weging-stat-groen">{pct(data.precision)}</span><span className="np-weging-stat-label">bruikbaar van meetbaar</span></div>
@@ -40,7 +40,7 @@ export default function LerenTab({ data, periodeLabel }: { data: LeerDashboard; 
     <Attributie titel="Uitkomsten per detectieregel" rijen={data.regels} />
     <div className="np-beheer-kaart" style={{ marginTop: 24 }}>
       <p className="np-beheer-trechter-titel">Maandreview</p>
-      <p className="np-tekst">Laatste cyclus: {data.reviewMaand ?? 'nog niet aangemaakt'} — {label(data.reviewStatus ?? 'open')}.</p>
+      <p className="np-tekst">Laatste cyclus: {data.reviewMaand ?? 'nog niet aangemaakt'} · {label(data.reviewStatus ?? 'open')}.</p>
       <p className="np-tekst np-stil">Beoordeel false positives, gemiste entiteiten en brongezondheid. Een drempel, brongewicht of regel verandert nooit vanuit dit scherm; daarvoor zijn minstens 50 oordelen, twee maandcycli en expliciete menselijke goedkeuring nodig.</p>
       {data.reviewMaand && data.reviewStatus && <Maandreview maand={data.reviewMaand} status={data.reviewStatus} />}
       {data.onderdrukteDubbeleFeedback > 0 && <p className="np-tekst np-stil">{data.onderdrukteDubbeleFeedback} historische dubbele handeling is bewaard maar niet meegeteld.</p>}

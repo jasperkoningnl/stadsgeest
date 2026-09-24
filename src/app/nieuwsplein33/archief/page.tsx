@@ -14,7 +14,7 @@ export default async function ArchiefPagina() {
       <p className="np-telling">
         {tips.length === 0
           ? 'Nog niets afgehandeld.'
-          : `${tips.length} afgehandelde ${tips.length === 1 ? 'tip' : 'tips'}. Afgewezen tips blijven bewaard — de reden telt mee bij het bijstellen van de selectie.`}
+          : `${tips.length} afgehandelde ${tips.length === 1 ? 'tip' : 'tips'}. Afgewezen tips blijven bewaard; de reden telt mee bij het bijstellen van de selectie.`}
       </p>
       <div className="np-lijst">
         {tips.map((tip) => <TipRegel key={tip.id} tip={tip} />)}

@@ -9,7 +9,7 @@ import FeedbackFormulier from '../FeedbackFormulier'
 import LogboekGelezen from './LogboekGelezen'
 
 export const metadata: Metadata = {
-  title: 'Logboek — Nieuwsplein33',
+  title: 'Logboek · Nieuwsplein33',
   robots: { index: false, follow: false },
 }
 
@@ -68,7 +68,7 @@ export default async function LogboekPagina() {
         <p className="np-tekst np-stil">
           Dit gaat over het dashboard zelf: wat onduidelijk is, wat ontbreekt, wat niet werkt.
           Het komt bij Jasper terecht, en wat eruit volgt komt hierboven te staan. Gaat het over
-          één tip — waarom die wel of niet bruikbaar was — gebruik dan de knoppen onder die tip.
+          één tip (waarom die wel of niet bruikbaar was), gebruik dan de knoppen onder die tip.
         </p>
         <FeedbackFormulier aanleiding="logboek" />
       </section>

@@ -122,7 +122,7 @@ export default function BronnenTabel({ overzicht }: { overzicht: SourcesOverview
             {rijen.map((s) => (
               <tr key={s.id} className={s.isActive ? undefined : 'np-beheer-rij-inactief'}>
                 <td>{s.name}</td>
-                <td>{s.tier ? <span className="np-tier">tier {s.tier}</span> : '—'}</td>
+                <td>{s.tier ? <span className="np-tier">tier {s.tier}</span> : '–'}</td>
                 <td className="np-bron-rest">{formatRelative(s.lastItemAt)}</td>
                 <td>{s.items7d}</td>
                 <td>{s.items30d}</td>

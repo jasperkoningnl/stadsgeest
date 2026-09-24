@@ -18,7 +18,7 @@ import LerenTab from './LerenTab'
 import ControlerenTab from './ControlerenTab'
 
 export const metadata: Metadata = {
-  title: 'Beheer — Nieuwsplein33',
+  title: 'Beheer · Nieuwsplein33',
   robots: { index: false, follow: false },
 }
 

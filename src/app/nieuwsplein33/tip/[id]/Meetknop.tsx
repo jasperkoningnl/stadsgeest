@@ -73,11 +73,11 @@ export default function Meetknop({
         <legend>Was dit artikel er zonder Stadsgeest ook geweest?</legend>
         <label className="np-vink">
           <input type="radio" name="zonder-stadsgeest" checked={zonderStadsgeest === 'ja'} onChange={() => setZonderStadsgeest('ja')} />
-          <span>Nee — dit hadden we zonder Stadsgeest niet gehad</span>
+          <span>Nee, dit hadden we zonder Stadsgeest niet gehad</span>
         </label>
         <label className="np-vink">
           <input type="radio" name="zonder-stadsgeest" checked={zonderStadsgeest === 'nee'} onChange={() => setZonderStadsgeest('nee')} />
-          <span>Ja — dit onderwerp was al op een andere manier gevonden</span>
+          <span>Ja, dit onderwerp was al op een andere manier gevonden</span>
         </label>
       </fieldset>
 

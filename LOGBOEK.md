@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-09-24 - Een tip leest rustiger
+
+De onderdelen van een tip (wat we weten, wat we niet weten, context, zo kom je verder, eerdere berichtgeving, let op en wie erin voorkomen) staan nu elk in een eigen kaart met een gekleurde lijn links. De kleur zegt wat voor informatie het is: oranje voor open vragen, rood voor wat er niet in mag. Bronnen onder een feit zijn knopjes met een pijltje; klik erop en het brondocument opent. Staan er twee documenten bij een feit, dan zijn het twee knopjes. De namen onderaan zijn ook knopjes: klik op een naam om te zien wat Stadsgeest verder over die persoon of organisatie heeft. Bij een organisatie met mensen erbij (bijvoorbeeld een directeur) krijgt ieder een eigen knopje. De lange gedachtestreepjes zijn uit het dashboard gehaald. Keerzijde: een heel lange bronvermelding wordt ingekort; wijs het knopje aan om de volledige tekst te zien.
+
 ## 2026-09-24 — Stadsgeest leest nu ook de inhoud van Woo-bijlagen
 
 Tot nu toe keek Stadsgeest bij een Woo-besluit alleen naar het besluit zelf, niet naar de soms honderd vrijgegeven stukken. Oudere Woo-besluiten kwamen bovendien helemaal niet in de wachtrij. Nu worden alle bijlagen doorzocht op woorden als fraude, faillissement, liquiditeitsproblemen, aansprakelijkstelling en kort geding. Ook een Woo-besluit van maanden geleden kan zo alsnog een tip opleveren. De komende dagen komen er daardoor elke dag tot tien extra oudere Woo-besluiten in de beoordeling. Keerzijde: niet elke treffer betekent iets. Een contractclausule over faillissement kan ook meetellen, dus lees altijd het stuk zelf.
