@@ -22,6 +22,7 @@ Lees `CURRENT.md`. Kies daarna alleen de route die bij de taak past:
 | Feedback, kwaliteitsmeting of privacy | `EDITORIAL-LEARNING.md`, `TESTING.md` |
 | NER, documentvermeldingen of entiteitskwaliteit | `NER.md`, `ARCHITECTURE.md` |
 | Adressen, BAG-koppeling of kruisverbanden | `ADRESKOPPELING.md` |
+| Organisaties over bronnen heen (Splink, geld en toezicht) | `KOPPELING.md` |
 | Historische vraag | `HISTORY/INDEX.md`, daarna gericht zoeken |
 
 ## Niet standaard lezen

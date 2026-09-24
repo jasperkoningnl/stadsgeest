@@ -221,3 +221,14 @@ Dit is het meetpunt van de testperiode: het slaagt als het dashboard drie tot
 vijf keer aantoonbaar tot een artikel heeft geleid dat er anders niet was
 geweest. Achteraf reconstrueren lukt niet, dus vul het in op het moment zelf —
 ook als het antwoord "toch niets mee gedaan" is.
+
+## 2026-09-24 — De weger ziet waar een organisatie nog meer voorkomt
+
+Stadsgeest zoekt nu elke nacht welke organisaties in meerdere bronnen staan: in
+het subsidieregister, bij gewonnen aanbestedingen, in de ANBI- en
+toezichtregisters, bij asbest- en arbeidsinspecties en in het
+faillissementsregister. Noemt een signaal zo'n organisatie, dan krijgt de weger
+te zien waar die nog meer voorkomt. Een tip kan dus vaker zeggen "deze stichting
+kreeg ook subsidie" of "deze aannemer won eerder een aanbesteding van de
+gemeente". Keerzijde: als de koppeling alleen op de naam berust, kan het om een
+naamgenoot gaan. De tip vermeldt dat dan; controleer het KvK-nummer.

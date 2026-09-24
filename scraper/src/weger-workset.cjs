@@ -4,6 +4,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { createClient } = require('@libsql/client');
+const { normaliseerNaam } = require('./koppel/normaliseer.cjs');
 
 const MAX_CONTENT_CHARS = 4000;
 const MAX_ITEMS_PER_SIGNAL = 6;
@@ -246,6 +247,131 @@ async function loadAddressLinks(db, signalId) {
   return out;
 }
 
+// Organisatiekoppeling (2026-09-24, docs/KOPPELING.md): dezelfde organisatie in
+// andere bronnen. Zoekt op KvK-nummer en op exacte genormaliseerde naam uit de
+// entiteiten en NER-kandidaten van dit signaal. Een naamtreffer is een
+// aanwijzing, geen vaststelling (scorepost alleen_naamovereenkomst in WEGER.md).
+const GENERIEKE_NAMEN = new Set(['gemeente amersfoort', 'gemeente leusden', 'provincie utrecht', 'rijksoverheid',
+  'college van burgemeester en wethouders', 'gemeenteraad', 'politie', 'rijkswaterstaat']);
+
+async function latestOrgRun(db) {
+  if (!(await tableExists(db, 'org_link_runs'))) return null;
+  const [row] = (await db.execute("SELECT MAX(id) AS id FROM org_link_runs WHERE status = 'ok'")).rows;
+  return row && row.id != null ? Number(row.id) : null;
+}
+
+async function loadOrgVerbanden(db, signalId, runId) {
+  if (!runId) return [];
+  const namen = (await db.execute({
+    sql: `SELECT DISTINCT e.name AS naam FROM signal_items si JOIN entities e ON e.raw_item_id = si.raw_item_id
+          WHERE si.signal_id = ? AND e.entity_type = 'organization'
+          UNION
+          SELECT DISTINCT ke.canonical_name FROM signal_items si
+          JOIN document_mentions dm ON dm.raw_item_id = si.raw_item_id
+          JOIN kg_entities ke ON ke.id = dm.resolved_entity_id
+          WHERE si.signal_id = ? AND ke.entity_type = 'organization' AND dm.resolution_status IN ('candidate','confirmed')
+          UNION
+          -- Ook onopgeloste NER-organisaties: los te ruisig voor de weger, maar een
+          -- exacte naamtreffer in een register is een bruikbare filter.
+          SELECT DISTINCT dm.mention_text FROM signal_items si
+          JOIN document_mentions dm ON dm.raw_item_id = si.raw_item_id
+          WHERE si.signal_id = ? AND dm.entity_type = 'organization' AND dm.resolution_status <> 'rejected'`,
+    args: [signalId, signalId, signalId],
+  }).catch(() => ({ rows: [] }))).rows.map((r) => r.naam);
+  const teksten = (await db.execute({
+    sql: `SELECT r.id, COALESCE(r.full_text, r.content, '') AS tekst FROM signal_items si JOIN raw_items r ON r.id = si.raw_item_id
+          WHERE si.signal_id = ?`,
+    args: [signalId],
+  })).rows;
+  const eigen = new Set(teksten.map((t) => `raw#${Number(t.id)}`));
+  const kvks = new Set();
+  for (const t of teksten) for (const m of String(t.tekst).matchAll(/KvK[-\s]?(?:nummer|nr\.?)?:?\s*(\d{8})\b/gi)) kvks.add(m[1]);
+  // TenderNed-gunningen: de winnaars met KvK staan in tender_parties, niet in de tekst.
+  if (await tableExists(db, 'tender_parties')) {
+    const winnaars = (await db.execute({
+      sql: `SELECT DISTINCT tp.registratienummer AS kvk FROM signal_items si JOIN raw_items r ON r.id = si.raw_item_id
+            JOIN tender_parties tp ON r.external_url LIKE '%' || tp.publicatie_id || '%'
+            WHERE si.signal_id = ? AND r.source_id = 132 AND tp.is_winnaar = 1 AND tp.registratienummer IS NOT NULL`,
+      args: [signalId],
+    })).rows;
+    for (const w of winnaars) if (/^\d{8}$/.test(String(w.kvk))) kvks.add(String(w.kvk));
+  }
+  // De eigen TenderNed-publicatie is geen verband met zichzelf.
+  const eigenTenders = (await db.execute({
+    sql: `SELECT r.external_url FROM signal_items si JOIN raw_items r ON r.id = si.raw_item_id WHERE si.signal_id = ? AND r.source_id = 132`,
+    args: [signalId],
+  })).rows.map((r) => (String(r.external_url).match(/(\d+)\/?$/) || [])[1]).filter(Boolean);
+  for (const id of eigenTenders) eigen.add(`tender#${id}`);
+  const norms = [...new Set(namen.map(normaliseerNaam))]
+    .filter((n) => n.length >= 5 && !GENERIEKE_NAMEN.has(n) && !/^(gemeente|provincie|ministerie|waterschap) /.test(n))
+    .slice(0, 150);
+  if (!norms.length && !kvks.size) return [];
+  const voorwaarden = [];
+  const args = [runId];
+  if (norms.length) { voorwaarden.push(`naam_norm IN (${norms.map(() => '?').join(',')})`); args.push(...norms); }
+  if (kvks.size) { voorwaarden.push(`kvk IN (${[...kvks].map(() => '?').join(',')})`); args.push(...kvks); }
+  const treffers = (await db.execute({
+    sql: `SELECT cluster_key, naam, naam_norm, kvk FROM org_link_records WHERE run_id = ? AND (${voorwaarden.join(' OR ')}) LIMIT 200`,
+    args,
+  })).rows;
+  const perCluster = new Map();
+  for (const t of treffers) {
+    const basis = t.kvk && kvks.has(t.kvk) ? 'kvk' : 'naam';
+    const oud = perCluster.get(t.cluster_key);
+    if (!oud || (oud.basis === 'naam' && basis === 'kvk')) perCluster.set(t.cluster_key, { basis, gevonden_als: t.naam });
+  }
+  const out = [];
+  for (const [key, treffer] of perCluster) {
+    const leden = (await db.execute({
+      sql: `SELECT bron, rol, naam, kvk, bron_ref, extra, n_rijen FROM org_link_records WHERE run_id = ? AND cluster_key = ? LIMIT 20`,
+      args: [runId, key],
+    })).rows.filter((l) => !(eigen.has(l.bron_ref) && Number(l.n_rijen) === 1) && l.bron !== 'kg');
+    if (!leden.length) continue;
+    const [cluster] = (await db.execute({
+      sql: `SELECT first_seen_at FROM org_clusters WHERE cluster_key = ?`, args: [key],
+    })).rows;
+    out.push({
+      organisatie: treffer.gevonden_als,
+      koppeling: treffer.basis === 'kvk' ? 'KvK-nummer (exact)' : 'alleen naamovereenkomst',
+      kvk: (leden.find((l) => l.kvk) || {}).kvk || null,
+      geld: leden.some((l) => l.rol === 'geld'),
+      toezicht: leden.some((l) => l.rol === 'toezicht'),
+      verband_sinds: cluster ? cluster.first_seen_at : null,
+      elders: leden.slice(0, 8).map((l) => ({ bron: l.bron, rol: l.rol, naam: l.naam, wat: short(l.extra, 240) })),
+    });
+  }
+  // Geld en toezicht eerst, dan KvK-treffers.
+  out.sort((a, b) => (Number(b.geld && b.toezicht) - Number(a.geld && a.toezicht))
+    || (Number(b.koppeling.startsWith('KvK')) - Number(a.koppeling.startsWith('KvK'))));
+  return out.slice(0, 8);
+}
+
+// Kruisbronclusters die de afgelopen zeven dagen voor het eerst zijn gezien en
+// geld en toezicht combineren, of een insolventie bevatten. Los van de signalen:
+// hier kan een verhaal zitten dat nog geen signaal is.
+async function loadKruisbronKandidaten(db, runId) {
+  if (!runId) return [];
+  const clusters = (await db.execute({
+    sql: `SELECT cluster_key, naam, bronnen, heeft_geld, heeft_toezicht, kvk, first_seen_at FROM org_clusters
+          WHERE run_id = ? AND first_seen_at >= datetime('now', '-7 days')
+            AND ((heeft_geld = 1 AND heeft_toezicht = 1) OR bronnen LIKE '%"insolventie"%')
+          ORDER BY first_seen_at DESC LIMIT 10`,
+    args: [runId],
+  })).rows;
+  const out = [];
+  for (const c of clusters) {
+    const leden = (await db.execute({
+      sql: 'SELECT bron, rol, naam, extra FROM org_link_records WHERE run_id = ? AND cluster_key = ? AND bron <> \'kg\' LIMIT 12',
+      args: [runId, c.cluster_key],
+    })).rows;
+    out.push({
+      organisatie: c.naam, kvk: c.kvk, bronnen: JSON.parse(c.bronnen), sinds: c.first_seen_at,
+      leden: leden.map((l) => ({ bron: l.bron, rol: l.rol, naam: l.naam, wat: short(l.extra, 240) })),
+    });
+  }
+  return out;
+}
+
 async function loadRecentEvents(db, signalId) {
   if (!(await tableExists(db, 'signal_events'))) return [];
   const result = await db.execute({
@@ -295,15 +421,17 @@ async function main(argv = process.argv.slice(2)) {
       args: [limit],
     });
 
+    const orgRunId = await latestOrgRun(db);
     const candidates = [];
     for (const signal of signals.rows) {
       const signalId = Number(signal.id);
-      const [itemSet, entities, recentEvents, nerKgCandidates, addressLinks] = await Promise.all([
+      const [itemSet, entities, recentEvents, nerKgCandidates, addressLinks, orgVerbanden] = await Promise.all([
         loadItems(db, signalId),
         loadEntities(db, signalId),
         loadRecentEvents(db, signalId),
         loadNerKgCandidates(db, signalId),
         loadAddressLinks(db, signalId),
+        loadOrgVerbanden(db, signalId, orgRunId),
       ]);
       candidates.push({
         signal: { ...signal, id: signalId },
@@ -313,9 +441,11 @@ async function main(argv = process.argv.slice(2)) {
         entities,
         ner_kg_kandidaten: nerKgCandidates,
         adres_koppelingen: addressLinks,
+        organisatie_verbanden: orgVerbanden,
         recent_events: recentEvents,
       });
     }
+    const kruisbronKandidaten = await loadKruisbronKandidaten(db, orgRunId);
 
     const dossierResult = await db.execute(
       'SELECT id, naam, slug, trefwoorden, omschrijving FROM dossiers ORDER BY naam'
@@ -325,6 +455,7 @@ async function main(argv = process.argv.slice(2)) {
       limit,
       selected_count: candidates.length,
       candidates,
+      kruisbron_kandidaten: kruisbronKandidaten,
       dossiers: dossierResult.rows.map((row) => ({ ...row, id: Number(row.id) })),
     };
     if (argv.includes('--summary')) {
@@ -332,10 +463,12 @@ async function main(argv = process.argv.slice(2)) {
         generated_at: output.generated_at,
         selected_count: output.selected_count,
         dossier_count: output.dossiers.length,
+        kruisbron_kandidaten: output.kruisbron_kandidaten.length,
         candidates: output.candidates.map((candidate) => ({
           signal_id: candidate.signal.id,
           item_count: candidate.item_count,
           included_items: candidate.items.length,
+          organisatie_verbanden: candidate.organisatie_verbanden.length,
         })),
       }, null, 2));
     } else {
@@ -353,4 +486,6 @@ if (require.main === module) {
   });
 }
 
-module.exports = { clip, jsonValue, parseLimit, loadNerKgCandidates, loadAddressLinks };
+module.exports = {
+  clip, jsonValue, parseLimit, loadNerKgCandidates, loadAddressLinks, loadOrgVerbanden, loadKruisbronKandidaten, latestOrgRun,
+};

@@ -325,3 +325,16 @@ bracht zo een privépersoon in beeld. `link-register-addresses.cjs` slaat VGO
 daarom over; de 86 bestaande rijen zijn uit `register_addresses` verwijderd.
 Kinderdagverblijven, bso's en gastouderbureaus (KDV, BSO, GOB) blijven
 gekoppeld. Het LRK-record zelf in `source_records` is ongewijzigd.
+
+## 2026-09-24 — Organisatiekoppeling met Splink, vaste gewichten en harde regels
+
+Organisaties uit registers, geld- en toezichtbronnen worden dagelijks aan elkaar
+gekoppeld met Splink (Python, eigen venv `scraper\.koppel-venv`), naar het
+voorbeeld van de NER-worker: Node doet alle I/O, Python rekent. De gewichten
+staan vast, omdat de EM-training op deze dunne data onzinnige gewichten leerde.
+Boven de Splink-kans gelden harde regels: de naam moet lijken, twee verschillende
+KvK-nummers komen nooit samen en plaatsen moeten passen. Die regels kosten
+recall (concernverbanden en merknamen zoals "MBO Amersfoort" vallen weg), maar
+een vals verband in een tip is erger dan een gemist verband. De uitkomst gaat
+naar eigen tabellen (`org_link_records`, `org_clusters`, `org_link_runs`),
+niet naar de KG. Zie `KOPPELING.md`.

@@ -82,6 +82,21 @@ patroon of relatie claimt. GLEIF bevat ook persoonlijke holdings op
 woonadressen: noem bij een particulier adres geen holding of bewoner in een tip.
 Zie `docs/ADRESKOPPELING.md`.
 
+`organisatie_verbanden` noemt per organisatie in het signaal waar dezelfde
+organisatie elders voorkomt: subsidies, RVO-projecten en gewonnen
+aanbestedingen (`rol: geld`), asbest, Arbeidsinspectie met overtreding,
+NVWA "voldoet niet", een zwak inspectieoordeel of een insolventie
+(`rol: toezicht`), en registers. `koppeling` zegt hoe: "KvK-nummer (exact)"
+is een geverifieerde sleutel, "alleen naamovereenkomst" niet. Een naamtreffer
+telt pas als kruisbronverband als je in beide bronnen hetzelfde KvK-nummer,
+adres of dezelfde context vindt; anders geldt de scorepost
+`alleen_naamovereenkomst`. Een organisatie met zowel geld als toezicht staat
+bovenaan en is een reden om beide bronnen te lezen. Bovenaan de werkset staat
+daarnaast `kruisbron_kandidaten`: nieuwe verbanden van de afgelopen week tussen
+geld en toezicht, of met een insolventie, los van de signalen. Behandel ze als
+een sweepvondst (sectie 3b): alleen een tip als het lokaal is en na lezen
+standhoudt. Zie `docs/KOPPELING.md`.
+
 Lees bij een dragende officiële bron de volledige beschikbare tekst. Als de
 opgeslagen tekst zichtbaar is afgekapt of leeg is, open dan de officiële URL.
 Ken geen patroon of detail toe dat niet uit het gelezen materiaal blijkt.

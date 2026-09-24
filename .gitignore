@@ -63,4 +63,5 @@ dwarsverbanden/rapport-*.md
 # Tijdelijke inspectie- en dry-runbestanden; Python-bytecode van de NER-worker
 /scraper/tmp/
 /scraper/.ner-venv/
+/scraper/.koppel-venv/
 __pycache__/
