@@ -60,7 +60,10 @@ async function main() {
     WHERE id IN (SELECT source_id FROM scrape_runs GROUP BY source_id HAVING COUNT(*) >= 10)
   `);
 
-  const sources = (await db.execute("SELECT id, name, url, category, expected_yield, health, is_active, scrape_frequency FROM sources WHERE COALESCE(health,'ok') != 'uitgeschakeld'")).rows;
+  // Alleen actieve bronnen. Uitgezette rijen (dubbel, eenmalig, vervangen) houden hun
+  // vastgelegde health; anders zou een oude dubbele rij met veel historische runs
+  // elke run opnieuw als 'dood' worden gemarkeerd.
+  const sources = (await db.execute("SELECT id, name, url, category, expected_yield, health, is_active, scrape_frequency FROM sources WHERE COALESCE(health,'ok') != 'uitgeschakeld' AND COALESCE(is_active,1) = 1")).rows;
   const regels = [];
   let nVerdacht = 0, nDood = 0, nReces = 0, nGeenRuns = 0;
 
