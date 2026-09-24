@@ -242,26 +242,40 @@ binnen en worden in `raw_item_attachments` gezet en samengevoegd in
 `raw_items.full_text`. Klachten (278 rijen) blijven bewust buiten beschouwing.
 Scans zonder tekstlaag krijgen `geen_tekst`.
 
-**Open (vastgesteld 24 september 2026): Woo-bijlagen inhoudelijk meewegen.**
-Besluit van Jasper: Woo-bijlagen moeten voortaan inhoudelijk meegenomen worden.
-Nu gebeurt dat niet, om drie redenen:
+**Woo-bijlagen inhoudelijk meewegen (gebouwd 24 september 2026, besluit Jasper).**
+Voorheen woog de inhoud van de Woo-bijlagen niet mee, om drie redenen:
 - Van de 116 iBabs-items zijn er 102 bij de backfill van 23 september als
-  `is_historical=1` gemarkeerd, omdat het besluit ouder was dan het venster.
-  Daardoor kregen ze geen signaal en zag de weger ze nooit. Toch kunnen de
-  bijlagen maanden na het besluit nog nieuwswaardig zijn: niemand leest ze.
-- De weger ziet een Woo-besluit als één signaal met een titel. De tekst van
-  soms honderd bijlagen (tot 1,2 miljoen tekens per besluit) weegt niet mee.
-  De inhoud moet doorzocht worden op woorden als liquiditeit, voorschot,
-  fraude, ondermijning, geheimhouding, ingebrekestelling, aansprakelijk en
-  dwangsom, en de treffers moeten naar de weger.
-- Oude bijlagen met status `fout` zijn niet opnieuw geprobeerd. Een steekproef
-  van drie haalde gewoon op via `/Document/View/{id}`, en juist daarin zat de
-  kern van een tip.
+  historisch (`is_historical=1`, `is_processed=1`) gemarkeerd, omdat het besluit
+  ouder was dan het venster. Ze kregen geen signaal en de weger zag ze nooit.
+- De weger zag van een Woo-besluit alleen de eerste 4.000 tekens. De bijlagen
+  (tot 1,2 miljoen tekens per besluit) wogen niet mee. Ook `full_text` stopt bij
+  200.000 tekens.
+- Oude bijlagen met status `fout` staan nog in de herprobeerregeling (maximaal
+  drie pogingen, `ibabs-lib.js`). Een steekproef liet zien dat ze wel op te halen
+  zijn.
 
-Handmatige test: een doorzoeking van één Woo-besluit en een vergelijking met de
-raadsstukken van de zeven regiogemeenten (Open Raadsinformatie) leverden een
-verdiepingstip op met score 20. Zoekhulpjes voor ORI staan buiten de repo in
-`stadsgeest-werk/ori/`. Nog niet gebouwd; eerst met Jasper het ontwerp bespreken.
+Wat er nu gebeurt:
+- `scraper/src/woo-scan.cjs` (dagelijks via `run-weekly.js`, na
+  `ibabs-bijlagen.js`) doorzoekt iedere bijlage met status `ok` met de regels uit
+  `woo-scan-lib.cjs`. Het gaat om zware termen met een gewicht van 1 tot 3 en
+  uitsluitingen voor standaardclausules en vaste Woo-zinnen. De treffers staan
+  met fragment in `woo_scan_hits`; welke bijlage wanneer is gescand staat in
+  `woo_scans`.
+- Promotie: een Woo-item zonder signaal met een itemscore van 3 of meer (per
+  term het hoogste gewicht, opgeteld) krijgt weer `is_processed=0`. De gewone
+  intake maakt er dan een `watching`-signaal met label [HISTORISCH] van.
+  Hoogstens 10 per run, en ieder item één keer (`woo_promoties`). Bij de start
+  lagen er 23 items boven de drempel, verdeeld over drie runs.
+- `weger-workset.cjs` geeft per signaal `woo_vondsten` mee en bovenaan
+  `woo_kandidaten`. De instructie staat in `operations/WEGER.md`, sectie 1.
+- Na een wijziging in de zoekregels: `node scraper/src/woo-scan.cjs --opnieuw
+  --alleen-scan`. Met `--dry-run` zie je de promoties zonder te schrijven.
+
+Nog niet gedaan: een bijlage zonder tekstlaag (scan) krijgt geen OCR; de
+convenanten gaan mee in dezelfde scan. Aanleiding was een handmatige test op
+24 september: één Woo-besluit, vergeleken met de raadsstukken van de zeven
+regiogemeenten via Open Raadsinformatie, leverde een verdiepingstip met score
+20 op. Zoekhulpjes voor ORI staan buiten de repo in `stadsgeest-werk/ori/`.
 
 ## Raad Leusden - vergaderstukken via Notubiz
 

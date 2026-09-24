@@ -97,6 +97,21 @@ geld en toezicht, of met een insolventie, los van de signalen. Behandel ze als
 een sweepvondst (sectie 3b): alleen een tip als het lokaal is en na lezen
 standhoudt. Zie `docs/KOPPELING.md`.
 
+Woo-besluiten: van een Woo-besluit zie je in `items[].content` alleen de eerste
+4.000 tekens, meestal de besluitbrief. De bijlagen (soms honderd documenten)
+staan daar niet in. `woo_vondsten` geeft per signaal de treffers uit die
+bijlagen op zware termen (liquiditeit, fraude, aansprakelijkstelling,
+ingebrekestelling, kort geding, dwangsom, bibob en dergelijke), met gewicht,
+bijlagetitel, URL en fragment. Bovenaan de werkset staat daarnaast
+`woo_kandidaten`: Woo-items met zware treffers die de weger nog niet heeft
+beoordeeld, ook als het besluit maanden oud is. Een treffer is een aanwijzing,
+geen feit: open de bijlage via de URL en lees het stuk voordat je iets
+claimt. Een fragment uit een standaardclausule of een vaste Woo-zin telt niet.
+Vergelijk wat de bijlagen zeggen met wat de raad openbaar te horen kreeg
+(raadsinformatiebrieven, antwoorden op vragen): juist dat verschil kan het
+verhaal zijn. Een Woo-kandidaat zonder eigen signaal behandel je als
+sweepvondst (sectie 3b). Zie `docs/SOURCES.md`, 'iBabs-bijlagen'.
+
 Lees bij een dragende officiële bron de volledige beschikbare tekst. Als de
 opgeslagen tekst zichtbaar is afgekapt of leeg is, open dan de officiële URL.
 Ken geen patroon of detail toe dat niet uit het gelezen materiaal blijkt.

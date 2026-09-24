@@ -372,6 +372,75 @@ async function loadKruisbronKandidaten(db, runId) {
   return out;
 }
 
+// Woo-bijlagen (2026-09-24): de weger ziet van een Woo-besluit maar 4.000 tekens,
+// terwijl de bijlagen tot 1,2 miljoen tekens beslaan. woo-scan.cjs zoekt daarin
+// naar zware termen (liquiditeit, fraude, aansprakelijkstelling, ...). Hier gaan
+// de treffers met fragment mee, zwaarste eerst.
+async function loadWooVondsten(db, signalId) {
+  if (!(await tableExists(db, 'woo_scan_hits'))) return [];
+  const rows = (await db.execute({
+    sql: `SELECT h.term, h.gewicht, h.aantal, h.fragmenten, a.titel AS bijlage, a.url
+          FROM signal_items si
+          JOIN woo_scan_hits h ON h.raw_item_id = si.raw_item_id
+          JOIN raw_item_attachments a ON a.id = h.attachment_id
+          WHERE si.signal_id = ?
+          ORDER BY h.gewicht DESC, h.aantal DESC
+          LIMIT 12`,
+    args: [signalId],
+  })).rows;
+  return rows.map((r) => ({
+    term: r.term, gewicht: Number(r.gewicht), aantal: Number(r.aantal),
+    bijlage: short(r.bijlage, 120), url: r.url,
+    fragmenten: JSON.parse(r.fragmenten || '[]').slice(0, 2),
+  }));
+}
+
+// Woo-items met zware treffers waarvan het signaal nog niet door de weger is
+// beoordeeld of die (nog) geen signaal hebben. Los van de werkset, zoals de
+// kruisbronkandidaten: een oud Woo-besluit valt anders nooit in de tien nieuwste.
+async function loadWooKandidaten(db) {
+  if (!(await tableExists(db, 'woo_scan_hits'))) return [];
+  const rows = (await db.execute(`
+    SELECT r.id AS raw_item_id, r.title, r.external_url, r.published_at,
+           (SELECT si.signal_id FROM signal_items si WHERE si.raw_item_id = r.id LIMIT 1) AS signal_id,
+           h.term, MAX(h.gewicht) AS gewicht, SUM(h.aantal) AS aantal
+    FROM woo_scan_hits h JOIN raw_items r ON r.id = h.raw_item_id
+    GROUP BY r.id, h.term`)).rows;
+  const perItem = new Map();
+  for (const r of rows) {
+    const id = Number(r.raw_item_id);
+    if (!perItem.has(id)) perItem.set(id, { raw_item_id: id, titel: r.title, url: r.external_url, gepubliceerd: r.published_at, signal_id: r.signal_id == null ? null : Number(r.signal_id), termen: [] });
+    perItem.get(id).termen.push({ term: r.term, gewicht: Number(r.gewicht), aantal: Number(r.aantal) });
+  }
+  const out = [];
+  for (const item of perItem.values()) {
+    item.score = item.termen.reduce((a, t) => a + t.gewicht, 0);
+    if (item.score < 3) continue;
+    if (item.signal_id != null) {
+      const beoordeeld = (await db.execute({
+        sql: `SELECT 1 FROM signal_events WHERE signal_id = ? AND actor = 'weger'
+              UNION SELECT 1 FROM tip_signals WHERE signal_id = ? LIMIT 1`,
+        args: [item.signal_id, item.signal_id],
+      })).rows.length > 0;
+      if (beoordeeld) continue;
+    }
+    item.termen.sort((a, b) => b.gewicht - a.gewicht || b.aantal - a.aantal);
+    out.push(item);
+  }
+  out.sort((a, b) => b.score - a.score);
+  const top = out.slice(0, 10);
+  for (const item of top) {
+    const frag = (await db.execute({
+      sql: `SELECT h.term, h.fragmenten, a.titel AS bijlage, a.url FROM woo_scan_hits h
+            JOIN raw_item_attachments a ON a.id = h.attachment_id
+            WHERE h.raw_item_id = ? ORDER BY h.gewicht DESC, h.aantal DESC LIMIT 4`,
+      args: [item.raw_item_id],
+    })).rows;
+    item.fragmenten = frag.map((f) => ({ term: f.term, bijlage: short(f.bijlage, 120), url: f.url, tekst: JSON.parse(f.fragmenten || '[]')[0] || '' }));
+  }
+  return top;
+}
+
 async function loadRecentEvents(db, signalId) {
   if (!(await tableExists(db, 'signal_events'))) return [];
   const result = await db.execute({
@@ -425,13 +494,14 @@ async function main(argv = process.argv.slice(2)) {
     const candidates = [];
     for (const signal of signals.rows) {
       const signalId = Number(signal.id);
-      const [itemSet, entities, recentEvents, nerKgCandidates, addressLinks, orgVerbanden] = await Promise.all([
+      const [itemSet, entities, recentEvents, nerKgCandidates, addressLinks, orgVerbanden, wooVondsten] = await Promise.all([
         loadItems(db, signalId),
         loadEntities(db, signalId),
         loadRecentEvents(db, signalId),
         loadNerKgCandidates(db, signalId),
         loadAddressLinks(db, signalId),
         loadOrgVerbanden(db, signalId, orgRunId),
+        loadWooVondsten(db, signalId),
       ]);
       candidates.push({
         signal: { ...signal, id: signalId },
@@ -442,10 +512,12 @@ async function main(argv = process.argv.slice(2)) {
         ner_kg_kandidaten: nerKgCandidates,
         adres_koppelingen: addressLinks,
         organisatie_verbanden: orgVerbanden,
+        woo_vondsten: wooVondsten,
         recent_events: recentEvents,
       });
     }
     const kruisbronKandidaten = await loadKruisbronKandidaten(db, orgRunId);
+    const wooKandidaten = await loadWooKandidaten(db);
 
     const dossierResult = await db.execute(
       'SELECT id, naam, slug, trefwoorden, omschrijving FROM dossiers ORDER BY naam'
@@ -456,6 +528,7 @@ async function main(argv = process.argv.slice(2)) {
       selected_count: candidates.length,
       candidates,
       kruisbron_kandidaten: kruisbronKandidaten,
+      woo_kandidaten: wooKandidaten,
       dossiers: dossierResult.rows.map((row) => ({ ...row, id: Number(row.id) })),
     };
     if (argv.includes('--summary')) {
@@ -464,11 +537,13 @@ async function main(argv = process.argv.slice(2)) {
         selected_count: output.selected_count,
         dossier_count: output.dossiers.length,
         kruisbron_kandidaten: output.kruisbron_kandidaten.length,
+        woo_kandidaten: output.woo_kandidaten.length,
         candidates: output.candidates.map((candidate) => ({
           signal_id: candidate.signal.id,
           item_count: candidate.item_count,
           included_items: candidate.items.length,
           organisatie_verbanden: candidate.organisatie_verbanden.length,
+          woo_vondsten: candidate.woo_vondsten.length,
         })),
       }, null, 2));
     } else {
@@ -487,5 +562,5 @@ if (require.main === module) {
 }
 
 module.exports = {
-  clip, jsonValue, parseLimit, loadNerKgCandidates, loadAddressLinks, loadOrgVerbanden, loadKruisbronKandidaten, latestOrgRun,
+  clip, jsonValue, parseLimit, loadNerKgCandidates, loadAddressLinks, loadOrgVerbanden, loadKruisbronKandidaten, latestOrgRun, loadWooVondsten, loadWooKandidaten,
 };

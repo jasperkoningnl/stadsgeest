@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-09-24 — Stadsgeest leest nu ook de inhoud van Woo-bijlagen
+
+Tot nu toe keek Stadsgeest bij een Woo-besluit alleen naar het besluit zelf, niet naar de soms honderd vrijgegeven stukken. Oudere Woo-besluiten kwamen bovendien helemaal niet in de wachtrij. Nu worden alle bijlagen doorzocht op woorden als fraude, faillissement, liquiditeitsproblemen, aansprakelijkstelling en kort geding. Ook een Woo-besluit van maanden geleden kan zo alsnog een tip opleveren. De komende dagen komen er daardoor elke dag tot tien extra oudere Woo-besluiten in de beoordeling. Keerzijde: niet elke treffer betekent iets. Een contractclausule over faillissement kan ook meetellen, dus lees altijd het stuk zelf.
+
 ## 2026-09-23 — Wijzigingen in het KvK-register komen binnen
 
 Stadsgeest leest nu elke dag welke inschrijvingen in Amersfoort en Leusden in het KvK-register zijn gewijzigd. Je krijgt een tip als een organisatie die we al uit andere bronnen kennen wordt uitgeschreven, verhuist of een andere naam krijgt, en als een stichting, vereniging of coöperatie nieuw opduikt of stopt. Nieuwe BV's en eenmanszaken leveren bewust geen tip op, omdat dat de wachtrij met ruis zou vullen. Tot 7 oktober worden alleen gegevens verzameld, dus "nieuw" verschijnt pas daarna. Keerzijde: de bron kent geen inschrijfdatum, dus een organisatie die als nieuw wordt gemeld kan ook al langer bestaan en alleen iets hebben gewijzigd. Kijk bij twijfel op kvk.nl.

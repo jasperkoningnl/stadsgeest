@@ -81,6 +81,29 @@ for (const scraper of scrapers) {
 // Entiteitsextractie is hier op 2026-08-09 weggehaald en een eigen PM2-job geworden
 // (`extract-entities`, 05:00), zodat hij ná fetch-fulltext draait. Zie run-all.js.
 
+// Woo-scan (2026-09-24): doorzoekt nieuwe Woo- en convenantbijlagen op zware termen
+// en zet historische Woo-items met zware treffers terug in de intake (max 10 per run).
+// Draait na de scrapers, dus na ibabs-bijlagen.js. Zie docs/SOURCES.md.
+{
+  const startedAt = new Date();
+  let status = 'ok';
+  let errorMessage = null;
+  try {
+    const wooOut = execSync(`node "${path.join(__dirname, 'woo-scan.cjs')}"`, { stdio: 'pipe', timeout: 300000, encoding: 'utf8', env: { ...process.env, SCRAPE_JOB_NAME: JOB_NAME } });
+    if (wooOut) process.stdout.write(wooOut);
+  } catch (err) {
+    if (err.stdout) process.stdout.write(err.stdout);
+    console.error('Woo-scan mislukt:', err.message);
+    status = err.signal === 'SIGTERM' ? 'timeout' : 'error';
+    errorMessage = (err.stderr || err.message || '').toString();
+  }
+  try {
+    await recordScrapeRun(db, { jobName: JOB_NAME, scraperFile: 'woo-scan.cjs', startedAt, finishedAt: new Date(), status, errorMessage });
+  } catch (logErr) {
+    console.error('Kon scrape_runs niet bijwerken voor woo-scan.cjs:', logErr.message);
+  }
+}
+
 // Bronnenwacht (P4, 2026-08-02)
 try {
   const bwOut = execSync(`node "${path.join(__dirname, 'bronnenwacht.cjs')}"`, { stdio: 'pipe', timeout: 300000, encoding: 'utf8', env: { ...process.env, SCRAPE_JOB_NAME: JOB_NAME } });
