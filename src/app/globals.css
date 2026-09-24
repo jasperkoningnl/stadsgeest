@@ -2043,35 +2043,44 @@ html[data-np-thema="donker"] .np-subnav-item-actief { box-shadow: 0 1px 2px rgba
    De kleur zegt wat voor informatie het is; namen en bronnen zijn chips. */
 .np-blok {
   --blok: var(--np-accent);
-  margin: 0 0 16px; padding: 16px 20px 18px;
+  --blok-x: 20px;
+  margin: 0 0 16px; padding: 16px var(--blok-x) 18px;
   background: var(--np-kaart); border: 1px solid var(--np-rand-z);
   border-left: 3px solid var(--blok); border-radius: 10px;
 }
-.np-blok-weten, .np-blok-herkomst { --blok: var(--np-accent); }
-.np-blok-open    { --blok: var(--np-amber); }
-.np-blok-context { --blok: var(--np-paars); }
-.np-blok-verder  { --blok: var(--np-blauw); }
-.np-blok-eerder, .np-blok-wie { --blok: var(--np-inkt3); }
-.np-blok-letop   { --blok: var(--np-rood); }
+.np-blok-weten, .np-blok-herkomst { --blok: var(--np-accent); --blok-z: var(--np-accent-z); }
+.np-blok-open    { --blok: var(--np-amber); --blok-z: var(--np-amber-z); }
+.np-blok-context { --blok: var(--np-paars); --blok-z: var(--np-paars-z); }
+.np-blok-verder  { --blok: var(--np-blauw); --blok-z: var(--np-blauw-z); }
+.np-blok-eerder, .np-blok-wie { --blok: var(--np-inkt3); --blok-z: var(--np-grijs-z); }
+.np-blok-letop   { --blok: var(--np-rood); --blok-z: var(--np-rood-z); }
 .np-blok-kop {
   font-family: var(--f-d); font-size: 12px; font-weight: 800;
   letter-spacing: .08em; text-transform: uppercase;
   color: var(--blok); margin: 0 0 12px;
 }
+.np-blok-lijst:first-child, .np-blok-kop + .np-blok-lijst { margin-top: -6px; }
 .np-blok-tekst { font-family: var(--f-b); font-size: 15px; line-height: 1.65; color: var(--np-inkt2); margin: 0; }
 .np-blok-lijst { list-style: none; margin: 0; padding: 0; }
-.np-blok-lijst > li + li { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--np-rand-z); }
+.np-blok:has(> .np-blok-lijst:last-child) { padding-bottom: 8px; }
+/* Elk item loopt tot de randen van de kaart en licht op onder de muis,
+   in de zachte variant van de blokkleur. */
+.np-blok-lijst > li {
+  margin: 0 calc(-1 * var(--blok-x)); padding: 10px var(--blok-x);
+  transition: background-color .14s ease;
+}
+.np-blok-lijst > li + li { border-top: 1px solid var(--np-rand-z); }
+.np-blok-lijst > li:hover { background: var(--blok-z); }
 
 /* Opsommingen: een stip in de kleur van het blok */
 .np-puntlijst > li {
-  position: relative; padding-left: 20px;
+  position: relative; padding-left: calc(var(--blok-x) + 20px);
   font-family: var(--f-b); font-size: 15px; line-height: 1.6; color: var(--np-inkt2);
 }
 .np-puntlijst > li::before {
-  content: ''; position: absolute; left: 3px; top: 9px;
+  content: ''; position: absolute; left: calc(var(--blok-x) + 3px); top: 19px;
   width: 6px; height: 6px; border-radius: 50%; background: var(--blok);
 }
-.np-puntlijst > li + li::before { top: 21px; }
 
 /* Wat we weten: genummerde feiten met de bron als chip eronder */
 .np-feitlijst > li { display: flex; gap: 12px; }
@@ -2132,6 +2141,6 @@ a.np-chip:hover .np-chip-pijl { transform: translateX(2px); }
 .np-tijdlijn-inhoud a.np-chip:hover { color: var(--np-accent); }
 
 @media (max-width: 640px) {
-  .np-blok { padding: 14px 14px 16px; }
+  .np-blok { --blok-x: 14px; padding: 14px var(--blok-x) 16px; }
   .np-feitlijst > li { gap: 10px; }
 }
