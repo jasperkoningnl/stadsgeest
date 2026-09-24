@@ -1,7 +1,7 @@
 // Parsering van het iBabs-publieksportaal: rapportrijen en documentlinks.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { rijNaarItem, documentLinks, leeftijdDagen, RAPPORTEN } from '../../src/ibabs-lib.js';
+import { rijNaarItem, documentLinks, leeftijdDagen, bijlageIsAfgehandeld, RAPPORTEN } from '../../src/ibabs-lib.js';
 
 test('Woo-rij krijgt dezelfde titelvorm als ibabs-woo.js', () => {
   const i = rijNaarItem({ DT_RowId: 'abc', zaaknummer: '2024-1', title: ' Aardgasvrij  Schothorst ', DAtum1: '16-04-2024', datum2: '01-09-2024' }, RAPPORTEN.woo);
@@ -23,4 +23,12 @@ test('documentlinks worden ontdubbeld en krijgen de linktekst als titel', () => 
 test('leeftijd in dagen uit dd-mm-jjjj', () => {
   assert.equal(Math.round(leeftijdDagen('01-09-2026', Date.UTC(2026, 8, 11))), 10);
   assert.equal(leeftijdDagen('onbekend'), null);
+});
+
+test('een foutbijlage krijgt maximaal drie pogingen zonder nieuwe bijlagen te blokkeren', () => {
+  assert.equal(bijlageIsAfgehandeld('fout', 1), false);
+  assert.equal(bijlageIsAfgehandeld('fout', 2), false);
+  assert.equal(bijlageIsAfgehandeld('fout', 3), true);
+  assert.equal(bijlageIsAfgehandeld('geen_tekst', 1), true);
+  assert.equal(bijlageIsAfgehandeld('ok', 1), true);
 });

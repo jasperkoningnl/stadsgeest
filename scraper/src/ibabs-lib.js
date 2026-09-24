@@ -2,6 +2,16 @@
 // zonder netwerk of database, zodat de regels los te testen zijn.
 
 export const IBABS_BASE = 'https://amersfoort.bestuurlijkeinformatie.nl';
+export const MAX_BIJLAGE_POGINGEN = 3;
+
+// Alleen tijdelijke download-/parsefouten worden opnieuw geprobeerd. Een PDF
+// zonder tekstlaag, een niet-PDF of een te groot bestand heeft bij een volgende
+// identieke run geen andere uitkomst. Na drie mislukte pogingen stopt ook een
+// foutdocument, zodat een permanent kapotte link niet iedere week de wachtrij
+// voor nieuwe bijlagen blokkeert.
+export function bijlageIsAfgehandeld(status, pogingen = 1) {
+  return status !== 'fout' || Number(pogingen) >= MAX_BIJLAGE_POGINGEN;
+}
 
 // Categorieoverzichten. De lijst komt via POST /Reports/GetReportData/{id} (DataTables).
 export const RAPPORTEN = {

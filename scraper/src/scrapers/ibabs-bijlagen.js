@@ -23,7 +23,7 @@
 import * as cheerio from 'cheerio';
 import db from '../db.js';
 import { contentHash, getOrCreateSource, logResult, naarPublicatieIso } from '../utils.js';
-import { RAPPORTEN, rijNaarItem, documentLinks, leeftijdDagen, IBABS_BASE } from '../ibabs-lib.js';
+import { RAPPORTEN, rijNaarItem, documentLinks, leeftijdDagen, IBABS_BASE, bijlageIsAfgehandeld } from '../ibabs-lib.js';
 
 const UA = 'Stadsgeest033/1.0 (+https://stadsgeest.nl; redactie@nieuwsplein33.nl)';
 const VERSHEID_DAGEN = 30;
@@ -32,6 +32,7 @@ const MAX_PAGINAS = 150;
 const MAX_FULLTEXT = 200000;
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i > -1 ? process.argv[i + 1] : d; };
 const MAX_DOCS = Number(arg('--max-docs', '25')); // past binnen de 120s-timeout van run-weekly
+const MAX_HERPOGINGEN = Number(arg('--max-retries', '3'));
 const CATEGORIEEN = arg('--categorie', 'woo,convenanten').split(',');
 const pauze = ms => new Promise(r => setTimeout(r, ms));
 
@@ -62,8 +63,13 @@ async function zorgVoorTabel() {
     tekens INTEGER,
     status TEXT NOT NULL CHECK(status IN ('ok','geen_tekst','te_groot','geen_pdf','fout')),
     tekst TEXT,
+    pogingen INTEGER NOT NULL DEFAULT 1,
     opgehaald_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`);
+  const kolommen = (await db.execute('PRAGMA table_info(raw_item_attachments)')).rows.map(r => String(r.name));
+  if (!kolommen.includes('pogingen')) {
+    await db.execute('ALTER TABLE raw_item_attachments ADD COLUMN pogingen INTEGER NOT NULL DEFAULT 1');
+  }
   await db.execute('CREATE INDEX IF NOT EXISTS idx_ria_item ON raw_item_attachments(raw_item_id)');
 }
 
@@ -104,8 +110,14 @@ async function scrape() {
     name: 'Bestuurlijke informatie gemeente Amersfoort (iBabs)',
     url: `${IBABS_BASE}/`, sourceType: 'scrape', reliability: 'primary', category: 'government', scrapeFrequency: 'weekly',
   });
-  const gehad = new Set((await db.execute('SELECT document_id FROM raw_item_attachments')).rows.map(r => r.document_id));
-  let items = 0, nieuweItems = 0, docs = 0, ok = 0, leeg = 0, fouten = 0;
+  const bestaandeBijlagen = (await db.execute('SELECT document_id, status, pogingen FROM raw_item_attachments')).rows;
+  const gehad = new Set(bestaandeBijlagen
+    .filter(r => bijlageIsAfgehandeld(String(r.status), Number(r.pogingen)))
+    .map(r => String(r.document_id)));
+  const herprobeerbaar = new Set(bestaandeBijlagen
+    .filter(r => !bijlageIsAfgehandeld(String(r.status), Number(r.pogingen)))
+    .map(r => String(r.document_id)));
+  let items = 0, nieuweItems = 0, docs = 0, herpogingen = 0, ok = 0, leeg = 0, fouten = 0;
 
   for (const cat of CATEGORIEEN) {
     const r = RAPPORTEN[cat];
@@ -115,7 +127,8 @@ async function scrape() {
       const item = rijNaarItem(rij, r);
       try {
         const html = await (await fetch(item.url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(30000) })).text();
-        const links = documentLinks(html).filter(l => !gehad.has(l.documentId));
+        const links = documentLinks(html).filter(l => !gehad.has(l.documentId)
+          && (!herprobeerbaar.has(l.documentId) || herpogingen < MAX_HERPOGINGEN));
         items++;
         if (!links.length) continue;
         const detail = itemTekst(html);
@@ -124,11 +137,17 @@ async function scrape() {
 
         for (const l of links) {
           if (docs >= MAX_DOCS) break;
+          const isHerpoging = herprobeerbaar.has(l.documentId);
+          if (isHerpoging && herpogingen >= MAX_HERPOGINGEN) continue;
           docs++;
+          if (isHerpoging) herpogingen++;
           let status = 'fout', tekst = null, bytes = null, paginas = null;
           try {
             await pauze(600);
-            const resp = await fetch(l.url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(90000) });
+            // Een bekende foutlink mag de volledige wekelijkse runner niet opnieuw
+            // 90 seconden blokkeren. Nieuwe documenten houden de ruimere timeout.
+            const timeout = isHerpoging ? 20000 : 90000;
+            const resp = await fetch(l.url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(timeout) });
             const type = resp.headers.get('content-type') || '';
             const buf = Buffer.from(await resp.arrayBuffer());
             bytes = buf.length;
@@ -146,8 +165,19 @@ async function scrape() {
           }
           if (status === 'ok') ok++; else if (status === 'geen_tekst') leeg++; else fouten++;
           await db.execute({
-            sql: `INSERT INTO raw_item_attachments (raw_item_id, document_id, titel, url, bytes, paginas, tekens, status, tekst)
-                  VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(document_id) DO NOTHING`,
+            sql: `INSERT INTO raw_item_attachments (raw_item_id, document_id, titel, url, bytes, paginas, tekens, status, tekst, pogingen)
+                  VALUES (?,?,?,?,?,?,?,?,?,1)
+                  ON CONFLICT(document_id) DO UPDATE SET
+                    raw_item_id = excluded.raw_item_id,
+                    titel = excluded.titel,
+                    url = excluded.url,
+                    bytes = excluded.bytes,
+                    paginas = excluded.paginas,
+                    tekens = excluded.tekens,
+                    status = excluded.status,
+                    tekst = excluded.tekst,
+                    pogingen = raw_item_attachments.pogingen + 1,
+                    opgehaald_at = datetime('now')`,
             args: [rawId, l.documentId, l.titel, l.url, bytes, paginas, tekst ? tekst.length : 0, status, status === 'ok' ? tekst : null],
           });
           gehad.add(l.documentId);
@@ -169,7 +199,7 @@ async function scrape() {
       await pauze(400);
     }
   }
-  console.log(`iBabs-bijlagen: ${items} items bekeken, ${nieuweItems} nieuw aangemaakt, ${docs} documenten (${ok} met tekst, ${leeg} zonder tekstlaag, ${fouten} overig)`);
+  console.log(`iBabs-bijlagen: ${items} items bekeken, ${nieuweItems} nieuw aangemaakt, ${docs} documenten (${herpogingen} herpogingen; ${ok} met tekst, ${leeg} zonder tekstlaag, ${fouten} overig)`);
   await logResult(db, sourceId, 'iBabs-bijlagen', ok, leeg, fouten, items);
 }
 
