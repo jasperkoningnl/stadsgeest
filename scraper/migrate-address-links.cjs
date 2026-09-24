@@ -69,11 +69,26 @@ const statements = [
   )`,
   `CREATE INDEX IF NOT EXISTS idx_ra_na ON register_addresses(nummeraanduiding_id)`,
   `CREATE INDEX IF NOT EXISTS idx_ra_vbo ON register_addresses(verblijfsobject_id)`,
+  // Pand bij verblijfsobject (2026-09-24), voor 'zelfde gebouw, ander adres'.
+  // Een verblijfsobject kan in meer panden liggen, dus één rij per paar.
+  `CREATE TABLE IF NOT EXISTS bag_vbo_pand (
+    verblijfsobject_id TEXT NOT NULL,
+    pand_id TEXT NOT NULL,
+    bouwjaar INTEGER,
+    aantal_verblijfsobjecten INTEGER,
+    PRIMARY KEY (verblijfsobject_id, pand_id)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_vp_pand ON bag_vbo_pand(pand_id)`,
+  `CREATE TABLE IF NOT EXISTS bag_pand_scan (
+    verblijfsobject_id TEXT PRIMARY KEY,
+    status TEXT NOT NULL CHECK(status IN ('ok','not_found')),
+    fetched_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
 ];
 
 (async () => {
   for (const sql of statements) await db.execute(sql);
-  for (const t of ['bag_lookup_cache', 'document_addresses', 'address_scans', 'register_addresses']) {
+  for (const t of ['bag_lookup_cache', 'document_addresses', 'address_scans', 'register_addresses', 'bag_vbo_pand', 'bag_pand_scan']) {
     const n = (await db.execute(`SELECT COUNT(*) AS n FROM ${t}`)).rows[0].n;
     console.log(`${t}: ${n} rijen`);
   }

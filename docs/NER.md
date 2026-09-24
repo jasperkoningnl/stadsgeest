@@ -135,19 +135,40 @@ Lees dit zo:
 - **Homoniemen blijven een risico.** 'M. de Jong' (gemachtigde in een
   rechtszaak) werd aan een KG-persoon gekoppeld; waarschijnlijk onjuist.
 - **Organisaties zijn zwak** op B&W-tekst: programma's, regelingen, afkortingen
-  en kopjes ('GROP', 'POET', 'Raad Commissie'). Filter-7 vangt een deel daarvan,
-  maar is niet opnieuw gemeten.
+  en kopjes ('GROP', 'POET', 'Raad Commissie'). Filter-7 vangt een deel daarvan
+  (zie de hermeting hieronder).
 - **Locaties** zijn bruikbaar maar vaak triviaal (straatnamen uit
   vergunningen, lijsten uit bijlagen).
 - Verkeerd gelabelde persoonsnamen kunnen als organisatie of locatie
   doorlekken ('Yokuş', 'Aboyaakoub'). Dat is een reden om onopgeloste
   vermeldingen niet aan de weger of het dashboard te tonen zonder review.
 
+Hermeting filter-7 (24-9, 250 willekeurige items uit het hele bronbereik, n=40
+per type): organisaties 19/40 (48%), locaties 27/40 (68%). Het filter helpt
+nauwelijks meer; de ruis zit in afkortingen van wetten en programma's
+('UAVG', 'WPO', 'BBV') en in kopjes. Onopgeloste organisaties blijven daarom
+buiten de weger. Verder filteren levert weinig op; een bruikbare
+organisatielaag komt eerder uit registers (zie de Splink-proef) dan uit NER.
+
+## Handmatige controle
+
+`src/ner-review.cjs export --n 60 --out pad.csv` maakt een steekproef van
+KG-kandidaten (half personen, half organisaties, één per vorm) voor Excel.
+Vul `oordeel` met ja of nee. `src/ner-review.cjs import pad.csv` telt en geeft
+de precisie; met `--apply` worden ja/nee `confirmed`/`rejected` (alleen rijen
+die nog niet beoordeeld zijn). Afgewezen vermeldingen gaan niet meer naar de
+weger. De eerste steekproef staat in
+`Stadsgeest-documentatie\ner-steekproef-2026-09-24.csv`.
+
+## Bewaking
+
+`stilte-alarm.mjs` meldt als `ner_scans` of `address_scans` langer dan 48 uur
+geen nieuwe scan heeft (`ALARM_UREN_SCANS`).
+
 ## Open
 
-1. Bij NS-storingen komt steeds 'NS' als kandidaat mee in de werkset (ruis).
-2. Review-ingang voor `candidate`/`ambiguous` ontbreekt; hoort bij het
-   dashboardontwerp.
-3. Organisatiefilter opnieuw meten na filter-7, en pas daarna onopgeloste
-   organisaties breder gebruiken.
-4. Geen koppeling aan `entity_signals`; de weger leest via `signal_items`.
+1. Review-ingang in het dashboard voor `candidate`/`ambiguous`; tot die tijd
+   de CSV-route hierboven.
+2. Geen koppeling aan `entity_signals`; de weger leest via `signal_items`.
+3. Een kandidaat die de bron zelf is ('NS' bij NS-storingen) wordt in de
+   werkset weggelaten; in `document_mentions` blijft hij staan.

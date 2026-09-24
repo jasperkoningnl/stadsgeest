@@ -71,8 +71,12 @@ als het gelezen document het bevestigt, en let op naamgenoten bij gewone namen.
 Zie `docs/NER.md`.
 
 `adres_koppelingen` noemt per exact BAG-adres in het signaal de andere
-documenten, registers (kinderopvang, GLEIF, DUO) en KG-organisaties op precies
-datzelfde adres. Gebruik dat om verbanden tussen bronnen te zoeken. Een gedeeld
+documenten, registers (onder meer rijksmonumenten, kinderopvang, scholen,
+zorgaanbieders, GLEIF) en KG-organisaties op precies datzelfde adres, en onder
+`zelfde_pand_ander_adres` wat er in hetzelfde gebouw op een ander huisnummer
+zit. Een vergunning op een rijksmonument is een reden om het signaal volledig
+te lezen; dat de publicatie de monumentstatus niet noemt, is geen reden om af
+te wijzen. Gebruik de koppelingen om verbanden tussen bronnen te zoeken. Een gedeeld
 adres is een aanwijzing, geen verband: lees beide stukken voordat je een
 patroon of relatie claimt. GLEIF bevat ook persoonlijke holdings op
 woonadressen: noem bij een particulier adres geen holding of bewoner in een tip.

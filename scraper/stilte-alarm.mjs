@@ -71,6 +71,19 @@ try {
     meldingen.push(`ALARM slechts ${n24} nieuwe items in 24 uur (ondergrens ${MIN_ITEMS})`);
   }
 
+  // NER- en adresstappen van de dagelijkse detectietaak (2026-09-24). Er komen
+  // elke dag items binnen, dus twee dagen zonder scan betekent dat de stap stilligt.
+  const UREN_SCANS = Number(process.env.ALARM_UREN_SCANS || 48);
+  for (const [tabel, naam] of [['ner_scans', 'NER-scan'], ['address_scans', 'adresscan']]) {
+    const bestaat = await db.execute({ sql: "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", args: [tabel] });
+    if (!bestaat.rows.length) continue;
+    const r = await db.execute(`SELECT max(${NORM('scanned_at')}) AS t FROM ${tabel}`);
+    const u = urenGeleden(r.rows[0]?.t);
+    if (u === null || u > UREN_SCANS) {
+      meldingen.push(`ALARM laatste ${naam} is ${u === null ? 'onbekend' : Math.round(u) + ' uur'} geleden (drempel ${UREN_SCANS})`);
+    }
+  }
+
   if (meldingen.length === 0) {
     console.log(`ok laatste item ${Math.round(uItem)}u geleden, intake ${Math.round(uIntake)}u geleden, ${n24} items in 24u`);
     process.exitCode = 0;

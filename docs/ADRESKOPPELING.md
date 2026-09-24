@@ -35,9 +35,21 @@ NER, dus geen sociale, community- of noodbronnen) en schrijft naar
 is een lijst (de parkeerrestrictielijst telt er 2.378); die wordt alleen geteld
 in `address_scans.found` en niet gekoppeld, omdat hij aan alles zou hangen.
 `src/link-register-addresses.cjs` doet het voor de nieuwste versie van LRK
-(kinderopvang), GLEIF (statutair adres en hoofdkantoor) en DUO
-(schoolvestigingen) en schrijft naar `register_addresses`. Beide zijn
-herhaalbaar zonder dubbelingen. `source_records` en de KG worden niet gewijzigd.
+(kinderopvang), GLEIF (statutair adres en hoofdkantoor), DUO
+(schoolvestigingen), jaarverantwoording zorg (één adres per KvK), OSM
+(objecten met naam, huisnummer en postcode), UIT-agenda (één rij per locatie,
+niet per evenement) en asbestovertredingen (overtredingslocatie). Voor
+**rijksmonumenten** haalt het script het BAG-adres live op bij de RCE
+(SPARQL-endpoint van het monumentenregister, `heeftBAGRelatie`), omdat
+`source_records` alleen coördinaten heeft. Alles gaat naar `register_addresses`.
+Beide scripts zijn herhaalbaar zonder dubbelingen; de dagelijkse registerrun
+laadt cache en bestaande rijen vooraf en schrijft alleen wat verandert.
+`source_records` en de KG worden niet gewijzigd.
+
+`src/link-bag-panden.cjs` zoekt voor elk exact gekoppeld verblijfsobject het
+pand op via de PDOK BAG OGC API (geen sleutel nodig): verblijfsobject →
+pand-link → pand-id, bouwjaar en aantal verblijfsobjecten. Resultaat in
+`bag_vbo_pand` en `bag_pand_scan`.
 
 ## In de weger-werkset
 
@@ -46,6 +58,12 @@ voorkomt: andere documenten op precies dat adres (tot vijf, met aantal), de
 registers en de KG-organisaties via `locations`/`entity_locations`. Adressen
 zonder treffer elders gaan niet mee. Een adres in meer dan 50 documenten
 (gemeentehuis, standaardadres in bekendmakingen) krijgt geen documentlijst.
+
+Per adres staan ook het pand (bouwjaar, aantal verblijfsobjecten) en onder
+`zelfde_pand_ander_adres` documenten en registers op een ánder adres in
+hetzelfde pand, bijvoorbeeld een vergunning op 181A en het monument op 181B.
+Dat gebeurt alleen bij panden met hoogstens 20 verblijfsobjecten; bij een flat
+of kantoorverzamelgebouw zegt hetzelfde pand niets.
 
 Een gedeeld adres is een aanwijzing, geen verband. Twee vergunningen op
 hetzelfde adres kunnen over verschillende zaken gaan, en een bedrijfsverzamelgebouw
@@ -59,17 +77,14 @@ node migrate-address-links.cjs                  # eenmalig, additief
 node src/extract-addresses.cjs --dry-run         # alleen tellen, geen PDOK
 node src/extract-addresses.cjs --limit 500       # nieuwste ongescande items
 node src/link-register-addresses.cjs --only lrk  # één register
+node src/link-bag-panden.cjs --limit 2000        # panden bij nieuwe verblijfsobjecten
 ```
 
 ## Niet gedaan
 
-- **Rijksmonumenten** hebben in `source_records` alleen coördinaten, geen adres.
-  Koppelen op afstand is precies de fout die we willen vermijden. Nodig: het
-  BAG-adres van het monument uit het monumentenregister van de RCE.
-- **OSM, UIT-agenda, zorgverantwoording, asbest, NVWA** zijn nog niet
-  gekoppeld. Asbest heeft alleen vrije tekst met landelijke adressen.
-- **BAG-pand-id** ontbreekt: de gratis Locatieserver geeft verblijfsobject en
-  nummeraanduiding, niet het pand. Voor 'zelfde gebouw, ander adres' is de BAG
-  API (met sleutel) nodig.
+- **Monumenten zonder BAG-relatie** in het RCE-register (muren, bruggen,
+  grenspalen) worden niet gekoppeld.
 - Adressen zonder postcode en zonder plaatsnaam ('Stadsring 55' los in een
   zin) worden niet gevonden.
+- Asbestovertredingen zijn vrijwel allemaal buiten Amersfoort en Leusden; ze
+  krijgen `outside_area` en koppelen dan niet.

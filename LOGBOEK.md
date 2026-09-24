@@ -37,6 +37,10 @@ Daarnaast leest Stadsgeest nu ook de bijlagen van Woo-besluiten van de gemeente,
 
 Sinds half juli kwamen er geen nieuwe moties en amendementen van de Amersfoortse raad meer in Stadsgeest. Ze komen nu weer binnen via RaadKijker, met de volledige tekst van de motie en de indienende partij. De zeven moties van de raadsvergadering van vandaag staan er al in, en bij ruim twintig oudere moties is de volledige tekst aangevuld. Keerzijde: de uitslag (aangenomen of verworpen) verschijnt pas als de griffie het gestempelde stuk publiceert, en die komt in de titel te staan zonder aparte nieuwe tip.
 
+## 2026-09-24 — Rijksmonumenten en hetzelfde gebouw herkend
+
+De weger ziet nu ook wanneer een vergunning of ander stuk over een rijksmonument gaat, ook als de publicatie dat zelf niet noemt. Daarnaast ziet hij wat er in hetzelfde gebouw op een ander huisnummer zit, zoals een monument op 181B naast een aanvraag voor 181A, en welke scholen, zorgaanbieders, winkels en horeca er op een adres staan. Keerzijde: bij een gebouw met een paar woningen hoort niet alles wat op een ander huisnummer staat bij hetzelfde verhaal; de weger moet dat in de stukken zelf nagaan.
+
 ## 2026-09-23 — Hetzelfde adres in verschillende bronnen wordt zichtbaar
 
 Stadsgeest koppelt adressen uit vergunningen, bekendmakingen en nieuws nu exact aan het officiële adressenregister. Daardoor ziet de weger wanneer een adres ook in een ander stuk voorkomt, of wanneer er een kinderopvang, school of geregistreerde organisatie op dat adres zit. Een tip kan zo vaker een verband tussen bronnen noemen. Keerzijde: een gedeeld adres is nog geen verband. In een bedrijfsverzamelgebouw of op het adres van een persoonlijke holding zit vaak iets anders dan waar het stuk over gaat; controleer dat in beide bronnen.
