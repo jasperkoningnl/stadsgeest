@@ -53,11 +53,22 @@ const statements = [
     scanned_at TEXT NOT NULL DEFAULT (datetime('now')),
     PRIMARY KEY (raw_item_id, extractor, model_version)
   )`,
+  // Handmatige oordelen (2026-09-24): dashboard Beheer > Controleren en ner-review.cjs.
+  // Eén rij per oordeel, idempotent via request_id; 'skipped' wijzigt de vermelding niet.
+  `CREATE TABLE IF NOT EXISTS document_mention_reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mention_id INTEGER NOT NULL REFERENCES document_mentions(id),
+    verdict TEXT NOT NULL CHECK(verdict IN ('correct','incorrect','skipped')),
+    actor TEXT NOT NULL,
+    request_id TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_dmr_mention ON document_mention_reviews(mention_id)`,
 ];
 
 (async () => {
   for (const sql of statements) await db.execute(sql);
-  for (const t of ['document_mentions', 'ner_scans']) {
+  for (const t of ['document_mentions', 'ner_scans', 'document_mention_reviews']) {
     const n = (await db.execute(`SELECT COUNT(*) AS n FROM ${t}`)).rows[0].n;
     const cols = (await db.execute(`PRAGMA table_info(${t})`)).rows.length;
     console.log(`${t}: ${cols} kolommen, ${n} rijen`);

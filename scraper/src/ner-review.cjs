@@ -74,12 +74,23 @@ async function importReview(file) {
     if (!status) { stats.onbekend++; continue; }
     stats[o]++;
     if (!apply) continue;
-    const res = await db.execute({
-      sql: `UPDATE document_mentions SET resolution_status = ?, reviewed_by = 'redactie', reviewed_at = datetime('now'),
+    const id = parseInt(r[iId], 10);
+    // Zelfde administratie als het dashboard (Beheer > Controleren); request_id
+    // 'csv-<id>' maakt een herhaalde import onschadelijk.
+    // Alleen een oordeel vastleggen als de vermelding nog niet beoordeeld was,
+    // anders telt een oordeel uit het dashboard dubbel.
+    const upd = await db.execute({
+      sql: `UPDATE document_mentions SET resolution_status = ?, reviewed_by = 'jasper', reviewed_at = datetime('now'),
               updated_at = datetime('now') WHERE id = ? AND reviewed_at IS NULL`,
-      args: [status, parseInt(r[iId], 10)],
+      args: [status, id],
     });
-    stats.bijgewerkt += res.rowsAffected;
+    if (upd.rowsAffected) {
+      await db.execute({
+        sql: 'INSERT OR IGNORE INTO document_mention_reviews (mention_id, verdict, actor, request_id) VALUES (?,?,?,?)',
+        args: [id, status === 'confirmed' ? 'correct' : 'incorrect', 'jasper', `csv-${id}`],
+      });
+    }
+    stats.bijgewerkt += upd.rowsAffected;
   }
   const beoordeeld = stats.ja + stats.nee;
   console.log(JSON.stringify({ ...stats, precisie: beoordeeld ? `${Math.round((100 * stats.ja) / beoordeeld)}%` : null, modus: apply ? 'apply' : 'alleen tellen' }, null, 2));

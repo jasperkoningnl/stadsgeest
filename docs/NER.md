@@ -152,7 +152,18 @@ organisatielaag komt eerder uit registers (zie de Splink-proef) dan uit NER.
 
 ## Handmatige controle
 
-`src/ner-review.cjs export --n 60 --out pad.csv` maakt een steekproef van
+In het dashboard: **Beheer > Controleren > Namen in documenten** (alleen
+Jasper, zelfde opzet als de fase-1-controle). Per kaart staan de naam zoals in
+het document, de gekoppelde KG-entiteit, het tekstfragment met de naam
+gemarkeerd en een link naar de bron. Ja zet de vermelding op `confirmed`, nee op
+`rejected`; weet-ik-niet wordt alleen vastgelegd. Elk oordeel komt in
+`document_mention_reviews` (idempotent via `request_id`). De wachtrij toont één
+vermelding per (KG-entiteit, vorm) in een vaste, gespreide volgorde; een vorm
+die al beoordeeld is komt niet terug. Het oordeel geldt alleen voor die
+vermelding, niet voor alle vermeldingen met dezelfde naam (naamgenoten). Doel
+voor een eerste precisiecijfer: 60 oordelen.
+
+Alternatief zonder dashboard: `src/ner-review.cjs export --n 60 --out pad.csv` maakt een steekproef van
 KG-kandidaten (half personen, half organisaties, één per vorm) voor Excel.
 Vul `oordeel` met ja of nee. `src/ner-review.cjs import pad.csv` telt en geeft
 de precisie; met `--apply` worden ja/nee `confirmed`/`rejected` (alleen rijen
@@ -167,8 +178,8 @@ geen nieuwe scan heeft (`ALARM_UREN_SCANS`).
 
 ## Open
 
-1. Review-ingang in het dashboard voor `candidate`/`ambiguous`; tot die tijd
-   de CSV-route hierboven.
+1. `ambiguous`-vermeldingen staan nog niet in de controle; die vragen een
+   keuze tussen meerdere KG-entiteiten.
 2. Geen koppeling aan `entity_signals`; de weger leest via `signal_items`.
 3. Een kandidaat die de bron zelf is ('NS' bij NS-storingen) wordt in de
    werkset weggelaten; in `document_mentions` blijft hij staan.

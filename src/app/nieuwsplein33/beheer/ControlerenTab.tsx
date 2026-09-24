@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import NerControle from './NerControle'
 
 type Candidate = {
   id: number
@@ -20,7 +21,36 @@ type GoldenStatus = {
   candidate: Candidate | null
 }
 
+// Twee handmatige controles onder Beheer > Controleren: de fase-1-organisatiematches
+// en de NER-naamkoppelingen (docs/NER.md). Beide alleen voor Jasper.
 export default function ControlerenTab() {
+  const [soort, setSoort] = useState<'organisaties' | 'namen'>('organisaties')
+  return (
+    <div>
+      <div className="np-controle-keuze" role="group" aria-label="Soort controle">
+        <button
+          type="button"
+          aria-pressed={soort === 'organisaties'}
+          className={`np-periode-pil${soort === 'organisaties' ? ' np-periode-pil-actief' : ''}`}
+          onClick={() => setSoort('organisaties')}
+        >
+          Organisaties (fase 1)
+        </button>
+        <button
+          type="button"
+          aria-pressed={soort === 'namen'}
+          className={`np-periode-pil${soort === 'namen' ? ' np-periode-pil-actief' : ''}`}
+          onClick={() => setSoort('namen')}
+        >
+          Namen in documenten
+        </button>
+      </div>
+      {soort === 'organisaties' ? <OrganisatieControle /> : <NerControle />}
+    </div>
+  )
+}
+
+function OrganisatieControle() {
   const [data, setData] = useState<GoldenStatus | null>(null)
   const [busy, setBusy] = useState(false)
   const [fout, setFout] = useState<string | null>(null)

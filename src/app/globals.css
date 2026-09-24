@@ -1322,6 +1322,9 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 .np-golden-kvk { color: var(--np-inkt2); font-size: 13px; }
 .np-golden-kvk a { color: var(--np-accent); }
 .np-golden-acties { margin-top: 20px; }
+.np-controle-keuze { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 16px; }
+.np-ner-fragment { margin: 0 0 12px; padding: 12px 14px; border-left: 3px solid var(--np-rand); background: var(--np-zacht); border-radius: 0 8px 8px 0; color: var(--np-inkt2); font-size: 14px; line-height: 1.55; overflow-wrap: anywhere; }
+.np-ner-fragment mark { background: var(--np-accent-z); color: var(--np-inkt); padding: 0 2px; border-radius: 3px; }
 .np-beheer-history summary:hover { color: var(--np-inkt); }
 
 .np-beheer-tabel-wrap { overflow-x: auto; margin-bottom: 8px; }
