@@ -10,14 +10,26 @@ export const SOORT_LABEL: Record<string, string> = {
   dossiersignaal: 'Dossier',
 }
 
+// Een supertip is (nog) geen apart veld: de weger of Jasper zet "Supertip:"
+// voor de titel. Het dashboard haalt dat voorvoegsel weg en toont de tip
+// opvallender.
+const SUPERTIP = /^\s*supertip\s*[:\-–—]\s*/i
+export function isSupertip(titel: string | null | undefined): boolean {
+  return Boolean(titel && SUPERTIP.test(titel))
+}
+export function zonderSupertip(titel: string): string {
+  return titel.replace(SUPERTIP, '')
+}
+
 /**
- * Eén kaart in de lijst: etiketten, de kop, de kern in één of twee regels,
- * bronnen, tier-badge en inline triage-knoppen. De redacteur kan nu direct
- * vanuit de lijst beslissen of doorlezen.
+ * Eén kaart in de lijst, in dezelfde vormtaal als de blokken op de tippagina:
+ * een gekleurde lijn links in de kleur van de soort, bronnen als chips.
  */
 export default function TipRegel({ tip }: { tip: TipRij }) {
   const dragend = tip.bronnen.filter((b) => !b.spiegel)
   const spiegels = tip.bronnen.filter((b) => b.spiegel)
+  const superTip = isSupertip(tip.titel)
+  const titel = ontstreep(superTip ? zonderSupertip(tip.titel) : tip.titel)
 
   // Hoogste tier van de dragende bronnen (lager = belangrijker)
   const tier = dragend.reduce<number | null>(
@@ -27,46 +39,55 @@ export default function TipRegel({ tip }: { tip: TipRij }) {
 
   return (
     <div className="np-lijst-item">
-      <Link href={`/nieuwsplein33/tip/${tip.id}`} className="np-regel">
-        <div className="np-regel-labels">
-          <span className={`np-soort np-soort-${tip.soort}`}>{SOORT_LABEL[tip.soort] ?? tip.soort}</span>
-          {tier !== null && (
-            <span className={`np-tier np-tier-${tier}`} title={`Hoogste bron: tier ${tier}`}>tier {tier}</span>
-          )}
-          {tip.gemeente !== 'Amersfoort' && <span className="np-gemeente">{tip.gemeente}</span>}
-          <span className="np-regel-datum">{formatDate(tip.created_at)}</span>
-        </div>
-
-        <span className="np-regel-titel">{ontstreep(tip.titel)}</span>
-        {tip.kern && <p className="np-regel-kern">{ontstreep(tip.kern)}</p>}
-
-        {tip.score_motivatie && (
-          <div className="np-regel-waarom">
-            <strong>Waarom:</strong> {ontstreep(tip.score_motivatie)}
-          </div>
+      <Link
+        href={`/nieuwsplein33/tip/${tip.id}`}
+        className={`np-regel np-regel-${tip.soort}${superTip ? ' np-regel-super' : ''}`}
+      >
+        {superTip && (
+          <div className="np-super-band"><span aria-hidden>★</span> Supertip</div>
         )}
+        <div className="np-regel-inhoud">
+          <div className="np-regel-labels">
+            <span className={`np-soort np-soort-${tip.soort}`}>{SOORT_LABEL[tip.soort] ?? tip.soort}</span>
+            {tip.gemeente !== 'Amersfoort' && <span className="np-gemeente">{tip.gemeente}</span>}
+            {tier !== null && (
+              <span className={`np-tier np-tier-${tier}`} title={`Hoogste bron: tier ${tier}`}>tier {tier}</span>
+            )}
+            <span className="np-regel-datum">{formatDate(tip.created_at)}</span>
+          </div>
 
-        <div className="np-regel-meta">
-          {dragend.slice(0, 3).map((b) => (
-            <span key={b.naam} className="np-bron">{b.naam}</span>
-          ))}
-          {dragend.length > 3 && <span className="np-bron np-bron-rest">+{dragend.length - 3}</span>}
-          {spiegels.length > 0 && (
-            <span className="np-bron np-bron-spiegel" title="Media waarmee Nieuwsplein33 samenwerkt, hier al gepubliceerd">
-              ook bij {spiegels.map((s) => s.naam).join(', ')}
-            </span>
+          <span className="np-regel-titel">{titel}</span>
+          {tip.kern && <p className="np-regel-kern">{ontstreep(tip.kern)}</p>}
+
+          {tip.score_motivatie && (
+            <div className="np-regel-waarom">
+              <span className="np-regel-waarom-kop">Waarom</span>
+              <p>{ontstreep(tip.score_motivatie)}</p>
+            </div>
           )}
-          <span className="np-regel-scheiding">·</span>
-          <span>{tip.aantal_documenten} {tip.aantal_documenten === 1 ? 'document' : 'documenten'}</span>
-          {tip.dossier_naam && (
-            <>
-              <span className="np-regel-scheiding">·</span>
-              <span className="np-dossier">dossier {tip.dossier_naam}</span>
-            </>
-          )}
+
+          <div className="np-regel-meta np-regel-bronnen">
+            {dragend.slice(0, 3).map((b) => (
+              <span key={b.naam} className="np-bron">{ontstreep(b.naam, ' · ')}</span>
+            ))}
+            {dragend.length > 3 && <span className="np-bron np-bron-rest">+{dragend.length - 3}</span>}
+            {spiegels.length > 0 && (
+              <span className="np-bron np-bron-spiegel" title="Media waarmee Nieuwsplein33 samenwerkt, hier al gepubliceerd">
+                ook bij {spiegels.map((s) => ontstreep(s.naam, ' · ')).join(', ')}
+              </span>
+            )}
+          </div>
+          <div className="np-regel-meta">
+            <span>{tip.aantal_documenten} {tip.aantal_documenten === 1 ? 'document' : 'documenten'}</span>
+            {tip.dossier_naam && (
+              <>
+                <span className="np-regel-scheiding">·</span>
+                <span className="np-dossier">dossier {ontstreep(tip.dossier_naam, ' · ')}</span>
+              </>
+            )}
+          </div>
         </div>
       </Link>
-
     </div>
   )
 }

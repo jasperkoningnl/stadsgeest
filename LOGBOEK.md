@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-09-24 - De wachtrij in dezelfde stijl, supertips vallen op
+
+De tips in de wachtrij hebben nu dezelfde vorm als de onderdelen van een tip: een kaart met een gekleurde lijn links in de kleur van de soort (blauw voor nieuwsfeit, groen-blauw voor patroon, oranje voor verdieping). Waarom een tip is geselecteerd staat onder een eigen kopje, en de bronnen staan als knopjes op een eigen regel. Een supertip krijgt een groene band met een ster, een volle rand en een grotere kop, zodat je hem niet mist. Ook op de tippagina zelf staat dan een label Supertip. Keerzijde: een tip telt alleen als supertip als de titel met Supertip begint.
+
 ## 2026-09-24 - Een tip leest rustiger
 
 De onderdelen van een tip (wat we weten, wat we niet weten, context, zo kom je verder, eerdere berichtgeving, let op en wie erin voorkomen) staan nu elk in een eigen kaart met een gekleurde lijn links. De kleur zegt wat voor informatie het is: oranje voor open vragen, rood voor wat er niet in mag. Bronnen onder een feit zijn knopjes met een pijltje; klik erop en het brondocument opent. Staan er twee documenten bij een feit, dan zijn het twee knopjes. De namen onderaan zijn ook knopjes: klik op een naam om te zien wat Stadsgeest verder over die persoon of organisatie heeft. Bij een organisatie met mensen erbij (bijvoorbeeld een directeur) krijgt ieder een eigen knopje. De lange gedachtestreepjes zijn uit het dashboard gehaald. Keerzijde: een heel lange bronvermelding wordt ingekort; wijs het knopje aan om de volledige tekst te zien.

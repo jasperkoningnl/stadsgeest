@@ -979,7 +979,8 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 .np-strook {
   display: flex; flex-wrap: wrap; gap: 8px 20px;
   padding: 12px 16px; margin-bottom: 18px;
-  background: var(--np-amber-z); border: 1px solid var(--np-amber);
+  background: var(--np-kaart); border: 1px solid var(--np-rand-z);
+  border-left: 3px solid var(--np-amber);
   border-radius: 10px; font-size: 14px;
 }
 .np-strook-item { color: var(--np-amber); font-weight: 600; text-decoration: none; }
@@ -989,38 +990,6 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 .np-telling { font-size: 13.5px; color: var(--np-inkt3); margin-bottom: 12px; }
 
 .np-lijst { display: flex; flex-direction: column; gap: 10px; }
-
-/* ── Eén tip in de lijst ─────────────────────────────────── */
-.np-regel {
-  display: block; text-decoration: none; color: inherit;
-  padding: 16px 18px; border: 1px solid var(--np-rand-z); border-radius: 12px;
-  background: var(--np-kaart); box-shadow: var(--np-schaduw);
-  transition: border-color .16s ease, transform .16s ease;
-}
-.np-regel:hover { border-color: var(--np-inkt3); transform: translateY(-1px); }
-.np-regel-labels {
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;
-}
-.np-regel-titel {
-  display: block;
-  font-family: var(--f-d); font-weight: 700; font-size: 17px;
-  line-height: 1.35; color: var(--np-inkt); text-wrap: balance;
-}
-.np-regel-kern {
-  margin-top: 5px;
-  font-family: var(--f-b); font-size: 14.5px; line-height: 1.55;
-  color: var(--np-inkt2);
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
-.np-regel-meta {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 5px 7px;
-  margin-top: 10px; font-size: 12.5px; color: var(--np-inkt3);
-}
-.np-regel-scheiding { color: var(--np-rand); }
-.np-regel-datum {
-  margin-left: auto; font-family: var(--f-b); font-size: 13px;
-  color: var(--np-inkt3); white-space: nowrap;
-}
 
 /* Soort-etiketten: elk soort een eigen, rustige kleur */
 .np-soort {
@@ -1043,6 +1012,12 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
   padding: 2px 8px; border-radius: 20px;
   background: var(--np-zacht); color: var(--np-inkt2);
 }
+.np-regel-meta .np-bron {
+  padding: 2px 9px; border: 1px solid var(--np-rand); border-radius: 14px;
+  background: var(--np-bg); font-family: var(--f-d); font-size: 12px; font-weight: 600;
+}
+.np-regel-meta .np-bron-rest { border-color: transparent; background: none; padding: 2px 0; }
+.np-regel-meta .np-bron-spiegel { border-color: transparent; background: var(--np-amber-z); color: var(--np-amber); }
 .np-bron-rest { background: none; color: var(--np-inkt3); padding: 2px 0; }
 .np-bron-spiegel { background: var(--np-amber-z); color: var(--np-amber); }
 
@@ -1561,8 +1536,9 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 .np-daggroep { margin-bottom: 24px; }
 .np-daggroep-kop {
   display: flex; align-items: center; gap: 8px;
-  font-family: var(--f-d); font-weight: 700; font-size: 14px;
-  color: var(--np-inkt2); margin-bottom: 10px;
+  font-family: var(--f-d); font-weight: 800; font-size: 12px;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--np-inkt3); margin-bottom: 10px;
   padding-bottom: 6px; border-bottom: 1px solid var(--np-rand-z);
 }
 .np-daggroep-tel {
@@ -2144,3 +2120,88 @@ a.np-chip:hover .np-chip-pijl { transform: translateX(2px); }
   .np-blok { --blok-x: 14px; padding: 14px var(--blok-x) 16px; }
   .np-feitlijst > li { gap: 10px; }
 }
+
+/* ── Wachtrij: kaarten in de vormtaal van de tipblokken (2026-09-24) ─────
+   Gekleurde lijn links in de kleur van de soort, soort als kop in kapitalen,
+   bronnen als chips, onder de muis een zweem van de soortkleur. */
+.np-regel {
+  --soort: var(--np-inkt3); --soort-z: var(--np-grijs-z);
+  display: block; text-decoration: none; color: inherit; overflow: hidden;
+  background: var(--np-kaart); border: 1px solid var(--np-rand-z);
+  border-left: 3px solid var(--soort); border-radius: 10px;
+  transition: background-color .12s ease;
+}
+.np-regel-nieuwsfeit     { --soort: var(--np-blauw);  --soort-z: var(--np-blauw-z); }
+.np-regel-patroon        { --soort: var(--np-accent); --soort-z: var(--np-accent-z); }
+.np-regel-verdieping     { --soort: var(--np-amber);  --soort-z: var(--np-amber-z); }
+.np-regel-dossiersignaal { --soort: var(--np-groen);  --soort-z: var(--np-groen-z); }
+.np-regel:hover { background: var(--soort-z); }
+.np-regel-inhoud { padding: 14px 18px 16px; }
+.np-regel-labels { display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.np-regel .np-soort {
+  padding: 0; background: none; border-radius: 0;
+  font-family: var(--f-d); font-size: 12px; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--soort);
+}
+.np-regel .np-gemeente, .np-regel .np-tier {
+  padding: 1px 8px; border-radius: 14px; font-size: 11.5px; font-weight: 600;
+}
+.np-regel .np-gemeente { background: none; border: 1px solid var(--np-rand); color: var(--np-inkt2); }
+.np-regel-titel {
+  display: block;
+  font-family: var(--f-d); font-weight: 700; font-size: 17px;
+  line-height: 1.35; color: var(--np-inkt); text-wrap: balance;
+}
+.np-regel-kern {
+  margin-top: 5px;
+  font-family: var(--f-b); font-size: 14.5px; line-height: 1.55; color: var(--np-inkt2);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.np-regel-waarom {
+  margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--np-rand-z);
+}
+.np-regel-waarom-kop {
+  display: block; margin-bottom: 3px;
+  font-family: var(--f-d); font-size: 11px; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--np-inkt3);
+}
+.np-regel-waarom p {
+  font-family: var(--f-b); font-size: 14px; line-height: 1.55; color: var(--np-inkt2);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.np-regel-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 7px;
+  margin-top: 12px; font-size: 12.5px; color: var(--np-inkt3);
+}
+.np-regel-bronnen + .np-regel-meta { margin-top: 8px; }
+.np-regel-datum {
+  margin-left: auto; font-family: var(--f-b); font-size: 13px;
+  color: var(--np-inkt3); white-space: nowrap;
+}
+
+/* Supertip: volle rand en een band in de accentkleur, grotere kop,
+   de kern niet ingekort. */
+.np-regel-super {
+  border: 2px solid var(--np-accent); border-left-width: 6px;
+  box-shadow: 0 6px 22px rgba(15, 118, 110, .16);
+}
+.np-regel-super:hover { background: var(--np-accent-z); }
+.np-super-band {
+  display: flex; align-items: center; gap: 8px; padding: 7px 18px;
+  background: var(--np-accent); color: var(--np-accent-io);
+  font-family: var(--f-d); font-size: 12px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase;
+}
+.np-regel-super .np-regel-inhoud { padding: 16px 20px 18px; }
+.np-regel-super .np-regel-titel { font-size: 21px; line-height: 1.28; letter-spacing: -0.01em; }
+.np-regel-super .np-regel-kern { display: block; font-size: 15.5px; overflow: visible; }
+
+/* Supertip op de tippagina */
+.np-super-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 11px; border-radius: 20px;
+  background: var(--np-accent); color: var(--np-accent-io);
+  font-family: var(--f-d); font-size: 11.5px; font-weight: 800;
+  letter-spacing: .1em; text-transform: uppercase;
+}
+.np-detail-super { padding-left: 16px; border-left: 6px solid var(--np-accent); }

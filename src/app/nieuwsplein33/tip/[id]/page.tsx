@@ -8,7 +8,7 @@ import {
 import { formatDate, formatDateTime, safeParseJson, safeParseJsonArray } from '@/lib/dashboard/format'
 import { parseBriefing, ontstreep, type GeparsedeBriefing } from '@/lib/dashboard/briefing'
 import GeenDatabase from '../../GeenDatabase'
-import { SOORT_LABEL } from '../../TipRegel'
+import { SOORT_LABEL, isSupertip, zonderSupertip } from '../../TipRegel'
 import TipTabs, { type Tab } from './TipTabs'
 import TipActies from './TipActies'
 import Meetknop from './Meetknop'
@@ -240,6 +240,7 @@ export default async function TipPagina({ params }: Props) {
     getWachtrijIds(),
   ])
 
+  const superTip = isSupertip(tip.titel)
   const vragen = safeParseJsonArray<string>(tip.vervolgvragen) ?? []
   const wegingRaw = safeParseJson<Record<string, number | { punten: number; bron?: string }>>(tip.weging)
   const weging = wegingRaw
@@ -416,8 +417,9 @@ export default async function TipPagina({ params }: Props) {
       {/* Sticky beslisbalk met wachtrijnavigatie */}
       <BeslisNavigatie tipId={tip.id} status={tip.status} wachtrijIds={wachtrijIds} />
 
-      <header className="np-detail-kop">
+      <header className={`np-detail-kop${superTip ? ' np-detail-super' : ''}`}>
         <div className="np-detail-labels">
+          {superTip && <span className="np-super-label"><span aria-hidden>★</span> Supertip</span>}
           <span className={`np-soort np-soort-${tip.soort}`}>{SOORT_LABEL[tip.soort] ?? tip.soort}</span>
           {tier !== null && (
             <span className={`np-tier np-tier-${tier}`} title={TIER_UITLEG[tier]}>tier {tier}</span>
@@ -426,7 +428,7 @@ export default async function TipPagina({ params }: Props) {
           <span className="np-label">{tip.gemeente}</span>
           {tip.status !== 'wachtrij' && <span className="np-label np-label-status">{STATUS_LABEL[tip.status] ?? tip.status}</span>}
         </div>
-        <h1 className="np-detail-titel">{ontstreep(tip.titel)}</h1>
+        <h1 className="np-detail-titel">{ontstreep(superTip ? zonderSupertip(tip.titel) : tip.titel)}</h1>
         <p className="np-detail-kern">{tip.kern && ontstreep(tip.kern)}</p>
       </header>
 
