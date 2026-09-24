@@ -19,47 +19,41 @@ async function scrape() {
       scrapeFrequency: 'daily',
     });
 
-    let response;
+    let saved = 0, skipped = 0, errors = 0;
     try {
-      response = await fetch(sub.url, {
+      const response = await fetch(sub.url, {
         headers: { 'User-Agent': 'AmersfoortLokaal/1.0 (nieuwssite; contact@amersfoortlokaal.nl)' },
       });
-    } catch (err) {
-      console.error(`Reddit ${sub.name}: netwerkfout —`, err.message);
-      continue;
-    }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
 
-    if (!response.ok) {
-      console.error(`Reddit ${sub.name}: HTTP ${response.status}`);
-      continue;
-    }
+      if (data.data?.children) {
+        for (const post of data.data.children) {
+          const p = post.data;
 
-    const data = await response.json();
-    let saved = 0, skipped = 0, errors = 0;
+          if (sub.filterKeywords) {
+            const text = `${p.title} ${p.selftext || ''}`.toLowerCase();
+            if (!KEYWORDS.some(kw => text.includes(kw))) continue;
+          }
 
-    if (data.data?.children) {
-      for (const post of data.data.children) {
-        const p = post.data;
-
-        if (sub.filterKeywords) {
-          const text = `${p.title} ${p.selftext || ''}`.toLowerCase();
-          if (!KEYWORDS.some(kw => text.includes(kw))) continue;
-        }
-
-        try {
-          const result = await saveRawItem(db, {
-            sourceId,
-            externalUrl: `https://www.reddit.com${p.permalink}`,
-            title: p.title,
-            content: p.selftext || '',
-            summary: `Score: ${p.score}, Comments: ${p.num_comments}`,
-          });
-          if (result.saved) saved++; else skipped++;
-        } catch (err) {
-          errors++;
-          console.error(`Fout bij Reddit post "${p.title}":`, err.message);
+          try {
+            const result = await saveRawItem(db, {
+              sourceId,
+              externalUrl: `https://www.reddit.com${p.permalink}`,
+              title: p.title,
+              content: p.selftext || '',
+              summary: `Score: ${p.score}, Comments: ${p.num_comments}`,
+            });
+            if (result.saved) saved++; else skipped++;
+          } catch (err) {
+            errors++;
+            console.error(`Fout bij Reddit post "${p.title}":`, err.message);
+          }
         }
       }
+    } catch (err) {
+      errors++;
+      console.error(`Reddit ${sub.name}:`, err.message);
     }
 
     await logResult(db, sourceId, `Reddit ${sub.name}`, saved, skipped, errors);
@@ -69,4 +63,4 @@ async function scrape() {
   }
 }
 
-scrape().catch(console.error);
+scrape().catch(err => { console.error(err); process.exitCode = 1; });

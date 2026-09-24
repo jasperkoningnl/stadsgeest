@@ -65,6 +65,7 @@ async function scrape() {
   } catch (e) {
     console.error('Bluesky zoekfeed fout:', e.message);
     totalErrors++;
+    await logResult(db, searchSourceId, 'Bluesky zoek', 0, 0, 1, 0);
   }
 
   // 2. Account-feeds
@@ -101,6 +102,8 @@ async function scrape() {
       totalSaved += saved; totalSkipped += skipped;
     } catch (e) {
       console.error(`Bluesky ${handle} fout:`, e.message);
+      totalErrors++;
+      await logResult(db, sourceId, `Bluesky @${handle.split('.')[0]}`, 0, 0, 1, 0);
     }
   }
 
@@ -108,4 +111,4 @@ async function scrape() {
   await logResult(db, null, 'Bluesky totaal', totalSaved, totalSkipped, totalErrors);
 }
 
-scrape().catch(console.error);
+scrape().catch(err => { console.error(err); process.exitCode = 1; });

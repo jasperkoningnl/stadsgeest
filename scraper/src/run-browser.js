@@ -26,10 +26,6 @@ const scrapers = [
                                 //   is nog geen opvolger.
   'nvwa-inspectieresultaten.js', // Openbare inspectieresultaten horeca, per postcode
   'omthuis.js',                 // Omthuis woningcorporatie nieuwsberichten
-  'ob-playwright.js',           // C10: Officiële Bekendmakingen. Draait op het SRU-endpoint van
-                                //   zoek.officielebekendmakingen.nl, dat HTTP 500 geeft op elke
-                                //   query. Opgevolgd door officielebekendmakingen-repo.js.
-                                //   Blijft in de lijst tot Jasper besluit hem eruit te halen.
 
   // Groep C — wekelijkse browser-scrapers
   'bw-besluiten.js',            // C4: B&W besluitenlijsten — fix 2026-05-28
@@ -38,7 +34,6 @@ const scrapers = [
   // werd uitgevoerd. Die aantekening klopte dus niet: ze draaien elke dag en leveren
   // elke dag nul. Ze staan te wachten op reparatie, niet op uitzetten.
   'ggd-regio-utrecht.js',       // C6: GGD regio Utrecht — draait, levert 0, te repareren
-  'waaroverheid.js',            // C8: WaarOverheid — draait, levert 0, te repareren
   'onderwijsinspectie.js',      // C9: Onderwijsinspectie — draait, levert 0, te repareren
   'provincie-utrecht.js',       // C11: Provincie Utrecht — draait, levert 0, te repareren
 ];

@@ -707,7 +707,6 @@ async function main() {
     scrapeACM,
     scrapeCOELO,
     scrapeEPOnline,
-    scrapeKadaster,
     scrapeMonumentenregister,
     scrapeBuurtbudgetten,
     scrapeEUSubsidies,

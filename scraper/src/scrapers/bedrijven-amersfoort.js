@@ -160,7 +160,6 @@ async function scrapeFrieslandCampina() {
 // TODO: controleer of er een opvolger is.
 
 async function scrape() {
-  await scrapeFrieslandCampina();
   await scrapeQbuzz();
   await scrapeNoordhoff();
 }

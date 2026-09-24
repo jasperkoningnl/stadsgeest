@@ -16,29 +16,33 @@ async function scrape() {
     scrapeFrequency: 'daily',
   });
 
-  const feed = await parser.parseURL(FEED_URL);
   let saved = 0, skipped = 0, errors = 0;
+  try {
+    const feed = await parser.parseURL(FEED_URL);
+    for (const item of feed.items) {
+      const text = `${item.title} ${item.contentSnippet || ''}`.toLowerCase();
+      if (!KEYWORDS.some(kw => text.includes(kw))) continue;
 
-  for (const item of feed.items) {
-    const text = `${item.title} ${item.contentSnippet || ''}`.toLowerCase();
-    if (!KEYWORDS.some(kw => text.includes(kw))) continue;
-
-    try {
-      const result = await saveRawItem(db, {
-        sourceId,
-        externalUrl: item.link,
-        title: item.title,
-        content: item.contentSnippet || item.content || '',
-        summary: item.contentSnippet || '',
-      });
-      if (result.saved) saved++; else skipped++;
-    } catch (err) {
-      errors++;
-      console.error(`Fout bij item "${item.title}":`, err.message);
+      try {
+        const result = await saveRawItem(db, {
+          sourceId,
+          externalUrl: item.link,
+          title: item.title,
+          content: item.contentSnippet || item.content || '',
+          summary: item.contentSnippet || '',
+        });
+        if (result.saved) saved++; else skipped++;
+      } catch (err) {
+        errors++;
+        console.error(`Fout bij item "${item.title}":`, err.message);
+      }
     }
+  } catch (err) {
+    errors++;
+    console.error('Rijksoverheid feedfout:', err.message);
   }
 
   await logResult(db, sourceId, 'Rijksoverheid', saved, skipped, errors);
 }
 
-scrape().catch(console.error);
+scrape().catch(err => { console.error(err); process.exitCode = 1; });

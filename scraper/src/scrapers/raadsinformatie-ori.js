@@ -177,10 +177,18 @@ async function scrape() {
   // 30 dagen, 46 binnen 45 dagen (de raadsvergadering van 9 juli over de
   // kadernota), 198 binnen 90 dagen. Verruim dit dus met mate — 90 dagen is
   // een backfill, geen venster.
-  try {
-    await leusdenPass(parseInt(process.env.ORI_DAGEN_LEUSDEN || '30', 10));
-  } catch (e) {
-    console.error('raadsinformatie-ori (Leusden):', e.message);
+  //
+  // UITGESCHAKELD 2026-09-24 (besluit Jasper): Leusden is na de zomer naar
+  // Notubiz gegaan en de ORI-index stopt bij de raad van 9 juli 2026. De
+  // vergaderstukken komen nu via notubiz-leusden.js, de moties via de
+  // Leusden-pass in raadkijker-moties.js. Bron 129 staat op is_active=0.
+  // Weer aanzetten kan met ORI_LEUSDEN=1, bijvoorbeeld als ORI Leusden weer bijwerkt.
+  if (process.env.ORI_LEUSDEN === '1') {
+    try {
+      await leusdenPass(parseInt(process.env.ORI_DAGEN_LEUSDEN || '30', 10));
+    } catch (e) {
+      console.error('raadsinformatie-ori (Leusden):', e.message);
+    }
   }
 }
 
