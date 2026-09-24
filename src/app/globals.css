@@ -2205,3 +2205,4 @@ a.np-chip:hover .np-chip-pijl { transform: translateX(2px); }
   letter-spacing: .1em; text-transform: uppercase;
 }
 .np-detail-super { padding-left: 16px; border-left: 6px solid var(--np-accent); }
+.np-daggroep-super .np-daggroep-kop { color: var(--np-accent); border-bottom-color: var(--np-accent-z); }

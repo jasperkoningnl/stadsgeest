@@ -31,7 +31,10 @@ function usage() {
   return `Gebruik: node scraper/src/weger-apply.cjs plan.json [--apply]\n\n` +
     `Zonder --apply wordt het plan volledig gevalideerd en alleen als voorvertoning\n` +
     `getoond. Met --apply worden reviews, tips en dossierfeiten atomair geschreven.\n\n` +
-    `Hoofdvelden: { reviews: [], tips: [], dossier_facts: [] }`;
+    `Hoofdvelden: { reviews: [], tips: [], dossier_facts: [] }\n\n` +
+    `Supertip-run: zet \`run: "supertip"\` in het plan en \`supertip: true\` op\n` +
+    `hoogstens één tip. Die tip mag signalen gebruiken die al aan een andere tip\n` +
+    `hangen en moet minimaal score 6 halen.`;
 }
 
 function words(value) {
@@ -66,6 +69,13 @@ function validatePlan(plan) {
     requiredString(review?.reason, `${field}.reason`, errors);
   });
 
+  if (plan.run !== undefined && plan.run !== 'supertip') errors.push('run is ongeldig; alleen "supertip" is toegestaan.');
+  const superTips = tips.filter((tip) => tip?.supertip === true);
+  if (superTips.length > 0 && plan.run !== 'supertip') {
+    errors.push('supertip: true mag alleen in een plan met run: "supertip".');
+  }
+  if (superTips.length > 1) errors.push('Een supertip-run maakt hoogstens één supertip.');
+
   const linkedSignalIds = new Set();
   tips.forEach((tip, index) => {
     const field = `tips[${index}]`;
@@ -79,6 +89,11 @@ function validatePlan(plan) {
         errors.push(`${field}.briefing mist de kop ${heading} op een eigen regel.`);
       }
     }
+    if (tip?.supertip !== undefined && typeof tip.supertip !== 'boolean') errors.push(`${field}.supertip moet true of false zijn.`);
+    if (tip?.supertip === true && !(Number.isInteger(tip?.score) && tip.score >= 6)) {
+      errors.push(`${field} is een supertip en moet minimaal score 6 halen.`);
+    }
+    if (/^\s*supertip\b/i.test(tip?.titel ?? '')) errors.push(`${field}.titel begint met Supertip; gebruik het veld supertip.`);
     if (words(tip?.titel) > 10) errors.push(`${field}.titel mag maximaal 10 woorden bevatten.`);
     if (words(tip?.kern) > 30) errors.push(`${field}.kern mag maximaal 30 woorden bevatten.`);
     if (!TIP_TYPES.has(tip?.soort)) errors.push(`${field}.soort is ongeldig.`);
@@ -181,7 +196,8 @@ async function preflight(db, plan) {
   const foundDossiers = new Set(dossiers.map((row) => Number(row.id)));
   for (const id of dossierIds) if (!foundDossiers.has(id)) errors.push(`Dossier ${id} bestaat niet.`);
 
-  const tipSignalIds = (plan.tips ?? []).flatMap((tip) => tip.signals.map((link) => link.id));
+  // Een supertip bouwt bewust voort op materiaal dat al in andere tips zit.
+  const tipSignalIds = (plan.tips ?? []).filter((tip) => tip.supertip !== true).flatMap((tip) => tip.signals.map((link) => link.id));
   if (tipSignalIds.length > 0) {
     const placeholders = tipSignalIds.map(() => '?').join(',');
     const linked = await db.execute({
@@ -196,7 +212,7 @@ async function preflight(db, plan) {
 async function applyPlan(db, plan, statusBySignal) {
   const tx = await db.transaction('write');
   try {
-    const tipSignalIds = (plan.tips ?? []).flatMap((tip) => tip.signals.map((link) => link.id));
+    const tipSignalIds = (plan.tips ?? []).filter((tip) => tip.supertip !== true).flatMap((tip) => tip.signals.map((link) => link.id));
     if (tipSignalIds.length > 0) {
       const placeholders = tipSignalIds.map(() => '?').join(',');
       const linked = await tx.execute({
@@ -208,17 +224,19 @@ async function applyPlan(db, plan, statusBySignal) {
       }
     }
     for (const tip of plan.tips ?? []) {
+      const actor = tip.supertip === true ? 'supertip-run' : 'codex-weger';
       const inserted = await tx.execute({
         sql: `INSERT INTO tips
           (titel, kern, briefing, vervolgvragen, soort, gemeente, categorie, score,
            score_motivatie, weging, herkomst, elders_gebracht, toegevoegde_waarde,
-           dossier_id, actor, trefwoorden)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'codex-weger', ?)`,
+           dossier_id, actor, trefwoorden, supertip)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
           tip.titel.trim(), tip.kern.trim(), tip.briefing.trim(), JSON.stringify(tip.vervolgvragen),
           tip.soort, tip.gemeente, tip.categorie.trim(), tip.score, tip.score_motivatie.trim(),
           JSON.stringify(tip.weging), JSON.stringify(tip.herkomst), JSON.stringify(tip.elders_gebracht),
-          tip.toegevoegde_waarde?.trim() || null, tip.dossier_id ?? null, JSON.stringify(tip.trefwoorden),
+          tip.toegevoegde_waarde?.trim() || null, tip.dossier_id ?? null, actor, JSON.stringify(tip.trefwoorden),
+          tip.supertip === true ? 1 : 0,
         ],
       });
       const tipId = Number(inserted.lastInsertRowid);
@@ -233,8 +251,8 @@ async function applyPlan(db, plan, statusBySignal) {
       }
       await tx.execute({
         sql: `INSERT INTO tip_events (tip_id, actor, event_type, status_to, reason)
-              VALUES (?, 'codex-weger', 'created', 'wachtrij', ?)`,
-        args: [tipId, tip.score_motivatie.trim()],
+              VALUES (?, ?, 'created', 'wachtrij', ?)`,
+        args: [tipId, actor, tip.score_motivatie.trim()],
       });
     }
 

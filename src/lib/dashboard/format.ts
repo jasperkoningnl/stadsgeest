@@ -51,6 +51,21 @@ function dagString(d: Date): string {
   return d.toLocaleDateString('sv-SE', { timeZone: TIJDZONE })
 }
 
+/**
+ * Een supertip staat bovenaan de wachtrij tot de maandag na de dag waarop hij
+ * is gemaakt (Nederlandse tijd). De run draait op donderdag, dus hij blijft
+ * vrijdag en het weekend bovenaan en zakt maandag terug in de chronologie.
+ */
+export function supertipVastgezet(tip: { supertip?: number | boolean | null; created_at: string }, nu = new Date()): boolean {
+  if (!tip.supertip) return false
+  const d = parseDbDate(tip.created_at)
+  if (!d) return false
+  const dag = new Date(dagString(d) + 'T00:00:00Z')
+  const totMaandag = ((8 - dag.getUTCDay()) % 7) || 7
+  const maandag = new Date(dag.getTime() + totMaandag * 86400000).toISOString().slice(0, 10)
+  return dagString(nu) < maandag
+}
+
 /** Kalenderdagen geleden in Nederlandse tijd (0 = vandaag, 1 = gisteren). */
 export function kalenderdagenGeleden(iso: string | null | undefined): number | null {
   const d = parseDbDate(iso)

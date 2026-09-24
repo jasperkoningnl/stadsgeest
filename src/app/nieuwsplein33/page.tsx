@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { hasTurso } from '@/lib/turso'
 import { getTips, getGeparkeerdDezeWeek, getMeetstand, type TipRij } from '@/lib/dashboard/tipQueries'
-import { kalenderdagenGeleden } from '@/lib/dashboard/format'
+import { kalenderdagenGeleden, supertipVastgezet } from '@/lib/dashboard/format'
 import TipRegel from './TipRegel'
 import WachtrijFilters from './WachtrijFilters'
 import GeenDatabase from './GeenDatabase'
@@ -23,6 +23,10 @@ export default async function WachtrijPagina() {
   // Verzamel de beschikbare soorten voor de filterpillen.
   const soorten = [...new Set(tips.map((t) => t.soort))].sort()
 
+  // Een supertip staat tot de maandag na de run bovenaan, daarna gewoon in de
+  // chronologie.
+  const vast = tips.filter((t) => supertipVastgezet(t))
+
   // Vier dagkopjes: vandaag, gisteren, deze week, eerder.
   const groepen: { kop: string; tips: TipRij[] }[] = [
     { kop: 'Vandaag', tips: [] },
@@ -31,6 +35,7 @@ export default async function WachtrijPagina() {
     { kop: 'Eerder', tips: [] },
   ]
   for (const tip of tips) {
+    if (vast.includes(tip)) continue
     const dagen = kalenderdagenGeleden(tip.created_at)
     if (dagen !== null && dagen <= 0) groepen[0].tips.push(tip)
     else if (dagen === 1) groepen[1].tips.push(tip)
@@ -67,7 +72,16 @@ export default async function WachtrijPagina() {
           </p>
         </div>
       ) : (
-        <>{groepen.filter((g) => g.tips.length > 0).map((g) => (
+        <>
+        {vast.length > 0 && (
+          <section className="np-daggroep np-daggroep-super">
+            <h2 className="np-daggroep-kop">Supertip van deze week</h2>
+            <div className="np-lijst">
+              {vast.map((tip) => <TipRegel key={tip.id} tip={tip} />)}
+            </div>
+          </section>
+        )}
+        {groepen.filter((g) => g.tips.length > 0).map((g) => (
           <section key={g.kop} className="np-daggroep">
             <h2 className="np-daggroep-kop">
               {g.kop}

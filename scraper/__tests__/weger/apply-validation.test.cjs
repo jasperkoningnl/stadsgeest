@@ -85,3 +85,30 @@ test('briefingkoppen moeten exact op een eigen regel staan', () => {
   plan.tips[0].briefing = plan.tips[0].briefing.replace('WAT WE WETEN', '1. WAT WE WETEN');
   assert.match(validatePlan(plan).join('\n'), /mist de kop WAT WE WETEN/);
 });
+
+test('supertip mag alleen in een supertip-run', () => {
+  const plan = validPlan();
+  plan.tips[0].supertip = true;
+  assert.match(validatePlan(plan).join('\n'), /alleen in een plan met run: "supertip"/);
+  plan.run = 'supertip';
+  assert.deepEqual(validatePlan(plan), []);
+});
+
+test('een supertip-run maakt hoogstens één supertip, met minimaal score 6', () => {
+  const plan = validPlan();
+  plan.run = 'supertip';
+  plan.tips[0].supertip = true;
+  plan.tips[0].score = 5;
+  const tweede = { ...validPlan().tips[0], supertip: true, signals: [{ id: 43, rol: 'dragend' }] };
+  plan.tips.push(tweede);
+  plan.reviews.push({ signal_id: 43, status_to: 'watching', reason: 'Gelezen.' });
+  const errors = validatePlan(plan).join('\n');
+  assert.match(errors, /hoogstens één supertip/);
+  assert.match(errors, /minimaal score 6/);
+});
+
+test('Supertip hoort niet in de titel', () => {
+  const plan = validPlan();
+  plan.tips[0].titel = 'Supertip: raad besluit over woonwijk';
+  assert.match(validatePlan(plan).join('\n'), /gebruik het veld supertip/);
+});

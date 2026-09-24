@@ -6,6 +6,7 @@
 // opgehaald. Alles wat hier uitkomt is bedoeld om in redactietaal getoond te
 // worden — 'bron' en 'document', nooit 'signaal' of 'raw_item'.
 import { q, qOne } from '@/lib/turso'
+import { supertipVastgezet } from './format'
 
 export type TipStatus =
   | 'wachtrij' | 'goedgekeurd' | 'in_behandeling'
@@ -23,6 +24,8 @@ export interface TipRij {
   status: TipStatus
   dossier_naam: string | null
   created_at: string
+  /** 1 als de tip uit de wekelijkse supertip-run komt. */
+  supertip: number
   bronnen: { naam: string; tier: number | null; spiegel: boolean }[]
   aantal_documenten: number
 }
@@ -120,7 +123,7 @@ async function verrijkMetBronnen(tips: any[]): Promise<TipRij[]> {
 
 const TIP_KOLOMMEN = `
   t.id, t.titel, t.kern, t.soort, t.gemeente, t.categorie, t.score,
-  t.score_motivatie, t.status, t.created_at, d.naam AS dossier_naam
+  t.score_motivatie, t.status, t.created_at, t.supertip, d.naam AS dossier_naam
 `
 
 export async function getTips(statussen: TipStatus[]): Promise<TipRij[]> {
@@ -224,9 +227,11 @@ export async function getMeetstand(): Promise<{ gepubliceerd: number; eigenVonds
 
 /** Alle tip-ids in de wachtrij, in dezelfde volgorde als de lijst. */
 export async function getWachtrijIds(): Promise<number[]> {
-  const rijen = await q<{ id: number }>(
-    `SELECT id FROM tips WHERE status = 'wachtrij'
+  const rijen = await q<{ id: number; supertip: number; created_at: string }>(
+    `SELECT id, supertip, created_at FROM tips WHERE status = 'wachtrij'
      ORDER BY substr(created_at, 1, 10) DESC, score DESC, created_at DESC`,
   )
-  return rijen.map((r) => r.id)
+  // Zelfde volgorde als de wachtrijpagina: een vastgezette supertip eerst.
+  const vast = rijen.filter((r) => supertipVastgezet(r))
+  return [...vast, ...rijen.filter((r) => !vast.includes(r))].map((r) => r.id)
 }

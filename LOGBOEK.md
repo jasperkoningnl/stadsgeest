@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-09-24 - Elke donderdag een zoektocht naar een supertip
+
+Vanaf volgende week zoekt Stadsgeest elke donderdag naar één supertip. Dat is een verhaal waarvoor Stadsgeest dieper in het archief duikt: alle nieuwe signalen van de week, maar ook oudere stukken, Woo-bijlagen en raadsstukken van de regiogemeenten. Is er een supertip, dan staat die tot maandag bovenaan de wachtrij onder het kopje Supertip van deze week. Daarna zakt hij terug naar zijn gewone plek op datum. Het kan ook gebeuren dat er een week geen supertip is. Dat is bewust: het label moet iets betekenen. De MetMaya-tip van vandaag is de eerste supertip en staat tot maandag bovenaan.
+
 ## 2026-09-24 - De wachtrij in dezelfde stijl, supertips vallen op
 
 De tips in de wachtrij hebben nu dezelfde vorm als de onderdelen van een tip: een kaart met een gekleurde lijn links in de kleur van de soort (blauw voor nieuwsfeit, groen-blauw voor patroon, oranje voor verdieping). Waarom een tip is geselecteerd staat onder een eigen kopje, en de bronnen staan als knopjes op een eigen regel. Een supertip krijgt een groene band met een ster, een volle rand en een grotere kop, zodat je hem niet mist. Ook op de tippagina zelf staat dan een label Supertip. Keerzijde: een tip telt alleen als supertip als de titel met Supertip begint.

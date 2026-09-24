@@ -10,9 +10,9 @@ export const SOORT_LABEL: Record<string, string> = {
   dossiersignaal: 'Dossier',
 }
 
-// Een supertip is (nog) geen apart veld: de weger of Jasper zet "Supertip:"
-// voor de titel. Het dashboard haalt dat voorvoegsel weg en toont de tip
-// opvallender.
+// Een supertip komt uit de wekelijkse supertip-run en staat als tips.supertip
+// in de database. Het voorvoegsel "Supertip:" in de titel telt nog als
+// terugval, voor het geval iemand een tip met de hand zo noemt.
 const SUPERTIP = /^\s*supertip\s*[:\-–—]\s*/i
 export function isSupertip(titel: string | null | undefined): boolean {
   return Boolean(titel && SUPERTIP.test(titel))
@@ -28,7 +28,7 @@ export function zonderSupertip(titel: string): string {
 export default function TipRegel({ tip }: { tip: TipRij }) {
   const dragend = tip.bronnen.filter((b) => !b.spiegel)
   const spiegels = tip.bronnen.filter((b) => b.spiegel)
-  const superTip = isSupertip(tip.titel)
+  const superTip = Boolean(tip.supertip) || isSupertip(tip.titel)
   const titel = ontstreep(superTip ? zonderSupertip(tip.titel) : tip.titel)
 
   // Hoogste tier van de dragende bronnen (lager = belangrijker)

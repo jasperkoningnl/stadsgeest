@@ -259,6 +259,7 @@ voeg die alleen toe als redactionele verbreding werkelijk waarde heeft.
 - `soort`: `nieuwsfeit`, `patroon`, `verdieping` of `dossiersignaal`.
 - `gemeente`: `Amersfoort`, `Leusden` of `regio`.
 - `score_motivatie`: gewone taal; waarom dit journalistiek telt.
+- `supertip`: niet zetten. Dat veld is voor de wekelijkse supertip-run.
 - `herkomst`: per dragende bron naam, tier, URL, datum en bijdrage.
 - `trefwoorden`: drie tot vijf onderscheidende termen; geen gemeentenaam,
   generiek woord, korte afkorting of losse wijknaam.

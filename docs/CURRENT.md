@@ -18,6 +18,13 @@ fase-5-maandevaluatie en privacyretentie uitgevoerd. Adapter-, evaluatie- en
 retentiefouten zijn van elkaar geïsoleerd; dezelfde invoer levert geen dubbele
 metingen of uitkomsten op.
 
+Iedere donderdag om 09.00 uur draait de supertip-run: een Claude-taak in
+Cowork op Jaspers notebook met de prompt `stadsgeest-werk\PROMPT-supertip.md`.
+Die kiest één spoor, duikt het archief in en schrijft hoogstens één tip met
+`tips.supertip = 1` weg; nul is een geldige uitkomst. Het dashboard zet een
+supertip bovenaan de wachtrij tot de maandag erna. Alleen deze run mag
+`supertip` zetten; `weger-apply.cjs` dwingt dat af via `run: "supertip"`.
+
 De dagelijkse taak en de NDW-taak eindigen met resultaatcode 0. Een dode
 proceslock wordt direct herkend en opgeruimd. De gecombineerde detectierun heeft
 een heaplimiet van 1,5 GB.

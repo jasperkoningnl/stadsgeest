@@ -240,7 +240,7 @@ export default async function TipPagina({ params }: Props) {
     getWachtrijIds(),
   ])
 
-  const superTip = isSupertip(tip.titel)
+  const superTip = Boolean(tip.supertip) || isSupertip(tip.titel)
   const vragen = safeParseJsonArray<string>(tip.vervolgvragen) ?? []
   const wegingRaw = safeParseJson<Record<string, number | { punten: number; bron?: string }>>(tip.weging)
   const weging = wegingRaw
