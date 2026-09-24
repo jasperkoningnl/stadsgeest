@@ -28,10 +28,10 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: {
     template: '%s — Stadsgeest',
-    default: 'Stadsgeest — persbureau voor lokale journalistiek',
+    default: 'Stadsgeest — speurwerk in openbare bronnen van Amersfoort',
   },
   description:
-    'Stadsgeest doorzoekt dagelijks honderden openbare bronnen op zoek naar lokaal nieuws dat blijft liggen, en levert de vondsten aan lokale redacties.',
+    'Stadsgeest doorzoekt dagelijks ruim honderd openbare bronnen over Amersfoort en legt wat opvalt voor aan de redactie van Nieuwsplein33.',
   metadataBase: new URL(SITE_URL),
   openGraph: {
     siteName: 'Stadsgeest',

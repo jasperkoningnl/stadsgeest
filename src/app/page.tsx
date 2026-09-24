@@ -3,9 +3,9 @@ import { IconDoorzoeken, IconWegen, IconDoorgeven } from '@/components/HomeIcons
 import HomeTrechter from '@/components/HomeTrechter'
 
 export const metadata: Metadata = {
-  title: 'Stadsgeest — persbureau voor lokale journalistiek',
+  title: 'Stadsgeest — speurwerk in openbare bronnen van Amersfoort',
   description:
-    'Stadsgeest doorzoekt dagelijks honderden openbare bronnen op zoek naar lokaal nieuws dat blijft liggen, en levert de vondsten aan lokale redacties.',
+    'Stadsgeest doorzoekt dagelijks ruim honderd openbare bronnen over Amersfoort en legt wat opvalt voor aan de redactie van Nieuwsplein33.',
   alternates: { canonical: '/' },
 }
 
@@ -44,12 +44,12 @@ export default function Home() {
         </header>
 
         <section className="home-hero">
-          <p className="home-eyebrow">Persbureau voor lokale journalistiek</p>
+          <p className="home-eyebrow">Een proef met de redactie van Nieuwsplein33</p>
           <h1 className="home-titel">Het nieuws zit in stukken die niemand leest.</h1>
           <p className="home-lead">
-            Stadsgeest doorzoekt dagelijks honderden openbare bronnen over Amersfoort, weegt wat er
-            tussen zit, en levert de vondsten aan bij een redactie. Geen concurrent van lokale media,
-            maar een leverancier — het werk waar op een redactie zelden tijd voor is.
+            Stadsgeest doorzoekt dagelijks ruim honderd openbare bronnen over Amersfoort, weegt wat
+            er tussen zit en legt de vondsten voor aan de redactie van Nieuwsplein33. Het doet het
+            speurwerk waar op een lokale redactie zelden tijd voor is.
           </p>
         </section>
 
@@ -88,23 +88,20 @@ export default function Home() {
             </p>
             <p>
               Wij publiceren zelf niet. Wat hier gevonden wordt, wordt geschreven en gecontroleerd
-              door de redactie die het afneemt.
+              door de redactie van Nieuwsplein33.
             </p>
           </div>
         </section>
 
         <section className="home-blok home-blok-contact">
-          <h2 className="home-blok-kop">Voor redacties</h2>
+          <h2 className="home-blok-kop">Wie erachter zit</h2>
           <div className="home-blok-tekst">
             <p>
-              Stadsgeest draait op dit moment op Amersfoort en wordt beproefd met één redactie. De
-              methode is niet aan die stad gebonden — waar openbare bronnen zijn, werkt hetzelfde
-              principe.
+              Stadsgeest is een project van Jasper Koning en wordt samen met de redactie van
+              Nieuwsplein33 ontwikkeld en beproefd. Nieuwsplein33 en Stadsgeest hebben de ambitie om
+              te onderzoeken of deze methode kan bijdragen aan lokale journalistiek.
             </p>
-            <p>
-              Werk je bij een lokale of regionale redactie en wil je weten wat dit voor jullie zou
-              opleveren? Laat het weten.
-            </p>
+            <p>Vragen of opmerkingen?</p>
           </div>
           <a className="home-mail" href="mailto:stadsgeest@proton.me">
             stadsgeest@proton.me
