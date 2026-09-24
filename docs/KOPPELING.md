@@ -61,8 +61,16 @@ Vastgesteld in de proef van 24-9 (`scraper/tmp/koppel-inspect.cjs`):
 - Ook de plaatsen van twee clusters moeten passen. Anders slaat een
   KG-entiteit zonder plaats een brug tussen De Baander in Amersfoort en De
   Baander in Elim.
+- Binnen één bron worden gelijk genormaliseerde namen alleen samengevoegd als
+  er hoogstens één sterke identiteit (KvK, RSIN of LEI) voorkomt. Twee
+  gelijknamige rechtspersonen met verschillende identifiers blijven aparte
+  records; anders zou het conflict al vóór Splink verloren gaan.
 - Woonkernen tellen als hun gemeente (Hoogland, Vathorst → Amersfoort;
   Achterveld, Stoutenburg → Leusden).
+
+De genormaliseerde invoer wordt vóór toekenning van de interne uid vast
+gesorteerd. Daardoor blijft de invoerhash gelijk als Turso dezelfde rijen in
+een andere volgorde teruggeeft.
 
 ## Uitkomst eerste run (24-9)
 

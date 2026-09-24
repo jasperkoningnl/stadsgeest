@@ -39,10 +39,32 @@ test('voegSamen: één record per bron en naam, toezicht wint van register', () 
     maakRecord({ bron: 'anbi', naam: 'Xenon' }),
   ].filter(Boolean));
   assert.equal(r.length, 2);
-  assert.equal(r[0].rol, 'toezicht');
-  assert.equal(r[0].kvk, '12345678');
-  assert.equal(r[0].n_rijen, 2);
+  const inspectie = r.find((x) => x.bron === 'arbeidsinspectie');
+  assert.equal(inspectie.rol, 'toezicht');
+  assert.equal(inspectie.kvk, '12345678');
+  assert.equal(inspectie.n_rijen, 2);
   assert.deepEqual(r.map((x) => x.uid), [0, 1]);
+});
+
+test('voegSamen houdt gelijknamige rechtspersonen met verschillende identifiers apart en sorteert stabiel', () => {
+  const invoer = [
+    maakRecord({ bron: 'openkvk', naam: 'De Horizon B.V.', kvk: '22222222', plaats: 'Leusden' }),
+    maakRecord({ bron: 'openkvk', naam: 'De Horizon B.V.', kvk: '11111111', plaats: 'Amersfoort' }),
+    maakRecord({ bron: 'subsidie', naam: 'Stichting Zandfoort' }),
+  ];
+  const normaal = voegSamen(invoer);
+  const omgekeerd = voegSamen([...invoer].reverse());
+  assert.equal(normaal.length, 3);
+  assert.deepEqual(normaal, omgekeerd);
+  assert.deepEqual(normaal.filter((r) => r.bron === 'openkvk').map((r) => r.kvk), ['11111111', '22222222']);
+});
+
+test('voegSamen houdt ook velden en extra-volgorde stabiel binnen dezelfde groep', () => {
+  const invoer = [
+    maakRecord({ bron: 'subsidie', naam: 'Stichting Horizon', extra: 'regeling B', plaats: 'Leusden' }),
+    maakRecord({ bron: 'subsidie', naam: 'Stichting Horizon', extra: 'regeling A', plaats: 'Amersfoort' }),
+  ];
+  assert.deepEqual(voegSamen(invoer), voegSamen([...invoer].reverse()));
 });
 
 test('accepteerPaar: gedeeld adres zonder naamovereenkomst telt niet', () => {

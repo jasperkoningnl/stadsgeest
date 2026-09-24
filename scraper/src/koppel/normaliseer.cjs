@@ -77,21 +77,51 @@ function maakRecord(ruw) {
   };
 }
 
-// Records met dezelfde bron en dezelfde genormaliseerde naam worden één record:
-// een subsidieontvanger met tien regelingen is één organisatie in die bron.
+// Records met dezelfde bron, genormaliseerde naam en sterke identiteit worden
+// één record: een subsidieontvanger met tien regelingen is één organisatie in
+// die bron. Twee rechtspersonen met dezelfde naam maar verschillende KvK-,
+// RSIN- of LEI-nummers moeten apart blijven; anders gaat het conflict al vóór
+// de veilige clusterregels verloren.
 function voegSamen(records) {
-  const map = new Map();
+  const groepen = new Map();
   for (const r of records) {
     const key = `${r.bron}|${r.naam_norm}`;
-    const oud = map.get(key);
-    if (!oud) { map.set(key, { ...r, n_rijen: 1, extras: r.extra ? [r.extra] : [] }); continue; }
-    oud.n_rijen += 1;
-    // Eén inspectie met overtreding maakt de organisatie in die bron een toezichtsgeval.
-    if (r.rol === 'toezicht' || (r.rol === 'geld' && oud.rol === 'register')) oud.rol = r.rol;
-    for (const veld of ['kvk', 'rsin', 'lei', 'postcode', 'huisnr', 'plaats']) if (!oud[veld] && r[veld]) oud[veld] = r[veld];
-    if (r.extra && oud.extras.length < 8 && !oud.extras.includes(r.extra)) oud.extras.push(r.extra);
+    if (!groepen.has(key)) groepen.set(key, []);
+    groepen.get(key).push(r);
   }
-  return [...map.values()].map(({ extras, ...r }, uid) => ({ ...r, uid, extra: extras.join(' | ').slice(0, 600) }));
+  const samengevoegd = [];
+  for (const groep of groepen.values()) {
+    const vasteGroep = [...groep].sort((a, b) => ['kvk', 'rsin', 'lei', 'postcode', 'huisnr', 'plaats', 'bron_ref', 'extra']
+      .map((veld) => String(a[veld] || '').localeCompare(String(b[veld] || ''))).find((n) => n !== 0) || 0);
+    const identiteit = (r) => ['kvk', 'rsin', 'lei'].map((veld) => r[veld] ? `${veld}:${r[veld]}` : '').filter(Boolean).join('|') || null;
+    const heeftConflict = ['kvk', 'rsin', 'lei'].some((veld) => new Set(vasteGroep.map((r) => r[veld]).filter(Boolean)).size > 1);
+    const delen = !heeftConflict
+      ? [vasteGroep]
+      : [...vasteGroep.reduce((m, r) => {
+          const key = identiteit(r) || 'zonder-id';
+          if (!m.has(key)) m.set(key, []);
+          m.get(key).push(r);
+          return m;
+        }, new Map()).values()];
+    for (const deel of delen) {
+      const [eerste, ...rest] = deel;
+      const uit = { ...eerste, n_rijen: 1, extras: eerste.extra ? [eerste.extra] : [] };
+      for (const r of rest) {
+        uit.n_rijen += 1;
+        // Eén inspectie met overtreding maakt de organisatie in die bron een toezichtsgeval.
+        if (r.rol === 'toezicht' || (r.rol === 'geld' && uit.rol === 'register')) uit.rol = r.rol;
+        for (const veld of ['kvk', 'rsin', 'lei', 'postcode', 'huisnr', 'plaats']) if (!uit[veld] && r[veld]) uit[veld] = r[veld];
+        if (r.extra && uit.extras.length < 8 && !uit.extras.includes(r.extra)) uit.extras.push(r.extra);
+      }
+      samengevoegd.push(uit);
+    }
+  }
+  // Databasevolgorde is zonder ORDER BY niet gegarandeerd. Een vaste sortering
+  // houdt uid's, invoerhash en de uitvoer identiek bij dezelfde inhoud.
+  return samengevoegd
+    .sort((a, b) => `${a.bron}|${a.naam_norm}|${a.kvk || ''}|${a.rsin || ''}|${a.lei || ''}`
+      .localeCompare(`${b.bron}|${b.naam_norm}|${b.kvk || ''}|${b.rsin || ''}|${b.lei || ''}`))
+    .map(({ extras, ...r }, uid) => ({ ...r, uid, extra: extras.join(' | ').slice(0, 600) }));
 }
 
 // Clusteren uit paren van de worker plus harde sleutels (KvK, RSIN, LEI).
