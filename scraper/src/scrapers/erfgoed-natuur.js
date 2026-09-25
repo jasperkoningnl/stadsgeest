@@ -201,11 +201,8 @@ async function scrapeDefensie() {
 }
 
 async function scrape() {
-  await scrapeStaatsbosbeheer();
   await scrapeRestauratiefonds();
   await scrapeEigenHuis();
-  await scrapeRCE();
-  await scrapeDefensie();
 }
 
 scrape().catch(console.error);

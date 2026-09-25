@@ -242,6 +242,16 @@ binnen en worden in `raw_item_attachments` gezet en samengevoegd in
 `raw_items.full_text`. Klachten (278 rijen) blijven bewust buiten beschouwing.
 Scans zonder tekstlaag krijgen `geen_tekst`.
 
+`scraper/src/scrapers/ibabs-ocr.js` draait direct na de bijlagen en gebruikt de
+lokaal geïnstalleerde Tesseract (`nld+eng`) voor zulke scans. De run is bewust
+begrensd op twee documenten, twaalf pagina's per document, 40 MB en 100
+seconden. Een document krijgt hoogstens twee OCR-pogingen. Geslaagde tekst krijgt
+`tekstbron='ocr'`, wordt in `raw_items.full_text` opgenomen en maakt afgeleide
+NER- en adresscans ongeldig voor een gerichte herhaling. De productiepiloottest
+van 25 september herstelde één scan naar 1.938 tekens; één foto bleef terecht
+onder de minimumgrens van 200 tekens. De resterende wachtrij wordt in volgende
+wekelijkse runs geleidelijk verwerkt.
+
 **Woo-bijlagen inhoudelijk meewegen (gebouwd 24 september 2026, besluit Jasper).**
 Voorheen woog de inhoud van de Woo-bijlagen niet mee, om drie redenen:
 - Van de 116 iBabs-items zijn er 102 bij de backfill van 23 september als
@@ -271,8 +281,7 @@ Wat er nu gebeurt:
 - Na een wijziging in de zoekregels: `node scraper/src/woo-scan.cjs --opnieuw
   --alleen-scan`. Met `--dry-run` zie je de promoties zonder te schrijven.
 
-Nog niet gedaan: een bijlage zonder tekstlaag (scan) krijgt geen OCR; de
-convenanten gaan mee in dezelfde scan. Aanleiding was een handmatige test op
+De convenanten gaan mee in dezelfde inhoudsscan. Aanleiding was een handmatige test op
 24 september: één Woo-besluit, vergeleken met de raadsstukken van de zeven
 regiogemeenten via Open Raadsinformatie, leverde een verdiepingstip met score
 20 op. Zoekhulpjes voor ORI staan buiten de repo in `stadsgeest-werk/ori/`.

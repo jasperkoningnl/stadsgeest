@@ -16,7 +16,8 @@
 // 4. full_text van het item = itemtekst + alle bijlageteksten; entities_scanned_at
 //    wordt leeggemaakt zodat extractie opnieuw draait.
 //
-// Scans zonder tekstlaag leveren geen tekst op (status 'geen_tekst'); OCR doen we niet.
+// Scans zonder tekstlaag krijgen status 'geen_tekst'. ibabs-ocr.js verwerkt
+// daarna een kleine, begrensde portie met Tesseract.
 //
 // Aanroep (vanuit scraper/): node src/scrapers/ibabs-bijlagen.js [--max-docs 300] [--categorie woo,convenanten]
 
@@ -70,6 +71,10 @@ async function zorgVoorTabel() {
   if (!kolommen.includes('pogingen')) {
     await db.execute('ALTER TABLE raw_item_attachments ADD COLUMN pogingen INTEGER NOT NULL DEFAULT 1');
   }
+  if (!kolommen.includes('tekstbron')) await db.execute('ALTER TABLE raw_item_attachments ADD COLUMN tekstbron TEXT');
+  if (!kolommen.includes('ocr_pogingen')) await db.execute('ALTER TABLE raw_item_attachments ADD COLUMN ocr_pogingen INTEGER NOT NULL DEFAULT 0');
+  if (!kolommen.includes('ocr_fout')) await db.execute('ALTER TABLE raw_item_attachments ADD COLUMN ocr_fout TEXT');
+  if (!kolommen.includes('ocr_at')) await db.execute('ALTER TABLE raw_item_attachments ADD COLUMN ocr_at TEXT');
   await db.execute('CREATE INDEX IF NOT EXISTS idx_ria_item ON raw_item_attachments(raw_item_id)');
 }
 
@@ -165,8 +170,8 @@ async function scrape() {
           }
           if (status === 'ok') ok++; else if (status === 'geen_tekst') leeg++; else fouten++;
           await db.execute({
-            sql: `INSERT INTO raw_item_attachments (raw_item_id, document_id, titel, url, bytes, paginas, tekens, status, tekst, pogingen)
-                  VALUES (?,?,?,?,?,?,?,?,?,1)
+            sql: `INSERT INTO raw_item_attachments (raw_item_id, document_id, titel, url, bytes, paginas, tekens, status, tekst, pogingen, tekstbron)
+                  VALUES (?,?,?,?,?,?,?,?,?,1,?)
                   ON CONFLICT(document_id) DO UPDATE SET
                     raw_item_id = excluded.raw_item_id,
                     titel = excluded.titel,
@@ -176,9 +181,10 @@ async function scrape() {
                     tekens = excluded.tekens,
                     status = excluded.status,
                     tekst = excluded.tekst,
+                    tekstbron = excluded.tekstbron,
                     pogingen = raw_item_attachments.pogingen + 1,
                     opgehaald_at = datetime('now')`,
-            args: [rawId, l.documentId, l.titel, l.url, bytes, paginas, tekst ? tekst.length : 0, status, status === 'ok' ? tekst : null],
+            args: [rawId, l.documentId, l.titel, l.url, bytes, paginas, tekst ? tekst.length : 0, status, status === 'ok' ? tekst : null, status === 'ok' ? 'pdf' : null],
           });
           gehad.add(l.documentId);
         }

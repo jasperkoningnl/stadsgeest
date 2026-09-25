@@ -4,7 +4,9 @@ import 'dotenv/config';
 import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
 
-const BASE = 'https://public.api.bsky.app/xrpc';
+// public.api.bsky.app weigert searchPosts sinds september 2026 met 403;
+// api.bsky.app is de andere officiële publieke AppView en accepteert dezelfde reads.
+const BASE = 'https://api.bsky.app/xrpc';
 const H = { 'Accept': 'application/json' };
 
 const get = async (path) => {

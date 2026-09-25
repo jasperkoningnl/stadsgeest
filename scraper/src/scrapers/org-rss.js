@@ -4,6 +4,7 @@
 // FrieslandCampina, CliniClowns, Museum Flehite, HU: geen RSS → HTML (zie andere scrapers)
 
 import Parser from 'rss-parser';
+import * as cheerio from 'cheerio';
 import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
 
@@ -27,6 +28,7 @@ const FEEDS = [
     category: 'local_news',
     reliability: 'secondary',
     filter: null,
+    htmlFallback: { page: 'https://www.mondriaanhuis.nl/nl/nieuws/', pad: '/nl/nieuws/' },
   },
   {
     name: 'Kunsthal KAdE',
@@ -35,6 +37,7 @@ const FEEDS = [
     category: 'local_news',
     reliability: 'secondary',
     filter: null,
+    htmlFallback: { page: 'https://www.kunsthalkade.nl/nl/nieuws/', pad: '/nl/nieuws/' },
   },
   {
     name: 'Kamp Amersfoort',
@@ -43,6 +46,7 @@ const FEEDS = [
     category: 'local_news',
     reliability: 'secondary',
     filter: null,
+    htmlFallback: { page: 'https://www.kampamersfoort.nl/nieuws/', pad: '/nieuws-archief/' },
   },
   {
     name: 'Natuurmonumenten',
@@ -84,6 +88,25 @@ async function fetchFeed(feedUrl) {
   return parser.parseString(xml);
 }
 
+async function fetchHtmlItems(fallback) {
+  const response = await fetch(fallback.page, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(15000), redirect: 'follow' });
+  if (!response.ok) throw new Error(`HTML-fallback HTTP ${response.status}`);
+  const $ = cheerio.load(await response.text());
+  const basis = new URL(fallback.page);
+  const items = new Map();
+  $('a[href]').each((_, el) => {
+    const href = $(el).attr('href') || '';
+    let url;
+    try { url = new URL(href, basis).href; } catch { return; }
+    const pad = new URL(url).pathname;
+    if (!pad.includes(fallback.pad) || pad.replace(/\/$/, '') === new URL(fallback.page).pathname.replace(/\/$/, '')) return;
+    const title = (($(el).attr('aria-label') || $(el).text() || $(el).closest('article,li,div').find('h2,h3').first().text()).replace(/\s+/g, ' ').trim()
+      || pad.split('/').filter(Boolean).at(-1)?.replace(/-/g, ' '));
+    if (title && title.length > 3 && !items.has(url)) items.set(url, { title, link: url, contentSnippet: '' });
+  });
+  return [...items.values()].slice(0, 25);
+}
+
 async function scrape() {
   for (const src of FEEDS) {
     const sourceId = await getOrCreateSource(db, {
@@ -109,7 +132,8 @@ async function scrape() {
 
     try {
       const feed = await fetchFeed(src.feedUrl);
-      for (const item of feed.items) {
+      const items = feed.items?.length ? feed.items : (src.htmlFallback ? await fetchHtmlItems(src.htmlFallback) : []);
+      for (const item of items) {
         // Filter voor landelijke bronnen: alleen items met 'amersfoort' in titel of tekst
         if (src.filter) {
           const text = `${item.title || ''} ${item.contentSnippet || item.content || ''}`.toLowerCase();

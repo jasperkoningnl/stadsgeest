@@ -67,3 +67,35 @@ test('huurcontract- en accountantsclausules tellen niet mee', () => {
   for (const term of ['faillissement', 'ingebrekestelling', 'fraude']) assert.equal(r.find((x) => x.term === term), undefined, term);
   assert.ok(scanTekst('De stichting ging failliet na het vertrek van de bestuurder.').find((x) => x.term === 'faillissement'));
 });
+
+test('Schothorsterlaan-contractboilerplate wordt niet gepromoveerd', () => {
+  const t = 'Huurder failliet wordt verklaard of surseance van betaling aanvraagt. '
+    + 'In alle gevallen waarin verhuurder een sommatie, een ingebrekestelling of een exploot doet uitbrengen. '
+    + 'Na ommekomst van de in de ingebrekestelling gestelde termijn. '
+    + 'Indien de huurder het gehuurde onrechtmatig onder zich houdt. '
+    + 'De notariële akte valt onder de geheimhoudingsplicht van artikel 20 van de Wet op het notarisambt.';
+  assert.deepEqual(scanTekst(t), []);
+});
+
+test('algemene inkoopvoorwaarden en afgebroken beschikking geven geen zware treffers', () => {
+  const t = 'De Gemeente mag de Overeenkomst ontbinden indien de Contractant zich schuldig heeft gemaakt aan een integriteitsschending volgens het screeningsresultaat. '
+    + 'De Gemeente is gerechtigd een integriteitsscreening uit te voeren met een advies volgens de Wet Bibob. '
+    + 'De apparatuur wordt ter be- schikking gesteld.';
+  assert.deepEqual(scanTekst(t), []);
+});
+
+test('bussluiscontract bevat geen journalistieke ingebrekestelling of onrechtmatigheid', () => {
+  const t = 'Beide partijen mogen ontbinden na een schriftelijke ingebrekestelling met een redelijke hersteltermijn. '
+    + 'Wie onrechtmatig passeert krijgt een waarschuwing; de camera handhaaft onrechtmatige passages van voertuigen.';
+  assert.deepEqual(scanTekst(t), []);
+});
+
+test('standaardvoorwaarden en camera-passages uit Texelstraat-Woo tellen niet', () => {
+  const tekst = `Beide partijen mogen de overeenkomst ontbinden indien de andere partij
+    de verplichtingen niet nakomt. Echter pas na een schriftelijke ingebrekestelling
+    die zo gedetailleerd mogelijk is. Cliënt geeft daarbij een redelijke termijn om
+    de tekortkoming te herstellen. Artikel 10. Geheimhouding. Opdrachtgever en
+    Opdrachtnemer verbinden zich om geheimhouding te verzekeren. Wie onrechtmatig
+    passeert, krijgt een waarschuwing of een bekeuring thuisgestuurd.`;
+  assert.deepEqual(scanTekst(tekst), []);
+});

@@ -1,7 +1,7 @@
 # Actuele toestand — Stadsgeest
 
 **Doel:** compacte herschrijfbare momentopname.
-**Status:** actueel per 23 september 2026.
+**Status:** actueel per 25 september 2026.
 **Lees wanneer:** bij iedere nieuwe taak. Historische details staan elders.
 
 ## Productie
@@ -68,6 +68,13 @@ herhalingen leverden voor alle drie nul wijzigingen en nul events op.
 De zorg-ODS-parser scheidt organisatienamen nu van persoons- en bestandsvelden.
 178 verkeerd benoemde importorganisaties zijn hersteld uit KVK-identiteitsregels.
 
+De iBabs-bijlagenketen heeft nu een begrensde Tesseract-OCR-naloop voor scans
+zonder tekstlaag. De eerste productierun herstelde één document; mislukte scans
+stoppen na twee pogingen. De bronnenwacht staat na herstel van onder meer
+Rijksoverheid, Bluesky, De Alliantie, drie cultuurbronnen en UWV op nul
+verdachte en nul dode bronnen. De niet-renderende brede Reddit-stroom r/Utrecht
+en vier bronnen zonder unieke lokale opbrengst zijn gemotiveerd uitgeschakeld.
+
 Handmatige kernseeds hebben bron-, reden- en reviewmetadata. Merge/review en
 unmerge zijn transactioneel en geaudit. De BAG-backfill koppelde 79 van 82
 locaties exact; drie niet-eenduidige gevallen zijn vastgelegd. In Beheer staat
@@ -76,11 +83,11 @@ handmatige golden set.
 
 ## Laatste verificatie en bewijsgrens
 
-De productiedatabase bevat 30 historische feedbackregels. Eén exacte dubbele
-handeling is gemarkeerd en telt niet mee. Alle feedback heeft een bevroren
-context. Er is één gepubliceerde artikeluitkomst, gemarkeerd
-als een vondst die zonder Stadsgeest niet was ontstaan; ontbrekende of dubbele
-artikeluitkomsten zijn nul.
+De productiedatabase bevat 38 feedbackregels. Eén exacte dubbele handeling is
+gemarkeerd en telt niet mee; 37 regels blijven over, verdeeld over 29 tips met
+een actueel besluit. Alle feedback heeft een bevroren context. Er zijn twee
+unieke gepubliceerde artikeluitkomsten; ontbrekende of dubbele uitkomsten zijn
+nul.
 
 De identieke rollende evaluatie over 17 augustus–14 september leverde tweemaal
 evaluatie 4 en invoerhash
@@ -116,8 +123,8 @@ Los van de KG, dagelijks: zie `NER.md` en `ADRESKOPPELING.md`.
 6. Fase 1 blijft open op de handmatig gelabelde organisatie-golden-set: 0 van
    200. Het dashboard bevat 223 naamvariant-versus-organisatieparen om met ja,
    nee of “weet ik niet” te beoordelen; alleen ja en nee tellen mee.
-7. De augustus-reviewcyclus van fase 5 staat nog open. De actuele rollende
-   meting telt 14 beoordelingen en 6 bruikbare tips; dit blijft beschrijvend en
-   is onvoldoende voor kalibratie of effectsluiting.
+7. De augustus-reviewcyclus van fase 5 staat nog open. Het totaal is groot
+   genoeg voor een handmatige, productbrede analyse, maar nog niet voor een
+   automatische of bron-/regelspecifieke kalibratie.
 
 Details staan in `PHASES/phase-5.md` en `EDITORIAL-LEARNING.md`.

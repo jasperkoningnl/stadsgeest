@@ -3,7 +3,10 @@ import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
 
 const parser = new Parser();
-const FEED_URL = 'https://feeds.rijksoverheid.nl/nieuws.rss';
+// Sinds juni 2026 genereert het nieuwe Rijksoverheid-platform RSS via /api/rss.
+// Meteen op Amersfoort zoeken voorkomt het ophalen van de volledige landelijke feed.
+const FEED_QUERY = JSON.stringify({ filters: [], resultSearchTerm: 'Amersfoort', pageTitle: 'Nieuws' });
+const FEED_URL = `https://www.rijksoverheid.nl/api/rss?query=${encodeURIComponent(FEED_QUERY)}`;
 const KEYWORDS = ['amersfoort', 'eemland', 'regio utrecht', 'provincie utrecht'];
 
 async function scrape() {

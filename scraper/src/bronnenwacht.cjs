@@ -47,6 +47,17 @@ function isReces() {
   return maand === 6 || maand === 7;
 }
 
+// Deze rubrieken zijn uitgangen van één gedeelde KOOP-SRU-query. Een rubriek kan
+// weken legitiem leeg zijn; een technische storing blijkt uit error-runs van alle
+// uitgangen en wordt dus nog steeds als fout geclassificeerd.
+function isOfficieleBekendmakingenRubriek(source) {
+  return String(source.name || '').startsWith('Officiële Bekendmakingen —');
+}
+
+function isStilleRaadsCatchall(source) {
+  return String(source.name || '') === 'Raad Amersfoort — Vergaderingen en overig';
+}
+
 async function main() {
   await ensureColumns();
   const jobName = process.env.SCRAPE_JOB_NAME || null;
@@ -106,12 +117,26 @@ async function main() {
     const leeg6 = l6.every(r => (r.items_found || 0) === 0);
     const fout6 = l6.filter(r => r.status === 'error' || r.status === 'timeout').length;
     const leeg12 = runs.length >= 12 && runs.every(r => (r.items_found || 0) === 0 || r.status === 'error');
+    const stilleRubriek = isOfficieleBekendmakingenRubriek(s) && fout6 === 0;
+    const stilleRaadsrubriek = isStilleRaadsCatchall(s) && fout6 === 0;
+    const hersteld = l6.length >= 2
+      && l6.slice(0, 2).every(r => r.status !== 'error' && r.status !== 'timeout')
+      && Number(l6[0].items_found || 0) > 0;
 
     let health = 'ok', note = null;
 
     // Reces-check: raadsbronnen in juli/augustus krijgen 'reces' in plaats van
     // 'verdacht' of 'dood', mits het probleem leegte is (niet fouten).
-    if ((leeg12 || (leeg6 && yieldVerwacht > 0.3)) && isRaadsbron(s) && isReces() && fout6 === 0) {
+    if (hersteld) {
+      health = 'ok';
+      note = 'Na eerdere fouten twee opeenvolgende succesvolle runs; bron is hersteld.';
+    } else if (stilleRubriek && (leeg12 || leeg6)) {
+      health = 'ok';
+      note = 'Stille KOOP-rubriek; de gedeelde SRU-query draaide zonder fouten.';
+    } else if (stilleRaadsrubriek && (leeg12 || leeg6)) {
+      health = 'ok';
+      note = 'Stille catch-allrubriek; inhoudelijke raadsdocumenten landen in de vijf specifieke ORI-stromen.';
+    } else if ((leeg12 || (leeg6 && yieldVerwacht > 0.3)) && isRaadsbron(s) && isReces() && fout6 === 0) {
       health = 'reces';
       note = 'Raad op zomerreces — leeg is verwacht gedrag. Wordt na augustus opnieuw beoordeeld.';
       nReces++;

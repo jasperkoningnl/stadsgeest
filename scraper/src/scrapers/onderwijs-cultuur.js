@@ -227,7 +227,6 @@ async function scrapeHU() {
 async function scrape() {
   await scrapeDiabetesfonds();
   await scrapeMboAmersfoort();
-  await scrapeCliniClowns();
   await scrapeFlehite();
   await scrapeHU();
 }

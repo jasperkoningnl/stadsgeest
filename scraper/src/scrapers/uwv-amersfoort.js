@@ -39,6 +39,7 @@ const GEMEENTE_PAGINA = `https://arbeidsmarktinzicht.nl/content/data/bycity?comm
 const CHART_ID = 2279;                                           // Lopende WW-uitkeringen
 const CHART_URL = `https://arbeidsmarktinzicht.nl/charts/get/${CHART_ID}`
   + `?style=HideFilters&title=False&showDataSource=False&region=4&community=${COMMUNITY_ID}`;
+const GET_CHART_URL = 'https://arbeidsmarktinzicht.nl/charts/getchart';
 const CSV_URL = 'https://arbeidsmarktinzicht.nl/charts/csvcached';
 const FILTER = 'f51520=51519~Beroepsklasse›51520~Totaal›'
   + '&f51521=51521~Lopend›'
@@ -61,8 +62,48 @@ async function haalCsv() {
   });
   if (!resp.ok) throw new Error(`HTTP ${resp.status} op ${CHART_URL}`);
   const $ = cheerio.load(await resp.text());
-  const query = $('[data-query]').attr('data-query');
-  if (!query) throw new Error('Geen data-query in de grafiek-HTML — opbouw van de pagina is gewijzigd');
+  let query = $('[data-query]').attr('data-query');
+
+  // Sinds september 2026 rendert /charts/get alleen nog een lege chart-shell.
+  // De browser haalt het model daarna met dezelfde POST op die chart.min.js
+  // uitvoert. Ondersteun ook de oude data-query-vorm, zodat de scraper bij een
+  // terugrol aan de bron niet opnieuw breekt.
+  if (!query) {
+    const shell = $('[data-toggle="chart"]').first();
+    const chartResp = await fetch(GET_CHART_URL, {
+      method: 'POST',
+      headers: {
+        'User-Agent': BROWSER_UA,
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'X-Requested-With': 'XMLHttpRequest',
+        Referer: CHART_URL,
+      },
+      body: new URLSearchParams({
+        id: String(CHART_ID),
+        style: String(shell.attr('data-style') || 'HideFilters'),
+        themeColor: String(shell.attr('data-theme-color') || '#505767'),
+        title: String(shell.attr('data-title') || 'False'),
+        exportTitle: String(shell.attr('data-export-title') || 'false'),
+        fontSize: String(shell.attr('data-font-size') || '0'),
+        lineThickness: String(shell.attr('data-line-thickness') || '0'),
+        region: String(shell.attr('data-region') || '4'),
+        community: String(shell.attr('data-region-community') || COMMUNITY_ID),
+        showDataSource: String(shell.attr('data-show-data-source') || 'false'),
+        showFilters: String(shell.attr('data-show-filters') || 'true'),
+        testMode: String(shell.attr('data-test-mode') || 'false'),
+        multiLevelFiltering: String(shell.attr('data-multi-level-filtering') || 'false'),
+        maxRangeOverride: String(shell.attr('data-max-range-override') || '0'),
+        exportEnabled: String(shell.attr('data-export-enabled') || 'false'),
+        zoomToUserSelection: String(shell.attr('data-zoom-to-user-selection') || 'false'),
+        switched: String(shell.attr('data-switched') || 'false'),
+      }),
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!chartResp.ok) throw new Error(`HTTP ${chartResp.status} op ${GET_CHART_URL}`);
+    const model = cheerio.load(await chartResp.text())('[data-model]').first().attr('data-model');
+    if (!model) throw new Error('Geen data-model in het vernieuwde grafiekantwoord');
+    query = JSON.stringify(JSON.parse(model).input);
+  }
 
   const config = JSON.parse(query);
   config.filter = FILTER;

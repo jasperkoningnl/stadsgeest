@@ -2,12 +2,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { rijNaarItem, documentLinks, leeftijdDagen, bijlageIsAfgehandeld, RAPPORTEN } from '../../src/ibabs-lib.js';
+import { bouwFullText, isOcrKandidaat } from '../../src/ibabs-ocr-lib.js';
 
 test('Woo-rij krijgt dezelfde titelvorm als ibabs-woo.js', () => {
   const i = rijNaarItem({ DT_RowId: 'abc', zaaknummer: '2024-1', title: ' Aardgasvrij  Schothorst ', DAtum1: '16-04-2024', datum2: '01-09-2024' }, RAPPORTEN.woo);
   assert.equal(i.titel, 'Woo-verzoeken: Aardgasvrij Schothorst');
   assert.equal(i.url, 'https://amersfoort.bestuurlijkeinformatie.nl/Reports/Item/abc');
   assert.equal(i.datum, '01-09-2024');
+});
+
+test('OCR pakt alleen tekstloze bijlagen en stopt na twee pogingen', () => {
+  assert.equal(isOcrKandidaat('geen_tekst', 0), true);
+  assert.equal(isOcrKandidaat('geen_tekst', 1), true);
+  assert.equal(isOcrKandidaat('geen_tekst', 2), false);
+  assert.equal(isOcrKandidaat('ok', 0), false);
+});
+
+test('OCR-tekst wordt met bijlagetitel begrensd aan full_text toegevoegd', () => {
+  assert.equal(bouwFullText('basis', [{ titel: 'Scan', tekst: 'herkende tekst' }], 100), 'basis\n\n=== Bijlage: Scan ===\nherkende tekst');
 });
 
 test('documentlinks worden ontdubbeld en krijgen de linktekst als titel', () => {

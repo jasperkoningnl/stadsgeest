@@ -1,12 +1,12 @@
+import Parser from 'rss-parser';
 import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
 
 const SUBREDDITS = [
-  { name: 'r/amersfoort', url: 'https://www.reddit.com/r/amersfoort/new/.json?limit=25', filterKeywords: false },
-  { name: 'r/Utrecht', url: 'https://www.reddit.com/r/Utrecht/new/.json?limit=25', filterKeywords: true },
+  { name: 'r/amersfoort', url: 'https://www.reddit.com/r/amersfoort/new.rss' },
 ];
 
-const KEYWORDS = ['amersfoort', 'eemland', 'vathorst', 'hoogland'];
+const parser = new Parser();
 
 async function scrape() {
   for (const sub of SUBREDDITS) {
@@ -19,30 +19,30 @@ async function scrape() {
       scrapeFrequency: 'daily',
     });
 
-    let saved = 0, skipped = 0, errors = 0;
+    let saved = 0, skipped = 0, errors = 0, found = 0;
     try {
-      const response = await fetch(sub.url, {
+      let response = await fetch(sub.url, {
         headers: { 'User-Agent': 'AmersfoortLokaal/1.0 (nieuwssite; contact@amersfoortlokaal.nl)' },
       });
+      if (response.status === 429) {
+        await new Promise(r => setTimeout(r, 15000));
+        response = await fetch(sub.url, { headers: { 'User-Agent': 'AmersfoortLokaal/1.0 (nieuwssite; contact@amersfoortlokaal.nl)' } });
+      }
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      const feed = await parser.parseString(await response.text());
+      found = Array.isArray(feed.items) ? feed.items.length : 0;
 
-      if (data.data?.children) {
-        for (const post of data.data.children) {
-          const p = post.data;
-
-          if (sub.filterKeywords) {
-            const text = `${p.title} ${p.selftext || ''}`.toLowerCase();
-            if (!KEYWORDS.some(kw => text.includes(kw))) continue;
-          }
+      if (feed.items) {
+        for (const p of feed.items) {
 
           try {
             const result = await saveRawItem(db, {
               sourceId,
-              externalUrl: `https://www.reddit.com${p.permalink}`,
+              externalUrl: p.link,
               title: p.title,
-              content: p.selftext || '',
-              summary: `Score: ${p.score}, Comments: ${p.num_comments}`,
+              content: p.contentSnippet || p.content || '',
+              summary: p.creator ? `Door ${p.creator}` : '',
+              publishedAt: p.isoDate || p.pubDate || null,
             });
             if (result.saved) saved++; else skipped++;
           } catch (err) {
@@ -56,10 +56,8 @@ async function scrape() {
       console.error(`Reddit ${sub.name}:`, err.message);
     }
 
-    await logResult(db, sourceId, `Reddit ${sub.name}`, saved, skipped, errors);
-
-    // Rate limit: wacht 2 seconden tussen subreddits
-    await new Promise(r => setTimeout(r, 2000));
+    // items_found is de bereikbare feed, ook als alle items al bekend zijn.
+    await logResult(db, sourceId, `Reddit ${sub.name}`, saved, skipped, errors, found);
   }
 }
 

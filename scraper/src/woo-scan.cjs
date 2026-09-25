@@ -32,6 +32,7 @@ const OPNIEUW = process.argv.includes('--opnieuw');
 const MAX = Number(arg('--max', '500'));
 const MAX_PROMOTIES = Number(arg('--max-promoties', '10'));
 const TIJDBUDGET_MS = Number(arg('--budget-ms', '240000'));
+const ITEM_IDS = String(arg('--ids', '')).split(',').map(Number).filter(Boolean);
 const BATCH = 10;
 
 async function zorgVoorTabellen(db) {
@@ -62,14 +63,16 @@ async function zorgVoorTabellen(db) {
 }
 
 async function scan(db, bronId) {
+  const idFilter = ITEM_IDS.length ? `AND a.raw_item_id IN (${ITEM_IDS.map(() => '?').join(',')})` : '';
   const teDoen = (await db.execute({
     sql: `SELECT a.id, a.raw_item_id FROM raw_item_attachments a
           JOIN raw_items r ON r.id = a.raw_item_id
           LEFT JOIN woo_scans w ON w.attachment_id = a.id
           WHERE r.source_id = ? AND a.status = 'ok'
             AND (? = 1 OR w.attachment_id IS NULL OR datetime(a.opgehaald_at) > datetime(w.scanned_at))
+            ${idFilter}
           ORDER BY a.id DESC LIMIT ?`,
-    args: [bronId, OPNIEUW ? 1 : 0, MAX],
+    args: [bronId, OPNIEUW ? 1 : 0, ...ITEM_IDS, MAX],
   })).rows;
   const start = Date.now();
   let gescand = 0, metTreffers = 0, treffersTotaal = 0;
@@ -101,7 +104,16 @@ async function scan(db, bronId) {
     }
     if (!DRY && stmts.length) await db.batch(stmts, 'write');
   }
-  return { teDoen: teDoen.length, gescand, metTreffers, treffersTotaal };
+  return { teDoen: teDoen.length, gescand, metTreffers, treffersTotaal, itemIds: [...new Set(teDoen.map((r) => Number(r.raw_item_id)))] };
+}
+
+async function herberekenPromoties(db, itemIds) {
+  for (const id of itemIds) {
+    const hits = (await db.execute({ sql: 'SELECT term,MAX(gewicht) gewicht FROM woo_scan_hits WHERE raw_item_id=? GROUP BY term', args: [id] })).rows;
+    const score = itemScore(hits.map((h) => ({ term: String(h.term), gewicht: Number(h.gewicht) })));
+    const termen = hits.sort((a, b) => Number(b.gewicht) - Number(a.gewicht)).map((h) => String(h.term));
+    await db.execute({ sql: 'UPDATE woo_promoties SET score=?,termen=? WHERE raw_item_id=?', args: [score, JSON.stringify(termen), id] });
+  }
 }
 
 async function promoveer(db, bronId) {
@@ -157,6 +169,7 @@ async function main() {
       }
     }
     const s = await scan(db, bronId);
+    if (!DRY && s.itemIds.length) await herberekenPromoties(db, s.itemIds);
     const p = ALLEEN_SCAN ? { boveDrempel: null, gekozen: [] } : await promoveer(db, bronId);
     console.log(JSON.stringify({
       mode: DRY ? 'dry-run' : 'applied',
