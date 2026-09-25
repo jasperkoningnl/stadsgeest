@@ -250,7 +250,7 @@ seconden. Een document krijgt hoogstens twee OCR-pogingen. Geslaagde tekst krijg
 NER- en adresscans ongeldig voor een gerichte herhaling. De productiepiloottest
 van 25 september herstelde één scan naar 1.938 tekens; één foto bleef terecht
 onder de minimumgrens van 200 tekens. De resterende wachtrij wordt in volgende
-wekelijkse runs geleidelijk verwerkt.
+dagelijkse `run-weekly`-rondes geleidelijk verwerkt.
 
 **Woo-bijlagen inhoudelijk meewegen (gebouwd 24 september 2026, besluit Jasper).**
 Voorheen woog de inhoud van de Woo-bijlagen niet mee, om drie redenen:
