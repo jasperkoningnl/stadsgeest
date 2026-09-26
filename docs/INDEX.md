@@ -12,7 +12,8 @@ Lees `CURRENT.md`. Kies daarna alleen de route die bij de taak past:
 |---|---|
 | Productdoel of begrippen | `PROJECT-OVERVIEW.md` |
 | Frontend of dashboard | `ARCHITECTURE.md`, `TESTING.md` |
-| Scraper, intake, detectie of database | `ARCHITECTURE.md`, `SOURCES.md`, `RUNBOOKS/operations.md`, `TESTING.md` |
+| Scraper, intake, detectie of database | `ARCHITECTURE.md`, `SOURCES.md`, `RUNBOOKS/operations.md`, `TESTING.md`, `DATABASE-LEZEN.md` |
+| Query's, analyse, backfill of hulpscripts op Turso | `DATABASE-LEZEN.md` |
 | Productiestoring of herstel | `RUNBOOKS/incident-response.md` en daarna alleen relevante logs |
 | Deployment | `RUNBOOKS/deployment.md`, `TESTING.md` |
 | Roadmap of uitbreidingsplan | `ROADMAP.md`, `PHASES/README.md`, daarna zo nodig het volledige `Stadsgeest_uitbreidingsplan_Claude.md` |

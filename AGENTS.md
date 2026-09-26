@@ -57,6 +57,10 @@ Roep nooit `pm2 save` aan wanneer `pm2 jlist` leeg is. De scrapers hebben hun
 eigen `scraper/node_modules`. Wijzig productieplanning of databasegegevens alleen
 wanneer de taak dat vereist en leg verificatie vast.
 
+Turso heeft een leesquotum van 500 mln rijen per maand. Geen `LIKE '%…%'` of
+sweeps op grote tabellen; analyse op een lokale kopie. Lees
+`docs/DATABASE-LEZEN.md` vóór elke nieuwe query, backfill of hulpscript.
+
 De Codex-weger volgt uitsluitend `operations/WEGER.md`.
 
 <!-- BEGIN:nextjs-agent-rules -->
