@@ -286,6 +286,17 @@ De convenanten gaan mee in dezelfde inhoudsscan. Aanleiding was een handmatige t
 regiogemeenten via Open Raadsinformatie, leverde een verdiepingstip met score
 20 op. Zoekhulpjes voor ORI staan buiten de repo in `stadsgeest-werk/ori/`.
 
+**Lokaal archiefonderzoek (gebouwd 26 september 2026).** Een aparte lokale
+SQLite/FTS5-index bevat de tekst van `raw_items` en geslaagde bijlagen. De eerste
+vulling is een bewuste eenmalige actie; daarna synchroniseert
+`archive-sync.cjs` alleen nieuwe ids plus een beperkte overlap voor nagekomen
+fulltext en OCR. `archive-research.cjs` zoekt lokaal langs journalistieke sporen
+voor geldproblemen, juridische conflicten, integriteit/toezicht, vertraging en
+publiek geld. Het resultaat is een compacte kandidatenlijst voor
+`weger-workset.cjs`; hoogstens tien historische items worden via hun exacte id
+teruggezet voor de gewone intake. De lokale database en kandidaten-JSON staan
+onder `scraper/data/archive-research/` en blijven buiten Git.
+
 ## Raad Leusden - vergaderstukken via Notubiz
 
 Scraper `scraper/src/scrapers/notubiz-leusden.js`, hulpfuncties in

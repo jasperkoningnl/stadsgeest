@@ -39,6 +39,15 @@ elke meegenomen rij; joins en subqueries tellen alle bekeken rijen van alle tabe
 8. Meet na afloop in Beheer → Verbruik (per uur) en noem het verbruik in de
    overdracht. Grote queries eerst met Jasper afstemmen.
 
+## Lokaal archiefonderzoek
+
+`archive-sync.cjs` haalt documenten in oplopende primaire-sleutelvolgorde op en
+herleest bij vervolgruns alleen een kleine staart voor nagekomen fulltext en OCR.
+`archive-research.cjs` doorzoekt daarna lokaal een FTS5-index. De wekelijkse
+routine mag Turso uitsluitend met gerichte ids bijwerken; nooit met een remote
+fulltextsweep. De eerste volledige synchronisatie vereist daarom expliciet
+`--initial` en wordt vooraf afgestemd en achteraf gemeten.
+
 ## Bekende grote verbruikers
 
 - `operations/WEGER.md` sectie 3a en 3b: verbandencheck en sweep zoeken in vrije

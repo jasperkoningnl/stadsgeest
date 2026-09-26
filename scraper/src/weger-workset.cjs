@@ -2,6 +2,7 @@
 'use strict';
 
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { createClient } = require('@libsql/client');
 const { normaliseerNaam } = require('./koppel/normaliseer.cjs');
@@ -441,6 +442,38 @@ async function loadWooKandidaten(db) {
   return top;
 }
 
+// Kandidaten uit het wekelijkse lokale archiefonderzoek. Het JSON-bestand
+// staat bewust buiten Git en bevat alleen compacte fragmenten. Eén geïndexeerde
+// query koppelt alle kandidaten aan eventuele signalen en filtert reeds
+// beoordeelde vondsten; er komt geen vrije-tekstquery op Turso aan te pas.
+async function loadArchiefKandidaten(db) {
+  const file = path.join(__dirname, '..', 'data', 'archive-research', 'candidates.json');
+  if (!fs.existsSync(file)) return [];
+  let parsed;
+  try { parsed = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return []; }
+  const kandidaten = Array.isArray(parsed?.candidates) ? parsed.candidates.slice(0, 50) : [];
+  const ids = [...new Set(kandidaten.map((k) => Number(k.raw_item_id)).filter((id) => Number.isInteger(id) && id > 0))];
+  if (!ids.length) return kandidaten;
+  const placeholders = ids.map(() => '?').join(',');
+  const links = (await db.execute({
+    sql: `SELECT si.raw_item_id,si.signal_id,
+                 EXISTS(SELECT 1 FROM signal_events e WHERE e.signal_id=si.signal_id AND e.actor='weger') AS beoordeeld,
+                 EXISTS(SELECT 1 FROM tip_signals ts WHERE ts.signal_id=si.signal_id) AS heeft_tip
+          FROM signal_items si WHERE si.raw_item_id IN (${placeholders})`,
+    args: ids,
+  })).rows;
+  const perItem = new Map();
+  for (const link of links) {
+    const id = Number(link.raw_item_id);
+    const bestaand = perItem.get(id);
+    const waarde = { signal_id: Number(link.signal_id), beoordeeld: !!Number(link.beoordeeld), heeft_tip: !!Number(link.heeft_tip) };
+    if (!bestaand || (!waarde.beoordeeld && bestaand.beoordeeld)) perItem.set(id, waarde);
+  }
+  return kandidaten
+    .map((k) => ({ ...k, ...(perItem.get(Number(k.raw_item_id)) || { signal_id: null, beoordeeld: false, heeft_tip: false }) }))
+    .filter((k) => !k.beoordeeld && !k.heeft_tip);
+}
+
 async function loadRecentEvents(db, signalId) {
   if (!(await tableExists(db, 'signal_events'))) return [];
   const result = await db.execute({
@@ -518,6 +551,7 @@ async function main(argv = process.argv.slice(2)) {
     }
     const kruisbronKandidaten = await loadKruisbronKandidaten(db, orgRunId);
     const wooKandidaten = await loadWooKandidaten(db);
+    const archiefKandidaten = await loadArchiefKandidaten(db);
 
     const dossierResult = await db.execute(
       'SELECT id, naam, slug, trefwoorden, omschrijving FROM dossiers ORDER BY naam'
@@ -529,6 +563,7 @@ async function main(argv = process.argv.slice(2)) {
       candidates,
       kruisbron_kandidaten: kruisbronKandidaten,
       woo_kandidaten: wooKandidaten,
+      archief_kandidaten: archiefKandidaten,
       dossiers: dossierResult.rows.map((row) => ({ ...row, id: Number(row.id) })),
     };
     if (argv.includes('--summary')) {
@@ -538,6 +573,7 @@ async function main(argv = process.argv.slice(2)) {
         dossier_count: output.dossiers.length,
         kruisbron_kandidaten: output.kruisbron_kandidaten.length,
         woo_kandidaten: output.woo_kandidaten.length,
+        archief_kandidaten: output.archief_kandidaten.length,
         candidates: output.candidates.map((candidate) => ({
           signal_id: candidate.signal.id,
           item_count: candidate.item_count,
@@ -562,5 +598,5 @@ if (require.main === module) {
 }
 
 module.exports = {
-  clip, jsonValue, parseLimit, loadNerKgCandidates, loadAddressLinks, loadOrgVerbanden, loadKruisbronKandidaten, latestOrgRun, loadWooVondsten, loadWooKandidaten,
+  clip, jsonValue, parseLimit, loadNerKgCandidates, loadAddressLinks, loadOrgVerbanden, loadKruisbronKandidaten, latestOrgRun, loadWooVondsten, loadWooKandidaten, loadArchiefKandidaten,
 };

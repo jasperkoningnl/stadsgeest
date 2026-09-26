@@ -66,6 +66,24 @@ Het laatste commando is een dry-run. Gebruik `--apply` alleen voor de geplande
 retentie of een bewuste beheerhandeling. Een evaluatie of maandreview geeft nooit
 toestemming om drempels, brongewichten of regels automatisch te veranderen.
 
+## Wekelijks lokaal archiefonderzoek
+
+Initialiseer de lokale onderzoeksdatabase één keer, na afstemming en met een
+verbruiksmeting voor en na afloop:
+
+```powershell
+node scraper/src/archive-sync.cjs --initial
+node scraper/src/archive-research.cjs --dry-run
+```
+
+Vervolgruns gebruiken `node scraper/src/run-archive-research.cjs`. Plan daarvoor
+`scraper/run-archive-research-task.ps1` eenmaal per week op de Windows-notebook,
+op een moment buiten intake, detectie en weger. De sync leest op primaire sleutel
+en met een overlap van standaard 1.000 ids; het onderzoek zelf gebruikt alleen
+de lokale FTS5-index. Hoogstens tien nieuwe historische items worden gericht
+voor intake heropend. Controleer na de eerste en de eerste geplande run Beheer →
+Verbruik en leg het verschil vast.
+
 ## Entitybeheer en fase-1-audit
 
 Controleer de actuele dekking en openstaande fase-1-eisen met:

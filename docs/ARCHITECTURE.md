@@ -37,6 +37,11 @@
 
 ## Belangrijke grenzen
 
+Zwaar archiefonderzoek is een lokale afgeleide laag: `archive-sync.cjs` kopieert
+documentteksten incrementeel naar een genegeerde SQLite-database met FTS5.
+`archive-research.cjs` produceert compacte kandidaten voor de weger. Turso blijft
+de productiebron; de lokale index is herstelbaar en nooit gezaghebbend.
+
 - Een baseline is opslag, geen nieuwsgebeurtenis.
 - Ontbreken in een periodiek bestand is niet automatisch sluiting of verwijdering.
 - Lokale relevantie loopt waar mogelijk via gekoppelde entiteiten en locaties,

@@ -20,9 +20,10 @@ Werk rechtstreeks in de lokale repository. Productiegeheimen staan in
 actief is. Wijzig tijdens een normale run geen Git-bestanden, `CURRENT.md` of
 `LOGBOEK.md`.
 
-Iedere run levert minimaal één bruikbare tip op. De weger werkt daarvoor de
-achterstand weg en zoekt actief naar verbanden tussen bronnen (sectie 3a en
-3b). Een tip met een geverifieerd verband gaat vóór een tip uit één bron.
+Iedere run werkt de achterstand weg en beoordeelt daarnaast voorberekende
+verbanden en archiefkandidaten (sectie 3a en 3b). Een tip met een geverifieerd
+verband gaat vóór een tip uit één bron; nul tips is beter dan een geforceerde
+dunne tip.
 
 Lees vóór de eerste beoordeling de laatste twintig redactieoordelen
 (`tip_feedback`, gekoppeld aan `tips`) en houd rekening met de redenen.
@@ -112,6 +113,12 @@ Vergelijk wat de bijlagen zeggen met wat de raad openbaar te horen kreeg
 verhaal zijn. Een Woo-kandidaat zonder eigen signaal behandel je als
 sweepvondst (sectie 3b). Zie `docs/SOURCES.md`, 'iBabs-bijlagen'.
 
+`archief_kandidaten` komt uit het wekelijkse lokale archiefonderzoek. De zware
+fulltextzoekactie is al buiten Turso uitgevoerd. Per kandidaat staan zoekspoor,
+bron, URL, fragment en gevonden termen klaar. `signal_id` kan nog leeg zijn als
+de gerichte herpromotie pas bij de volgende intake een signaal krijgt. Behandel
+de kandidaat pas inhoudelijk wanneer er een signaal is en lees altijd de bron.
+
 Lees bij een dragende officiële bron de volledige beschikbare tekst. Als de
 opgeslagen tekst zichtbaar is afgekapt of leeg is, open dan de officiële URL.
 Ken geen patroon of detail toe dat niet uit het gelezen materiaal blijkt.
@@ -150,6 +157,10 @@ hulpscripts lezen alleen:
 - `node scraper/src/weger-query.cjs "<SELECT ...>"` voert een zoekvraag uit
   tegen de database en weigert alles wat schrijft.
 
+Gebruik `weger-query.cjs` alleen met een geïndexeerde exacte sleutel en controleer
+het plan vooraf. Zoek hier nooit met `LIKE '%…%'` in vrije tekst; dat werk hoort
+in het lokale archiefonderzoek.
+
 Waar zoek je:
 - **Adres:** andere vergunningen op hetzelfde adres, asbest
   (`source_records` 138), NVWA, en de misdrijventrend in dezelfde buurtcode
@@ -171,11 +182,12 @@ routine meer. Noem geen particulieren.
 Leg in het rapport vast welke verbanden je vond en welke koppelgaten er waren:
 waar een verband niet te controleren was, en welke sleutel of bron ontbrak.
 
-## 3b. Sweep als de werkset geen tip oplevert
+## 3b. Voorberekende sweep als de werkset geen tip oplevert
 
-Levert de werkset geen tip van 6 of hoger op, zoek dan zelf over de hele
-database. Kies een sweep die in recente runs niet is gedaan; dat zie je aan de
-redenen in `signal_events` en aan bestaande tips.
+Levert de gewone werkset geen tip van 6 of hoger op, gebruik dan
+`archief_kandidaten` of `kruisbron_kandidaten`. Zoek tijdens de dagelijkse run
+nooit zelf met vrije tekst over de hele Turso-database. Is geen voorberekende
+kandidaat beschikbaar, dan is nul tips een geldige uitkomst.
 
 1. Vergunningen van de laatste 60 dagen (bronnen 109, 123 en 127) ×
    rijksmonumenten, via `weger-adres.cjs` en bevestigd in het register.
@@ -192,9 +204,11 @@ redenen in `signal_events` en aan bestaande tips.
 7. Zorg- en jeugdaanbieders met gemeentelijke contracten × jaarverantwoording
    (150).
 
-Een tip uit een sweep koppel je aan het best passende bestaande signaal. Als
-er geen signaal is, gebruik je een signaal dat de sweep ondersteunt, met de rol
-`context`. De harde bronregel blijft gelden.
+De zeven sporen hierboven blijven de inhoudelijke leidraad voor de lokale
+weekroutine en voor gerichte controle van een voorberekende kandidaat. Een tip
+uit zo'n vondst koppel je aan het best passende bestaande signaal. Als er nog
+geen signaal is, wacht je de gerichte herpromotie en intake af. De harde
+bronregel blijft gelden.
 
 ## 4. Spiegelcheck
 
@@ -235,18 +249,9 @@ Gebruik in `weging` voor de laatste twee de sleutels `kruisbronverband` en
 Score 6 of hoger wordt een tip. Daaronder blijft het bij een gemotiveerd oordeel
 en zo nodig dossierfeit. Rek scores niet op. Maak hoogstens drie tips per run.
 
-Haalt niets 6, ook niet na een sweep (3b), kies dan de beste kandidaat met een
-geldige dragende bron als dunne dagtip. Een dunne dagtip mag nooit het volgende
-zijn:
-- een routinehandeling;
-- een los incident van één klein bedrijf;
-- iets buiten Amersfoort of Leusden;
-- iets wat de redactie al had.
-
-Zet de melding dat de score onder de drempel ligt als laatste punt onder
-`WAT HIER NIET IN MAG`, niet in `score_motivatie`: dat veld staat in de
-wachtrij. Lever alleen nul tips als na de sweep werkelijk geen geldige kandidaat
-overblijft. Leg dan uit waarom ook de beste kandidaat niet kon.
+Haalt niets 6, ook niet onder de voorberekende kandidaten, lever dan nul tips en
+leg uit waarom de beste kandidaat niet voldeed. Verlaag de drempel niet om de
+dagproductie kunstmatig te vullen.
 
 Bij meer dan twee tips en een meerderheid uit één
 broncategorie: bekijk de beste geldige kandidaat uit een andere categorie en
@@ -313,12 +318,13 @@ Rapporteer getelde resultaten:
 - gevonden verbanden, met sleutel, bronnen en status (tip, hypothese of
   verworpen);
 - koppelgaten;
-- de uitgevoerde sweep (nummer uit 3b) en wat die opleverde;
+- het gebruikte voorberekende zoekspoor uit 3b en wat dat opleverde;
 - bronproblemen en niet-geverifieerde punten;
 - de resterende achterstand (`weger-workset.cjs --limit 50 --summary`).
 
 Controleer de databaseaantallen na de write.
 
-Ook als de werkset leeg is, voer je een sweep (3b) uit. Wijzig bij een normale run geen documentatie
-en maak geen Git-commit. Meld alleen een structureel defect, vereiste keuze of
-onveilige toestand aan Jasper.
+Ook als de werkset leeg is, beoordeel je beschikbare voorberekende kandidaten
+uit 3b. Zijn die er niet, voer dan geen vervangende Turso-sweep uit. Wijzig bij
+een normale run geen documentatie en maak geen Git-commit. Meld alleen een
+structureel defect, vereiste keuze of onveilige toestand aan Jasper.
