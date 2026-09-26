@@ -23,14 +23,27 @@ function splitStatements(text) {
   return text.split(/;\s*\r?\n/).map((s) => s.trim().replace(/;$/, '')).filter(Boolean);
 }
 
+// --lokaal: zoek in de kopie van lokale-kopie.cjs in plaats van in Turso.
+// Dat kost geen reads; gebruik het voor sweeps en veel zoekopdrachten.
+const KOPIE = process.env.STADSGEEST_KOPIE || path.join(__dirname, '..', 'tmp', 'kopie', 'stadsgeest.db');
+
 async function main(argv = process.argv.slice(2)) {
+  const lokaal = argv.includes('--lokaal');
+  argv = argv.filter((a) => a !== '--lokaal');
   if (!argv[0] || argv[0] === '--help') {
-    console.log('Gebruik: node scraper/src/weger-query.cjs "<SELECT ...>" [breedte]');
+    console.log('Gebruik: node scraper/src/weger-query.cjs [--lokaal] "<SELECT ...>" [breedte]');
     return;
   }
   const invoer = fs.existsSync(argv[0]) ? fs.readFileSync(argv[0], 'utf8') : argv[0];
   const breedte = Number(argv[1] || 160);
-  const db = createClient({ url: process.env.TURSO_URL, authToken: process.env.TURSO_AUTH_TOKEN });
+  if (lokaal && !fs.existsSync(KOPIE)) throw new Error(`geen lokale kopie op ${KOPIE}; maak die met scraper/src/lokale-kopie.cjs`);
+  const db = lokaal
+    ? createClient({ url: `file:${KOPIE.replace(/\\/g, '/')}` })
+    : createClient({ url: process.env.TURSO_URL, authToken: process.env.TURSO_AUTH_TOKEN });
+  if (lokaal) {
+    const meta = await db.execute('SELECT gemaakt_op FROM _kopie_meta').catch(() => null);
+    console.log(`(lokale kopie${meta?.rows[0] ? ` van ${meta.rows[0].gemaakt_op}` : ''})`);
+  }
   try {
     for (const sql of splitStatements(invoer)) {
       if (!isAlleenLezend(sql)) {

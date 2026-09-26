@@ -22,10 +22,15 @@ elke meegenomen rij; joins en subqueries tellen alle bekeken rijen van alle tabe
    `raw_items` kost zo'n 14.000 reads, over `source_records` zo'n 86.000; dat mag.
    Nooit in een lus (per adres, per signaal) of als correlated subquery: dan wordt
    het miljoenen. Meer dan een paar tientallen zoekopdrachten: lokale kopie.
-2. Analyse en verkenning draaien op een lokale kopie, niet op Turso. De hele database
-   kopiëren kost circa 250.000 reads, minder dan drie scans van `source_records`.
-   Hulpscripts als `weger-query.cjs` en `stadsgeest-werk\q.cjs` zijn voor enkele
-   gerichte queries, niet voor sweeps.
+2. Analyse en verkenning draaien op een lokale kopie, niet op Turso:
+   `node scraper/src/lokale-kopie.cjs` (standaard naar `scraper/tmp/kopie/`,
+   gitignored; `--uit <pad>` voor elders). Gemeten 26-9-2026: 232.000 rijen, circa
+   0,25 mln reads, een paar minuten. Zoeken op de kopie:
+   `node scraper/src/weger-query.cjs --lokaal "<SQL>"` (ander pad via
+   `STADSGEEST_KOPIE`). Zonder `--lokaal` is `weger-query.cjs` voor enkele gerichte
+   queries op Turso, niet voor sweeps. De kopie is voor losse SQL over alle
+   tabellen (registers, tips, dossiers); voor terugkerend zoeken in documenttekst
+   is er de incrementele FTS-index hieronder.
 3. Draai `EXPLAIN QUERY PLAN` op elke nieuwe of gewijzigde query. Op `raw_items`,
    `source_records`, `raw_item_attachments` en `document_mentions` moet
    `SEARCH … USING INDEX` staan, geen `SCAN`. Zo niet: index toevoegen of herschrijven.
@@ -36,7 +41,9 @@ elke meegenomen rij; joins en subqueries tellen alle bekeken rijen van alle tabe
 6. `CREATE INDEX`, `ALTER TABLE` en backfills lezen de hele tabel. Eén keer mag;
    nooit in code die bij elke run of deploy opnieuw draait.
 7. Tabelgroottes via `dbstat` of `sqlite_stat1`; die kosten geen reads. `count(*)` wel.
-8. Meet na afloop in Beheer → Verbruik (per uur) en noem het verbruik in de
+8. Meet: `node scraper/src/turso-teller.cjs` geeft de stand (kost geen reads),
+   `--sinds <stand>` het verbruik sindsdien; de teller loopt enkele minuten
+   achter. Of kijk in Beheer → Verbruik (per uur). Noem het verbruik in de
    overdracht. Grote queries eerst met Jasper afstemmen.
 
 ## Lokaal archiefonderzoek
