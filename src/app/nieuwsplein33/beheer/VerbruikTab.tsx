@@ -88,8 +88,9 @@ export default function VerbruikTab({ verbruik: v }: { verbruik: VerbruikDetail 
       <section className="np-blok np-blok-verder">
         <h2 className="np-blok-kop">Afgelopen 24 uur · {v.hoofdDb}</h2>
         <p className="np-vb-uitleg">
-          Per uur, met de PM2-jobs die in dat uur starten. Cowork-routines, losse scripts en het dashboard
-          zelf staan er niet bij; die zie je als verbruik in een uur zonder job.
+          Per uur, met de geplande jobs die in dat uur starten. NDW draait elk kwartier en zit in elk uur.
+          Cowork-routines, losse scripts en het dashboard zelf staan er niet bij; die zie je als verbruik
+          in een uur zonder job.
         </p>
         <UurTabel uren={v.uren} />
       </section>
@@ -178,7 +179,7 @@ function UurTabel({ uren }: { uren: VerbruikDetail['uren'] }) {
               <td className="np-vb-balk-kol" aria-hidden="true">
                 <span className="np-vb-balk" style={{ width: `${(u.gelezen / max) * 100}%` }} />
               </td>
-              <td>{u.jobs || (u.gelezen > 0 ? <span className="np-vb-onbekend">geen PM2-job</span> : '')}</td>
+              <td>{u.jobs || (u.gelezen > 0 ? <span className="np-vb-onbekend">geen geplande job</span> : '')}</td>
             </tr>
           ))}
         </tbody>

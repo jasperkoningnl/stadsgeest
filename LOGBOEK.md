@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-09-26 - Dashboard was zaterdagochtend een paar uur onbereikbaar
+
+Zaterdag 26 september tussen ongeveer zes en half elf gaf het dashboard na het inloggen alleen een foutmelding. De database had zijn maandelijkse leeslimiet bereikt en weigerde verzoeken. Dat is opgelost. Een deel van de nachtelijke verwerking van zaterdag liep daardoor vast, dus een dunnere wachtrij op zaterdag komt door deze storing en niet door een rustige nieuwsdag. Gebeurt het opnieuw, dan zie je bovenaan een melding in plaats van een lege foutpagina.
+
 ## 2026-09-24 - Een rustiger bovenkant en een klikbare teller
 
 De bovenkant van het dashboard is opgeruimd. De tabbladen staan nu als één rij met een streep onder het tabblad waar je bent; Logboek en Beheer staan rechts, los van de werkvoorraad. Boven de wachtrij staat één balk: links kies je de soort (met het aantal tips per soort erbij), rechts staat de teller die nu zegt hoeveel artikelen er zonder Stadsgeest niet waren geschreven. Klik op die teller en je ziet de tips waar die artikelen uit voortkwamen. Kies je een soort, dan verdwijnen ook de dagkopjes waar niets van die soort onder staat. Keerzijde: de teller noemt niet meer hoeveel tips in totaal zijn gepubliceerd; dat zie je onder Archief.

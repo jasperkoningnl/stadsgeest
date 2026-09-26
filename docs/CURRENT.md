@@ -1,7 +1,7 @@
 # Actuele toestand — Stadsgeest
 
 **Doel:** compacte herschrijfbare momentopname.
-**Status:** actueel per 25 september 2026.
+**Status:** actueel per 26 september 2026.
 **Lees wanneer:** bij iedere nieuwe taak. Historische details staan elders.
 
 ## Productie
@@ -100,6 +100,12 @@ verbetering.
 De beschermde regelidentiteiten blijven R1–R16. In het bijzonder zijn R5
 misdrijfanomalie, R10 multibronversterking, R11 leerlingontwikkeling, R12
 schoolprognose, R13 Onderwijsinspectie en R14 verkeersmaatregel ongewijzigd.
+
+## Databasequotum
+
+Gratis Turso-quotum: 500 mln bekeken rijen per maand, daarna worden alle reads
+geweigerd (26/9 gebeurd; tot 1/10 Developer-plan). Beheer > Verbruik bewaakt
+dit. Doorzoek de hele database nooit rechtstreeks op Turso.
 
 ## NER en adressen
 

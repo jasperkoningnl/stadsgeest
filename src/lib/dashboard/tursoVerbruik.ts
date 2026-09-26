@@ -28,9 +28,11 @@ export const OPSLAGLIMIET = 5 * 1024 ** 3
 export const DREMPEL_LET_OP = 0.75
 export const DREMPEL_KRITIEK = 0.9
 
-// De PM2-jobs op de notebook, in Nederlandse tijd. Overgenomen uit `pm2 jlist`
-// op 26-09-2026; pas dit aan als de crontijden veranderen. Cowork-routines en
-// het dashboard zelf staan hier niet in: die draaien op wisselende momenten.
+// Geplande jobs op de notebook, in Nederlandse tijd: de PM2-jobs (`pm2 jlist`),
+// de Windows-taken Stadsgeest Intake en Detection en de supertip-run. Stand van
+// 26-09-2026; pas dit aan als de tijden veranderen. De Windows-taak NDW draait
+// elk kwartier en staat hier niet per uur in. Cowork-routines en het dashboard
+// zelf draaien op wisselende momenten.
 const JOBS: { uur: number; naam: string; dagen?: string }[] = [
   { uur: 1, naam: 'scrape-browser' },
   { uur: 2, naam: 'scrape-dagelijks, scrape-ob' },
@@ -38,8 +40,9 @@ const JOBS: { uur: number; naam: string; dagen?: string }[] = [
   { uur: 3, naam: 'scrape-nieuw', dagen: 'ma' },
   { uur: 3, naam: 'scrape-subsidies', dagen: 'zo' },
   { uur: 4, naam: 'fetch-fulltext' },
-  { uur: 5, naam: 'extract-entities' },
-  { uur: 6, naam: 'dwarsverbanden2-nacht' },
+  { uur: 5, naam: 'extract-entities, Intake (05:30)' },
+  { uur: 6, naam: 'dwarsverbanden2-nacht, Detection (06:15)' },
+  { uur: 9, naam: 'supertip-run (Cowork)', dagen: 'do' },
   { uur: 11, naam: 'scrape-dagelijks-middag1' },
   { uur: 21, naam: 'scrape-dagelijks-avond' },
 ]
