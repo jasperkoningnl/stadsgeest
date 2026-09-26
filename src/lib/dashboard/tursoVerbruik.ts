@@ -47,7 +47,9 @@ const JOBS: { uur: number; naam: string; dagen?: string }[] = [
   { uur: 21, naam: 'scrape-dagelijks-avond' },
 ]
 
-export type VerbruikStatus = 'ok' | 'let-op' | 'kritiek' | 'geblokkeerd'
+// 'boven-gratis': er loopt een betaald plan en we zitten boven het gratis
+// quotum. Geen blokkade, wel iets om volgende maand onder te blijven.
+export type VerbruikStatus = 'ok' | 'let-op' | 'boven-gratis' | 'kritiek' | 'geblokkeerd'
 
 interface Gebruik { rows_read: number; rows_written: number; storage_bytes: number }
 
@@ -55,6 +57,8 @@ export interface VerbruikSamenvatting {
   beschikbaar: true
   gemeten: string
   plan: string
+  // Leeslimiet van het huidige plan volgens /plans; null als onbekend.
+  planLimiet: number | null
   bijbetalen: boolean
   leesBlok: boolean
   schrijfBlok: boolean
@@ -118,11 +122,15 @@ function maandStart(nu: Date) { return new Date(Date.UTC(nu.getUTCFullYear(), nu
 function volgendeMaand(nu: Date) { return new Date(Date.UTC(nu.getUTCFullYear(), nu.getUTCMonth() + 1, 1)) }
 
 async function samenvattingOphalen(nu: Date): Promise<VerbruikSamenvatting> {
-  const [org, sub, lijst] = await Promise.all([
+  const [org, sub, lijst, plannen] = await Promise.all([
     api<{ organization: { plan_id?: string; overages?: boolean; blocked_reads?: boolean; blocked_writes?: boolean } }>(''),
     api<{ subscription?: { current_billing_period_end?: string } }>('/subscription').catch(() => ({ subscription: undefined })),
     api<{ databases: { Name: string }[] }>('/databases'),
+    api<{ plans: { name: string; quotas?: { rowsRead?: number } }[] }>('/plans').catch(() => ({ plans: [] })),
   ])
+  const planNaam = org.organization.plan_id ?? 'onbekend'
+  const planLimiet = plannen.plans.find(p => p.name === planNaam)?.quotas?.rowsRead ?? null
+  const betaald = planLimiet !== null && planLimiet > LEESLIMIET
   const start = maandStart(nu)
   const namen = lijst.databases.map(d => d.Name)
   const [perDb, recent] = await Promise.all([
@@ -141,6 +149,15 @@ async function samenvattingOphalen(nu: Date): Promise<VerbruikSamenvatting> {
   const redenen: string[] = []
   let status: VerbruikStatus = 'ok'
   if (org.organization.blocked_reads) { status = 'geblokkeerd'; redenen.push('Turso blokkeert leesopdrachten') }
+  else if (betaald) {
+    // Blokkaderisico meten we tegen de planlimiet, de gratis grens blijft het doel.
+    if (gelezen >= planLimiet! * DREMPEL_KRITIEK) { status = 'kritiek'; redenen.push(`${pct(gelezen, planLimiet!)} van de limiet van ${planNaam} gebruikt`) }
+    else if (prognose >= planLimiet!) { status = 'kritiek'; redenen.push(`prognose ${mln(prognose)} komt boven de limiet van ${planNaam} (${mln(planLimiet!)})`) }
+    else {
+      if (gelezen >= LEESLIMIET * DREMPEL_LET_OP) { status = 'boven-gratis'; redenen.push(`${pct(gelezen)} van het gratis quotum gebruikt`) }
+      if (prognose >= LEESLIMIET) { status = 'boven-gratis'; redenen.push(`prognose ${mln(prognose)} aan het eind van de maand, boven het gratis quotum`) }
+    }
+  }
   else if (gelezen >= LEESLIMIET * DREMPEL_KRITIEK) { status = 'kritiek'; redenen.push(`${pct(gelezen)} van het leesquotum gebruikt`) }
   else {
     if (gelezen >= LEESLIMIET * DREMPEL_LET_OP) { status = 'let-op'; redenen.push(`${pct(gelezen)} van het leesquotum gebruikt`) }
@@ -151,7 +168,8 @@ async function samenvattingOphalen(nu: Date): Promise<VerbruikSamenvatting> {
   return {
     beschikbaar: true,
     gemeten: nu.toISOString(),
-    plan: org.organization.plan_id ?? 'onbekend',
+    plan: planNaam,
+    planLimiet,
     bijbetalen: !!org.organization.overages,
     leesBlok: !!org.organization.blocked_reads,
     schrijfBlok: !!org.organization.blocked_writes,

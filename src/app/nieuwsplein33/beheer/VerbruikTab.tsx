@@ -7,6 +7,7 @@ import { formatDateTime } from '@/lib/dashboard/format'
 const STATUS_TEKST = {
   ok: 'Binnen het quotum',
   'let-op': 'Let op',
+  'boven-gratis': 'Boven het gratis quotum · geen blokkade',
   kritiek: 'Bijna op',
   geblokkeerd: 'Geblokkeerd',
 } as const
@@ -14,6 +15,7 @@ const STATUS_TEKST = {
 const STATUS_BLOK = {
   ok: 'np-blok-weten',
   'let-op': 'np-blok-open',
+  'boven-gratis': 'np-blok-open',
   kritiek: 'np-blok-letop',
   geblokkeerd: 'np-blok-letop',
 } as const
@@ -41,11 +43,16 @@ export default function VerbruikTab({ verbruik: v }: { verbruik: VerbruikDetail 
     <div className="np-verbruik">
       {/* ── Stand van de maand ─────────────────────────────────────── */}
       <section className={`np-blok ${STATUS_BLOK[v.status]}`}>
-        <h2 className="np-blok-kop">Leesquotum {maand} · {STATUS_TEKST[v.status]}</h2>
+        <h2 className="np-blok-kop">
+          Leesquotum {maand} · {STATUS_TEKST[v.status]}{v.status === 'boven-gratis' ? ` (${v.plan})` : ''}
+        </h2>
         <div className="np-vb-kern">
           <div className="np-vb-getal">{mln(v.gelezen)}</div>
           <div className="np-vb-van">
-            van {mln(LEESLIMIET)} gelezen rijen <strong>({pct(v.gelezen)})</strong>
+            van {mln(LEESLIMIET)} gelezen rijen in het gratis quotum <strong>({pct(v.gelezen)})</strong>
+            {v.planLimiet !== null && v.planLimiet > LEESLIMIET && (
+              <> · van {mln(v.planLimiet)} op {v.plan} ({pct(v.gelezen, v.planLimiet)})</>
+            )}
           </div>
         </div>
         <div className="np-vb-meter" role="img" aria-label={`${pct(v.gelezen)} van het leesquotum gebruikt`}>

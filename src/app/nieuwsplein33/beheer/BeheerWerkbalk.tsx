@@ -67,10 +67,12 @@ export default function BeheerWerkbalk({
         <div className="np-meldingen">
           <Link
             href={href('verbruik', periode)}
-            className={`np-melding ${verbruik.status === 'let-op' ? 'np-melding-let-op' : 'np-melding-kritiek'}`}
+            className={`np-melding ${verbruik.status === 'let-op' || verbruik.status === 'boven-gratis' ? 'np-melding-let-op' : 'np-melding-kritiek'}`}
           >
             {verbruik.status === 'geblokkeerd'
               ? 'Turso blokkeert de database'
+              : verbruik.status === 'boven-gratis'
+              ? `Boven het gratis quotum (${pct(verbruik.gelezen)}) · geen blokkade op ${verbruik.plan}`
               : `Leesquotum ${pct(verbruik.gelezen)} · prognose ${mln(verbruik.prognose)}`}
             <span className="np-melding-pijl">→</span>
           </Link>
