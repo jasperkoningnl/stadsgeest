@@ -27,10 +27,12 @@ export default function RedactieNav({
   tellingen,
   gebruiker,
   laatsteLogDatum,
+  beheerLetOp = false,
 }: {
   tellingen: Record<string, number>
   gebruiker: string | null
   laatsteLogDatum: string | null
+  beheerLetOp?: boolean
 }) {
   const pathname = usePathname()
   const items = [...ITEMS, LOGBOEK_ITEM, ...(gebruiker === 'jasper' ? [BEHEER_ITEM] : [])]
@@ -55,7 +57,8 @@ export default function RedactieNav({
       {items.map((item) => {
         const actief = item.href === '/nieuwsplein33' ? pathname === '/nieuwsplein33' : pathname.startsWith(item.href)
         const aantal = item.tel.reduce((som, s) => som + (tellingen[s] ?? 0), 0)
-        const stip = item.href === LOGBOEK_ITEM.href && ongelezen
+        // Bij Beheer: het Turso-leesquotum loopt tegen de grens (zie Beheer > Verbruik).
+        const stip = (item.href === LOGBOEK_ITEM.href && ongelezen) || (item.href === BEHEER_ITEM.href && beheerLetOp)
         // Logboek en Beheer zijn geen werkvoorraad: ze staan rechts, iets stiller.
         const bijzaak = item.href === LOGBOEK_ITEM.href || item.href === BEHEER_ITEM.href
         const klassen = ['np-nav-item']
@@ -66,7 +69,11 @@ export default function RedactieNav({
           <Link key={item.href} href={item.href} className={klassen.join(' ')} aria-current={actief ? 'page' : undefined}>
             {item.label}
             {aantal > 0 && <span className="np-nav-tel">{aantal}</span>}
-            {stip && <span className="np-nav-stip" title="Er is iets nieuws in het logboek" aria-label="ongelezen" />}
+            {stip && (
+              item.href === BEHEER_ITEM.href
+                ? <span className="np-nav-stip np-nav-stip-waarschuwing" title="Het leesquotum van Turso loopt vol" aria-label="waarschuwing" />
+                : <span className="np-nav-stip" title="Er is iets nieuws in het logboek" aria-label="ongelezen" />
+            )}
           </Link>
         )
       })}

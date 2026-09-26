@@ -11,6 +11,7 @@ import { getIntakeRuns } from '@/lib/dashboard/beheerQueries'
 import { laatsteLogboekDatum } from '@/lib/dashboard/logboek'
 import { AUTH_COOKIE, sessieGebruiker } from '@/lib/dashboardAuth'
 import { formatDateTime } from '@/lib/dashboard/format'
+import { getVerbruikSamenvatting, isQuotumBlokkade } from '@/lib/dashboard/tursoVerbruik'
 
 export const metadata: Metadata = {
   title: 'Redactie · Nieuwsplein33',
@@ -27,12 +28,26 @@ const THEMA_SCRIPT = `try{var t=localStorage.getItem('np-thema');if(t==='licht'|
 
 export default async function RedactieLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
-  const [tellingen, gebruiker, laatsteLogDatum, runs] = await Promise.all([
-    hasTurso() ? getStatusTellingen() : Promise.resolve({}),
-    sessieGebruiker(cookieStore.get(AUTH_COOKIE)?.value),
+  const gebruiker = await sessieGebruiker(cookieStore.get(AUTH_COOKIE)?.value)
+
+  // Een databasefout in de kop mag niet het hele dashboard omleggen. Op 26
+  // september blokkeerde Turso alle reads (quotum op) en gaf elke pagina een
+  // 500 zonder uitleg. Nu toont de kop een melding en blijft Beheer > Verbruik,
+  // dat de database niet nodig heeft, bereikbaar.
+  const fout: { soort: 'geblokkeerd' | 'fout' | null } = { soort: null }
+  const opvangen = <T,>(p: Promise<T>, leeg: T) => p.catch((e: unknown) => {
+    fout.soort = isQuotumBlokkade(e) ? 'geblokkeerd' : (fout.soort ?? 'fout')
+    console.error('[layout] databasefout:', e)
+    return leeg
+  })
+  const [tellingen, laatsteLogDatum, runs, verbruik] = await Promise.all([
+    hasTurso() ? opvangen(getStatusTellingen(), {}) : Promise.resolve({}),
     laatsteLogboekDatum(),
-    hasTurso() ? getIntakeRuns(1) : Promise.resolve([]),
+    hasTurso() ? opvangen(getIntakeRuns(1), []) : Promise.resolve([]),
+    gebruiker === 'jasper' ? getVerbruikSamenvatting() : Promise.resolve(null),
   ])
+  const beheerLetOp = !!verbruik?.beschikbaar && verbruik.status !== 'ok'
+  const dbFout = fout.soort
 
   const laatsteRun = runs[0] ?? null
 
@@ -91,7 +106,19 @@ export default async function RedactieLayout({ children }: { children: React.Rea
           </UitlegToggle>
         </div>
 
-        <RedactieNav tellingen={tellingen} gebruiker={gebruiker} laatsteLogDatum={laatsteLogDatum} />
+        <RedactieNav tellingen={tellingen} gebruiker={gebruiker} laatsteLogDatum={laatsteLogDatum} beheerLetOp={beheerLetOp} />
+        {dbFout && (
+          <div className="np-strook np-strook-fout" role="alert">
+            <span className="np-strook-item">
+              {dbFout === 'geblokkeerd'
+                ? 'De database weigert op dit moment leesopdrachten: het leesquotum van Turso is op.'
+                : 'De database gaf een fout. Niet alles hieronder is actueel.'}
+            </span>
+            {gebruiker === 'jasper' && (
+              <a className="np-strook-item" href="/nieuwsplein33/beheer?tab=verbruik">Bekijk verbruik →</a>
+            )}
+          </div>
+        )}
         {children}
       </div>
       <FeedbackBalk />

@@ -2295,3 +2295,96 @@ html[data-np-thema="donker"] .np-nav-item-actief {
   .np-nav-item { white-space: nowrap; padding: 10px 10px 11px; }
   .np-meldingen { margin-left: 0; }
 }
+
+/* ── Beheer: werkbalk en Verbruik (26 sep 2026) ─────────────
+   Beheer gebruikt nu dezelfde werkbalk als de wachtrij (segmenten links,
+   meldingen rechts) en dezelfde blokken als de tippagina. Verbruik toont
+   het Turso-leesquotum: meter, per dag, per uur, per database. */
+.np-segment-knop { text-decoration: none; }
+.np-segment-knop .np-nav-stip { margin-left: 2px; }
+.np-melding-kritiek { background: var(--np-rood-z); color: var(--np-rood); }
+.np-melding-kritiek:hover { border-color: var(--np-rood); }
+
+.np-verbruik code {
+  font-family: var(--f-m, ui-monospace, monospace); font-size: 12.5px;
+  padding: 1px 5px; border-radius: 5px; background: var(--np-zacht); color: var(--np-inkt);
+}
+.np-vb-kern { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
+.np-vb-getal {
+  font-family: var(--f-d); font-weight: 800; font-size: 40px; line-height: 1.05;
+  letter-spacing: -0.03em; color: var(--np-inkt); font-variant-numeric: tabular-nums;
+}
+.np-vb-van { font-size: 14.5px; color: var(--np-inkt2); }
+.np-vb-van strong { color: var(--blok); }
+
+.np-vb-meter {
+  position: relative; height: 10px; margin: 14px 0 6px;
+  background: var(--np-zacht); border-radius: 5px; overflow: hidden;
+}
+.np-vb-meter-vul { position: absolute; inset: 0 auto 0 0; background: var(--blok); border-radius: 5px; }
+.np-vb-meter-streep { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--np-kaart); }
+
+.np-vb-redenen { margin-top: 6px !important; }
+.np-vb-redenen > li { font-size: 14px; }
+
+.np-vb-cijfers {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px 20px; margin: 14px 0 0; padding-top: 14px; border-top: 1px solid var(--np-rand-z);
+}
+.np-vb-cijfers dt { font-size: 12px; color: var(--np-inkt3); margin-bottom: 2px; }
+.np-vb-cijfers dd {
+  margin: 0; font-family: var(--f-d); font-size: 17px; font-weight: 700;
+  color: var(--np-inkt); font-variant-numeric: tabular-nums;
+}
+.np-vb-cijfers small { font-size: 12px; font-weight: 500; color: var(--np-inkt3); }
+.np-vb-voet { margin: 14px 0 0; font-size: 12.5px; line-height: 1.55; color: var(--np-inkt3); }
+.np-vb-uitleg { margin: -4px 0 14px; font-size: 13.5px; line-height: 1.55; color: var(--np-inkt2); }
+
+/* Staafgrafiek per dag */
+.np-vb-staven {
+  position: relative; display: grid; gap: 2px; height: 150px;
+  border-bottom: 1px solid var(--np-rand);
+}
+.np-vb-kolom {
+  position: relative; display: flex; align-items: flex-end; height: 100%;
+  outline: none; cursor: default;
+}
+.np-vb-staaf {
+  display: block; width: 100%; background: var(--np-blauw);
+  border-radius: 4px 4px 0 0; transition: opacity .12s ease;
+}
+.np-vb-staaf-boven { background: var(--np-amber); }
+.np-vb-staven:hover .np-vb-staaf { opacity: .45; }
+.np-vb-kolom:hover .np-vb-staaf, .np-vb-kolom:focus .np-vb-staaf { opacity: 1; }
+.np-vb-norm {
+  position: absolute; left: 0; right: 0; height: 0; z-index: 1; pointer-events: none;
+  border-top: 1.5px dashed var(--np-inkt3);
+}
+.np-vb-tip {
+  position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  z-index: 2; white-space: nowrap; pointer-events: none;
+  padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;
+  background: var(--np-inkt); color: var(--np-bg); opacity: 0; transition: opacity .12s ease;
+}
+.np-vb-kolom:hover .np-vb-tip, .np-vb-kolom:focus .np-vb-tip { opacity: 1; }
+.np-vb-kolom:first-child .np-vb-tip { left: 0; transform: none; }
+.np-vb-kolom:last-child .np-vb-tip, .np-vb-kolom:nth-last-child(2) .np-vb-tip { left: auto; right: 0; transform: none; }
+.np-vb-as { display: grid; gap: 2px; margin-top: 4px; font-size: 11px; color: var(--np-inkt3); text-align: center; font-variant-numeric: tabular-nums; }
+.np-vb-grootste { margin: 10px 0 0; font-size: 13px; color: var(--np-inkt2); }
+
+/* Tabellen in Verbruik */
+.np-vb-tabel td, .np-vb-tabel th { font-variant-numeric: tabular-nums; }
+.np-vb-uren td:nth-child(2) { white-space: nowrap; }
+.np-vb-balk-kol { width: 40%; }
+.np-vb-balk { display: block; height: 8px; min-width: 0; border-radius: 0 4px 4px 0; background: var(--np-blauw); }
+.np-vb-stil td { color: var(--np-inkt3); }
+.np-vb-onbekend { color: var(--np-amber); font-weight: 600; }
+
+@media (max-width: 640px) {
+  .np-vb-getal { font-size: 32px; }
+  .np-vb-staven { height: 120px; gap: 1px; }
+  .np-vb-balk-kol { width: 25%; }
+}
+.np-nav-stip-waarschuwing, .np-segment-knop .np-nav-stip { background: var(--np-amber); }
+.np-strook-fout { border-left-color: var(--np-rood); }
+.np-strook-fout .np-strook-item { color: var(--np-rood); }
