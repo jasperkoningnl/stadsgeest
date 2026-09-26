@@ -18,8 +18,10 @@ elke meegenomen rij; joins en subqueries tellen alle bekeken rijen van alle tabe
 
 ## Regels
 
-1. Geen `LIKE '%…%'` op `raw_items.full_text`, `raw_items.content`,
-   `source_records.raw_object` of andere vrije tekst in Turso. Zeker niet in een lus.
+1. `LIKE '%…%'` op vrije tekst leest de hele tabel. Eén zoekopdracht over
+   `raw_items` kost zo'n 14.000 reads, over `source_records` zo'n 86.000; dat mag.
+   Nooit in een lus (per adres, per signaal) of als correlated subquery: dan wordt
+   het miljoenen. Meer dan een paar tientallen zoekopdrachten: lokale kopie.
 2. Analyse en verkenning draaien op een lokale kopie, niet op Turso. De hele database
    kopiëren kost circa 250.000 reads, minder dan drie scans van `source_records`.
    Hulpscripts als `weger-query.cjs` en `stadsgeest-werk\q.cjs` zijn voor enkele
