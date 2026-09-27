@@ -1,5 +1,8 @@
 'use strict';
 
+const crypto = require('node:crypto');
+const { scanTekst } = require('./woo-scan-lib.cjs');
+
 // Journalistieke zoeksporen voor de lokale archiefindex. De termen zijn bewust
 // breder dan de Woo-promotieregels: de uitkomst is een onderzoekskandidaat, nog
 // geen feit of tip. Alle zware zoekopdrachten draaien lokaal via FTS5.
@@ -40,9 +43,32 @@ function normaliseerTekst(value) {
   return String(value ?? '').toLocaleLowerCase('nl-NL').replace(/\s+/g, ' ').trim();
 }
 
+const WOO_TERM = {
+  geldproblemen: {
+    liquiditeit: 'liquiditeit', faillissement: 'faillissement', surseance: 'faillissement',
+    exploitatietekort: 'exploitatietekort', 'extra voorschot': 'extra voorschot', 'aanvullend voorschot': 'extra voorschot',
+  },
+  juridisch_conflict: {
+    aansprakelijk: 'aansprakelijkstelling', ingebrekestelling: 'ingebrekestelling', 'kort geding': 'kort geding',
+    schikking: 'schikking', vaststellingsovereenkomst: 'vaststellingsovereenkomst', dwangsom: 'dwangsom',
+  },
+  integriteit_toezicht: {
+    integriteit: 'integriteit', fraude: 'fraude', klokkenluider: 'klokkenluider', bibob: 'bibob',
+    'verscherpt toezicht': 'verscherpt toezicht', ondermijning: 'ondermijning', aangifte: 'strafrechtelijk',
+  },
+};
+
 function gevondenTermen(spoor, document) {
   const tekst = normaliseerTekst(`${document.title ?? ''} ${document.body ?? ''}`);
-  return spoor.terms.filter((term) => tekst.includes(normaliseerTekst(term)));
+  const direct = spoor.terms.filter((term) => tekst.includes(normaliseerTekst(term)));
+  const mapping = WOO_TERM[spoor.id];
+  if (!mapping) return direct;
+  const inhoudelijkeHits = new Set(scanTekst(tekst).map((hit) => hit.term));
+  return direct.filter((term) => inhoudelijkeHits.has(mapping[term]));
+}
+
+function inhoudHash(value) {
+  return crypto.createHash('sha256').update(normaliseerTekst(value)).digest('hex');
 }
 
 function scoreKandidaat(spoor, document) {
@@ -58,15 +84,17 @@ function scoreKandidaat(spoor, document) {
 
 function uniekOpDocument(kandidaten, maximum) {
   const gezien = new Set();
+  const inhoudGezien = new Set();
   const uit = [];
   for (const kandidaat of kandidaten) {
     const sleutel = kandidaat.raw_item_id ? `item:${kandidaat.raw_item_id}` : kandidaat.doc_key;
-    if (gezien.has(sleutel)) continue;
+    if (gezien.has(sleutel) || (kandidaat.inhoud_hash && inhoudGezien.has(kandidaat.inhoud_hash))) continue;
     gezien.add(sleutel);
+    if (kandidaat.inhoud_hash) inhoudGezien.add(kandidaat.inhoud_hash);
     uit.push(kandidaat);
     if (uit.length >= maximum) break;
   }
   return uit;
 }
 
-module.exports = { SPOREN, gevondenTermen, normaliseerTekst, scoreKandidaat, uniekOpDocument };
+module.exports = { SPOREN, gevondenTermen, inhoudHash, normaliseerTekst, scoreKandidaat, uniekOpDocument };

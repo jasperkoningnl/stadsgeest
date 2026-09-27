@@ -11,7 +11,7 @@ const path = require('node:path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { createClient } = require('@libsql/client');
 const { DEFAULT_CANDIDATES, ensureSchema, openLocal } = require('./archive-local.cjs');
-const { SPOREN, scoreKandidaat, uniekOpDocument } = require('./archive-research-lib.cjs');
+const { SPOREN, inhoudHash, scoreKandidaat, uniekOpDocument } = require('./archive-research-lib.cjs');
 
 function arg(argv, name, fallback) {
   const i = argv.indexOf(name);
@@ -52,6 +52,7 @@ async function zoekSpoor(db, spoor, perSpoor) {
       termen: waardering.termen,
       fragment: String(row.fragment ?? '').replace(/\s+/g, ' ').trim().slice(0, 900),
       content_hash: String(row.content_hash),
+      inhoud_hash: inhoudHash(row.fragment),
       status: beoordeeld ? 'gewijzigd' : 'nieuw',
       lokale_rank: Number(row.rank),
     });
@@ -98,7 +99,7 @@ async function main(argv = process.argv.slice(2)) {
     const alle = [];
     for (const spoor of SPOREN) alle.push(...await zoekSpoor(db, spoor, perSpoor));
     alle.sort((a, b) => b.score - a.score || a.lokale_rank - b.lokale_rank);
-    const kandidaten = uniekOpDocument(alle, maximum).map(({ lokale_rank, ...k }) => k);
+    const kandidaten = uniekOpDocument(alle, maximum).map(({ lokale_rank, inhoud_hash, ...k }) => k);
     const gegenereerd = new Date().toISOString();
     const output = { generated_at: gegenereerd, document_count: docs, candidate_count: kandidaten.length, candidates: kandidaten };
 
