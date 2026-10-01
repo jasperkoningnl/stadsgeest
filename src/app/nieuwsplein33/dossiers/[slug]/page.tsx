@@ -10,6 +10,7 @@ import { ontstreep } from '@/lib/dashboard/briefing'
 import GeenDatabase from '../../GeenDatabase'
 import { BronChip } from '../../tip/[id]/TipBlokken'
 import Tijdas from '../Tijdas'
+import DossierTabs from '../DossierTabs'
 
 export const dynamic = 'force-dynamic'
 
@@ -145,6 +146,7 @@ export default async function DossierPagina({ params, searchParams }: Props) {
           {laatstToegevoegd && <span>laatst aangevuld {formatDate(laatstToegevoegd)}</span>}
         </div>
       </header>
+      <DossierTabs slug={dossier.slug} actief="feiten" />
 
       {omschrijving && (
         <section className="np-dos-context">

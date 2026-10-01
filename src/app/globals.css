@@ -2514,3 +2514,46 @@ a.np-label-dossier:hover { text-decoration: underline; }
   .np-werkbalk-wachtrij .np-meldingen { flex-wrap: nowrap; flex-shrink: 0; }
   .np-werkbalk-wachtrij .np-melding { white-space: nowrap; }
 }
+
+/* Dossiertabs en partijengraaf (2026-10-01) */
+.np-dos-tabs { display: flex; gap: 4px; margin: -6px 0 18px; border-bottom: 1px solid var(--np-rand); }
+.np-dos-tab { padding: 8px 14px 9px; font-family: var(--f-d); font-size: 14px; font-weight: 600; color: var(--np-inkt2); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.np-dos-tab:hover { color: var(--np-inkt); }
+.np-dos-tab-actief { color: var(--np-inkt); border-bottom-color: var(--np-accent); }
+.np-graaf { margin: 0 0 8px; background: var(--np-kaart); border: 1px solid var(--np-rand-z); border-radius: 10px; overflow: hidden; }
+.np-graaf-svg { display: block; width: 100%; height: auto; }
+.np-graaf-lijn { stroke: var(--np-inkt3); opacity: .55; }
+.np-graaf-lijn-passage { stroke-dasharray: 5 3; }
+.np-graaf-lijn-relatie { stroke: var(--np-inkt); opacity: .8; }
+.np-graaf-lijn-bron { opacity: .35; }
+.np-graaf-klikvlak { stroke: transparent; }
+a:hover > .np-graaf-lijn { stroke: var(--np-accent); opacity: 1; }
+.np-graaf-knoop circle { fill: var(--np-accent); stroke: var(--np-kaart); stroke-width: 2; }
+.np-graaf-person circle { fill: var(--np-blauw); }
+.np-graaf-location circle { fill: var(--np-amber); }
+.np-graaf-stippel circle { fill-opacity: .25; stroke: var(--np-accent); stroke-dasharray: 3 2; stroke-width: 2; }
+.np-graaf-person.np-graaf-stippel circle { stroke: var(--np-blauw); }
+.np-graaf-document rect { fill: var(--np-inkt3); }
+.np-graaf-label { font-family: var(--f-d); font-size: 13px; fill: var(--np-inkt); paint-order: stroke; stroke: var(--np-kaart); stroke-width: 3px; stroke-linejoin: round; }
+.np-graaf-document .np-graaf-label { font-size: 11px; fill: var(--np-inkt2); }
+.np-graaf-knoop:hover circle, .np-graaf-knoop:hover rect { stroke: var(--np-inkt); }
+.np-graaf-leg { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+.np-graaf-leg-org { background: var(--np-accent); }
+.np-graaf-leg-pers { background: var(--np-blauw); }
+.np-graaf-leg-stippel { border: 1.5px dashed var(--np-accent); background: var(--np-accent-z); }
+.np-graaf-leg-doc { border-radius: 1px; background: var(--np-inkt3); }
+.np-graaf-passage { margin-top: 8px; padding-left: 10px; border-left: 2px solid var(--np-rand); }
+.np-graaf-passage .np-tekst { margin-bottom: 2px; font-size: 14px; }
+.np-graaf-tabel { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.np-graaf-tabel th { text-align: left; font-size: 12px; color: var(--np-inkt3); font-weight: 700; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--np-rand); }
+.np-graaf-tabel td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--np-rand-z); color: var(--np-inkt2); }
+.np-graaf-tabel td:first-child { color: var(--np-inkt); }
+.np-graaf-tabel tr:target td { background: var(--np-accent-z); }
+.np-graaf-tabel tr { scroll-margin-top: 90px; }
+.np-graaf-kolommen { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+.np-graaf-telling { padding-left: 20px; font-size: 14px; color: var(--np-inkt2); }
+.np-graaf-voorbeelden { list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: var(--np-inkt2); }
+@media (max-width: 640px) {
+  .np-graaf-kolommen { grid-template-columns: 1fr; }
+  .np-graaf-tabel th:nth-child(4), .np-graaf-tabel td:nth-child(4), .np-graaf-tabel th:nth-child(5), .np-graaf-tabel td:nth-child(5) { display: none; }
+}
