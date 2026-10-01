@@ -2480,3 +2480,12 @@ a.np-tijdas-stip:hover, a.np-tijdas-stip:focus-visible { transform: scale(1.5); 
   .np-dos-filterlabel { width: 100%; }
   .np-tijdas { padding: 12px 12px 8px; }
 }
+
+/* Wachtrij: strook met recent aangevulde dossiers (2026-10-01) */
+.np-dos-recent { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.np-dos-recent-label {
+  margin-right: 2px; font-family: var(--f-d); font-size: 12px; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--np-groen); text-decoration: none;
+}
+.np-dos-recent-label:hover { text-decoration: underline; }
+.np-dos-recent-tel { font-size: 11.5px; font-weight: 700; color: var(--np-groen); }

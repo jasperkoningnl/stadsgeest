@@ -182,3 +182,30 @@ export async function getTipsPerSignaal(tipIds: number[]): Promise<Map<number, n
   }
   return uit
 }
+
+export interface RecentDossier {
+  naam: string
+  slug: string
+  laatst_toegevoegd: string
+  nieuw_week: number
+}
+
+/**
+ * Dossiers voor de strook boven de wachtrij: alle dossiers met nieuwe feiten
+ * in de afgelopen zeven dagen (hoogstens vijf). Zijn dat er minder dan drie,
+ * dan vult de strook aan met de laatst aangevulde dossiers.
+ */
+export async function getRecenteDossiers(max = 5, min = 3): Promise<RecentDossier[]> {
+  const rijen = await q<any>(
+    `SELECT d.naam, d.slug, MAX(f.created_at) AS laatst_toegevoegd,
+            COALESCE(SUM(f.created_at >= datetime('now', '-7 days')), 0) AS nieuw_week
+     FROM dossier_facts f JOIN dossiers d ON d.id = f.dossier_id
+     GROUP BY d.id ORDER BY laatst_toegevoegd DESC LIMIT ?`,
+    [max],
+  )
+  const lijst: RecentDossier[] = rijen.map((r) => ({
+    naam: r.naam, slug: r.slug, laatst_toegevoegd: r.laatst_toegevoegd, nieuw_week: Number(r.nieuw_week),
+  }))
+  const metNieuws = lijst.filter((d) => d.nieuw_week > 0)
+  return metNieuws.length >= min ? metNieuws : lijst.slice(0, min)
+}

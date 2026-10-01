@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { hasTurso } from '@/lib/turso'
 import { getTips, getGeparkeerdDezeWeek, getMeetstand, type TipRij } from '@/lib/dashboard/tipQueries'
-import { kalenderdagenGeleden, supertipVastgezet } from '@/lib/dashboard/format'
+import { getRecenteDossiers } from '@/lib/dashboard/dossierQueries'
+import { formatDate, kalenderdagenGeleden, supertipVastgezet } from '@/lib/dashboard/format'
+import { ontstreep } from '@/lib/dashboard/briefing'
 import TipRegel from './TipRegel'
-import WachtrijFilters from './WachtrijFilters'
 import GeenDatabase from './GeenDatabase'
 
 // Geen caching: een redacteur die net een tip heeft geparkeerd moet dat meteen
@@ -14,18 +15,13 @@ export const dynamic = 'force-dynamic'
 export default async function WachtrijPagina() {
   if (!hasTurso()) return <GeenDatabase />
 
-  const [tips, geparkeerd, meetstand] = await Promise.all([
+  const [tips, geparkeerd, meetstand, dossiers] = await Promise.all([
     getTips(['wachtrij']),
     getGeparkeerdDezeWeek(),
     getMeetstand(),
+    // Een fout hier mag de wachtrij niet omleggen; dan blijft de strook weg.
+    getRecenteDossiers().catch(() => []),
   ])
-
-  // Soorten met hun aantal, voor de filterknoppen.
-  const perSoort = new Map<string, number>()
-  for (const t of tips) perSoort.set(t.soort, (perSoort.get(t.soort) ?? 0) + 1)
-  const soorten = [...perSoort.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([soort, aantal]) => ({ soort, aantal }))
 
   // Een supertip staat tot de maandag na de run bovenaan, daarna gewoon in de
   // chronologie.
@@ -49,10 +45,22 @@ export default async function WachtrijPagina() {
 
   return (
     <>
-      {/* Werkbalk: filters links, meldingen rechts. Eén regel in plaats van
-          een losse strook plus een filterbalk tussen lijnen. */}
+      {/* Werkbalk: recent aangevulde dossiers links, meldingen rechts. Het
+          soortfilter (Alles/Nieuwsfeit/Patroon/Verdieping) is op 1 oktober
+          2026 vervangen door deze dossierstrook. */}
       <div className="np-werkbalk">
-        <WachtrijFilters soorten={soorten} totaal={tips.length} />
+        {dossiers.length > 0 && (
+          <nav className="np-dos-recent" aria-label="Recent aangevulde dossiers">
+            <Link href="/nieuwsplein33/dossiers" className="np-dos-recent-label">Dossiers</Link>
+            {dossiers.map((d) => (
+              <Link key={d.slug} href={`/nieuwsplein33/dossiers/${d.slug}`} className="np-chip np-chip-klein"
+                title={`Laatst aangevuld ${formatDate(d.laatst_toegevoegd)}`}>
+                {ontstreep(d.naam, ' · ')}
+                {d.nieuw_week > 0 && <span className="np-dos-recent-tel">+{d.nieuw_week}</span>}
+              </Link>
+            ))}
+          </nav>
+        )}
         {(geparkeerd > 0 || meetstand.eigenVondst > 0) && (
           <div className="np-meldingen">
             {meetstand.eigenVondst > 0 && (

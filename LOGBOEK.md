@@ -25,7 +25,7 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ## 2026-10-01 - Dossiers hebben een eigen tab
 
-Onder Dossiers staan nu alle onderwerpen waarvoor Stadsgeest feiten bijhoudt, ook als een los feit geen nieuws is. Per dossier zie je hoeveel feiten en tips er zijn, wanneer er voor het laatst iets bij kwam en in een kleine grafiek hoe druk het de afgelopen twaalf maanden was. Open je een dossier, dan zie je bovenaan de afbakening en aandachtspunten, daaronder de tips die eruit voortkwamen, een tijdlijn met een stip per feit en de volledige lijst met bronnen. Je kunt filteren op soort feit en op zekerheid. Een klik op een stip brengt je naar het feit. Vanaf een tip kom je er via de dossiertab.
+Onder Dossiers staan nu alle onderwerpen waarvoor Stadsgeest feiten bijhoudt, ook als een los feit geen nieuws is. Per dossier zie je hoeveel feiten en tips er zijn, wanneer er voor het laatst iets bij kwam en in een kleine grafiek hoe druk het de afgelopen twaalf maanden was. Open je een dossier, dan zie je bovenaan de afbakening en aandachtspunten, daaronder de tips die eruit voortkwamen, een tijdlijn met een stip per feit en de volledige lijst met bronnen. Je kunt filteren op soort feit en op zekerheid. Een klik op een stip brengt je naar het feit. Vanaf een tip kom je er via de dossiertab. Boven de wachtrij staan nu de dossiers waar deze week feiten bij kwamen, met het aantal nieuwe feiten erachter. Het filter op soort (Alles, Nieuwsfeit, Patroon, Verdieping) is daarvoor weggehaald.
 
 ## 2026-09-26 - Dashboard was zaterdagochtend een paar uur onbereikbaar
 
