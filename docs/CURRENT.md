@@ -11,6 +11,8 @@ Amersfoort en Leusden. De keten loopt van publieke bronnen via bronrecords,
 events, entiteiten, signalen en de weger naar tips, dossiers en het
 redactiedashboard op `stadsgeest.nl/nieuwsplein33`. Vercel host het dashboard;
 Jaspers Windows-notebook voert de operationele keten uit.
+Dossiers hebben sinds 1 oktober een eigen tab met overzicht, tijdas en
+feitenlijst per dossier (22 dossiers, ruim 300 feiten).
 
 De dagelijkse taak `Stadsgeest Detection` start om 06.15 uur. NDW draait apart
 iedere vijftien minuten. Na iedere dagelijkse detectierun worden de geplande

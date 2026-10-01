@@ -140,7 +140,7 @@ export default async function VerkennerPagina({
                     <div className="np-tijdlijn-inhoud">
                       <strong>{f.titel}</strong>
                       <div className="np-tijdlijn-meta">
-                        <span>dossier {f.dossier}</span>
+                        <span>dossier <Link href={`/nieuwsplein33/dossiers/${f.dossier_slug}`}>{f.dossier}</Link></span>
                         <span className={`np-zekerheid np-zekerheid-${f.zekerheid}`}>{f.zekerheid.replace(/_/g, ' ')}</span>
                       </div>
                       {f.details && <p className="np-tekst">{f.details}</p>}

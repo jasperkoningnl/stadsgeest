@@ -2388,3 +2388,95 @@ html[data-np-thema="donker"] .np-nav-item-actief {
 .np-nav-stip-waarschuwing, .np-segment-knop .np-nav-stip { background: var(--np-amber); }
 .np-strook-fout { border-left-color: var(--np-rood); }
 .np-strook-fout .np-strook-item { color: var(--np-rood); }
+
+
+/* ── Dossiers: overzicht en dossierpagina (2026-10-01) ───────────────────
+   Overzicht: één kaart per dossier met een strook feiten per maand.
+   Dossierpagina: context, tips, tijdas met stippen, filters, feitenlijst. */
+.np-dos-regel {
+  display: flex; align-items: center; gap: 18px;
+  padding: 14px 18px; text-decoration: none; color: inherit;
+  background: var(--np-kaart); border: 1px solid var(--np-rand-z);
+  border-left: 3px solid var(--np-groen); border-radius: 10px;
+  transition: background-color .12s ease;
+}
+.np-dos-regel:hover { background: var(--np-groen-z); }
+.np-dos-regel-hoofd { flex: 1; min-width: 0; }
+.np-dos-regel-naam { font-family: var(--f-d); font-weight: 700; font-size: 16px; color: var(--np-inkt); }
+.np-dos-regel-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 4px; font-size: 13px; color: var(--np-inkt3); }
+.np-dos-open { color: var(--np-accent); font-weight: 700; }
+.np-dos-nieuw { color: var(--np-groen); font-weight: 700; font-size: 12.5px; }
+
+.np-dos-strook { flex-shrink: 0; display: flex; gap: 3px; }
+.np-dos-strook-maand { width: 9px; display: flex; flex-direction: column; align-items: center; }
+.np-dos-strook-bak { width: 100%; height: 28px; display: flex; align-items: flex-end; background: var(--np-grijs-z); border-radius: 2px; }
+.np-dos-strook-balk { display: block; width: 100%; background: var(--np-groen); border-radius: 2px; }
+.np-dos-strook-letter { display: block; margin-top: 3px; font-size: 9px; line-height: 9px; color: var(--np-inkt3); text-transform: uppercase; }
+
+/* Dossierpagina */
+.np-dos-terug { display: inline-block; margin-bottom: 12px; font-size: 13.5px; color: var(--np-accent); text-decoration: none; font-weight: 600; }
+.np-dos-terug:hover { text-decoration: underline; }
+.np-dos-kop h1 { font-family: var(--f-d); font-size: 24px; line-height: 1.25; font-weight: 800; color: var(--np-inkt); margin: 0; }
+.np-dos-kop { margin-bottom: 18px; }
+.np-dos-context {
+  margin-bottom: 18px; padding: 14px 18px;
+  background: var(--np-kaart); border: 1px solid var(--np-rand-z);
+  border-left: 3px solid var(--np-amber); border-radius: 10px;
+}
+.np-dos-context-kop { font-family: var(--f-d); font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--np-amber); margin-bottom: 6px; }
+.np-dos-context p { font-family: var(--f-b); font-size: 15px; line-height: 1.6; color: var(--np-inkt); margin: 0; }
+.np-dos-context p.np-dos-trefwoorden { margin-top: 8px; font-size: 13px; color: var(--np-inkt3); }
+
+.np-dos-tips { margin-bottom: 18px; padding: 12px 18px; background: var(--np-kaart); border: 1px solid var(--np-rand-z); border-radius: 10px; }
+.np-dos-tips-kop { font-family: var(--f-d); font-weight: 700; font-size: 14.5px; color: var(--np-inkt); }
+.np-dos-tips summary { margin-top: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--np-accent); }
+.np-dos-tips ul { list-style: none; margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.np-dos-tips li { display: flex; flex-direction: column; gap: 1px; }
+.np-dos-tips li a { color: var(--np-inkt); font-weight: 600; font-size: 14.5px; text-decoration: none; }
+.np-dos-tips li a:hover { color: var(--np-accent); }
+.np-dos-tip-meta { font-size: 12.5px; color: var(--np-inkt3); }
+
+/* Tijdas */
+.np-tijdas { margin: 0 0 14px; padding: 14px 18px 10px; background: var(--np-kaart); border: 1px solid var(--np-rand-z); border-radius: 10px; }
+.np-tijdas-veld { position: relative; margin-top: 8px; border-bottom: 1px solid var(--np-rand); }
+.np-tijdas-vandaag { position: absolute; top: -6px; bottom: 0; border-left: 1px dashed var(--np-inkt3); }
+.np-tijdas-vandaag span { position: absolute; top: -8px; left: 4px; font-size: 10.5px; color: var(--np-inkt3); white-space: nowrap; }
+.np-tijdas-vandaag-rechts span { left: auto; right: 4px; }
+.np-tijdas-stip {
+  position: absolute; display: block; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--np-inkt3); border: 1.5px solid var(--np-kaart); box-sizing: border-box;
+  transition: transform .1s ease;
+}
+a.np-tijdas-stip:hover, a.np-tijdas-stip:focus-visible { transform: scale(1.5); z-index: 2; outline: none; }
+.np-tijdas-vast { background: var(--np-groen); }
+.np-tijdas-open { background: var(--np-amber); }
+.np-tijdas-claim { background: var(--np-paars); }
+.np-tijdas-zacht { background: var(--np-kaart); border-color: var(--np-inkt3); }
+.np-tijdas-oud { opacity: .4; }
+.np-tijdas-as { position: relative; height: 18px; }
+.np-tijdas-as span { position: absolute; top: 3px; transform: translateX(-50%); font-size: 11px; color: var(--np-inkt3); white-space: nowrap; }
+.np-tijdas-as span.np-tijdas-jaar { font-weight: 700; color: var(--np-inkt2); }
+.np-tijdas-legenda { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: 12px; color: var(--np-inkt3); }
+.np-tijdas-legenda span { display: inline-flex; align-items: center; gap: 5px; }
+.np-tijdas-legenda .np-tijdas-stip { position: static; }
+
+/* Filters en lijst */
+.np-dos-filters { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.np-dos-filterrij { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.np-dos-filterlabel { width: 78px; flex-shrink: 0; font-size: 12.5px; font-weight: 700; color: var(--np-inkt3); }
+.np-chip.np-dos-actief { background: var(--np-accent-z); border-color: var(--np-accent); color: var(--np-accent); }
+.np-dos-maand h2 {
+  margin: 22px 0 2px; padding-bottom: 6px; border-bottom: 1px solid var(--np-rand);
+  font-family: var(--f-d); font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--np-inkt2);
+}
+.np-dos-maand .np-tijdlijn > li { scroll-margin-top: 90px; }
+.np-dos-maand .np-tijdlijn > li:target { background: var(--np-accent-z); margin: 0 -10px; padding-left: 10px; padding-right: 10px; border-radius: 8px; }
+.np-dos-gepland { margin-top: 2px; font-weight: 700; color: var(--np-blauw); }
+.np-dos-herkomst { margin-top: 6px; font-size: 11.5px; color: var(--np-inkt3); }
+
+@media (max-width: 640px) {
+  .np-dos-regel { flex-direction: column; align-items: stretch; gap: 10px; }
+  .np-dos-strook { align-self: flex-start; }
+  .np-dos-filterlabel { width: 100%; }
+  .np-tijdas { padding: 12px 12px 8px; }
+}

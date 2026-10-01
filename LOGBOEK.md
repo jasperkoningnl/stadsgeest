@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-10-01 - Dossiers hebben een eigen tab
+
+Onder Dossiers staan nu alle onderwerpen waarvoor Stadsgeest feiten bijhoudt, ook als een los feit geen nieuws is. Per dossier zie je hoeveel feiten en tips er zijn, wanneer er voor het laatst iets bij kwam en in een kleine grafiek hoe druk het de afgelopen twaalf maanden was. Open je een dossier, dan zie je bovenaan de afbakening en aandachtspunten, daaronder de tips die eruit voortkwamen, een tijdlijn met een stip per feit en de volledige lijst met bronnen. Je kunt filteren op soort feit en op zekerheid. Een klik op een stip brengt je naar het feit. Vanaf een tip kom je er via de dossiertab.
+
 ## 2026-09-26 - Dashboard was zaterdagochtend een paar uur onbereikbaar
 
 Zaterdag 26 september tussen ongeveer zes en half elf gaf het dashboard na het inloggen alleen een foutmelding. De database had zijn maandelijkse leeslimiet bereikt en weigerde verzoeken. Dat is opgelost. Een deel van de nachtelijke verwerking van zaterdag liep daardoor vast, dus een dunnere wachtrij op zaterdag komt door deze storing en niet door een rustige nieuwsdag. Gebeurt het opnieuw, dan zie je bovenaan een melding in plaats van een lege foutpagina.

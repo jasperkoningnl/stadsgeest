@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { hasTurso } from '@/lib/turso'
 import {
@@ -383,6 +384,12 @@ export default async function TipPagina({ params }: Props) {
           <p className="np-tekst np-stil">
             Alles wat Stadsgeest over dit onderwerp heeft vastgelegd, op volgorde van gebeurtenis.
             Losse feiten worden hier bewaard ook als ze afzonderlijk geen nieuws zijn.
+            {tip.dossier_slug && (
+              <>
+                {' '}
+                <Link href={`/nieuwsplein33/dossiers/${tip.dossier_slug}`} className="np-telling-link">Open het dossier →</Link>
+              </>
+            )}
           </p>
           <ol className="np-tijdlijn">
             {tijdlijn.map((f) => (

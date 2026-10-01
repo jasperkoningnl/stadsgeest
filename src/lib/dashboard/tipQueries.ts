@@ -38,6 +38,7 @@ export interface TipDetail extends TipRij {
   elders_gebracht: string | null
   toegevoegde_waarde: string | null
   dossier_id: number | null
+  dossier_slug: string | null
   artikel_url: string | null
   eigen_vondst: number | null
   actor: string
@@ -143,7 +144,7 @@ export async function getTips(statussen: TipStatus[]): Promise<TipRij[]> {
 
 export async function getTipDetail(id: number): Promise<TipDetail | null> {
   const rij = await qOne<any>(
-    `SELECT t.*, d.naam AS dossier_naam
+    `SELECT t.*, d.naam AS dossier_naam, d.slug AS dossier_slug
      FROM tips t LEFT JOIN dossiers d ON d.id = t.dossier_id
      WHERE t.id = ?`,
     [id],

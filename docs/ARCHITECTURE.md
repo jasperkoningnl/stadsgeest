@@ -121,6 +121,7 @@ nooit uitsluitend op naam automatisch samengevoegd.
 |---|---|
 | Dashboardroutes | `src/app/nieuwsplein33/` |
 | Dashboardqueries | `src/lib/dashboard/` |
+| Dossierpagina's | `src/app/nieuwsplein33/dossiers/`, `src/lib/dashboard/dossierQueries.ts` |
 | Klassieke intake | `scraper/intake-run.mjs` |
 | KG-adapters | `scraper/src/kg/adapters/` |
 | Detectieorkestratie | `scraper/src/kg/detection-run.cjs` |

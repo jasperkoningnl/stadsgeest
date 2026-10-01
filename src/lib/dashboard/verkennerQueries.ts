@@ -26,6 +26,7 @@ export interface VerkennerFeit {
   details: string | null
   zekerheid: string
   dossier: string
+  dossier_slug: string
   primaire_bron_url: string | null
 }
 
@@ -77,7 +78,7 @@ async function zoek(term: string) {
       [like, like],
     ),
     q<VerkennerFeit>(
-      `SELECT f.id, f.titel, f.datum, f.details, f.zekerheid, f.primaire_bron_url, d.naam AS dossier
+      `SELECT f.id, f.titel, f.datum, f.details, f.zekerheid, f.primaire_bron_url, d.naam AS dossier, d.slug AS dossier_slug
        FROM dossier_facts f JOIN dossiers d ON d.id = f.dossier_id
        WHERE f.titel LIKE ? OR f.details LIKE ? OR f.locatie LIKE ?
        ORDER BY COALESCE(f.datum, f.created_at) DESC LIMIT 15`,
