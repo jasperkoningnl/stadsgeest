@@ -2496,3 +2496,21 @@ a.np-tijdas-stip:hover, a.np-tijdas-stip:focus-visible { transform: scale(1.5); 
 }
 .np-dos-recent-label:hover { text-decoration: underline; }
 .np-dos-recent-tel { font-size: 11.5px; font-weight: 700; color: var(--np-groen); }
+
+/* Tipkaart: hele kaart klikbaar via de titellink, dossier als losse link (2026-10-01) */
+.np-regel { position: relative; }
+a.np-regel-link { text-decoration: none; }
+.np-regel-link::after { content: ''; position: absolute; inset: 0; }
+.np-regel-link:focus-visible { outline: none; }
+.np-regel:has(.np-regel-link:focus-visible) { outline: 2px solid var(--np-accent); outline-offset: 2px; }
+.np-dossier-link { position: relative; z-index: 1; color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; }
+.np-dossier-link:hover { color: var(--np-groen); text-decoration-style: solid; }
+a.np-label-dossier { text-decoration: none; color: var(--np-groen); }
+a.np-label-dossier:hover { text-decoration: underline; }
+
+/* Wachtrij: dossiers en meldingen op één regel; de dossierstrook geeft ruimte (2026-10-01) */
+@media (min-width: 641px) {
+  .np-werkbalk-wachtrij { flex-wrap: nowrap; }
+  .np-werkbalk-wachtrij .np-meldingen { flex-wrap: nowrap; flex-shrink: 0; }
+  .np-werkbalk-wachtrij .np-melding { white-space: nowrap; }
+}

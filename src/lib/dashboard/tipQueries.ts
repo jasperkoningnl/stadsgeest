@@ -23,6 +23,7 @@ export interface TipRij {
   score_motivatie: string
   status: TipStatus
   dossier_naam: string | null
+  dossier_slug: string | null
   created_at: string
   /** 1 als de tip uit de wekelijkse supertip-run komt. */
   supertip: number
@@ -38,7 +39,6 @@ export interface TipDetail extends TipRij {
   elders_gebracht: string | null
   toegevoegde_waarde: string | null
   dossier_id: number | null
-  dossier_slug: string | null
   artikel_url: string | null
   eigen_vondst: number | null
   actor: string
@@ -124,7 +124,7 @@ async function verrijkMetBronnen(tips: any[]): Promise<TipRij[]> {
 
 const TIP_KOLOMMEN = `
   t.id, t.titel, t.kern, t.soort, t.gemeente, t.categorie, t.score,
-  t.score_motivatie, t.status, t.created_at, t.supertip, d.naam AS dossier_naam
+  t.score_motivatie, t.status, t.created_at, t.supertip, d.naam AS dossier_naam, d.slug AS dossier_slug
 `
 
 export async function getTips(statussen: TipStatus[]): Promise<TipRij[]> {

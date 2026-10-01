@@ -15,6 +15,7 @@ import TipActies from './TipActies'
 import Meetknop from './Meetknop'
 import BeslisNavigatie from './BeslisNavigatie'
 import { Blok, BronChip, Betrokkenen } from './TipBlokken'
+import { kortDossierNaam } from '@/lib/dashboard/dossierNamen'
 
 export const dynamic = 'force-dynamic'
 
@@ -433,6 +434,12 @@ export default async function TipPagina({ params }: Props) {
           )}
           {tip.categorie && <span className="np-label">{ontstreep(tip.categorie)}</span>}
           <span className="np-label">{tip.gemeente}</span>
+          {tip.dossier_slug && tip.dossier_naam && (
+            <Link href={`/nieuwsplein33/dossiers/${tip.dossier_slug}`} className="np-label np-label-dossier"
+              title={`Naar het dossier ${ontstreep(tip.dossier_naam, ' · ')}`}>
+              dossier {kortDossierNaam(tip.dossier_slug, tip.dossier_naam)} →
+            </Link>
+          )}
           {tip.status !== 'wachtrij' && <span className="np-label np-label-status">{STATUS_LABEL[tip.status] ?? tip.status}</span>}
         </div>
         <h1 className="np-detail-titel">{ontstreep(superTip ? zonderSupertip(tip.titel) : tip.titel)}</h1>

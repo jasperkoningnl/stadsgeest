@@ -49,7 +49,7 @@ export default async function WachtrijPagina() {
       {/* Werkbalk: recent aangevulde dossiers links, meldingen rechts. Het
           soortfilter (Alles/Nieuwsfeit/Patroon/Verdieping) is op 1 oktober
           2026 vervangen door deze dossierstrook. */}
-      <div className="np-werkbalk">
+      <div className="np-werkbalk np-werkbalk-wachtrij">
         {dossiers.length > 0 && (
           <nav className="np-dos-recent" aria-label="Recent aangevulde dossiers">
             <Link href="/nieuwsplein33/dossiers" className="np-dos-recent-label">Dossiers</Link>
@@ -66,10 +66,9 @@ export default async function WachtrijPagina() {
           <div className="np-meldingen">
             {meetstand.eigenVondst > 0 && (
               <Link href="/nieuwsplein33/archief?eigen=1" className="np-melding np-melding-winst"
-                title="Bekijk de tips waar deze artikelen uit voortkwamen">
+                title={`${meetstand.eigenVondst} ${meetstand.eigenVondst === 1 ? 'artikel was' : 'artikelen waren'} zonder Stadsgeest niet geschreven. Bekijk de tips waar ze uit voortkwamen.`}>
                 <span aria-hidden="true">✓</span>
-                {meetstand.eigenVondst} {meetstand.eigenVondst === 1 ? 'artikel was' : 'artikelen waren'} zonder
-                Stadsgeest niet geschreven
+                {meetstand.eigenVondst} {meetstand.eigenVondst === 1 ? 'artikel' : 'artikelen'} dankzij Stadsgeest
                 <span aria-hidden="true" className="np-melding-pijl">→</span>
               </Link>
             )}

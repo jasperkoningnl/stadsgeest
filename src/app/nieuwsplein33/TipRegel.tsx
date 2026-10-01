@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { TipRij } from '@/lib/dashboard/tipQueries'
 import { formatDate } from '@/lib/dashboard/format'
 import { ontstreep } from '@/lib/dashboard/briefing'
+import { kortDossierNaam } from '@/lib/dashboard/dossierNamen'
 
 export const SOORT_LABEL: Record<string, string> = {
   nieuwsfeit: 'Nieuwsfeit',
@@ -24,6 +25,10 @@ export function zonderSupertip(titel: string): string {
 /**
  * Eén kaart in de lijst, in dezelfde vormtaal als de blokken op de tippagina:
  * een gekleurde lijn links in de kleur van de soort, bronnen als chips.
+ *
+ * De hele kaart is klikbaar via de titellink (die met ::after over de kaart
+ * valt), zodat de dossierlink er als losse link in kan staan. Een link in een
+ * link is geen geldige HTML.
  */
 export default function TipRegel({ tip }: { tip: TipRij }) {
   const dragend = tip.bronnen.filter((b) => !b.spiegel)
@@ -39,10 +44,7 @@ export default function TipRegel({ tip }: { tip: TipRij }) {
 
   return (
     <div className="np-lijst-item">
-      <Link
-        href={`/nieuwsplein33/tip/${tip.id}`}
-        className={`np-regel np-regel-${tip.soort}${superTip ? ' np-regel-super' : ''}`}
-      >
+      <div className={`np-regel np-regel-${tip.soort}${superTip ? ' np-regel-super' : ''}`}>
         {superTip && (
           <div className="np-super-band"><span aria-hidden>★</span> Supertip</div>
         )}
@@ -56,7 +58,7 @@ export default function TipRegel({ tip }: { tip: TipRij }) {
             <span className="np-regel-datum">{formatDate(tip.created_at)}</span>
           </div>
 
-          <span className="np-regel-titel">{titel}</span>
+          <Link href={`/nieuwsplein33/tip/${tip.id}`} className="np-regel-titel np-regel-link">{titel}</Link>
           {tip.kern && <p className="np-regel-kern">{ontstreep(tip.kern)}</p>}
 
           {tip.score_motivatie && (
@@ -82,12 +84,19 @@ export default function TipRegel({ tip }: { tip: TipRij }) {
             {tip.dossier_naam && (
               <>
                 <span className="np-regel-scheiding">·</span>
-                <span className="np-dossier">dossier {ontstreep(tip.dossier_naam, ' · ')}</span>
+                {tip.dossier_slug ? (
+                  <Link href={`/nieuwsplein33/dossiers/${tip.dossier_slug}`} className="np-dossier np-dossier-link"
+                    title={`Naar het dossier ${ontstreep(tip.dossier_naam, ' · ')}`}>
+                    dossier {kortDossierNaam(tip.dossier_slug, tip.dossier_naam)}
+                  </Link>
+                ) : (
+                  <span className="np-dossier">dossier {ontstreep(tip.dossier_naam, ' · ')}</span>
+                )}
               </>
             )}
           </div>
         </div>
-      </Link>
+      </div>
     </div>
   )
 }
