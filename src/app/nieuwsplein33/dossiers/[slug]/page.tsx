@@ -47,7 +47,13 @@ function tekst(s: string | null | undefined): string {
 }
 
 function secundair(raw: string | null): string[] {
-  return (safeParseJsonArray<unknown>(raw) ?? []).filter((u): u is string => typeof u === 'string' && /^https?:\/\//.test(u))
+  const urls = safeParseJsonArray<unknown>(raw)
+  if (urls) return urls.filter((u): u is string => typeof u === 'string' && /^https?:\/\//.test(u))
+
+  // Oude dossierfeiten bevatten soms één URL als platte tekst. Blijf die tonen
+  // totdat alle historische data door de normalisatie is gegaan.
+  const enkel = raw?.trim()
+  return enkel && /^https?:\/\/\S+$/.test(enkel) ? [enkel] : []
 }
 
 const ZICHTBARE_TIPS = 5

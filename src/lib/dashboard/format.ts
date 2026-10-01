@@ -13,6 +13,20 @@ export function formatDateTime(iso: string | null | undefined): string {
 }
 
 export function formatDate(iso: string | null | undefined): string {
+  if (iso && /^\d{4}$/.test(iso)) return iso
+
+  const maand = iso?.match(/^(\d{4})-(\d{2})$/)
+  if (maand) {
+    const maandnummer = Number(maand[2])
+    if (maandnummer >= 1 && maandnummer <= 12) {
+      return new Date(Date.UTC(Number(maand[1]), maandnummer - 1, 1)).toLocaleDateString('nl-NL', {
+        month: 'long',
+        year: 'numeric',
+        timeZone: TIJDZONE,
+      })
+    }
+  }
+
   const d = parseDbDate(iso)
   if (!d) return '–'
   return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric', timeZone: TIJDZONE })
