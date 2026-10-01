@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { hasTurso } from '@/lib/turso'
 import { getTips, getGeparkeerdDezeWeek, getMeetstand, type TipRij } from '@/lib/dashboard/tipQueries'
 import { getRecenteDossiers } from '@/lib/dashboard/dossierQueries'
+import { kortDossierNaam } from '@/lib/dashboard/dossierNamen'
 import { formatDate, kalenderdagenGeleden, supertipVastgezet } from '@/lib/dashboard/format'
 import { ontstreep } from '@/lib/dashboard/briefing'
 import TipRegel from './TipRegel'
@@ -54,8 +55,8 @@ export default async function WachtrijPagina() {
             <Link href="/nieuwsplein33/dossiers" className="np-dos-recent-label">Dossiers</Link>
             {dossiers.map((d) => (
               <Link key={d.slug} href={`/nieuwsplein33/dossiers/${d.slug}`} className="np-chip np-chip-klein"
-                title={`Laatst aangevuld ${formatDate(d.laatst_toegevoegd)}`}>
-                {ontstreep(d.naam, ' · ')}
+                title={`${ontstreep(d.naam, ' · ')} · laatst aangevuld ${formatDate(d.laatst_toegevoegd)}`}>
+                {kortDossierNaam(d.slug, d.naam)}
                 {d.nieuw_week > 0 && <span className="np-dos-recent-tel">+{d.nieuw_week}</span>}
               </Link>
             ))}

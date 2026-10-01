@@ -2482,7 +2482,14 @@ a.np-tijdas-stip:hover, a.np-tijdas-stip:focus-visible { transform: scale(1.5); 
 }
 
 /* Wachtrij: strook met recent aangevulde dossiers (2026-10-01) */
-.np-dos-recent { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.np-dos-recent {
+  display: flex; flex-wrap: nowrap; align-items: center; gap: 6px;
+  flex: 0 1 auto; min-width: 0; max-width: 100%; overflow: hidden; padding-right: 24px;
+  /* Past het niet, dan loopt de rij zacht uit in plaats van te breken. */
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+}
+.np-dos-recent > * { flex-shrink: 0; white-space: nowrap; }
 .np-dos-recent-label {
   margin-right: 2px; font-family: var(--f-d); font-size: 12px; font-weight: 800;
   letter-spacing: .08em; text-transform: uppercase; color: var(--np-groen); text-decoration: none;
