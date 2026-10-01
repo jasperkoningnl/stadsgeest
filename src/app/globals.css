@@ -2557,3 +2557,23 @@ a:hover > .np-graaf-lijn { stroke: var(--np-accent); opacity: 1; }
   .np-graaf-kolommen { grid-template-columns: 1fr; }
   .np-graaf-tabel th:nth-child(4), .np-graaf-tabel td:nth-child(4), .np-graaf-tabel th:nth-child(5), .np-graaf-tabel td:nth-child(5) { display: none; }
 }
+
+/* Graaf: zoomknoppen en uitleg (2026-10-01) */
+.np-zoom { position: relative; }
+.np-zoom-knoppen { position: absolute; top: 10px; right: 10px; z-index: 2; display: flex; gap: 4px; }
+.np-zoom-knoppen button {
+  min-width: 32px; height: 32px; padding: 0 10px;
+  font-family: var(--f-d); font-size: 16px; font-weight: 700; line-height: 1;
+  color: var(--np-inkt); background: var(--np-kaart); border: 1px solid var(--np-rand); border-radius: 8px; cursor: pointer;
+}
+.np-zoom-knoppen button:last-child { font-size: 12.5px; font-weight: 600; }
+.np-zoom-knoppen button:hover:not(:disabled) { border-color: var(--np-accent); color: var(--np-accent); }
+.np-zoom-knoppen button:disabled { opacity: .4; cursor: default; }
+.np-zoom-sleepbaar { cursor: grab; touch-action: none; }
+.np-zoom-sleepbaar:active { cursor: grabbing; }
+.np-graaf-uitleg ul { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.np-graaf-uitleg li { font-family: var(--f-b); font-size: 14px; line-height: 1.5; color: var(--np-inkt2); }
+.np-graaf-uitleg li strong { color: var(--np-inkt); }
+.np-graaf-label-lang { display: none; }
+.np-zoom-ver .np-graaf-label-kort { display: none; }
+.np-zoom-ver .np-graaf-label-lang { display: inline; }

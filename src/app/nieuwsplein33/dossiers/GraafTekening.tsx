@@ -1,7 +1,8 @@
 // Server-gerenderde netwerktekening: eenvoudige krachtgerichte opmaak
 // (Fruchterman-Reingold) met vaste beginposities, zodat dezelfde data altijd
-// dezelfde tekening geeft. Geen JavaScript in de browser; een klik op een bol
-// of lijn springt naar de onderbouwing onder de tekening.
+// dezelfde tekening geeft. Alleen zoomen en verslepen draait in de browser
+// (ZoomVlak); een klik op een bol of blokje springt naar de lijst eronder.
+import ZoomVlak from './ZoomVlak'
 
 export interface TekenKnoop {
   id: string
@@ -88,7 +89,7 @@ export default function GraafTekening({ knopen, lijnen, label }: { knopen: Teken
   const pos = opmaak(knopen, lijnen)
   return (
     <figure className="np-graaf" aria-label={label}>
-      <svg viewBox={`0 0 ${B} ${H}`} role="img" aria-label={label} className="np-graaf-svg">
+      <ZoomVlak breedte={B} hoogte={H} label={label}>
         <g>
           {lijnen.map((l, i) => {
             const a = pos.get(l.van), b = pos.get(l.naar)
@@ -116,12 +117,14 @@ export default function GraafTekening({ knopen, lijnen, label }: { knopen: Teken
                 {k.soort === 'document'
                   ? <rect x={p.x - r} y={p.y - r} width={r * 2} height={r * 2} rx={1.5} />
                   : <circle cx={p.x} cy={p.y} r={r} />}
-                <text x={p.x + r + 4} y={p.y + 4} className="np-graaf-label">{kort(k.label, k.soort === 'document' ? 24 : 26)}</text>
+                {/* Kort label in het overzicht; ingezoomd verschijnt de volledige naam. */}
+                <text x={p.x + r + 4} y={p.y + 4} className="np-graaf-label np-graaf-label-kort">{kort(k.label, k.soort === 'document' ? 24 : 26)}</text>
+                <text x={p.x + r + 4} y={p.y + 4} className="np-graaf-label np-graaf-label-lang">{kort(k.label, 90)}</text>
               </a>
             )
           })}
         </g>
-      </svg>
+      </ZoomVlak>
     </figure>
   )
 }
