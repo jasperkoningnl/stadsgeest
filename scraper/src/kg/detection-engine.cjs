@@ -18,6 +18,15 @@ function sourceUrlFallback(event) {
   return event?.source_identifier ? null : (event?.source_url || null);
 }
 
+// Hash van één bewijsitem. raw_items is uniek op (source_id, content_hash).
+// De hash van de momentopname (raw_object_hash) is voor alle events uit
+// dezelfde run gelijk; daarmee werd alleen het eerste bewijsitem opgeslagen
+// en bleven de andere signalen zonder document. Daarom per event een eigen hash.
+function evidenceHash(event) {
+  return crypto.createHash('sha256')
+    .update(`${event.event_type || ''}:${event.source_identifier || ''}:${event.raw_object_hash || event.summary || ''}`)
+    .digest('hex');
+}
 function evidenceUrl(event) {
   if (!event?.source_url || !event?.source_identifier) return event?.source_url || null;
   return `${event.source_url}#stadsgeest-event=${encodeURIComponent(event.source_identifier)}`;
@@ -237,9 +246,7 @@ class DetectionEngine {
     });
     let rawItemId = found.rows[0]?.id ? Number(found.rows[0].id) : null;
     if (!rawItemId) {
-      const contentHash = event.raw_object_hash || crypto.createHash('sha256')
-        .update(`${event.event_type || ''}:${event.source_identifier || ''}:${event.summary || ''}`)
-        .digest('hex');
+      const contentHash = evidenceHash(event);
       await this.db.execute({
         sql: `INSERT OR IGNORE INTO raw_items
               (source_id, external_url, title, content, summary, scraped_at,
@@ -345,4 +352,4 @@ function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-module.exports = { DetectionEngine, createDb, evidenceUrl, sourceUrlFallback };
+module.exports = { DetectionEngine, createDb, evidenceUrl, sourceUrlFallback, evidenceHash };

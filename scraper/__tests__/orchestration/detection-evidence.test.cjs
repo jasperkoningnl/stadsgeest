@@ -1,6 +1,6 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
-const { DetectionEngine, evidenceUrl } = require('../../src/kg/detection-engine.cjs');
+const { DetectionEngine, evidenceUrl, evidenceHash } = require('../../src/kg/detection-engine.cjs');
 
 describe('DetectionEngine bewijsbrug', () => {
   it('maakt voor feedrecords een bewijs-URL per officiële bronidentifier', () => {
@@ -42,5 +42,13 @@ describe('DetectionEngine bewijsbrug', () => {
     assert.equal(await engine.linkEvidenceForSignal(2230, event), 7001);
     assert.equal(rawWrites.length, 1);
     assert.deepEqual([...links], ['2230:7001']);
+  });
+  it('geeft events uit dezelfde momentopname elk een eigen hash', () => {
+    const basis = { event_type: 'CRIME_TREND', raw_object_hash: 'zelfde-momentopname', summary: 'x' };
+    const a = evidenceHash({ ...basis, source_identifier: 'politie-trend:GM0307:1.3.1' });
+    const b = evidenceHash({ ...basis, source_identifier: 'politie-trend:WK030703:0.0.0' });
+    assert.notEqual(a, b); // anders weigert de unieke index het tweede bewijsitem
+    assert.notEqual(a, 'zelfde-momentopname');
+    assert.equal(a, evidenceHash({ ...basis, source_identifier: 'politie-trend:GM0307:1.3.1' }));
   });
 });
