@@ -1,10 +1,15 @@
 'use client'
 
-import { useRef, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { noteerBeslissing } from '../../feedbackTeller'
 
 type Actie = 'goedgekeurd' | 'geparkeerd' | 'afgekeurd' | 'wachtrij'
+
+// De vaste beslisbalk bovenaan (BeslisNavigatie) opent via deze gebeurtenis
+// het redenpaneel hieronder, zodat afwijzen altijd met reden gebeurt en er
+// maar één plek is waar redenen worden gekozen. detail = de actie.
+export const OPEN_REDEN_GEBEURTENIS = 'np-open-reden'
 
 // De redenen zijn bewust kort en uitputtend genoeg om zonder typen te kunnen
 // afhandelen. Ze worden geteld bij het bijstellen van de selectie, dus ze
@@ -51,6 +56,19 @@ export default function TipActies({ tipId, status }: { tipId: number; status: st
   const [fout, setFout] = useState<string | null>(null)
   const [bezig, startTransition] = useTransition()
   const requestId = useRef<string | null>(null)
+  const paneel = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function openVanuitBalk(e: Event) {
+      const actie = (e as CustomEvent<string>).detail
+      if (actie !== 'goedgekeurd' && actie !== 'geparkeerd' && actie !== 'afgekeurd') return
+      setOpen(actie); setCode(''); setTekst(''); setFout(null)
+      // Na de render staat het paneel er; dan pas scrollen.
+      requestAnimationFrame(() => paneel.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
+    }
+    window.addEventListener(OPEN_REDEN_GEBEURTENIS, openVanuitBalk)
+    return () => window.removeEventListener(OPEN_REDEN_GEBEURTENIS, openVanuitBalk)
+  }, [])
 
   async function verstuur(actie: Actie) {
     setFout(null)
@@ -125,7 +143,7 @@ export default function TipActies({ tipId, status }: { tipId: number; status: st
       </div>
 
       {open && (
-        <div className="np-reden">
+        <div className="np-reden" ref={paneel}>
           <p className="np-reden-vraag">
             {open === 'goedgekeurd' && 'Waarom wil je hier iets mee? Dat helpt om de selectie scherper te krijgen.'}
             {open === 'geparkeerd' && 'Waarom nu niet?'}

@@ -30,6 +30,10 @@ wordt getoond. De documentatiecontrole (`npm run docs:check`, ook vóór iedere
 build) weigert een logboek waarin het voorkomt; welke woorden zij bewaakt staat
 in `scripts/check-docs.mjs` en de reden in `docs/DECISIONS.md` (2026-10-02).
 
+## 2026-10-03 — De knoppen bovenaan een tip werken nu echt
+
+De kleine knoppen in de balk bovenaan een tip (Oppakken, Parkeren, Afwijzen, Terugzetten) sloegen tot nu toe niets op: de pagina deed alsof, maar de tip bleef in de wachtrij staan. Dat is gerepareerd. Oppakken en Parkeren leggen de beslissing meteen vast en brengen je naar de volgende tip. Afwijzen opent het keuzeblok met redenen onder de kop, want een afwijzing vraagt altijd een reden; die telt mee bij het bijstellen van de selectie. Mislukt het opslaan, dan staat dat nu in de balk in plaats van dat er niets gebeurt. Heb je de afgelopen weken bovenaan op Oppakken of Parkeren gedrukt en zag je de tip later toch weer in de wachtrij, dan was dit de oorzaak.
+
 ## 2026-10-02 — Stukken van Provinciale Staten en twee extra kranten in de spiegelcheck
 
 Stadsgeest leest nu ook de vergaderstukken van Provinciale Staten en de Statencommissies van de provincie Utrecht: Statenvoorstellen, Statenbrieven, inspraakreacties en antwoorden op Statenvragen. Alleen stukken die Amersfoort, Leusden of een wijk of buurtschap daarvan noemen komen binnen; de rest van de provincie blijft buiten beeld. Tot nu toe kwam van de provincie alleen het nieuws van de website binnen. Verwacht de komende dagen enkele tips of dossierfeiten over bijvoorbeeld de netuitbreiding bij Amersfoort-Noord en de wijziging van de provinciale omgevingsvisie.
