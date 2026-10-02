@@ -30,6 +30,10 @@ wordt getoond. De documentatiecontrole (`npm run docs:check`, ook vóór iedere
 build) weigert een logboek waarin het voorkomt; welke woorden zij bewaakt staat
 in `scripts/check-docs.mjs` en de reden in `docs/DECISIONS.md` (2026-10-02).
 
+## 2026-10-02 — B&W-besluiten van september komen alsnog binnen
+
+De losse stukken uit de besluitenlijsten van het college kwamen sinds eind augustus niet bij de weger aan. Dat is gerepareerd. De 71 stukken uit september worden bij de eerstvolgende verwerking alsnog aangeboden. Je ziet daardoor de komende dagen meer signalen dan normaal, en een deel staat als historisch gemarkeerd omdat het ouder is dan een week. Daar zit onder meer de begroting 2027 bij.
+
 ## 2026-10-02 — Stukken van Provinciale Staten en twee extra kranten in de spiegelcheck
 
 Stadsgeest leest nu ook de vergaderstukken van Provinciale Staten en de Statencommissies van de provincie Utrecht: Statenvoorstellen, Statenbrieven, inspraakreacties en antwoorden op Statenvragen. Alleen stukken die Amersfoort, Leusden of een wijk of buurtschap daarvan noemen komen binnen; de rest van de provincie blijft buiten beeld. Tot nu toe kwam van de provincie alleen het nieuws van de website binnen. Verwacht de komende dagen enkele tips of dossierfeiten over bijvoorbeeld de netuitbreiding bij Amersfoort-Noord en de wijziging van de provinciale omgevingsvisie.
