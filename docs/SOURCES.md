@@ -104,13 +104,18 @@ De landelijke ontwikkeling (`NL00`) vormt de verwachting, zodat een landelijke
 golf niet automatisch een lokale tip wordt. De detector gebruikt de officiële
 wijkregels waar die bestaan en telt buurten alleen als terugvalroute op. Hij
 toetst stijgingen én dalingen, corrigeert de volledige reeks vergelijkingen voor
-meervoudig toetsen en laat per maand maximaal acht diverse kandidaten door.
-Een formeel significante afwijking wordt onderscheiden van een redactioneel
-opvallend patroon. Kleine aantallen en registratiewijzigingen blijven verplichte
-waarschuwingen; cijfers per inwoner worden niet automatisch gebruikt voor
-bedrijventerreinen en andere wijken met zeer weinig inwoners. De categorie
-`brand/ontploffing` is politiedata en mag niet als alle woningbranden worden
-gepresenteerd. NDW gebruikt de officiële CBS/PDOK-
+meervoudig toetsen en laat per maand maximaal acht diverse uitkomsten door. Eén
+compact twaalfmaandsbeeld per gemeente bundelt maximaal vijf brede trends en
+vergelijkt ook aantallen per 1.000 inwoners met Nederland, op basis van CBS
+86165NED. Deze bevolkingsvergelijking wordt bewust niet voor wijken gebruikt:
+bedrijventerreinen en wijken met weinig inwoners zouden misleidende extremen
+geven. Een formeel significante afwijking wordt onderscheiden van een
+redactioneel opvallend patroon. Mogelijke concentraties rond één winkel,
+instelling of registratielocatie krijgen een expliciete waarschuwing. Kleine
+aantallen en registratiewijzigingen blijven eveneens verplichte waarschuwingen;
+categorie `1.3.1` wordt apart gemarkeerd vanwege een mogelijke
+registratiewijziging. `Brand/ontploffing` is politiedata en mag niet als alle
+woningbranden worden gepresenteerd. NDW gebruikt de officiële CBS/PDOK-
 gemeentegeometrie met een buffer van één kilometer; een straatnaam is nooit een
 lokaal bewijs. Onderwijsinspectie behandelt een lege vigerend-oordeelrespons als
 ontbrekende data, niet als een negatief oordeel.

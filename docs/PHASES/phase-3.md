@@ -26,7 +26,7 @@ en deduplicatie op officiële identifier.
 | KOOP | vier bladen; officiële identifier; twee dagen overlap | live SRU valide; laatste venster 3 lokale records |
 | AFM | ZIP/XML 3.0; KVK, vergunning, product en dienst | 23.336 landelijk; 195 lokaal; herhaalrun 195 ongewijzigd |
 | DNB | zes CSV-deelregisters; register+relatienummer | 45.700 regels; 15 lokaal/watchlist; herhaalrun 15 ongewijzigd |
-| Politie/CBS | 47022NED; buurt/wijk/gemeente/NL00; kaartjaar; revisies | augustus 2026 aanwezig; 28 geselecteerde delictreeksen; 8 actuele trendsignalen |
+| Politie/CBS | 47022NED + bevolking 86165NED; buurt/wijk/gemeente/NL00; kaartjaar; revisies | augustus 2026 aanwezig; 28 delictreeksen; 9 wijktrends en 1 gemeentelijk overzicht |
 | NDW | situation+record-id; geometrie+1 km buffer; 90 dagen | 164 lokale records; iedere 15 minuten; taakresultaat 0 |
 | RVO | actuele downloadlink; projectnummer; geometrie/tekst/graph | 73.879 landelijk; 329 lokaal; herhaalrun 329 ongewijzigd |
 
@@ -49,9 +49,11 @@ en wordt als mislukte `fetch_run` zichtbaar.
   verwachte waarde. Alleen voldoende grote absolute en relatieve verschillen
   gaan door; een binomiale toets en Benjamini-Hochberg-correctie begrenzen de
   kans op toeval. Stijgingen en dalingen tellen mee. Per datamaand worden
-  maximaal acht kandidaten gekozen, hoogstens twee per delict en twee per
-  gebied. De waarschuwing over geregistreerde misdrijven, kleine aantallen en
-  mogelijke registratie-effecten is verplicht.
+  maximaal zes wijkkandidaten gekozen, hoogstens twee per delict en twee per
+  gebied, naast maximaal twee gemeentelijke overzichten. Het gemeentelijke
+  twaalfmaandsbeeld gebruikt CBS 86165NED voor de vergelijking per 1.000
+  inwoners; wijken niet. De waarschuwing over geregistreerde misdrijven, kleine
+  aantallen, mogelijke locatieclusters en registratie-effecten is verplicht.
 - NDW (R14): alleen volledige afsluiting, hoge ernst, minstens 24 uur of een
   kritieke locatie/route; kleine werkzaamheden blijven context.
 - R10: minstens twee onafhankelijke bronnen bij dezelfde entiteit binnen
@@ -69,9 +71,10 @@ NDW-impact. Zie `../DECISIONS.md`.
 - Politie R5 behoudt de oude maandpiek-terugtest als historisch bewijs. De
   trenddetector `crime-trend-2.0` doet daarnaast een rollende 24-maandsterugtest
   met dezelfde landelijke correctie, meervoudige toetsing en maandlimiet als de
-  productiedetector. De controle op de actuele dataset omvatte 12.516 geldige
-  vergelijkingen en 186 geselecteerde kandidaten over 24 maanden, na een limiet
-  van acht per datamaand; 454 patronen voldeden vóór die redactionele begrenzing.
+  productiedetector. De controle op de actuele dataset omvatte 7.801 geldige
+  vergelijkingen en 157 geselecteerde wijkkandidaten over 24 maanden; 286
+  patronen voldeden vóór de redactionele begrenzing en er waren 22 gemeentelijke
+  overzichtsmomenten.
 - Eventdata R10: 24 maanden vanaf 1 september 2024, 2.069 signalen, 185 met
   minstens twee bronnen, 133 binnen negentig dagen en 83 niet verworpen.
 - Alle bronfamilies begonnen met nul historische nieuws-events; expliciete
@@ -82,11 +85,11 @@ NDW-impact. Zie `../DECISIONS.md`.
   tweerunsverwijdering, herstel na tijdelijke afwezigheid, foutisolatie,
   kleine aantallen en de twee 24-maandsbacktests.
 
-De bestaande resultaten voor `crime-robust-1.0` en `multi-source-1.0` staan in
-`phase3_backtests`. De `crime-trend-2.0`-terugtest is lokaal reproduceerbaar;
-de eerste volledige bronrun moet hem na twee afgebroken netwerkherstelruns nog
-in productie registreren. Een nieuwe datamaand of bestandsversie alleen maakt
-geen tip. Er zijn geen inhoudelijke afwijkingen van de fase-3-scope. Voor
+De resultaten voor `crime-robust-1.0`, `crime-trend-2.0` en
+`multi-source-1.0` staan in `phase3_backtests`; de volledige Politie/CBS-run van
+2 oktober voltooide na tijdelijke netwerkfouten zonder duplicaten. Een nieuwe
+datamaand of bestandsversie alleen maakt geen tip. Er zijn geen inhoudelijke
+afwijkingen van de fase-3-scope. Voor
 compatibiliteit blijven de bestaande database-enums `registry`/`data` en
 `hourly`/`daily`/`weekly`; de precieze domeinen en feitelijke cadans staan in
 het bronmanifest en de taakplanning.

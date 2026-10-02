@@ -59,16 +59,14 @@ Stadsbron zijn spiegelbron. Eerste Statenrun 2 oktober (bron 164, 6 lokale
 stukken uit 30); de achterstand van 200 is rond 5 oktober weg. De spiegelbronnen
 krijgen hun bronrij bij de run-all van 3 oktober.
 
-R5 volgt nu ook stijgende en dalende misdaadtrends over drie en twaalf maanden
-per wijk en gemeente, afgezet tegen dezelfde periode een jaar eerder en tegen
-de landelijke ontwikkeling. De augustuspublicatie staat in productie met acht
-trend-events en acht bijbehorende signalen; één bestaande maandpiek kwam daar
-apart bij. De wekelijkse broncontrole gebruikt kleinere OData-pagina's en leest
-alleen het relevante 25-maandsvenster uit de database. De laatste herstelruns
-na de eerste liveverwerking eindigden door een tijdelijke `fetch failed`; de
-opgeslagen augustusrecords, events en baselines zijn gericht geverifieerd, maar
-een volgende volledige `ok`-run moet de trendterugtest nog in productie
-registreren.
+R5 volgt stijgende en dalende misdaadtrends over drie en twaalf maanden per wijk
+en gemeente, vergeleken met een jaar eerder en Nederland. Een gemeentelijk
+overzicht toont ook aantallen per 1.000 inwoners; wijken niet. Augustus staat in
+productie met negen wijktrends, één gemeenteoverzicht en de oude maandpiek.
+Signaal 2903 meldt onder meer 13% meer totale registraties en 27% meer fiets-,
+brom- en scooterdiefstal in Amersfoort. Fraude in De Berg-Noord en
+winkeldiefstal in Isselt zijn gemarkeerd als mogelijk locatiecluster. De bronrun
+en beide 24-maandsterugtests zijn op 2 oktober zonder duplicaten afgerond.
 
 De fase-5-leerloop legt redactionele besluiten idempotent vast met reden,
 dimensie en bevroren context van tip, signalen, regels, bronnen en entiteiten.

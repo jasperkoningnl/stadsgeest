@@ -366,8 +366,12 @@ significantie en een redactioneel opvallend maar niet-formeel-significant
 patroon worden zichtbaar van elkaar onderscheiden. Maximaal acht kandidaten per
 datamaand, met spreiding over delicten en gebieden, gaan naar R5.
 
-Een ranglijst per duizend inwoners wordt niet automatisch gebruikt: die geeft
-op bedrijventerreinen en in wijken met weinig inwoners misleidende extremen.
-`Brand/ontploffing` uit de politieregistratie is opgenomen, maar wordt nooit
-gelijkgesteld aan alle woningbranden. Alle uitkomsten blijven onderzoekstips;
-registratie- en aangifte-effecten vereisen menselijke verificatie.
+Een ranglijst per duizend inwoners wordt niet op wijkniveau gebruikt: die geeft
+op bedrijventerreinen en in wijken met weinig inwoners misleidende extremen. Op
+gemeenteniveau mag een compact twaalfmaandsbeeld wel de officiële CBS-bevolking
+uit 86165NED gebruiken voor een vergelijking met Nederland. Mogelijke
+locatieclusters krijgen een aparte waarschuwing en categorie `1.3.1` een
+registratiewaarschuwing. `Brand/ontploffing` uit de politieregistratie is
+opgenomen, maar wordt nooit gelijkgesteld aan alle woningbranden. Alle
+uitkomsten blijven onderzoekstips; registratie- en aangifte-effecten vereisen
+menselijke verificatie.

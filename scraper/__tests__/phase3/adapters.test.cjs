@@ -13,7 +13,8 @@ const { parseSru } = require('../../src/kg/adapters/koop-nonmunicipal.cjs');
 const { parseNdwXml, pointInGeometry, pointInGeometryBuffered } = require('../../src/kg/adapters/ndw-planning.cjs');
 const { assessInspectionChange, duoBranchCode, normalizeInspectionRecord } = require('../../src/kg/adapters/onderwijsinspectie-kwaliteit.cjs');
 const { CRIME_CODES, CRIME_PATTERN, aggregateTrendRows, assessCrimePoint, assessCrimeTrends, backtestCrime, backtestCrimeTrends,
-  districtCode, previousPeriod, robustZ, selectTrendCandidates } = require('../../src/kg/adapters/politie-cbs-anomalies.cjs');
+  buildMunicipalityDigests, districtCode, previousPeriod, robustZ, selectTrendCandidates,
+  executeWithRetry, isPossibleLocationCluster, trendWarning } = require('../../src/kg/adapters/politie-cbs-anomalies.cjs');
 const { R5_CRIME_ANOMALY, R11_SCHOOL_ENROLLMENT, R12_SCHOOL_FORECAST } = require('../../src/kg/detection-rules.cjs');
 const { evaluateHistoricalClusters } = require('../../backtest-phase3.cjs');
 
@@ -31,6 +32,17 @@ describe('fase 3 broncontracten', () => {
     assert.equal(isRecoveredUnconfirmed({ hash: first.tombstone.semanticHash, changeType: 'changed', record: first.tombstone }, 'origineel'), true);
     const second = missingTransition('bron:1', { hash: first.tombstone.semanticHash, changeType: 'changed', record: first.tombstone });
     assert.equal(second.confirmed, true); assert.equal(second.tombstone._priorSemanticHash, 'origineel');
+  });
+
+  it('herhaalt een tijdelijke databasefout bij het opslaan van terugtestbewijs', async () => {
+    let attempts = 0;
+    const result = await executeWithRetry({ execute: async statement => {
+      attempts++;
+      if (attempts < 3) throw new Error('fetch failed');
+      return statement;
+    } }, { sql: 'SELECT 1' });
+    assert.equal(attempts, 3);
+    assert.deepEqual(result, { sql: 'SELECT 1' });
   });
 
   it('filtert AFM uitsluitend op exacte lokale vestigingsplaats', () => {
@@ -113,24 +125,61 @@ describe('fase 3 broncontracten', () => {
     const latest = '2026MM08'; const rows = [];
     for (let offset = 0; offset < 25; offset++) {
       const period = previousPeriod(latest, offset);
-      const local = offset < 3 ? 12 : offset < 6 ? 5 : 6;
+      const local = offset < 3 ? 20 : offset < 6 ? 5 : 6;
       rows.push({ WijkenEnBuurten: 'BU03070800', SoortMisdrijf: '1.2.3', Perioden: period, GeregistreerdeMisdrijven_1: local });
+      rows.push({ WijkenEnBuurten: 'GM0307', SoortMisdrijf: '1.2.3', Perioden: period, GeregistreerdeMisdrijven_1: 30 });
       rows.push({ WijkenEnBuurten: 'NL00', SoortMisdrijf: '1.2.3', Perioden: period, GeregistreerdeMisdrijven_1: 1000 });
     }
     const areas = new Map([['WK030708', { name: 'Schothorst-Zuid', municipality: 'GM0307' }]]);
     const result = assessCrimeTrends(rows, areas, latest);
     const candidate = result.candidates.find(item => item.area === 'WK030708');
-    assert.ok(candidate); assert.equal(candidate.windowMonths, 3); assert.equal(candidate.observed, 36);
+    assert.ok(candidate); assert.equal(candidate.windowMonths, 3); assert.equal(candidate.observed, 60);
     assert.equal(candidate.yearAgo, 18); assert.equal(candidate.previousWindow, 15);
     assert.equal(candidate.classification, 'statistically_distinct'); assert.ok(candidate.qValue <= 0.05);
+    assert.equal(candidate.possibleLocationCluster, true); assert.match(trendWarning(candidate), /één locatie/);
     const event = { event_type: 'CRIME_TREND_DETECTED', provenance: JSON.stringify({ reason: 'trend_trigger',
       direction: candidate.direction, classification: candidate.classification, window_months: candidate.windowMonths,
       observed: candidate.observed, year_ago: candidate.yearAgo, previous_window: candidate.previousWindow,
       expected: candidate.expected, ratio: candidate.ratio, z_score: candidate.zScore, q_value: candidate.qValue,
-      national_ratio: candidate.nationalRatio, period_from: candidate.periodFrom, period_to: candidate.periodTo }) };
+      national_ratio: candidate.nationalRatio, period_from: candidate.periodFrom, period_to: candidate.periodTo,
+      possible_location_cluster: candidate.possibleLocationCluster, warning: trendWarning(candidate) }) };
     assert.equal(await R5_CRIME_ANOMALY.condition(event), true);
-    const signal = await R5_CRIME_ANOMALY.createSignal({ ...event, title: 'Diefstal stijgt', summary: '36 registraties.', source_url: 'https://bron' });
+    const signal = await R5_CRIME_ANOMALY.createSignal({ ...event, title: 'Diefstal stijgt', summary: '60 registraties.', source_url: 'https://bron' });
     assert.match(signal.summary, /correctie voor meervoudig toetsen/);
+    assert.match(signal.summary, /brede wijktrend/); assert.match(signal.evidence.join(' '), /registratielocatie/);
+  });
+
+  it('maakt één gemeentelijk misdaadbeeld met alleen gemeentelijke cijfers per 1.000 inwoners', async () => {
+    const base = { area: 'GM0307', latestPeriod: '2026MM08', windowMonths: 12, qValue: 0.001,
+      nationalYearAgo: 100000, municipalityObserved: 0, municipalityYearAgo: 0 };
+    const metrics = [
+      { ...base, crime: '0.0.0', observed: 9000, yearAgo: 8000, expected: 8100, difference: 900, ratio: 9000 / 8100,
+        zScore: 5, nationalObserved: 101000, nationalRatio: 1.01 },
+      { ...base, crime: '1.2.3', observed: 1380, yearAgo: 1087, expected: 1098, difference: 282, ratio: 1380 / 1098,
+        zScore: 4, nationalObserved: 101000, nationalRatio: 1.01 },
+    ];
+    const populations = new Map([['GM0307', 163298], ['NL00', 18044027]]);
+    const crimes = new Map([['0.0.0', { Title: '0.0.0 Totaal misdrijven' }], ['1.2.3', { Title: '1.2.3 Fietsendiefstal' }]]);
+    const digests = buildMunicipalityDigests(metrics, populations, crimes, '2026MM08');
+    assert.equal(digests.length, 1); assert.equal(digests[0].items.length, 2);
+    assert.equal(Number(digests[0].items[0].localRatePer1000.toFixed(1)), 55.1);
+    const items = digests[0].items.map(item => ({ crime_name: item.crimeName, local_change: item.localChange,
+      national_change: item.nationalChange, local_rate_per_1000: item.localRatePer1000,
+      national_rate_per_1000: item.nationalRatePer1000 }));
+    const event = { event_type: 'CRIME_TREND_DIGEST', title: 'Misdaadbeeld Amersfoort', summary: 'Gemeentelijk overzicht.',
+      source_url: 'https://bron', provenance: JSON.stringify({ reason: 'municipality_digest', area_level: 'gemeente',
+        area_name: 'Amersfoort', period: '2026MM08', window_months: 12, items, population_dataset: '86165NED',
+        population: 163298, national_population: 18044027, warning: 'Registratie-effecten mogelijk.' }) };
+    assert.equal(await R5_CRIME_ANOMALY.condition(event), true);
+    const signal = await R5_CRIME_ANOMALY.createSignal(event);
+    assert.match(signal.evidence.join(' '), /per 1\.000 inwoners/); assert.match(signal.summary, /Registratie-effecten/);
+  });
+
+  it('waarschuwt bij sterke fraude- en winkeldiefstalclusters ook als de gemeente meebeweegt', () => {
+    assert.equal(isPossibleLocationCluster({ area: 'WK030705', crime: '2.5.2', direction: 'increase', observed: 57,
+      ratio: 9.5, municipalityShare: 0.14, municipalityRatio: 1.3 }), true);
+    assert.equal(isPossibleLocationCluster({ area: 'WK030705', crime: '1.2.3', direction: 'increase', observed: 57,
+      ratio: 1.4, municipalityShare: 0.14, municipalityRatio: 1.3 }), false);
   });
 
   it('backtest 24 maanden telt onderdrukking en multi-sourceclusters uitlegbaar', () => {

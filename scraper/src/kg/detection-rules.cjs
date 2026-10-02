@@ -224,9 +224,14 @@ const R4_LOCAL_PERSON_EXTERNAL = {
 const R5_CRIME_ANOMALY = {
   id: 'R5',
   name: 'Robuuste anomalie geregistreerde misdrijven',
-  eventTypes: ['CRIME_ANOMALY_DETECTED', 'CRIME_TREND_DETECTED'],
+  eventTypes: ['CRIME_ANOMALY_DETECTED', 'CRIME_TREND_DETECTED', 'CRIME_TREND_DIGEST'],
   async condition(event) {
     let p = {}; try { p = JSON.parse(event.provenance || '{}'); } catch { return false; }
+    if (event.event_type === 'CRIME_TREND_DIGEST') {
+      return p.reason === 'municipality_digest' && p.area_level === 'gemeente' && Number(p.window_months) === 12 &&
+        Array.isArray(p.items) && p.items.length >= 2 && p.items.every(item => Number.isFinite(Number(item.local_rate_per_1000)) &&
+          Number.isFinite(Number(item.national_rate_per_1000)));
+    }
     if (event.event_type === 'CRIME_TREND_DETECTED') {
       return p.reason === 'trend_trigger' && ['increase', 'decrease'].includes(p.direction) &&
         Number(p.window_months) >= 3 && Number(p.expected) >= 5 && Number.isFinite(Number(p.ratio));
@@ -236,11 +241,23 @@ const R5_CRIME_ANOMALY = {
   },
   async createSignal(event) {
     const p = JSON.parse(event.provenance || '{}');
+    if (event.event_type === 'CRIME_TREND_DIGEST') {
+      return { title: event.title, summary: `${event.summary} ${p.warning}`,
+        category: 'veiligheid', tier: 2, noveltyScore: 84,
+        evidence: [...p.items.map(item => `${item.crime_name}: ${Math.round(Number(item.local_change) * 100)}% lokaal, ` +
+          `${Math.round(Number(item.national_change) * 100)}% landelijk; ${Number(item.local_rate_per_1000).toFixed(1)} ` +
+          `tegen ${Number(item.national_rate_per_1000).toFixed(1)} per 1.000 inwoners`),
+          `CBS-bevolkingsreferentie ${p.population_dataset}`, event.source_url],
+        entityPath: `${p.area_name || p.area_code} → gemeentelijk misdaadbeeld → ${p.period}`,
+        provenance: { area_level: p.area_level, classification: p.classification, methodology_warning: p.warning,
+          population: p.population, national_population: p.national_population, population_dataset: p.population_dataset,
+          digest_items: p.items }, entities: [] };
+    }
     if (event.event_type === 'CRIME_TREND_DETECTED') {
       const classification = p.classification === 'statistically_distinct'
         ? 'De afwijking blijft overeind na correctie voor meervoudig toetsen.'
         : 'Dit is een redactioneel opvallend patroon, geen formeel significante afwijking.';
-      return { title: event.title, summary: `${event.summary} ${classification} Het gaat om geregistreerde misdrijven; registratie- en aangifte-effecten blijven mogelijk.`,
+      return { title: event.title, summary: `${event.summary} ${classification} ${p.warning || 'Het gaat om geregistreerde misdrijven; registratie- en aangifte-effecten blijven mogelijk.'}`,
         category: 'veiligheid', tier: 2,
         noveltyScore: Math.min(92, p.classification === 'statistically_distinct' ? 78 + Math.round(Math.abs(Number(p.z_score))) : 68),
         evidence: [`${p.observed} geregistreerd in ${p.window_months} maanden`, `${p.year_ago} in dezelfde periode een jaar eerder`,
@@ -248,12 +265,14 @@ const R5_CRIME_ANOMALY = {
           p.area_level === 'wijk' && Number(p.municipality_year_ago) > 0
             ? `ontwikkeling gemeente ${Math.round((Number(p.municipality_ratio) - 1) * 100)}%` : null,
           `landelijk gecorrigeerde verwachting ${Number(p.expected).toFixed(1)}`,
+          p.possible_location_cluster ? 'mogelijk één locatie, instelling of registratielocatie; redactioneel controleren' : null,
           p.classification === 'statistically_distinct' ? `FDR q=${Number(p.q_value).toFixed(3)}` : 'redactioneel opvallend, niet formeel significant',
           event.source_url].filter(Boolean),
         entityPath: `${p.area_name || p.area_code} → ${p.crime_name || p.crime_code} → ${p.period_from}–${p.period_to}`,
         provenance: { absolute_count: p.observed, year_ago_count: p.year_ago, expected_count: p.expected,
           area_version: p.map_year, area_level: p.area_level, direction: p.direction, classification: p.classification,
-          methodology_warning: p.warning, national_trend_ratio: p.national_ratio, q_value: p.q_value }, entities: [] };
+          methodology_warning: p.warning, national_trend_ratio: p.national_ratio, q_value: p.q_value,
+          possible_location_cluster: p.possible_location_cluster, municipality_share: p.municipality_share }, entities: [] };
     }
     return { title: event.title, summary: `${event.summary} Het gaat om geregistreerde misdrijven; registratie-effecten blijven mogelijk.`,
       category: 'veiligheid', tier: 2, noveltyScore: Math.min(90, 60 + Math.round(Number(p.robustZ))),
