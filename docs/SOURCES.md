@@ -249,8 +249,23 @@ seconden. Een document krijgt hoogstens twee OCR-pogingen. Geslaagde tekst krijg
 `tekstbron='ocr'`, wordt in `raw_items.full_text` opgenomen en maakt afgeleide
 NER- en adresscans ongeldig voor een gerichte herhaling. De productiepiloottest
 van 25 september herstelde één scan naar 1.938 tekens; één foto bleef terecht
-onder de minimumgrens van 200 tekens. De resterende wachtrij wordt in volgende
-dagelijkse `run-weekly`-rondes geleidelijk verwerkt.
+onder de minimumgrens van 200 tekens. Nieuwe scans worden in volgende dagelijkse
+`run-weekly`-rondes geleidelijk verwerkt.
+
+PDF's boven 40 MB krijgen in de gewone run status `te_groot`. De afzonderlijke
+`scraper/src/scrapers/ibabs-grote-bijlagen.js` verwerkt op een rustig moment
+hoogstens één zo'n bestand per aanroep en staat bewust niet in `run-weekly`.
+Standaard gelden 100 MB, vijf minuten downloadtijd, maximaal 300 pagina's en
+drie pogingen. `grote_pogingen` en `grote_fout` bewaren de toestand per bijlage;
+een zware fout blokkeert daardoor niet blijvend de rest. Aanroep vanuit
+`scraper/`:
+
+```powershell
+node src/scrapers/ibabs-grote-bijlagen.js
+```
+
+De grenzen zijn zo nodig instelbaar via `IBABS_GROTE_BIJLAGE_MAX_MB`,
+`IBABS_GROTE_BIJLAGE_TIMEOUT_MS` en `IBABS_GROTE_BIJLAGE_MAX_PAGINAS`.
 
 **Woo-bijlagen inhoudelijk meewegen (gebouwd 24 september 2026, besluit Jasper).**
 Voorheen woog de inhoud van de Woo-bijlagen niet mee, om drie redenen:

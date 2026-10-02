@@ -84,6 +84,19 @@ de lokale FTS5-index. Hoogstens tien nieuwe historische items worden gericht
 voor intake heropend. Controleer na de eerste en de eerste geplande run Beheer →
 Verbruik en leg het verschil vast.
 
+## Grote iBabs-bijlagen
+
+De gewone bijlagenrunner stopt bij 40 MB. Verwerk de aparte wachtrij buiten
+intake, detectie en weger met:
+
+```powershell
+node scraper/src/scrapers/ibabs-grote-bijlagen.js
+```
+
+Iedere aanroep verwerkt maximaal één bestand. Plan dit daarom als een eigen taak
+op een rustig moment en niet binnen `run-weekly`. Na drie mislukte pogingen stopt
+de automatische herhaling; de laatste fout staat in `grote_fout`.
+
 ## Entitybeheer en fase-1-audit
 
 Controleer de actuele dekking en openstaande fase-1-eisen met:
