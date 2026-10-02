@@ -234,7 +234,7 @@ RTV Utrecht, amersfoort.nieuws.nl, Nieuwsplein33).
 de broncriteria uit het uitbreidingsplan: openbaar, machineleesbaar, zonder
 betaalde sleutel, formele stukken boven nieuwspagina's.
 
-1. **Provinciale Staten en Gedeputeerde Staten Utrecht — vergaderstukken.**
+1. **Provinciale Staten en Gedeputeerde Staten Utrecht — vergaderstukken.** *Gebouwd op 2 oktober, zie `SOURCES.md`; rechtstreeks op het Statenplatform omdat Open Stateninformatie drie maanden achterliep.*
    De provincie wordt nu alleen via haar nieuwspagina gevolgd (bron 39,
    negen berichten per keer). De Statenstukken staan in Open
    Stateninformatie, dezelfde API die `raadsinformatie-ori.js` al leest:
@@ -255,7 +255,7 @@ betaalde sleutel, formele stukken boven nieuwspagina's.
    vanaf de notebook vermoedelijk niet. Het past direct in `subsidies` naast
    het gemeentelijke register en voedt `organisatie_verbanden` (rol geld).
    Verifieer het bestandsformaat en de licentie eerst.
-3. **Leusder Krant en De Stadsbron als spiegelbron.** Beide staan in
+3. **Leusder Krant en De Stadsbron als spiegelbron.** *Gebouwd op 2 oktober, zie `SOURCES.md`.* Beide staan in
    `EDITORIAL-PROFILE.md` als spiegel maar hebben geen bronrij. Zonder
    Leusder Krant kan de weger bij Leusdense tips de "al bekend"-controle niet
    doen, en vier van de negentien afwijzingen waren juist "al bekend".
@@ -277,7 +277,7 @@ betaalde sleutel, formele stukken boven nieuwspagina's.
    corporatie jaarlijks een oordeel over governance en financiën. Voor De
    Alliantie, Portaal en Omnia Wonen is dat een formele, gedateerde bron die
    nu ontbreekt en direct in het woningbouwdossier past.
-7. **B&W-besluitenlijsten Leusden.** Amersfoort heeft bron 131; Leusden niet,
+7. **B&W-besluitenlijsten Leusden.** *Op 2 oktober onderzocht: Notubiz, RaadKijker en leusden.nl waren vanuit de cloud niet bereikbaar of leeg; controleren vanaf de notebook.* Amersfoort heeft bron 131; Leusden niet,
    terwijl het redactieprofiel Leusden als dun bezet gebied noemt. Controleer
    of de besluitenlijsten in de Notubiz-omgeving van Leusden (organisatie
    2090) staan; zo ja, is het een extra categorie in `notubiz-leusden.js`.

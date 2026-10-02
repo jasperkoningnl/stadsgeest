@@ -52,6 +52,12 @@ KVK-identiteitsregels hersteld. De iBabs-keten heeft een begrensde OCR-naloop
 voor scans zonder tekstlaag. De bronnenwacht meldt na herstel en gemotiveerde
 uitschakelingen nul verdachte en nul dode bronnen.
 
+Sinds 2 oktober leest de keten ook de Statenstukken van de provincie Utrecht
+rechtstreeks uit het Statenplatform (alleen stukken die Amersfoort of Leusden
+noemen, tier 1) en zijn de Leusder Krant en De Stadsbron als spiegelbron
+toegevoegd; de eerste productieruns moeten nog plaatsvinden en de achterstand
+van ruim 200 Statenstukken wordt in een paar runs weggewerkt.
+
 R5 volgt nu ook stijgende en dalende misdaadtrends over drie en twaalf maanden
 per wijk en gemeente, afgezet tegen dezelfde periode een jaar eerder en tegen
 de landelijke ontwikkeling. De augustuspublicatie staat in productie met acht

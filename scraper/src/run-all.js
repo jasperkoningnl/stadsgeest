@@ -35,6 +35,9 @@ const scrapers = [
 'raadkijker-moties.js',         // Moties/amendementen via RaadKijker-API + Notubiz-PDF (2026-09-23); sleutel RAADKIJKER_API_KEY in .env
 'insolventies.js',             // Centraal Insolventieregister, alleen lokale rechtspersonen (2026-09-23)
 'notubiz-leusden.js',          // Vergaderstukken gemeenteraad Leusden via de Notubiz-API; vervangt de stilgevallen ORI-Leusdenbron 129 (2026-09-24)
+'stateninformatie.js',        // Statenstukken provincie Utrecht over Amersfoort en Leusden, rechtstreeks uit de GO-API met PDF-tekst (2026-10-02)
+'leusder-krant.js',           // Spiegelbron Leusden, RSS (2026-10-02)
+'destadsbron.js',             // Spiegelbron Amersfoort, voorpagina zonder RSS (2026-10-02)
   // pdok-bag.js en rechtspraak.js draaien wekelijks → run-weekly.js (aangemaakt in Groep B)
 ];
 

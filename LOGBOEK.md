@@ -30,6 +30,12 @@ wordt getoond. De documentatiecontrole (`npm run docs:check`, ook vóór iedere
 build) weigert een logboek waarin het voorkomt; welke woorden zij bewaakt staat
 in `scripts/check-docs.mjs` en de reden in `docs/DECISIONS.md` (2026-10-02).
 
+## 2026-10-02 — Stukken van Provinciale Staten en twee extra kranten in de spiegelcheck
+
+Stadsgeest leest nu ook de vergaderstukken van Provinciale Staten en de Statencommissies van de provincie Utrecht: Statenvoorstellen, Statenbrieven, inspraakreacties en antwoorden op Statenvragen. Alleen stukken die Amersfoort, Leusden of een wijk of buurtschap daarvan noemen komen binnen; de rest van de provincie blijft buiten beeld. Tot nu toe kwam van de provincie alleen het nieuws van de website binnen. Verwacht de komende dagen enkele tips of dossierfeiten over bijvoorbeeld de netuitbreiding bij Amersfoort-Noord en de wijziging van de provinciale omgevingsvisie.
+
+Daarnaast kijkt Stadsgeest voortaan ook in de Leusder Krant en De Stadsbron voordat een tip wordt gemaakt. Beide waren al afgesproken als media waarmee rekening wordt gehouden, maar werden nog niet gelezen. Bij een Leusdense tip kan "al gebracht" nu dus ook naar de Leusder Krant verwijzen.
+
 ## 2026-10-02 — Misdaadcijfers worden nu als lokale trend gevolgd
 
 Stadsgeest kijkt niet meer alleen naar losse 112-meldingen of een uitzonderlijke maand, maar vergelijkt geregistreerde misdrijven over drie en twaalf maanden. Dat gebeurt per wijk en voor de hele gemeente, zowel voor stijgingen als dalingen. Een lokale verandering wordt ook naast de landelijke ontwikkeling gelegd, zodat een landelijke golf niet vanzelf een lokaal verhaal wordt. De eerste reeks over augustus bevat onder meer een stijging van winkeldiefstal in Isselt, meer verkeersmisdrijven in Amersfoort en juist minder diefstal uit voertuigen in Stadskern. Het zijn onderzoekssignalen: aangiftebereidheid en veranderingen in registratie kunnen de cijfers beïnvloeden. Brand en ontploffing is een politiecategorie en zegt niet hetzelfde als alle woningbranden.
