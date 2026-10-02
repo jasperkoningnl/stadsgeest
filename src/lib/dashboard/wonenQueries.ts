@@ -60,7 +60,7 @@ const CACHE_SECONDEN = 6 * 60 * 60
 // De datacache van Next overleeft een nieuwe build. Verhoog deze versie bij
 // elke wijziging in een query of in de verwerking, anders blijft de oude
 // uitkomst tot de revalidatie staan.
-const CACHE_VERSIE = 'v2'
+const CACHE_VERSIE = 'v3'
 
 // Woordenlijst voor "woon-gerelateerd" in titels van raadsstukken en regels.
 // LIKE kent geen woordgrenzen, dus de meeste patronen eisen een spatie of het
@@ -616,3 +616,230 @@ async function laadCorporatieNieuws(): Promise<Bericht[]> {
 }
 
 export const getCorporatieNieuws = unstable_cache(laadCorporatieNieuws, [`wonen-corporatienieuws-${CACHE_VERSIE}`], { revalidate: CACHE_SECONDEN })
+
+// ── Volledige vergunningenlijst: filters, lopende aanvragen, projecten ───────
+
+export interface VergunningItem {
+  id: number
+  titel: string
+  url: string | null
+  datum: string
+  soort: VergunningSoort
+  themas: ThemaId[]
+  /** Adres zoals het in de kop staat, zonder postcode en plaats; null als de kop geen adres noemt. */
+  adres: string | null
+  wijk: string | null
+  wijkCode: string | null
+  /** Aantal woningen of appartementen dat de kop noemt (indicatief, alleen bij een expliciet getal). */
+  woningen: number | null
+  zorg: boolean
+}
+
+export interface LopendeAanvraag extends VergunningItem {
+  dagenOpen: number
+  /** Dagen tot het einde van de wettelijke beslistermijn van acht weken; negatief is verstreken. */
+  dagenTotTermijn: number
+}
+
+export interface VergunningenLijst {
+  items: VergunningItem[]
+  lopend: LopendeAanvraag[]
+  /** Ontvangen aanvragen waarvoor later op hetzelfde adres een besluit of verlenging is gepubliceerd. */
+  afgehandeld: number
+  projecten: VergunningItem[]
+  wijken: { code: string; naam: string }[]
+}
+
+const BESLISTERMIJN_DAGEN = 56
+
+const ZORG_TERMEN = ['zorg', 'senior', 'ouderen', 'mantelzorg', 'begeleid', 'verpleeg', 'levensloop', 'aanleun', 'rolstoel', 'woon-zorg', 'woonzorg', 'opvang', 'beschermd wonen', 'hospice', 'dagbesteding']
+
+function soortVanTitel(t: string): VergunningSoort {
+  if (/^(Ontvangen aanvraag|Kennisgeving ontvangen aanvraag)/.test(t)) return 'aanvraag'
+  if (/^Verleend/.test(t)) return 'verleend'
+  if (/^(Weigering|Geweigerd)/.test(t)) return 'geweigerd'
+  if (/beslistermijn/i.test(t) || /^Verlenging/.test(t)) return 'verlengd'
+  if (/buiten behandeling/i.test(t)) return 'buiten_behandeling'
+  if (/intrekken|ingetrokken/i.test(t)) return 'ingetrokken'
+  if (/vergunningvrij|geen vergunning/i.test(t)) return 'vergunningvrij'
+  return 'overig'
+}
+
+/** Vertaalt een SQL-LIKE-term ('tot % appartementen') naar een reguliere expressie. */
+function likeNaarRegex(term: string): RegExp {
+  return new RegExp(term.split('%').map((d) => d.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*'), 'i')
+}
+
+const THEMA_REGEX = THEMAS.map((t) => ({ id: t.id, regexen: t.termen.map(likeNaarRegex) }))
+const ZORG_REGEX = ZORG_TERMEN.map(likeNaarRegex)
+
+function themasVanTitel(t: string): ThemaId[] {
+  return THEMA_REGEX.filter((th) => th.regexen.some((r) => r.test(t))).map((th) => th.id)
+}
+
+/**
+ * Het adres uit de kop, genormaliseerd zodat aanvraag en besluit op elkaar
+ * passen. De gemeente gebruikt vaste formuleringen ("op het perceel …",
+ * "ter hoogte van …", "beslistermijn verlengen …"); het streepjesformaat van
+ * oudere kennisgevingen eindigt op "- adres, postcode plaats".
+ */
+export function adresVanTitel(t: string): string | null {
+  let m = /(?:op het perceel|op de percelen|ter hoogte van|beslistermijn verlengen|op de locatie|nabij)\s+(.+)$/i.exec(t)
+  if (!m) m = /\s-\s([^-]+?,\s*\d{4}\s?[A-Z]{2}\b.*)$/.exec(t)
+  if (!m) return null
+  let a = m[1]
+  a = a.replace(/,?\s*\d{4}\s?[A-Z]{2}\b.*$/, '')
+  a = a.replace(/\s+(te|in)\s+(Amersfoort|Hoogland|Hooglanderveen|Stoutenburg).*$/i, '')
+  a = a.replace(/\s*-\s*gewijzigd.*$/i, '').trim().replace(/[ ,.]+$/, '').toLowerCase().replace(/\s+/g, ' ')
+  return a.length >= 4 ? a : null
+}
+
+function woningenVanTitel(t: string): number | null {
+  const m = /\b(\d{1,3})\s+(woningen|appartementen|studio'?s|wooneenheden|zorgwoningen|zorgappartementen)\b/i.exec(t)
+  return m ? Number(m[1]) : null
+}
+
+async function laadVergunningenLijst(): Promise<VergunningenLijst> {
+  const [rijen, wijkNamen] = await Promise.all([
+    q<any>(
+      `SELECT ri.id, ri.title AS titel, ri.external_url AS url, ${DATUM} AS datum,
+              (SELECT 'WK' || substr(da.buurtcode, 3, 6) FROM document_addresses da
+                WHERE da.raw_item_id = ri.id AND da.match_status = 'exact' AND da.buurtcode LIKE 'BU0307%' LIMIT 1) AS wijk_code
+       FROM raw_items ri WHERE ri.source_id = ? ORDER BY datum DESC, ri.id DESC`,
+      [BRON.omgevingsvergunningen],
+    ),
+    q<any>(`SELECT area_code, area_name FROM area_versions WHERE municipality_code = 'GM0307' AND area_code LIKE 'WK%'`),
+  ])
+  const naam = new Map<string, string>(wijkNamen.map((r) => [r.area_code, r.area_name]))
+  const items: VergunningItem[] = rijen.map((r) => {
+    const titel = String(r.titel)
+    return {
+      id: Number(r.id), titel, url: r.url ?? null, datum: String(r.datum),
+      soort: soortVanTitel(titel),
+      themas: themasVanTitel(titel),
+      adres: adresVanTitel(titel),
+      wijkCode: r.wijk_code ?? null,
+      wijk: r.wijk_code ? naam.get(r.wijk_code) ?? r.wijk_code : null,
+      woningen: woningenVanTitel(titel),
+      zorg: ZORG_REGEX.some((re) => re.test(titel)),
+    }
+  })
+
+  // Lopende aanvragen: een ontvangen aanvraag zonder later gepubliceerd besluit
+  // of verlenging op hetzelfde adres. Adressen zonder huisnummer (kavels,
+  // "Verzoeklocatie …") vallen vaak buiten de koppeling; dat staat in de uitleg.
+  const besluitenPerAdres = new Map<string, string[]>()
+  for (const it of items) {
+    if (it.adres && it.soort !== 'aanvraag' && it.soort !== 'overig') {
+      besluitenPerAdres.set(it.adres, [...(besluitenPerAdres.get(it.adres) ?? []), it.datum])
+    }
+  }
+  const vandaag = new Date().toISOString().slice(0, 10)
+  const dagen = (van: string, tot: string) => Math.round((Date.parse(tot) - Date.parse(van)) / 86400000)
+  const lopend: LopendeAanvraag[] = []
+  let afgehandeld = 0
+  for (const it of items) {
+    if (it.soort !== 'aanvraag') continue
+    const later = it.adres ? (besluitenPerAdres.get(it.adres) ?? []).some((d) => d >= it.datum) : false
+    if (later) { afgehandeld++; continue }
+    const dagenOpen = dagen(it.datum, vandaag)
+    lopend.push({ ...it, dagenOpen, dagenTotTermijn: BESLISTERMIJN_DAGEN - dagenOpen })
+  }
+  lopend.sort((a, b) => b.dagenOpen - a.dagenOpen)
+
+  const projecten = items.filter((it) => (it.woningen ?? 0) >= 5)
+  const wijken = [...new Set(items.map((it) => it.wijkCode).filter((c): c is string => !!c))]
+    .map((code) => ({ code, naam: naam.get(code) ?? code }))
+    .sort((a, b) => a.naam.localeCompare(b.naam, 'nl'))
+  return { items, lopend, afgehandeld, projecten, wijken }
+}
+
+export const getVergunningenLijst = unstable_cache(laadVergunningenLijst, [`wonen-vergunningenlijst-${CACHE_VERSIE}`], { revalidate: CACHE_SECONDEN })
+
+// ── Wonen en zorg ────────────────────────────────────────────────────────────
+
+export interface ZorgSubsidie {
+  omschrijving: string
+  ontvanger: string | null
+  jaar: number
+  bedrag: number
+}
+
+export interface ZorgOverzicht {
+  /** Raadsstukken van het afgelopen jaar over wonen met zorg, opvang of ouderen. */
+  raad: Stuk[]
+  /** Subsidies aan wonen-met-zorg: beschermd en begeleid wonen, opvang, doorstroming. */
+  subsidies: ZorgSubsidie[]
+  subsidieTotaalPerJaar: { jaar: number; totaal: number; aantal: number }[]
+  /** Officiële of bevestigde dossierfeiten die wonen en zorg raken. */
+  feiten: WoonFeit[]
+}
+
+const ZORG_RAAD_PATRONEN = [
+  '%beschermd wonen%', '%begeleid wonen%', '%maatschappelijke opvang%', '%daklo%', '%woonzorg%', '%woon-zorg%',
+  '%ouderenhuisvesting%', '%seniorenwoning%', '%levensloopbestendig%', '%mantelzorgwoning%', '%zorgwoning%',
+  '%verpleeghuis%', '%skaeve huse%', '%flexwon%', '%doorstroming%', '%wonen en zorg%', '%zorg en wonen%',
+  '%ouderen%wonen%', '%wonen%ouderen%', '%huisvesting%kwetsbar%', '%kwetsbar%huisvesting%', '%housing first%', '%woonplek%',
+]
+
+const ZORG_SUBSIDIE_PATRONEN = [
+  '%beschermd wonen%', '%begeleid wonen%', '%opvang%', '%doorstroomwoning%', '%housing first%', '%huisvesting%',
+  '%woonbegeleiding%', '%skaeve%', '%wonen%', '%dakloz%',
+]
+
+async function laadZorgOverzicht(): Promise<ZorgOverzicht> {
+  const raadGaten = RAAD_BRONNEN.map(() => '?').join(',')
+  const raadWaar = `(${ZORG_RAAD_PATRONEN.map(() => 'ri.title LIKE ?').join(' OR ')})`
+  const subsidieWaar = `(${ZORG_SUBSIDIE_PATRONEN.map(() => 'omschrijving LIKE ?').join(' OR ')})`
+  const dossiers = [WOON_DOSSIER_ID, 14, 18, 19] // wonen, asielopvang, zorgtoezicht, Skaeve Huse
+  const [raad, subsidies, feiten] = await Promise.all([
+    q<Stuk>(
+      `SELECT ri.id, ri.title AS titel, ri.external_url AS url, ${DATUM.replace(/published_at/g, 'ri.published_at').replace(/scraped_at/g, 'ri.scraped_at')} AS datum, s.name AS bron
+       FROM raw_items ri JOIN sources s ON s.id = ri.source_id
+       WHERE ri.source_id IN (${raadGaten}) AND ${raadWaar}
+         AND COALESCE(ri.published_at, ri.scraped_at) >= date('now', '-365 days')
+       ORDER BY datum DESC, ri.id DESC LIMIT 40`,
+      [...RAAD_BRONNEN, ...ZORG_RAAD_PATRONEN],
+    ),
+    q<any>(
+      `SELECT omschrijving, ontvanger, jaar, bedrag FROM subsidies
+       WHERE jaar >= 2024 AND ${subsidieWaar} AND omschrijving NOT LIKE 'Woningisolatie%' AND omschrijving NOT LIKE '%regenwater%'
+       ORDER BY jaar DESC, bedrag DESC`,
+      [...ZORG_SUBSIDIE_PATRONEN],
+    ),
+    q<WoonFeit>(
+      `SELECT f.id, f.fact_type, f.datum, f.locatie, f.titel, f.details, f.zekerheid, f.primaire_bron_url,
+              d.naam AS dossier, d.slug AS dossier_slug
+       FROM dossier_facts f JOIN dossiers d ON d.id = f.dossier_id
+       WHERE f.dossier_id IN (${dossiers.map(() => '?').join(',')}) AND f.zekerheid IN ('officieel', 'bevestigd') AND f.superseded_by IS NULL
+         AND (f.titel LIKE '%zorg%' OR f.titel LIKE '%opvang%' OR f.titel LIKE '%ouderen%' OR f.titel LIKE '%senior%' OR f.titel LIKE '%beschermd%'
+              OR f.titel LIKE '%begeleid%' OR f.titel LIKE '%daklo%' OR f.titel LIKE '%Skaeve%' OR f.titel LIKE '%flexwon%' OR f.titel LIKE '%kwetsbar%'
+              OR f.titel LIKE '%verpleeg%' OR f.titel LIKE '%Wmo%' OR f.titel LIKE '%mantelzorg%' OR f.titel LIKE '%doorstro%')
+       ORDER BY COALESCE(f.datum, f.created_at) DESC LIMIT 30`,
+      dossiers,
+    ),
+  ])
+  const kort = (s: Stuk): Stuk => ({ ...s, titel: s.titel.replace(/\s+\d{2}-\d{2}-\d{4}\s.*$/, '').replace(/^\d\.\s[A-Za-z]+\s\d+\s/, ''), bron: s.bron.replace('Raad Amersfoort — ', '') })
+  const gezien = new Set<string>()
+  const raadUniek = raad.map(kort).filter((s) => {
+    const sleutel = s.titel.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 60)
+    if (gezien.has(sleutel)) return false
+    gezien.add(sleutel)
+    return true
+  })
+  const lijst: ZorgSubsidie[] = subsidies.map((r) => ({ omschrijving: String(r.omschrijving), ontvanger: r.ontvanger ?? null, jaar: Number(r.jaar), bedrag: Number(r.bedrag ?? 0) }))
+  const perJaar = new Map<number, { jaar: number; totaal: number; aantal: number }>()
+  for (const s of lijst) {
+    const j = perJaar.get(s.jaar) ?? { jaar: s.jaar, totaal: 0, aantal: 0 }
+    j.totaal += s.bedrag; j.aantal += 1
+    perJaar.set(s.jaar, j)
+  }
+  return {
+    raad: raadUniek,
+    subsidies: lijst,
+    subsidieTotaalPerJaar: [...perJaar.values()].sort((a, b) => b.jaar - a.jaar),
+    feiten: feiten.map((f) => ({ ...f, details: zonderRedactiejargon(f.details) })),
+  }
+}
+
+export const getZorgOverzicht = unstable_cache(laadZorgOverzicht, [`wonen-zorg-${CACHE_VERSIE}`], { revalidate: CACHE_SECONDEN })
