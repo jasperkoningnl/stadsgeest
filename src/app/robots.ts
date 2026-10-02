@@ -1,13 +1,13 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL } from '@/lib/site'
 
-// De voorpagina mag geïndexeerd worden, het redactionele dashboard niet.
+// De voorpagina mag geïndexeerd worden, de dashboards achter de inlog niet.
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/nieuwsplein33', '/login', '/api/'],
+      disallow: ['/nieuwsplein33', '/beleidsadviseur', '/login', '/api/'],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   }

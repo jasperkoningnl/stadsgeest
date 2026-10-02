@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import { AUTH_COOKIE, isGeconfigureerd, maakSessie, wachtwoordKlopt } from '@/lib/dashboardAuth'
+import { AUTH_COOKIE, isGeconfigureerd, maakSessie, magNaar, startpagina, wachtwoordKlopt } from '@/lib/dashboardAuth'
 
 export async function POST(request: Request) {
   const formData = await request.formData()
   const gebruikersnaam = (formData.get('username') as string) ?? ''
   const wachtwoord = (formData.get('password') as string) ?? ''
-  const from = (formData.get('from') as string) || '/nieuwsplein33'
+  const from = (formData.get('from') as string) || ''
 
   const terugNaarLogin = (code: string) => {
     const url = new URL('/login', request.url)
@@ -23,8 +23,11 @@ export async function POST(request: Request) {
   if (!sessie) return terugNaarLogin('config')
 
   // Alleen paden binnen deze site toestaan, anders is dit een open redirect.
-  const bestemming = new URL(from.startsWith('/') && !from.startsWith('//') ? from : '/nieuwsplein33', request.url)
-  const response = NextResponse.redirect(bestemming, { status: 303 })
+  // En alleen paden die deze gebruiker mag zien: het beleidsaccount dat via
+  // /login?from=/nieuwsplein33 binnenkomt, gaat naar zijn eigen dashboard.
+  const binnenSite = from.startsWith('/') && !from.startsWith('//')
+  const pad = binnenSite && magNaar(geldigeGebruiker, from.split('?')[0]) ? from : startpagina(geldigeGebruiker)
+  const response = NextResponse.redirect(new URL(pad, request.url), { status: 303 })
 
   response.cookies.set(AUTH_COOKIE, sessie.waarde, {
     httpOnly: true,

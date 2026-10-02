@@ -120,7 +120,9 @@ nooit uitsluitend op naam automatisch samengevoegd.
 | Gebied | Locatie |
 |---|---|
 | Dashboardroutes | `src/app/nieuwsplein33/` |
+| Woondashboard beleidsadviseur | `src/app/beleidsadviseur/`, `src/lib/dashboard/wonenQueries.ts` |
 | Dashboardqueries | `src/lib/dashboard/` |
+| Inlog en rollen | `src/lib/dashboardAuth.ts`, `src/proxy.ts` |
 | Dossierpagina's | `src/app/nieuwsplein33/dossiers/`, `src/lib/dashboard/dossierQueries.ts` |
 | Klassieke intake | `scraper/intake-run.mjs` |
 | KG-adapters | `scraper/src/kg/adapters/` |

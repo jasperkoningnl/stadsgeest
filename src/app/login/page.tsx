@@ -20,14 +20,20 @@ export default async function LoginPage({
   // Dan komt niemand binnen — dat is opzet.
   const nietIngesteld = params.error === 'config'
   const from = params.from || '/nieuwsplein33'
+  // Het woondashboard heeft een eigen inlogkop; de inlog zelf is dezelfde.
+  const voorBeleid = from === '/beleidsadviseur' || from.startsWith('/beleidsadviseur/')
 
   return (
     <main className="np-vlak np-inlog">
       <script dangerouslySetInnerHTML={{ __html: THEMA_SCRIPT }} />
       <div className="np-inlog-kaart">
         <div className="np-inlog-merk">Stadsgeest<span>*</span></div>
-        <h1 className="np-inlog-kop">Redactie Nieuwsplein33</h1>
-        <p className="np-inlog-sub">Log in met je gebruikersnaam en wachtwoord.</p>
+        <h1 className="np-inlog-kop">{voorBeleid ? 'Woondashboard Amersfoort' : 'Redactie Nieuwsplein33'}</h1>
+        <p className="np-inlog-sub">
+          {voorBeleid
+            ? 'Log in met de gebruikersnaam en het wachtwoord die je van Nieuwsplein33 hebt gekregen.'
+            : 'Log in met je gebruikersnaam en wachtwoord.'}
+        </p>
 
         {error && (
           <p className="np-inlog-fout">Onjuiste gebruikersnaam of wachtwoord. Probeer het opnieuw.</p>

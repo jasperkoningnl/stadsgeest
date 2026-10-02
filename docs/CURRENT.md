@@ -12,7 +12,11 @@ events, entiteiten, signalen en de weger naar tips, dossiers en het
 redactiedashboard op `stadsgeest.nl/nieuwsplein33`. Vercel host het dashboard;
 Jaspers Windows-notebook voert de operationele keten uit. Het dashboard bevat
 22 dossiers met ruim 300 feiten, inclusief overzicht, feitenlijst, tijdas en
-partijengraaf.
+partijengraaf. Sinds 2 oktober staat op `/beleidsadviseur` een apart
+woondashboard voor de beleidsadviseur wonen van de gemeente Amersfoort, achter
+een eigen account met rol `beleid`; dat account ziet het redactiedashboard niet.
+De pagina toont alleen officiële of bevestigde feiten en cachet haar queries
+zes uur.
 
 `Stadsgeest Detection` start dagelijks om 06.15 uur; NDW draait iedere vijftien
 minuten. Na de dagrun volgen de geplande fase-5-maandevaluatie en
