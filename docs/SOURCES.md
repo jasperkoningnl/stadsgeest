@@ -354,3 +354,69 @@ ontdubbelen gaat daarom op de document-url, niet op het motienummer. Titels met
 "Bijlage" vallen af. Alleen Notubiz-PDF's worden opgehaald; oudere links naar
 gemeentebestuur.leusden.nl niet. Moties van langer dan 7 dagen geleden worden
 achtergrond. Bron: 'Raad Leusden — Moties en amendementen', tier 1.
+
+## Provinciale Staten Utrecht — Statenstukken
+
+Scraper `scraper/src/scrapers/stateninformatie.js`, hulpfuncties in
+`scraper/src/stateninformatie-lib.mjs`, PDF-tekst via `scraper/src/pdf-tekst.mjs`,
+dagelijks via `run-all.js`. Toegevoegd 2 oktober 2026. Bron 'Provinciale Staten
+Utrecht — Statenstukken', tier 1, gemeente `regio`.
+
+- Leest de open JSON-API van www.stateninformatie.provincie-utrecht.nl
+  (GemeenteOplossingen, geen sleutel): `/api/v1/meetings?date_from=&date_to=`
+  met Unix-seconden (een jjjj-mm-dd wordt genegeerd en geeft dan alles sinds
+  2007) en `/api/v1/meetings/{id}/documents/{docId}` voor de PDF.
+- Venster 30 dagen terug tot 21 dagen vooruit (`STATEN_DAGEN_TERUG`,
+  `STATEN_DAGEN_VOORUIT`); alle gremia (Staten, commissies, Praten met de
+  Staten, auditcommissie), vertrouwelijke stukken vallen af.
+- Alleen lokale stukken worden een `raw_item`: een plaatsnaam in titel of
+  agendapunt is genoeg, in de tekst zijn naar lengte 2, 3 of 5 treffers nodig
+  (`drempel`). Amersfoortseweg en Amersfoortsestraat tellen niet.
+- Het oordeel per document staat in `scraper/data/stateninformatie/beoordeeld.json`
+  (genegeerd in Git), zodat een niet-lokaal stuk niet elke run opnieuw wordt
+  gedownload. Weg betekent eenmalig opnieuw lezen; dubbele items vangt de
+  unieke index `(source_id, content_hash)` af. Geen query per document op
+  `raw_items`.
+- Een vergadering van langer dan 14 dagen geleden (`STATEN_HIST_DAGEN`) levert
+  achtergrond (`is_historical=1`, `is_processed=1`).
+- Hoogstens `STATEN_MAX_PDF` (30) documenten en `STATEN_BUDGET_MS` (45 s) per
+  run; gemeten twaalf PDF's in twaalf seconden. `STATEN_DRYRUN=1` toont wat hij
+  zou doen zonder database of statusbestand te raken.
+- Gemeten 2 oktober 2026: 23 vergaderingen en 230 documenten in het venster;
+  van de eerste twaalf gelezen stukken waren drie lokaal (wijziging
+  Omgevingsvisie en Omgevingsverordening met Amersfoort, Leusden, Eemland,
+  Isselt en Hoevelaken). Op titel noemden 9 van 227 stukken sinds half augustus
+  Amersfoort of Leusden, onder meer de netuitbreiding Amersfoort-Noord van TenneT.
+- Niet gekozen: Open Stateninformatie (`osi_provincie-utrecht*` op de ORI-API)
+  heeft dezelfde stukken met tekst, maar liep op 2 oktober bijna drie maanden
+  achter (laatste vergadering 8 juli). De Amersfoortse ORI-index
+  (`ori_amersfoort*`) stond op dezelfde dag ook op 10 juli; controleer wat de
+  bronnen 115–120 sinds de zomer nog uit ORI halen.
+
+## Leusder Krant en De Stadsbron — spiegelbronnen
+
+Toegevoegd 2 oktober 2026. Beide staan sinds augustus in `EDITORIAL-PROFILE.md`
+als spiegel en in `migrate-tips.cjs` als te markeren naam, maar hadden geen
+bronrij. De scrapers zetten bij de eerste run `bronrol = 'spiegel'`, tier 3 en
+de gemeente; daarna blijft een handmatige keuze staan. Spiegelitems maken geen
+eigen signaal (zie `intake-run.mjs`).
+
+- `scraper/src/scrapers/leusder-krant.js`: RSS `https://www.leusderkrant.nl/rss/feed`,
+  vijftig nieuwste berichten met publicatiedatum, dagelijks via `run-all.js`.
+  Plaats staat tussen blokhaken vooraan de tekst; gemeten 2 oktober: 34
+  Leusden, 8 Achterveld, 2 Amersfoort, 2 regio. Alles wordt bewaard. Gemeente
+  `Leusden`. `LEUSDERKRANT_DRYRUN=1` voor een proefrun.
+- `scraper/src/scrapers/destadsbron.js`, hulpfuncties in
+  `scraper/src/destadsbron-lib.mjs`: geen RSS (CMS Hypha); leest de voorpagina
+  (`li.pagelist-item`: titel, auteur, Nederlandse datum en tijd, samenvatting),
+  vijftien artikelen, enkele per maand. De samenvatting is de inhoud; voor
+  ontdubbeling en bevestiging is dat genoeg. Gemeente `Amersfoort`.
+  `STADSBRON_DRYRUN=1` voor een proefrun. Verandert de opmaak, dan eindigt de
+  run met een fout in plaats van stil leeg.
+
+Nog niet gebouwd, besproken in `DASHBOARD-ANALYSE-2026-10-02.md`: B&W-besluitenlijsten
+Leusden. Notubiz (api.notubiz.nl), RaadKijker en de gemeentesite van Leusden
+waren vanuit de cloudomgeving niet bereikbaar of gaven niets; controleer vanaf de
+notebook of de Notubiz-omgeving van Leusden (organisatie 2090) een
+besluitenlijstencategorie heeft.
+
