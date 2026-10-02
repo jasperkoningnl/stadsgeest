@@ -2578,3 +2578,55 @@ a:hover > .np-graaf-lijn { stroke: var(--np-accent); opacity: 1; }
 .np-graaf-label-lang { display: none; }
 .np-zoom-ver .np-graaf-label-kort { display: none; }
 .np-zoom-ver .np-graaf-label-lang { display: inline; }
+
+/* ── Eén beslisflow en veroudering (2026-10-03) ─────────────── */
+.np-acties-strook { padding: 10px 14px; margin-bottom: 16px; }
+.np-reden-paneel { margin-top: 0; padding-top: 0; border-top: none; }
+.np-reden-kop { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+.np-reden-kop .np-reden-vraag { margin-bottom: 0; }
+.np-reden-actie { font-family: var(--f-d); font-weight: 700; font-size: 13px; padding: 3px 10px; border-radius: 14px; border: 1px solid var(--np-rand); white-space: nowrap; }
+.np-reden-actie-goedgekeurd { border-color: var(--np-accent); color: var(--np-accent); background: var(--np-accent-z); }
+.np-reden-actie-geparkeerd { border-color: var(--np-amber); color: var(--np-amber); background: var(--np-amber-z); }
+.np-reden-actie-afgekeurd { color: var(--np-inkt2); }
+.np-reden-bevestig { align-items: center; flex-wrap: wrap; }
+.np-reden-hint { font-family: var(--f-m); font-size: 11px; color: var(--np-inkt3); margin-left: auto; }
+.np-detail-acties { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.np-detail-acties a.np-knop-klein { text-decoration: none; display: inline-flex; align-items: center; }
+.np-label-artikel { color: var(--np-accent); border-color: var(--np-accent); text-decoration: none; }
+.np-label-artikel:hover { background: var(--np-accent-z); }
+.np-chip-artikel { color: var(--np-accent); }
+.np-daggroep-oud summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; }
+.np-daggroep-oud summary::-webkit-details-marker { display: none; }
+.np-daggroep-oud summary::before { content: '▸'; font-size: 12px; color: var(--np-inkt3); }
+.np-daggroep-oud[open] summary::before { content: '▾'; }
+.np-daggroep-uitleg { font-family: var(--f-b); font-weight: 400; font-size: 12.5px; color: var(--np-inkt3); margin-left: 4px; }
+.np-daggroep-oud[open] .np-daggroep-uitleg { display: none; }
+.np-oud-actie { margin: 12px 0 16px; padding: 12px 16px; border: 1px dashed var(--np-rand); border-radius: 10px; background: var(--np-kaart); }
+.np-oud-actie p { margin-bottom: 10px; }
+
+/* ── Dossiers: laatste ontwikkeling, ingeklapte afbakening, tab Tips (2026-10-03) ── */
+.np-dos-regel-laatste { font-family: var(--f-b); font-size: 13.5px; color: var(--np-inkt2); margin: 2px 0 6px; line-height: 1.5; }
+.np-dos-regel-laatste-label { font-family: var(--f-d); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--np-inkt3); margin-right: 8px; }
+.np-dos-laatste { font-family: var(--f-b); font-size: 14.5px; color: var(--np-inkt2); margin-top: 10px; line-height: 1.5; }
+.np-dos-laatste a { color: var(--np-inkt); font-weight: 600; text-decoration: none; }
+.np-dos-laatste a:hover { color: var(--np-accent); }
+.np-dos-context-inklap summary { cursor: pointer; list-style: none; margin-bottom: 0; }
+.np-dos-context-inklap summary::-webkit-details-marker { display: none; }
+.np-dos-context-inklap summary::before { content: '▸ '; }
+.np-dos-context-inklap[open] summary::before { content: '▾ '; }
+.np-dos-context-inklap[open] summary { margin-bottom: 6px; }
+.np-dos-filter-rechts { margin-left: auto; }
+.np-chip-knop { cursor: pointer; font: inherit; }
+.np-dos-tiplijst { list-style: none; margin-top: 10px; display: flex; flex-direction: column; gap: 10px; }
+.np-dos-tiplijst li { display: flex; flex-direction: column; gap: 2px; }
+.np-dos-tiplijst li a { color: var(--np-inkt); font-weight: 600; font-size: 14.5px; text-decoration: none; }
+.np-dos-tiplijst li a:hover { color: var(--np-accent); }
+.np-dos-tiplijst .np-soort { margin-right: 4px; }
+
+/* ── Beheer: Redactie-tab (2026-10-03) ──────────────────────── */
+.np-doorstroom-balk-cel { width: 32%; min-width: 120px; }
+.np-doorstroom-balk { position: relative; height: 14px; background: var(--np-rand-z); border-radius: 4px; overflow: hidden; }
+.np-doorstroom-balk span { position: absolute; left: 0; top: 0; height: 100%; border-radius: 4px; }
+.np-doorstroom-gemaakt { background: var(--np-inkt3); opacity: .35; }
+.np-doorstroom-beslist { background: var(--np-accent); }
+

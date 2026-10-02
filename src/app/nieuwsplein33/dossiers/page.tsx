@@ -61,6 +61,13 @@ export default async function DossiersPagina() {
             <Link key={d.id} href={`/nieuwsplein33/dossiers/${d.slug}`} className="np-dos-regel">
               <div className="np-dos-regel-hoofd">
                 <div className="np-dos-regel-naam">{ontstreep(d.naam, ' · ')}</div>
+                {d.laatste_feit && (
+                  <div className="np-dos-regel-laatste">
+                    <span className="np-dos-regel-laatste-label">laatst</span>
+                    {d.laatste_feit.datum && <span className="np-stil">{formatDate(d.laatste_feit.datum)} · </span>}
+                    {ontstreep(d.laatste_feit.titel)}
+                  </div>
+                )}
                 <div className="np-dos-regel-meta">
                   <span>{d.feiten} {d.feiten === 1 ? 'feit' : 'feiten'}</span>
                   {bereik && <span>{bereik}</span>}

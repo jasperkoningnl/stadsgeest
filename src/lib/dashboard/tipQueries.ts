@@ -27,6 +27,8 @@ export interface TipRij {
   created_at: string
   /** 1 als de tip uit de wekelijkse supertip-run komt. */
   supertip: number
+  /** Het artikel op nieuwsplein33.nl dat eruit kwam, als dat is vastgelegd. */
+  artikel_url: string | null
   bronnen: { naam: string; tier: number | null; spiegel: boolean }[]
   aantal_documenten: number
 }
@@ -39,7 +41,6 @@ export interface TipDetail extends TipRij {
   elders_gebracht: string | null
   toegevoegde_waarde: string | null
   dossier_id: number | null
-  artikel_url: string | null
   eigen_vondst: number | null
   actor: string
   updated_at: string
@@ -124,7 +125,7 @@ async function verrijkMetBronnen(tips: any[]): Promise<TipRij[]> {
 
 const TIP_KOLOMMEN = `
   t.id, t.titel, t.kern, t.soort, t.gemeente, t.categorie, t.score,
-  t.score_motivatie, t.status, t.created_at, t.supertip, d.naam AS dossier_naam, d.slug AS dossier_slug
+  t.score_motivatie, t.status, t.created_at, t.supertip, t.artikel_url, d.naam AS dossier_naam, d.slug AS dossier_slug
 `
 
 export async function getTips(statussen: TipStatus[]): Promise<TipRij[]> {

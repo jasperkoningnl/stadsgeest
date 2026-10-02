@@ -16,6 +16,41 @@ import Meetknop from './Meetknop'
 import BeslisNavigatie from './BeslisNavigatie'
 import { Blok, BronChip, Betrokkenen } from './TipBlokken'
 import { kortDossierNaam } from '@/lib/dashboard/dossierNamen'
+import KopieerKnop from '../../KopieerKnop'
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://stadsgeest.nl'
+
+/**
+ * De tip als platte tekst, voor het klembord en de mail. Zelfde volgorde als
+ * het verhaal op de pagina; bronlinks tussen haakjes achter het feit.
+ */
+function tipAlsTekst(opties: {
+  id: number; titel: string; kern: string | null; briefing: GeparsedeBriefing | null; ruweBriefing: string | null
+  vragen: string[]; dossierNaam: string | null; dossierSlug: string | null
+}): string {
+  const r: string[] = [opties.titel]
+  if (opties.kern) r.push(ontstreep(opties.kern))
+  const b = opties.briefing
+  if (b?.volledig) {
+    r.push('', 'WAT WE WETEN')
+    b.weten.forEach((f, i) => {
+      const bron = [f.bron, ...f.urls].filter(Boolean).join(', ')
+      r.push(`${i + 1}. ${ontstreep(f.tekst)}${bron ? ` (${bron})` : ''}`)
+    })
+    if (b.nietWeten.length) { r.push('', 'WAT WE NIET WETEN'); b.nietWeten.forEach((x) => r.push(`- ${ontstreep(x)}`)) }
+    if (b.context) r.push('', 'CONTEXT', ontstreep(b.context))
+    if (opties.vragen.length) { r.push('', 'ZO KOM JE VERDER'); opties.vragen.forEach((x) => r.push(`- ${ontstreep(x)}`)) }
+    if (b.elders) r.push('', 'ELDERS GEBRACHT', ontstreep(b.elders))
+    if (b.nietInMag.length) { r.push('', 'LET OP'); b.nietInMag.forEach((x) => r.push(`- ${ontstreep(x)}`)) }
+  } else if (opties.ruweBriefing) {
+    r.push('', ontstreep(opties.ruweBriefing))
+    if (opties.vragen.length) { r.push('', 'ZO KOM JE VERDER'); opties.vragen.forEach((x) => r.push(`- ${ontstreep(x)}`)) }
+  }
+  r.push('')
+  if (opties.dossierNaam) r.push(`Dossier: ${ontstreep(opties.dossierNaam, ' · ')}${opties.dossierSlug ? ` (${SITE_URL}/nieuwsplein33/dossiers/${opties.dossierSlug})` : ''}`)
+  r.push(`Tip in Stadsgeest: ${SITE_URL}/nieuwsplein33/tip/${opties.id}`)
+  return r.join('\n')
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -241,6 +276,10 @@ export default async function TipPagina({ params }: Props) {
     tip.dossier_id ? getDossierTijdlijn(tip.dossier_id) : Promise.resolve([]),
     getWachtrijIds(),
   ])
+  // Na een beslissing gaat het redenpaneel door naar de volgende tip in de
+  // wachtrij. Een geparkeerde tip staat er niet in; dan terug naar de lijst.
+  const positie = wachtrijIds.indexOf(tip.id)
+  const volgendeId = positie >= 0 && positie < wachtrijIds.length - 1 ? wachtrijIds[positie + 1] : null
 
   const superTip = Boolean(tip.supertip) || isSupertip(tip.titel)
   const vragen = safeParseJsonArray<string>(tip.vervolgvragen) ?? []
@@ -253,6 +292,15 @@ export default async function TipPagina({ params }: Props) {
   const herkomst = safeParseJsonArray<HerkomstBron>(tip.herkomst) ?? []
   const elders = safeParseJsonArray<EldersItem>(tip.elders_gebracht) ?? []
   const briefing = tip.briefing ? parseBriefing(tip.briefing) : null
+  const titelSchoon = ontstreep(superTip || isSupertip(tip.titel) ? zonderSupertip(tip.titel) : tip.titel)
+  const tekst = tipAlsTekst({
+    id: tip.id, titel: titelSchoon, kern: tip.kern, briefing, ruweBriefing: tip.briefing, vragen,
+    dossierNaam: tip.dossier_naam, dossierSlug: tip.dossier_slug,
+  })
+  // Mailprogramma's kappen lange mailto-adressen af; alleen kop, kern en link.
+  const mailto = `mailto:?subject=${encodeURIComponent(`Tip: ${titelSchoon}`)}&body=${encodeURIComponent(
+    `${titelSchoon}\n\n${tip.kern ? ontstreep(tip.kern) + '\n\n' : ''}${SITE_URL}/nieuwsplein33/tip/${tip.id}`,
+  )}`
 
   const eerder: EerderBericht[] = elders.map((e) => ({
     medium: e.medium ?? 'onbekend medium',
@@ -422,8 +470,9 @@ export default async function TipPagina({ params }: Props) {
 
   return (
     <article className="np-detail">
-      {/* Sticky beslisbalk met wachtrijnavigatie */}
+      {/* Sticky beslisbalk met wachtrijnavigatie; het redenpaneel opent er direct onder. */}
       <BeslisNavigatie tipId={tip.id} status={tip.status} wachtrijIds={wachtrijIds} />
+      <TipActies tipId={tip.id} status={tip.status} volgendeId={volgendeId} />
 
       <header className={`np-detail-kop${superTip ? ' np-detail-super' : ''}`}>
         <div className="np-detail-labels">
@@ -441,12 +490,21 @@ export default async function TipPagina({ params }: Props) {
             </Link>
           )}
           {tip.status !== 'wachtrij' && <span className="np-label np-label-status">{STATUS_LABEL[tip.status] ?? tip.status}</span>}
+          {tip.status === 'gepubliceerd' && tip.artikel_url && (
+            <a href={tip.artikel_url} target="_blank" rel="noreferrer" className="np-label np-label-artikel"
+              title={`Het artikel dat uit deze tip kwam\n${tip.artikel_url}`}>
+              artikel op nieuwsplein33.nl ↗
+            </a>
+          )}
         </div>
-        <h1 className="np-detail-titel">{ontstreep(superTip ? zonderSupertip(tip.titel) : tip.titel)}</h1>
+        <h1 className="np-detail-titel">{titelSchoon}</h1>
         <p className="np-detail-kern">{tip.kern && ontstreep(tip.kern)}</p>
+        <div className="np-detail-acties">
+          <KopieerKnop tekst={tekst} />
+          <a href={mailto} className="np-knop-klein" title="Opent je mailprogramma met kop, kern en link">Mail deze tip</a>
+        </div>
       </header>
 
-      <TipActies tipId={tip.id} status={tip.status} />
       <TipTabs tabs={tabs} />
 
       <Meetknop

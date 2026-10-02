@@ -7,7 +7,7 @@ import {
   getIntakeRuns, getTierAggregates, getSourcesOverview,
   getIntakeFunnel, getIntakeDecisions, getTopFilterReasons, getTopEntities,
   getRecentTips, getAfgewezenSignalen, getWegingSamenvatting,
-  getLeerDashboard,
+  getLeerDashboard, getDoorstroom,
 } from '@/lib/dashboard/beheerQueries'
 import type { TierAggregate, SourcesOverview } from '@/lib/dashboard/beheerQueries'
 import { getVerbruikDetail, getVerbruikSamenvatting, isQuotumBlokkade } from '@/lib/dashboard/tursoVerbruik'
@@ -19,6 +19,7 @@ import WegingTab from './WegingTab'
 import LerenTab from './LerenTab'
 import ControlerenTab from './ControlerenTab'
 import VerbruikTab from './VerbruikTab'
+import RedactieTab from './RedactieTab'
 
 export const metadata: Metadata = {
   title: 'Beheer · Nieuwsplein33',
@@ -72,6 +73,8 @@ export default async function BeheerPagina({ searchParams }: BeheerPaginaProps) 
 
 async function tabInhoud(tab: Exclude<BeheerTab, 'verbruik'>, dagen: number, periodeLabel: string) {
   switch (tab) {
+    case 'redactie':
+      return <RedactieTab data={await getDoorstroom()} />
     case 'bronnen': {
       const [tiers, bronnen] = await Promise.all([getTierAggregates(), getSourcesOverview()])
       return <BronnenContent tiers={tiers} bronnen={bronnen} />

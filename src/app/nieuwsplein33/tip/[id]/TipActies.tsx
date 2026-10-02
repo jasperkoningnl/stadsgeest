@@ -4,19 +4,24 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { noteerBeslissing } from '../../feedbackTeller'
 
-type Actie = 'goedgekeurd' | 'geparkeerd' | 'afgekeurd' | 'wachtrij'
+export type BeslisActie = 'goedgekeurd' | 'geparkeerd' | 'afgekeurd'
+type Actie = BeslisActie | 'wachtrij'
 
-// De vaste beslisbalk bovenaan (BeslisNavigatie) opent via deze gebeurtenis
-// het redenpaneel hieronder, zodat afwijzen altijd met reden gebeurt en er
-// maar één plek is waar redenen worden gekozen. detail = de actie.
+// Eén beslisflow (sinds 3 oktober 2026): de vaste balk bovenaan
+// (BeslisNavigatie) kiest de actie en opent via deze gebeurtenis het
+// redenpaneel hieronder; het paneel legt vast. Zo is er één plek waar redenen
+// worden gekozen, en kan afwijzen nooit zonder reden. detail = de actie, of
+// null om het paneel te sluiten. Het paneel meldt zelf terug wanneer het
+// dichtgaat (GESLOTEN_GEBEURTENIS), zodat de balk zijn knop kan ontmarkeren.
 export const OPEN_REDEN_GEBEURTENIS = 'np-open-reden'
+export const GESLOTEN_GEBEURTENIS = 'np-reden-gesloten'
 
 // De redenen zijn bewust kort en uitputtend genoeg om zonder typen te kunnen
 // afhandelen. Ze worden geteld bij het bijstellen van de selectie, dus ze
 // moeten over maanden nog dezelfde betekenis hebben.
 // Terugzetten ('wachtrij') vraagt geen reden — de eerdere beslissing met reden
 // blijft in de geschiedenis staan.
-const REDENEN: Record<Exclude<Actie, 'wachtrij'>, { code: string; label: string }[]> = {
+const REDENEN: Record<BeslisActie, { code: string; label: string }[]> = {
   goedgekeurd: [
     { code: 'zelf_niet_gevonden', label: 'Dit had ik zelf niet gevonden' },
     { code: 'concreet_gemaakt', label: 'Wist er iets van, dit maakt het concreet' },
@@ -42,33 +47,59 @@ const REDENEN: Record<Exclude<Actie, 'wachtrij'>, { code: string; label: string 
   ],
 }
 
-const KNOPPEN: { actie: Exclude<Actie, 'wachtrij'>; label: string; klasse: string }[] = [
-  { actie: 'goedgekeurd', label: 'Hier wil ik iets mee', klasse: 'np-knop-ja' },
-  { actie: 'geparkeerd', label: 'Bewaar voor later', klasse: 'np-knop-later' },
-  { actie: 'afgekeurd', label: 'Niets mee doen', klasse: 'np-knop-nee' },
-]
+export const ACTIE_LABEL: Record<BeslisActie, string> = {
+  goedgekeurd: 'Hier wil ik iets mee',
+  geparkeerd: 'Bewaar voor later',
+  afgekeurd: 'Niets mee doen',
+}
 
-export default function TipActies({ tipId, status }: { tipId: number; status: string }) {
+const VRAAG: Record<BeslisActie, string> = {
+  goedgekeurd: 'Waarom wil je hier iets mee? Dat helpt om de selectie scherper te krijgen.',
+  geparkeerd: 'Waarom nu niet?',
+  afgekeurd: 'Waarom niet? Hoe specifieker, hoe beter de volgende selectie wordt.',
+}
+
+export function isBeslisActie(x: unknown): x is BeslisActie {
+  return x === 'goedgekeurd' || x === 'geparkeerd' || x === 'afgekeurd'
+}
+
+/**
+ * Het redenpaneel onder de beslisbalk. Open staat het alleen nadat de balk
+ * (of een toets) een actie heeft gekozen. Na "Vastleggen" ga je door naar de
+ * volgende tip in de wachtrij, of terug naar de wachtrij als dit de laatste
+ * was. Bij een afgehandelde tip toont dit alleen een korte strook.
+ */
+export default function TipActies({ tipId, status, volgendeId }: { tipId: number; status: string; volgendeId: number | null }) {
   const router = useRouter()
-  const [open, setOpen] = useState<Exclude<Actie, 'wachtrij'> | null>(null)
+  const [open, setOpen] = useState<BeslisActie | null>(null)
   const [code, setCode] = useState('')
   const [tekst, setTekst] = useState('')
   const [fout, setFout] = useState<string | null>(null)
   const [bezig, startTransition] = useTransition()
+  const [verzenden, setVerzenden] = useState(false)
   const requestId = useRef<string | null>(null)
   const paneel = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     function openVanuitBalk(e: Event) {
-      const actie = (e as CustomEvent<string>).detail
-      if (actie !== 'goedgekeurd' && actie !== 'geparkeerd' && actie !== 'afgekeurd') return
+      const actie = (e as CustomEvent<string | null>).detail
+      if (actie === null) { sluit(); return }
+      if (!isBeslisActie(actie)) return
       setOpen(actie); setCode(''); setTekst(''); setFout(null)
-      // Na de render staat het paneel er; dan pas scrollen.
-      requestAnimationFrame(() => paneel.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
+      // Na de render staat het paneel er; dan pas scrollen en focus.
+      requestAnimationFrame(() => {
+        paneel.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        paneel.current?.querySelector<HTMLButtonElement>('.np-reden-keuze')?.focus()
+      })
     }
     window.addEventListener(OPEN_REDEN_GEBEURTENIS, openVanuitBalk)
     return () => window.removeEventListener(OPEN_REDEN_GEBEURTENIS, openVanuitBalk)
   }, [])
+
+  function sluit() {
+    setOpen(null); setCode(''); setTekst(''); setFout(null)
+    window.dispatchEvent(new Event(GESLOTEN_GEBEURTENIS))
+  }
 
   async function verstuur(actie: Actie) {
     setFout(null)
@@ -77,112 +108,91 @@ export default function TipActies({ tipId, status }: { tipId: number; status: st
       return
     }
     requestId.current ??= crypto.randomUUID()
-    const res = await fetch(`/api/tip/${tipId}/beslis`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ actie, reden_code: code || null, reden_tekst: tekst || null, request_id: requestId.current }),
-    })
-    if (!res.ok) {
-      setFout('Opslaan is niet gelukt. Probeer het opnieuw; er is niets gewijzigd.')
+    setVerzenden(true)
+    try {
+      const res = await fetch(`/api/tip/${tipId}/beslis`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actie, reden_code: code || null, reden_tekst: tekst || null, request_id: requestId.current }),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        setFout(body.fout ?? 'Opslaan is niet gelukt. Probeer het opnieuw; er is niets gewijzigd.')
+        return
+      }
+    } catch {
+      setFout('Geen verbinding. Probeer het opnieuw; er is niets gewijzigd.')
       return
+    } finally {
+      setVerzenden(false)
     }
     requestId.current = null
-    setOpen(null); setCode(''); setTekst('')
+    sluit()
     // Telt mee voor de vraag om feedback op het dashboard, die verschijnt zodra
     // er die dag een paar tips zijn afgehandeld. Terugzetten telt niet: dat is
     // een correctie, geen afgeronde beoordeling.
-    if (actie !== 'wachtrij') noteerBeslissing()
-    startTransition(() => router.refresh())
+    if (actie === 'wachtrij') { startTransition(() => router.refresh()); return }
+    noteerBeslissing()
+    // Door naar de volgende tip; de wachtrij zelf is dan al bijgewerkt.
+    startTransition(() => router.push(volgendeId !== null ? `/nieuwsplein33/tip/${volgendeId}` : '/nieuwsplein33'))
   }
 
-  // Elke beslissing is omkeerbaar (de geschiedenis is append-only en blijft
-  // onderaan de pagina staan), behalve bij een gepubliceerde tip — daar loopt
-  // de correctie via de meetknop, zodat de meetstand blijft kloppen.
-  const terugKnop = (
-    <button
-      type="button"
-      className="np-knop np-knop-stil"
-      disabled={bezig}
-      onClick={() => verstuur('wachtrij')}
-      title="De tip komt terug in de wachtrij; de eerdere beslissing blijft in de geschiedenis staan"
-    >
-      {bezig ? 'Bezig…' : 'Zet terug in de wachtrij'}
-    </button>
-  )
+  const druk = bezig || verzenden
 
   if (status !== 'wachtrij' && status !== 'geparkeerd') {
     return (
-      <div className="np-acties">
+      <div className="np-acties np-acties-strook">
         <div className="np-acties-af">
-          Deze tip is afgehandeld. Hieronder staat wat er is besloten en waarom.
+          Deze tip is afgehandeld. Onderaan staat wat er is besloten en waarom.
+          {status !== 'gepubliceerd' && ' Terugzetten kan met de knop in de balk hierboven.'}
         </div>
-        {status !== 'gepubliceerd' && (
-          <div className="np-acties-knoppen" style={{ marginTop: 12 }}>
-            {terugKnop}
-          </div>
-        )}
-        {fout && <p className="np-fout" style={{ marginTop: 10 }}>{fout}</p>}
       </div>
     )
   }
 
+  if (!open) return null
+
   return (
-    <div className="np-acties">
-      <div className="np-acties-knoppen">
-        {KNOPPEN.filter((k) => k.actie !== status).map((k) => (
-          <button
-            key={k.actie}
-            type="button"
-            className={`np-knop ${k.klasse}${open === k.actie ? ' np-knop-open' : ''}`}
-            onClick={() => { setOpen(open === k.actie ? null : k.actie); setCode(''); setTekst('') }}
-          >
-            {k.label}
-          </button>
-        ))}
-        {status === 'geparkeerd' && terugKnop}
-      </div>
-
-      {open && (
-        <div className="np-reden" ref={paneel}>
-          <p className="np-reden-vraag">
-            {open === 'goedgekeurd' && 'Waarom wil je hier iets mee? Dat helpt om de selectie scherper te krijgen.'}
-            {open === 'geparkeerd' && 'Waarom nu niet?'}
-            {open === 'afgekeurd' && 'Waarom niet? Hoe specifieker, hoe beter de volgende selectie wordt.'}
-          </p>
-
-          <div className="np-reden-keuzes">
-            {REDENEN[open].map((r) => (
-              <button
-                key={r.code}
-                type="button"
-                className={`np-reden-keuze${code === r.code ? ' np-reden-keuze-aan' : ''}`}
-                onClick={() => setCode(r.code)}
-              >
-                {r.label}
-              </button>
-            ))}
-          </div>
-
-          <textarea
-            className="np-reden-tekst"
-            placeholder="Toelichting (mag leeg blijven)"
-            value={tekst}
-            onChange={(e) => setTekst(e.target.value)}
-            rows={3}
-          />
-
-          {fout && <p className="np-fout">{fout}</p>}
-
-          <div className="np-reden-bevestig">
-            <button type="button" className="np-knop np-knop-ja" disabled={bezig} onClick={() => verstuur(open)}>
-              {bezig ? 'Bezig…' : 'Vastleggen'}
-            </button>
-            <button type="button" className="np-knop np-knop-stil" onClick={() => setOpen(null)}>
-              Annuleren
-            </button>
-          </div>
+    <div className="np-acties" ref={paneel}>
+      <div className="np-reden np-reden-paneel" role="dialog" aria-label={`Vastleggen: ${ACTIE_LABEL[open]}`}>
+        <div className="np-reden-kop">
+          <span className={`np-reden-actie np-reden-actie-${open}`}>{ACTIE_LABEL[open]}</span>
+          <p className="np-reden-vraag">{VRAAG[open]}</p>
         </div>
-      )}
+
+        <div className="np-reden-keuzes">
+          {REDENEN[open].map((r) => (
+            <button
+              key={r.code}
+              type="button"
+              className={`np-reden-keuze${code === r.code ? ' np-reden-keuze-aan' : ''}`}
+              onClick={() => setCode(r.code)}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+
+        <textarea
+          className="np-reden-tekst"
+          placeholder="Toelichting (mag leeg blijven)"
+          value={tekst}
+          onChange={(e) => setTekst(e.target.value)}
+          rows={3}
+        />
+
+        {fout && <p className="np-fout">{fout}</p>}
+
+        <div className="np-reden-bevestig">
+          <button type="button" className="np-knop np-knop-ja" disabled={druk} onClick={() => verstuur(open)}>
+            {druk ? 'Bezig…' : volgendeId !== null ? 'Vastleggen en volgende' : 'Vastleggen'}
+          </button>
+          <button type="button" className="np-knop np-knop-stil" onClick={sluit}>
+            Annuleren
+          </button>
+          <span className="np-reden-hint">Esc sluit, 1 2 3 kiest, ↑ ↓ bladert</span>
+        </div>
+      </div>
     </div>
   )
 }

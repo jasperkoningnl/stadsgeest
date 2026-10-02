@@ -201,13 +201,13 @@ productkeuzes en vragen Jaspers akkoord vooraf (werkafspraak in `AGENTS.md`).
 | # | Wat | Winst | Omvang | Afhankelijk van |
 |---|---|---|---|---|
 | 1 | Snelle beslisknoppen repareren: `request_id` meesturen, afwijzen vraagt reden, fout tonen. *Gedaan op 3 oktober.* | Beslissen bovenaan werkt echt; leerloop blijft gevoed | 1 bestand, 1 route | niets |
-| 2 | Eén beslisflow met popover, daarna automatisch naar volgende tip, toetsen | Doorlooptijd per tip omlaag | `BeslisNavigatie`, `TipActies` | 1 |
-| 3 | Compacte kaart, naam van wie oppakte, filters Leusden en "nog nergens gebracht", nieuw-sinds-bezoek | Wachtrij in één blik te overzien | `TipRegel`, `page.tsx`, `tipQueries` | akkoord Jasper |
-| 4 | Veroudering: groep "ouder dan een maand" met één afsluitknop, of automatisch `niet_gebruikt` via de supertip-run | Wachtrij blijft eerlijk, 18 tips weg uit het zicht | wachtrij of `supertip-run` | keuze Jasper |
-| 5 | Dossierpagina herordenen: tijdas boven, tips als tab, nieuwste feit in kop en overzicht, kopieer feitenlijst | Dossiers worden werkmateriaal | `dossiers/*` | akkoord Jasper |
-| 6 | Beheer-tab Redactie: doorstroom en ouderdom | Jasper ziet het echte knelpunt wekelijks | `beheerQueries`, nieuwe tab | niets |
-| 7 | Verkenner eerst via entiteiten en vermeldingen, `raw_items` op verzoek | Minder Turso-reads per klik op een naam | `verkennerQueries` | niets |
-| 8 | Kopieer als tekst op tip en dossier; artikelchip bij gepubliceerde tip | Kleine dagelijkse gemakken | tippagina | niets |
+| 2 | Eén beslisflow met popover, daarna automatisch naar volgende tip, toetsen *Gedaan op 3 oktober.* | Doorlooptijd per tip omlaag | `BeslisNavigatie`, `TipActies` | 1 |
+| 3 | Compacte kaart, naam van wie oppakte, filters Leusden en "nog nergens gebracht", nieuw-sinds-bezoek *Niet doen, besluit Jasper 3 oktober.* | Wachtrij in één blik te overzien | `TipRegel`, `page.tsx`, `tipQueries` | akkoord Jasper |
+| 4 | Veroudering: groep "ouder dan een maand" met één afsluitknop, of automatisch `niet_gebruikt` via de supertip-run *Gedaan op 3 oktober, dashboardvariant.* | Wachtrij blijft eerlijk, 18 tips weg uit het zicht | wachtrij of `supertip-run` | keuze Jasper |
+| 5 | Dossierpagina herordenen: tijdas boven, tips als tab, nieuwste feit in kop en overzicht, kopieer feitenlijst *Gedaan op 3 oktober.* | Dossiers worden werkmateriaal | `dossiers/*` | akkoord Jasper |
+| 6 | Beheer-tab Redactie: doorstroom en ouderdom *Gedaan op 3 oktober.* | Jasper ziet het echte knelpunt wekelijks | `beheerQueries`, nieuwe tab | niets |
+| 7 | Verkenner eerst via entiteiten en vermeldingen, `raw_items` op verzoek *Gedaan op 3 oktober.* | Minder Turso-reads per klik op een naam | `verkennerQueries` | niets |
+| 8 | Kopieer als tekst op tip en dossier; artikelchip bij gepubliceerde tip *Gedaan op 3 oktober.* | Kleine dagelijkse gemakken | tippagina | niets |
 | 9 | Weekmail: kleurschaal, alleen wachtrij, ontvangers in env | Mail klopt weer | `weekmail/route.ts` | niets |
 | 10 | Tests voor briefingparser en naamontleding; CSS splitsen | Veiliger wijzigen | `scraper/__tests__`, css | niets |
 

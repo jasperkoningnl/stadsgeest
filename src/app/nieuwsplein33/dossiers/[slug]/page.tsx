@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { hasTurso } from '@/lib/turso'
 import {
   getDossierBySlug, getDossierFeiten, getDossierTips, getTipsPerSignaal,
-  OPEN_STATUSSEN, type DossierFeitVolledig, type DossierTip,
+  OPEN_STATUSSEN, type DossierFeitVolledig,
 } from '@/lib/dashboard/dossierQueries'
 import { formatDate, kalenderdagenGeleden, safeParseJsonArray } from '@/lib/dashboard/format'
 import { ontstreep } from '@/lib/dashboard/briefing'
@@ -11,6 +11,24 @@ import GeenDatabase from '../../GeenDatabase'
 import { BronChip } from '../../tip/[id]/TipBlokken'
 import Tijdas from '../Tijdas'
 import DossierTabs from '../DossierTabs'
+import KopieerKnop from '../../KopieerKnop'
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://stadsgeest.nl'
+
+/** De (gefilterde) feitenlijst als platte tekst, voor wie een stuk schrijft. */
+function feitenAlsTekst(naam: string, slug: string, feiten: DossierFeitVolledig[], filter: string | null): string {
+  const r = [`Dossier ${ontstreep(naam, ' · ')}${filter ? ` (${filter})` : ''}`, `${feiten.length} ${feiten.length === 1 ? 'feit' : 'feiten'}, ${SITE_URL}/nieuwsplein33/dossiers/${slug}`, '']
+  for (const f of feiten) {
+    const kop = `${f.datum ? formatDate(f.datum) : 'datum onbekend'} — ${ontstreep(f.titel ?? '')}`
+    const meta = [f.fact_type, f.locatie, f.zekerheid.replace(/_/g, ' '), f.superseded_by ? 'later gecorrigeerd' : null].filter(Boolean).join(', ')
+    r.push(kop, `  ${meta}`)
+    if (f.details && f.details !== 'null') r.push(`  ${ontstreep(f.details)}`)
+    if (f.tegenstrijdigheid && f.tegenstrijdigheid !== 'null') r.push(`  Bronnen spreken elkaar tegen: ${ontstreep(f.tegenstrijdigheid)}`)
+    if (f.primaire_bron_url) r.push(`  Bron: ${f.primaire_bron_url}`)
+    r.push('')
+  }
+  return r.join('\n')
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -21,16 +39,6 @@ export const dynamic = 'force-dynamic'
 interface Props {
   params: Promise<{ slug: string }>
   searchParams: Promise<{ soort?: string; zekerheid?: string; volgorde?: string }>
-}
-
-const STATUS_LABEL: Record<string, string> = {
-  wachtrij: 'in de wachtrij',
-  goedgekeurd: 'goedgekeurd',
-  in_behandeling: 'in behandeling',
-  gepubliceerd: 'gepubliceerd',
-  niet_gebruikt: 'niets mee gedaan',
-  geparkeerd: 'geparkeerd',
-  afgekeurd: 'afgewezen',
 }
 
 const MAAND_LANG = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december']
@@ -54,26 +62,6 @@ function secundair(raw: string | null): string[] {
   // totdat alle historische data door de normalisatie is gegaan.
   const enkel = raw?.trim()
   return enkel && /^https?:\/\/\S+$/.test(enkel) ? [enkel] : []
-}
-
-const ZICHTBARE_TIPS = 5
-
-function TipLijst({ tips }: { tips: DossierTip[] }) {
-  return (
-    <ul>
-      {tips.map((t) => (
-        <li key={t.id}>
-          <Link href={`/nieuwsplein33/tip/${t.id}`}>{ontstreep(t.titel)}</Link>
-          <span className="np-dos-tip-meta">
-            {formatDate(t.created_at)} · score {t.score} ·{' '}
-            <span className={OPEN_STATUSSEN.includes(t.status) ? 'np-dos-open' : undefined}>
-              {STATUS_LABEL[t.status] ?? t.status}
-            </span>
-          </span>
-        </li>
-      ))}
-    </ul>
-  )
 }
 
 function telPer(feiten: DossierFeitVolledig[], sleutel: 'fact_type' | 'zekerheid'): [string, number][] {
@@ -117,10 +105,6 @@ export default async function DossierPagina({ params, searchParams }: Props) {
   }
 
   const openTips = tips.filter((t) => OPEN_STATUSSEN.includes(t.status)).length
-  // Open tips eerst, daarna nieuwste eerst. Na vijf klapt de rest in.
-  const tipsGesorteerd = [...tips].sort((a, b) =>
-    Number(OPEN_STATUSSEN.includes(b.status)) - Number(OPEN_STATUSSEN.includes(a.status))
-    || b.created_at.localeCompare(a.created_at))
   const datums = feiten.map((f) => f.datum).filter((d): d is string => !!d).sort()
   const laatstToegevoegd = feiten.reduce<string | null>((m, f) => (!m || f.created_at > m ? f.created_at : m), null)
   const ids = new Set(feiten.map((f) => f.id))
@@ -135,6 +119,10 @@ export default async function DossierPagina({ params, searchParams }: Props) {
   }
 
   const omschrijving = tekst(dossier.omschrijving)
+  // De laatste ontwikkeling: het nieuwst vastgelegde feit, als eerste regel onder de kop.
+  const laatsteFeit = feiten.reduce<DossierFeitVolledig | null>((m, f) => (!m || f.created_at > m.created_at || (f.created_at === m.created_at && f.id > m.id) ? f : m), null)
+  const filterLabel = [soort, zekerheid ? zekerheid.replace(/_/g, ' ') : null].filter(Boolean).join(', ') || null
+  const kopieerTekst = feitenAlsTekst(dossier.naam, dossier.slug, gesorteerd, filterLabel)
 
   return (
     <article className="np-dos">
@@ -151,37 +139,31 @@ export default async function DossierPagina({ params, searchParams }: Props) {
           </span>
           {laatstToegevoegd && <span>laatst aangevuld {formatDate(laatstToegevoegd)}</span>}
         </div>
+        {laatsteFeit && (
+          <p className="np-dos-laatste">
+            <span className="np-dos-regel-laatste-label">laatste ontwikkeling</span>
+            {laatsteFeit.datum && <span className="np-stil">{formatDate(laatsteFeit.datum)} · </span>}
+            <a href={`#feit-${laatsteFeit.id}`}>{ontstreep(laatsteFeit.titel ?? '')}</a>
+          </p>
+        )}
       </header>
-      <DossierTabs slug={dossier.slug} actief="feiten" />
+      <DossierTabs slug={dossier.slug} actief="feiten" tips={tips.length} />
+
+      {/* Tijdas eerst: dat is in één blik het dossier. De afbakening staat eronder,
+          ingeklapt; de tips hebben sinds 3 oktober 2026 een eigen tab. */}
+      <Tijdas feiten={gefilterd} vandaag={vandaag} />
 
       {omschrijving && (
-        <section className="np-dos-context">
-          <div className="np-dos-context-kop">Afbakening en aandachtspunten</div>
+        <details className="np-dos-context np-dos-context-inklap">
+          <summary className="np-dos-context-kop">Afbakening en aandachtspunten</summary>
           <p>{omschrijving}</p>
           {dossier.trefwoorden && (
             <p className="np-dos-trefwoorden">
               Trefwoorden waarop de weger koppelt: {dossier.trefwoorden.split(',').map((t) => t.trim()).filter(Boolean).join(', ')}
             </p>
           )}
-        </section>
+        </details>
       )}
-
-      {tips.length > 0 && (
-        <section className="np-dos-tips">
-          <div className="np-dos-tips-kop">
-            Tips uit dit dossier ({tips.length}{openTips > 0 ? `, ${openTips} open` : ''})
-          </div>
-          <TipLijst tips={tipsGesorteerd.slice(0, ZICHTBARE_TIPS)} />
-          {tipsGesorteerd.length > ZICHTBARE_TIPS && (
-            <details>
-              <summary>Nog {tipsGesorteerd.length - ZICHTBARE_TIPS} tips</summary>
-              <TipLijst tips={tipsGesorteerd.slice(ZICHTBARE_TIPS)} />
-            </details>
-          )}
-        </section>
-      )}
-
-      <Tijdas feiten={gefilterd} vandaag={vandaag} />
 
       <div className="np-dos-filters">
         <div className="np-dos-filterrij">
@@ -206,6 +188,9 @@ export default async function DossierPagina({ params, searchParams }: Props) {
           <span className="np-dos-filterlabel">Volgorde</span>
           <Link href={link({ volgorde: undefined })} className={`np-chip np-chip-klein${!oudsteEerst ? ' np-dos-actief' : ''}`}>nieuwste eerst</Link>
           <Link href={link({ volgorde: 'oud' })} className={`np-chip np-chip-klein${oudsteEerst ? ' np-dos-actief' : ''}`}>oudste eerst</Link>
+          <span className="np-dos-filter-rechts">
+            <KopieerKnop tekst={kopieerTekst} label={filterLabel ? `Kopieer deze ${gesorteerd.length} feiten` : 'Kopieer feitenlijst'} klasse="np-chip np-chip-klein np-chip-knop" />
+          </span>
         </div>
       </div>
 
