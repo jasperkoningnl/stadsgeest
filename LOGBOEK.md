@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-10-02 — Woondashboard voor de beleidsadviseur wonen van de gemeente
+
+Op stadsgeest.nl/beleidsadviseur staat een aparte pagina voor de beleidsadviseur wonen van de gemeente Amersfoort, achter een eigen inlog. De pagina laat zien wat Stadsgeest over wonen vindt: omgevingsvergunningen per maand, thema en wijk, de prognoses van woningcorporaties (dPi), het feitenregister van het dossier Woningbouw en wonen, raadsstukken en regelingen over wonen, woonsubsidies en berichten van De Alliantie. Alleen officiële of bevestigde feiten staan erop; tips, scores en redactiebeslissingen niet. De pagina is alleen zichtbaar voor dat account en voor Jasper; het beleidsaccount kan het redactiedashboard niet zien.
+
 ## 2026-10-02 — Misdaadcijfers worden nu als lokale trend gevolgd
 
 Stadsgeest kijkt niet meer alleen naar losse 112-meldingen of een uitzonderlijke maand, maar vergelijkt geregistreerde misdrijven over drie en twaalf maanden. Dat gebeurt per wijk en voor de hele gemeente, zowel voor stijgingen als dalingen. Een lokale verandering wordt ook naast de landelijke ontwikkeling gelegd, zodat een landelijke golf niet vanzelf een lokaal verhaal wordt. De eerste reeks over augustus bevat onder meer een stijging van winkeldiefstal in Isselt, meer verkeersmisdrijven in Amersfoort en juist minder diefstal uit voertuigen in Stadskern. Het zijn onderzoekssignalen: aangiftebereidheid en veranderingen in registratie kunnen de cijfers beïnvloeden. Brand en ontploffing is een politiecategorie en zegt niet hetzelfde als alle woningbranden.
