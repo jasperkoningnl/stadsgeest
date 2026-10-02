@@ -25,7 +25,7 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ## 2026-10-02 — Woondashboard voor de beleidsadviseur wonen van de gemeente
 
-Op stadsgeest.nl/beleidsadviseur staat een aparte pagina voor de beleidsadviseur wonen van de gemeente Amersfoort, achter een eigen inlog. De pagina laat zien wat Stadsgeest over wonen vindt: omgevingsvergunningen per maand, thema en wijk, de prognoses van woningcorporaties (dPi), het feitenregister van het dossier Woningbouw en wonen, raadsstukken en regelingen over wonen, woonsubsidies en berichten van De Alliantie. Alleen officiële of bevestigde feiten staan erop; tips, scores en redactiebeslissingen niet. Het beleidsaccount kan het redactiedashboard niet zien. Redactieleden kunnen de pagina wel bekijken via dezelfde inlog.
+Op stadsgeest.nl/beleidsadviseur staat een aparte pagina voor de beleidsadviseur wonen van de gemeente Amersfoort, achter een eigen inlog. De pagina laat zien wat Stadsgeest over wonen vindt: omgevingsvergunningen per maand, thema en wijk, de prognoses van woningcorporaties (dPi), het feitenregister van het dossier Woningbouw en wonen, raadsstukken en regelingen over wonen, woonsubsidies en berichten van De Alliantie. Alleen officiële of bevestigde feiten staan erop; tips, scores en redactiebeslissingen niet. De pagina is alleen zichtbaar voor dat account en voor Jasper; het beleidsaccount kan het redactiedashboard niet zien.
 
 ## 2026-10-02 — Misdaadcijfers worden nu als lokale trend gevolgd
 

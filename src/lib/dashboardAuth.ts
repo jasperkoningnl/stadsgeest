@@ -17,13 +17,14 @@
 //   DASHBOARD_WACHTWOORD_HASH_GIDEON — SHA-256 (hex) van Gideons wachtwoord
 //   DASHBOARD_WACHTWOORD_HASH_BENTHE — SHA-256 (hex) van Benthes wachtwoord
 //   DASHBOARD_WACHTWOORD_HASH_KEES   — SHA-256 (hex) van Kees' wachtwoord
-//   DASHBOARD_WACHTWOORD_HASH_BELEIDSADVISEUR — SHA-256 (hex) van het wachtwoord
-//                                      voor het woondashboard op /beleidsadviseur
+//   WACHTWOORD_BELEIDSADVISEUR       — SHA-256 (hex) van het wachtwoord van het
+//                                      account 'adviseur' (woondashboard)
 //
-// Sinds 2 oktober 2026 heeft elk account een rol. 'redactie' mag overal komen;
-// 'beleid' is het account van de beleidsadviseur wonen van de gemeente en komt
-// uitsluitend op /beleidsadviseur. De proxy en de inlogroute controleren dat
-// via magNaar(); het redactiedashboard blijft zo onzichtbaar voor dat account.
+// Sinds 2 oktober 2026 heeft elk account een rol. 'redactie' komt op het
+// redactiedashboard; 'beleid' is het account van de beleidsadviseur wonen van
+// de gemeente en komt uitsluitend op /beleidsadviseur. Het woondashboard is
+// alleen zichtbaar voor dat account en voor Jasper; de andere redactieaccounts
+// zien het niet. De proxy en de inlogroute controleren dat via magNaar().
 //
 // Ontbreekt DASHBOARD_SESSIE_SECRET of hebben alle drie gebruikers geen hash,
 // dan komt niemand binnen. Dat is opzet: liever dicht dan per ongeluk open.
@@ -46,7 +47,7 @@ const GEBRUIKERS: Gebruiker[] = [
   { gebruikersnaam: 'gideon', envVar: 'DASHBOARD_WACHTWOORD_HASH_GIDEON', rol: 'redactie' },
   { gebruikersnaam: 'benthe', envVar: 'DASHBOARD_WACHTWOORD_HASH_BENTHE', rol: 'redactie' },
   { gebruikersnaam: 'kees', envVar: 'DASHBOARD_WACHTWOORD_HASH_KEES', rol: 'redactie' },
-  { gebruikersnaam: 'beleidsadviseur', envVar: 'DASHBOARD_WACHTWOORD_HASH_BELEIDSADVISEUR', rol: 'beleid' },
+  { gebruikersnaam: 'adviseur', envVar: 'WACHTWOORD_BELEIDSADVISEUR', rol: 'beleid' },
 ]
 
 /** Pad van het woondashboard voor de beleidsadviseur. */
@@ -64,17 +65,22 @@ export function startpagina(gebruikersnaam: string | null | undefined): string {
   return rolVan(gebruikersnaam) === 'beleid' ? BELEID_PAD : REDACTIE_PAD
 }
 
+/** Wie het woondashboard mag zien: het beleidsaccount en Jasper, niemand anders. */
+export function magNaarBeleid(gebruikersnaam: string | null | undefined): boolean {
+  return rolVan(gebruikersnaam) === 'beleid' || gebruikersnaam === 'jasper'
+}
+
 /**
- * Mag deze gebruiker dit pad zien? De redactie mag overal komen, ook op het
- * woondashboard; het beleidsaccount komt alleen op /beleidsadviseur.
+ * Mag deze gebruiker dit pad zien? Het woondashboard is alleen voor het
+ * beleidsaccount en Jasper; het redactiedashboard alleen voor de redactie.
  * Een onbekende gebruiker mag nergens komen.
  */
 export function magNaar(gebruikersnaam: string | null | undefined, pathname: string): boolean {
   const rol = rolVan(gebruikersnaam)
   if (!rol) return false
   const beleidPad = pathname === BELEID_PAD || pathname.startsWith(`${BELEID_PAD}/`)
-  if (rol === 'beleid') return beleidPad
-  return true
+  if (beleidPad) return magNaarBeleid(gebruikersnaam)
+  return rol === 'redactie'
 }
 
 const encoder = new TextEncoder()

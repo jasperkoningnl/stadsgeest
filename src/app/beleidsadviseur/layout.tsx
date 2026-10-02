@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
 import ThemaSchakelaar from '../nieuwsplein33/ThemaSchakelaar'
-import { AUTH_COOKIE, sessieGebruiker, rolVan } from '@/lib/dashboardAuth'
+import { AUTH_COOKIE, sessieGebruiker } from '@/lib/dashboardAuth'
 
 export const metadata: Metadata = {
   title: 'Woondashboard Amersfoort',
@@ -12,13 +12,14 @@ export const metadata: Metadata = {
 // Het woondashboard leest uit dezelfde database als het redactiedashboard, maar
 // is een eigen pagina voor een externe gebruiker: de beleidsadviseur wonen van
 // de gemeente Amersfoort. Geen redactienavigatie, geen tips, geen feedbackbalk.
+// Alleen het account 'adviseur' en Jasper komen hier (zie dashboardAuth.ts).
 
 const THEMA_SCRIPT = `try{var t=localStorage.getItem('np-thema');if(t==='licht'||t==='donker'){document.documentElement.setAttribute('data-np-thema',t)}}catch(e){}`
 
 export default async function BeleidLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
   const gebruiker = await sessieGebruiker(cookieStore.get(AUTH_COOKIE)?.value)
-  const redactie = rolVan(gebruiker) === 'redactie'
+  const jasper = gebruiker === 'jasper'
 
   return (
     <div className="np-vlak">
@@ -34,7 +35,7 @@ export default async function BeleidLayout({ children }: { children: React.React
             </div>
             <div className="np-top-rechts">
               <ThemaSchakelaar />
-              {redactie && (
+              {jasper && (
                 <Link href="/nieuwsplein33" className="np-sessie-uitloggen" style={{ textDecoration: 'none' }}>
                   Naar de redactie
                 </Link>

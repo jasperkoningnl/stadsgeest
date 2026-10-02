@@ -14,7 +14,8 @@ Jaspers Windows-notebook voert de operationele keten uit. Het dashboard bevat
 22 dossiers met ruim 300 feiten, inclusief overzicht, feitenlijst, tijdas en
 partijengraaf. Sinds 2 oktober staat op `/beleidsadviseur` een apart
 woondashboard voor de beleidsadviseur wonen van de gemeente Amersfoort, achter
-een eigen account met rol `beleid`; dat account ziet het redactiedashboard niet.
+het account `adviseur` (rol `beleid`). Alleen dat account en Jasper zien de
+pagina; het beleidsaccount ziet het redactiedashboard niet.
 De pagina toont alleen officiële of bevestigde feiten en cachet haar queries
 zes uur.
 

@@ -5,7 +5,8 @@ import { AUTH_COOKIE, magNaar, sessieGebruiker, startpagina } from '@/lib/dashbo
 // De voorpagina is publiek. Het redactiedashboard (/nieuwsplein33) en het
 // woondashboard voor de beleidsadviseur (/beleidsadviseur) zitten achter de
 // inlog. Wie wel is ingelogd maar dit pad niet mag zien (het beleidsaccount op
-// het redactiedashboard) gaat naar zijn eigen startpagina.
+// het redactiedashboard, of een redactielid dat niet Jasper is op het
+// woondashboard) gaat naar zijn eigen startpagina.
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const gebruiker = await sessieGebruiker(request.cookies.get(AUTH_COOKIE)?.value)
