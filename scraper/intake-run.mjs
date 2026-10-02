@@ -15,6 +15,7 @@ import {
   entiteitMatchToegestaan,
   woordMatchScore,
 } from './src/intake-matching.mjs';
+import { isOmnibus, splitsOmnibus } from './src/omnibus-split-lib.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -578,54 +579,33 @@ async function run() {
       }
 
       // Omnibus-splitsing: B&W-besluitenlijsten bevatten meerdere ongerelateerde
-      // besluiten in één document. De content bevat een "=== DOCUMENTEN ==="
-      // sectie met individuele documenten gescheiden door "--- Titel ---" headers.
-      // Procedurele stukken (besluitenlijsten, invitaties, collegeberichten) worden
-      // overgeslagen; inhoudelijke stukken worden als nieuwe raw_items ingevoegd.
-      const isOmnibus = item.source_name && (
-        item.source_name.toLowerCase().includes('b&w besluitenlijst')
-        || item.source_name.toLowerCase().includes('b&w-besluitenlijst')
-        || item.source_name.toLowerCase().includes('besluitenlijst college')
-      ) || /\bbesluitenlijst\b/i.test(item.title || '');
-      if (isOmnibus) {
-        const omnContent = item.content || '';
-        const docsSplit = omnContent.split('=== DOCUMENTEN ===');
-        if (docsSplit.length < 2 || docsSplit[1].trim().length < 50) {
+      // besluiten in één document. De splitsing zelf staat in
+      // src/omnibus-split-lib.mjs. Elk stuk krijgt een eigen URL (lijst-URL plus
+      // #stuk=...), zodat het URL-duplicaatfilter het bij de volgende run niet
+      // weggooit; gesplitste stukken slaan deze check over.
+      if (isOmnibus(item)) {
+        const split = splitsOmnibus(item);
+        if (!split) {
           stats.gefilterd++; stats.ids.push(item.id);
           await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', 'omnibus-document zonder documentensectie'));
           continue;
         }
-        const docParts = docsSplit[1].split(/\n--- (.+?) ---\n/);
-        const PROCEDUREEL = /besluitenlijst\s+(b\.|hamerstukken)|invitaties|collegebericht/i;
-        let gesplitst = 0, procedureel = 0;
-        for (let d = 1; d < docParts.length; d += 2) {
-          const docTitle = docParts[d].trim();
-          const docBody = (docParts[d + 1] || '').trim();
-          if (PROCEDUREEL.test(docTitle)) { procedureel++; continue; }
-          if (docBody.length < 100) continue;
-          const splitTitle = docTitle.replace(/^\d{6}\w?\s*[-\u2013]\s*/, '');
+        let gesplitst = 0;
+        for (const stuk of split.stukken) {
           try {
             await db.execute({
               sql: `INSERT INTO raw_items (source_id, external_url, title, content, summary, scraped_at, is_processed, is_historical)
                     VALUES (?, ?, ?, ?, ?, ?, 0, ?)`,
-              args: [
-                item.source_id,
-                item.external_url,
-                `[B&W] ${splitTitle}`,
-                docBody.substring(0, 50000),
-                `Gesplitst uit besluitenlijst (item #${item.id}): ${splitTitle}`,
-                item.scraped_at,
-                item.is_historical || 0,
-              ],
+              args: [item.source_id, stuk.external_url, stuk.title, stuk.content, stuk.summary, item.scraped_at, item.is_historical || 0],
             });
             gesplitst++;
           } catch (splitErr) {
-            console.warn(`Omnibus-split mislukt voor "${docTitle}" uit item ${item.id}: ${splitErr.message}`);
+            console.warn(`Omnibus-split mislukt voor "${stuk.title}" uit item ${item.id}: ${splitErr.message}`);
           }
         }
-        console.log(`  omnibus #${item.id}: ${gesplitst} inhoudelijke stukken gesplitst, ${procedureel} procedureel overgeslagen`);
+        console.log(`  omnibus #${item.id}: ${gesplitst} inhoudelijke stukken gesplitst, ${split.procedureel} procedureel overgeslagen`);
         stats.gefilterd++; stats.ids.push(item.id);
-        await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', `omnibus-document gesplitst: ${gesplitst} inhoudelijke stukken als aparte items ingevoegd, ${procedureel} procedurele stukken overgeslagen`));
+        await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', `omnibus-document gesplitst: ${gesplitst} inhoudelijke stukken als aparte items ingevoegd, ${split.procedureel} procedurele stukken overgeslagen`));
         continue;
       }
 
