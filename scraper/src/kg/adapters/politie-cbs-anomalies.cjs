@@ -4,15 +4,19 @@ const { createClient } = require('@libsql/client');
 const { BASELINE_KEY, archiveSnapshot, ensureSource, fetchBuffer, normalizeText, semanticHash } = require('../phase3-core.cjs');
 
 const BASE = 'https://dataderden.cbs.nl/ODataApi/OData/47022NED';
+const POPULATION_BASE = 'https://opendata.cbs.nl/ODataApi/OData/86165NED';
 const SOURCE_URL = 'https://data.politie.nl/#/Politie/nl/dataset/47022NED/table';
-const VERSION = '2.0.0';
+const VERSION = '2.1.0';
 const DETECTOR_VERSION = 'crime-robust-1.0';
 const TREND_DETECTOR_VERSION = 'crime-trend-2.0';
+const DIGEST_DETECTOR_VERSION = 'crime-digest-1.0';
 const MUNICIPALITIES = ['GM0307', 'GM0327'];
 const MUNICIPALITY_NAMES = { GM0307: 'Amersfoort', GM0327: 'Leusden' };
 const NATIONAL_CODE = 'NL00';
 const TREND_WINDOWS = [3, 12];
 const MAX_TREND_EVENTS = 8;
+const DIGEST_DEPRIORITIZED = new Set(['1.6.2']);
+const CLUSTER_PRONE_CRIMES = new Set(['2.5.2', '3.9.1']);
 const CRIME_PATTERN = /inbraak|diefstal|geweld|vernieling|brand|ontploffing|wapen|drug|overval|straatroof/i;
 const CRIME_CODES = new Set([
   '0.0.0',
@@ -28,6 +32,7 @@ const META = {
     identity: 'gebiedscode + delictscode + maand', area_version: 'DataProperties.MapYear', intended_frequency: 'maandelijks',
     minimum_count: 5, history_months: 60, backtest_months: 24,
     crime_codes: [...CRIME_CODES], national_reference: 'NL00 uit dezelfde dataset',
+    population_reference: 'CBS 86165NED, AantalInwoners_5, uitsluitend gemeente en Nederland',
     detector: 'buurtanomalie plus wijk/gemeente-trends over 3 en 12 maanden; landelijke seizoenscorrectie en FDR' },
 };
 
@@ -47,6 +52,18 @@ function robustZ(observed, history) {
   return 0.6745 * (observed - med) / mad;
 }
 function mean(values) { return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null; }
+
+async function executeWithRetry(db, statement, attempts = 3) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try { return await db.execute(statement); }
+    catch (error) {
+      lastError = error;
+      if (attempt < attempts) await new Promise(resolve => setTimeout(resolve, 500 * (2 ** (attempt - 1))));
+    }
+  }
+  throw lastError;
+}
 
 function buildIndex(rows) {
   const index = new Map();
@@ -182,12 +199,54 @@ function trendMetric(area, crime, latestPeriod, windowMonths, index, municipalit
   const consecutive = direction === 'increase'
     ? observed - previousWindow >= minimumAbsolute && observed >= Math.max(10, previousWindow * 1.25)
     : previousWindow - observed >= minimumAbsolute && previousWindow >= 10 && observed <= previousWindow * 0.8;
+  const municipalityRatio = municipalityRatioValue(municipalityObserved, municipalityYearAgo);
+  const municipalityShare = municipalityObserved > 0 ? observed / municipalityObserved : null;
+  const possibleLocationCluster = isPossibleLocationCluster({ area, crime, direction, observed, ratio,
+    municipalityShare, municipalityRatio });
   return { area, crime, latestPeriod, windowMonths, observed, yearAgo, previousWindow, expected, difference, ratio,
     zScore, pValue, qValue: 1, nationalObserved, nationalYearAgo, nationalRatio,
     municipalityObserved, municipalityYearAgo,
-    municipalityRatio: municipalityYearAgo > 0 ? municipalityObserved / municipalityYearAgo : null,
-    direction, material, consecutive,
+    municipalityRatio, municipalityShare,
+    possibleLocationCluster, direction, material, consecutive,
     periodFrom: currentPeriods.at(-1), periodTo: currentPeriods[0], comparisonFrom: yearPeriods.at(-1), comparisonTo: yearPeriods[0] };
+}
+
+function municipalityRatioValue(observed, yearAgo) {
+  return yearAgo > 0 ? observed / yearAgo : null;
+}
+
+function isPossibleLocationCluster({ area, crime, direction, observed, ratio, municipalityShare, municipalityRatio }) {
+  if (!String(area).startsWith('WK') || direction !== 'increase' || observed < 20) return false;
+  return municipalityShare >= 0.35 || (municipalityRatio !== null && municipalityRatio <= 1.15 && ratio >= 1.75) ||
+    (CLUSTER_PRONE_CRIMES.has(crime) && ratio >= 2);
+}
+
+function municipalityDigestGroups(metrics) {
+  const groups = [];
+  for (const municipality of MUNICIPALITIES) {
+    const items = metrics.filter(item => item.area === municipality && item.windowMonths === 12 &&
+      Math.abs(item.difference) >= 25 && (item.ratio >= 1.1 || item.ratio <= 1 / 1.1) && item.qValue <= 0.05)
+      .sort((a, b) => Number(b.crime === '0.0.0') - Number(a.crime === '0.0.0') ||
+        Number(DIGEST_DEPRIORITIZED.has(a.crime)) - Number(DIGEST_DEPRIORITIZED.has(b.crime)) || Math.abs(b.zScore) - Math.abs(a.zScore));
+    if (items.length >= 2) groups.push({ area: municipality, items: items.slice(0, 5) });
+  }
+  return groups;
+}
+
+function buildMunicipalityDigests(metrics, populations, crimes, latestPeriod) {
+  return municipalityDigestGroups(metrics).map(group => {
+    const population = populations.get(group.area);
+    const nationalPopulation = populations.get(NATIONAL_CODE);
+    const items = group.items.map(item => ({ ...item,
+      crimeName: crimeLabel(crimes.get(item.crime)?.Title || item.crime),
+      localChange: item.yearAgo > 0 ? item.observed / item.yearAgo - 1 : null,
+      nationalChange: item.nationalYearAgo > 0 ? item.nationalObserved / item.nationalYearAgo - 1 : null,
+      localRatePer1000: population > 0 ? item.observed / population * 1000 : null,
+      nationalRatePer1000: nationalPopulation > 0 ? item.nationalObserved / nationalPopulation * 1000 : null,
+    }));
+    return { area: group.area, areaName: MUNICIPALITY_NAMES[group.area] || group.area, latestPeriod,
+      population, nationalPopulation, items };
+  });
 }
 
 function assessCrimeTrends(rows, areas, latestPeriod) {
@@ -226,7 +285,8 @@ function assessCrimeTrends(rows, areas, latestPeriod) {
       windows: Object.fromEntries(series.map(item => [item.windowMonths, item])) });
   }
   return { candidates: candidates.sort((a, b) => Number(b.significant) - Number(a.significant) || Math.abs(b.zScore) - Math.abs(a.zScore)),
-    tests: metrics.length, significant: metrics.filter(item => item.significant).length, notable: metrics.filter(item => !item.significant && item.notable).length };
+    metrics, tests: metrics.length, significant: metrics.filter(item => item.significant).length,
+    notable: metrics.filter(item => !item.significant && item.notable).length };
 }
 
 function selectTrendCandidates(candidates, maximum = MAX_TREND_EVENTS) {
@@ -243,15 +303,19 @@ function selectTrendCandidates(candidates, maximum = MAX_TREND_EVENTS) {
 
 function backtestCrimeTrends(rows, areas, months = 24) {
   const periods = [...new Set(rows.map(row => row.Perioden))].sort().slice(-months);
-  let evaluated = 0; let candidates = 0; let eligibleCandidates = 0; let significant = 0; let notable = 0;
+  let evaluated = 0; let candidates = 0; let eligibleCandidates = 0; let significant = 0; let notable = 0; let digests = 0;
   for (const period of periods) {
     const result = assessCrimeTrends(rows, areas, period);
-    evaluated += result.tests; eligibleCandidates += result.candidates.length;
-    candidates += selectTrendCandidates(result.candidates).length;
+    const digestGroups = municipalityDigestGroups(result.metrics);
+    const districtCandidates = result.candidates.filter(item => item.area.startsWith('WK'));
+    const selectedDistricts = selectTrendCandidates(districtCandidates, MAX_TREND_EVENTS - MUNICIPALITIES.length);
+    evaluated += result.tests; eligibleCandidates += districtCandidates.length + digestGroups.length;
+    candidates += selectedDistricts.length + digestGroups.length; digests += digestGroups.length;
     significant += result.significant; notable += result.notable;
   }
   return { months: periods.length, from: periods[0], to: periods.at(-1), evaluated, evaluatedPeriods: periods.length,
-    candidates, eligibleCandidates, maximumPerPeriod: MAX_TREND_EVENTS, significant, notable, detectorVersion: TREND_DETECTOR_VERSION };
+    candidates, eligibleCandidates, digests, maximumPerPeriod: MAX_TREND_EVENTS, significant, notable,
+    detectorVersion: TREND_DETECTOR_VERSION };
 }
 
 function assessCrimePoint(point, rows, areas, context = buildAssessmentContext(rows)) {
@@ -296,7 +360,8 @@ async function fetchJson(url, fetchImpl) {
     const fetched = await fetchBuffer(url, { fetchImpl, label: 'Politie/CBS OData', accept: 'application/json', timeoutMs: 90_000 });
     return { fetched, data: JSON.parse(fetched.buffer.toString('utf8')) };
   } catch (error) {
-    const endpoint = String(url).match(/47022NED\/([^?]+)/)?.[1] || 'onbekend';
+    const match = String(url).match(/OData\/([^/]+)\/([^?]+)/i);
+    const endpoint = match ? `${match[1]}/${match[2]}` : 'onbekend';
     const crime = decodeURIComponent(String(url).match(/SoortMisdrijf%20eq%20'([^']+)'/)?.[1] || 'dimensie');
     throw new Error(`Politie/CBS ${endpoint} (${crime}) mislukt: ${error.message}`, { cause: error });
   }
@@ -324,6 +389,18 @@ function trendDirectionLabel(direction) {
   return direction === 'increase' ? 'stijgt' : 'daalt';
 }
 
+function signedPercentage(value) {
+  const percentage = Math.round(Number(value) * 100);
+  return `${percentage >= 0 ? '+' : ''}${percentage}%`;
+}
+
+function trendWarning(assessment) {
+  const warnings = ['Geregistreerde misdrijven; aangiftebereidheid, registratie-effecten, gebiedswijzigingen en kleine aantallen kunnen het beeld beïnvloeden.'];
+  if (assessment.crime === '1.3.1') warnings.push('Categorie 1.3.1 kan door een registratiewijziging zijn beïnvloed; verifieer dit bij politie/CBS.');
+  if (assessment.possibleLocationCluster) warnings.push('Dit wijkpatroon kan door één locatie, instelling of registratielocatie worden veroorzaakt; presenteer het niet zonder controle als brede wijktrend.');
+  return warnings.join(' ');
+}
+
 class PolitieCbsAdapter {
   constructor(config = {}) { this.db = config.db || createClient({ url: process.env.TURSO_URL, authToken: process.env.TURSO_AUTH_TOKEN });
     this.dryRun = config.dryRun || false; this.fetchImpl = config.fetchImpl || fetch; this.sourceId = null; }
@@ -331,20 +408,28 @@ class PolitieCbsAdapter {
     this.sourceId = await ensureSource(this.db, META, this.dryRun);
     const snapshots = [];
     const archive = async fetched => { const snap = await archiveSnapshot(this.db, this.sourceId, META.name, fetched, this.dryRun); snapshots.push(snap); };
-    const [areaResponse, crimeResponse, propertyResponse, periodResponse] = await Promise.all([
+    const populationFilter = encodeURIComponent("startswith(WijkenEnBuurten,'GM0307') or startswith(WijkenEnBuurten,'GM0327') or startswith(WijkenEnBuurten,'NL00')");
+    const [areaResponse, crimeResponse, propertyResponse, periodResponse, populationResponse] = await Promise.all([
       fetchJson(`${BASE}/WijkenEnBuurten?$filter=Municipality%20eq%20'GM0307'%20or%20Municipality%20eq%20'GM0327'&$top=1000`, this.fetchImpl),
       fetchJson(`${BASE}/SoortMisdrijf?$top=1000`, this.fetchImpl), fetchJson(`${BASE}/DataProperties?$top=50`, this.fetchImpl),
       fetchJson(`${BASE}/Perioden?$top=1000`, this.fetchImpl),
+      fetchJson(`${POPULATION_BASE}/TypedDataSet?$filter=${populationFilter}&$select=WijkenEnBuurten,AantalInwoners_5`, this.fetchImpl),
     ]);
-    for (const item of [areaResponse, crimeResponse, propertyResponse, periodResponse]) await archive(item.fetched);
+    for (const item of [areaResponse, crimeResponse, propertyResponse, periodResponse, populationResponse]) await archive(item.fetched);
     const areaRows = areaResponse.data.value || []; const areaMap = new Map(areaRows.map(row => [normalizeText(row.Key),
       { name: row.Title, municipality: normalizeText(row.Municipality), code: normalizeText(row.DetailRegionCode) }]));
     const mapYear = Number((propertyResponse.data.value || []).find(item => item.Key === 'WijkenEnBuurten')?.MapYear);
     if (!mapYear || areaRows.length < 50) throw new Error(`Politie/CBS gebiedsschema verdacht: ${areaRows.length} gebieden, kaartjaar ${mapYear || 'ontbreekt'}`);
     const crimes = (crimeResponse.data.value || []).filter(item => CRIME_CODES.has(normalizeText(item.Key)));
+    const crimeMap = new Map(crimes.map(item => [normalizeText(item.Key), item]));
     const missingCrimeCodes = [...CRIME_CODES].filter(code => !crimes.some(item => normalizeText(item.Key) === code));
     if (missingCrimeCodes.length) throw new Error(`Politie/CBS delictdimensie mist codes: ${missingCrimeCodes.join(', ')}`);
     const periods = (periodResponse.data.value || []).map(item => item.Key).filter(key => /^\d{4}MM\d{2}$/.test(key)).sort();
+    const populations = new Map((populationResponse.data.value || []).map(item =>
+      [normalizeText(item.WijkenEnBuurten), Number(item.AantalInwoners_5)]));
+    if (![NATIONAL_CODE, ...MUNICIPALITIES].every(code => populations.get(code) > 0)) {
+      throw new Error('CBS bevolkingsreferentie mist Nederland, Amersfoort of Leusden');
+    }
     const from = periods.at(-61) || periods[0];
     const areaFilter = `(startswith(WijkenEnBuurten,'BU0307')%20or%20startswith(WijkenEnBuurten,'BU0327')%20or%20startswith(WijkenEnBuurten,'WK0307')%20or%20startswith(WijkenEnBuurten,'WK0327')%20or%20WijkenEnBuurten%20eq%20'GM0307%20%20%20%20'%20or%20WijkenEnBuurten%20eq%20'GM0327%20%20%20%20'%20or%20WijkenEnBuurten%20eq%20'NL00%20%20%20%20%20%20')`;
     const rows = [];
@@ -360,7 +445,9 @@ class PolitieCbsAdapter {
       normalizeText(row.SoortMisdrijf) !== '0.0.0')
       .map(point => ({ point, assessment: assessCrimePoint(point, rows, areaMap, assessmentContext) })).filter(item => item.assessment.anomaly);
     const trendAssessment = assessCrimeTrends(rows, areaMap, latestPeriod);
-    const trendCandidates = selectTrendCandidates(trendAssessment.candidates);
+    const municipalityDigests = buildMunicipalityDigests(trendAssessment.metrics, populations, crimeMap, latestPeriod);
+    const trendCandidates = selectTrendCandidates(trendAssessment.candidates.filter(item => item.area.startsWith('WK')),
+      MAX_TREND_EVENTS - MUNICIPALITIES.length);
     const latestHashes = new Map(); let baselineComplete = false;
     const recordFrom = previousPeriod(latestPeriod, 24);
     if (this.sourceId > 0) {
@@ -410,6 +497,38 @@ class PolitieCbsAdapter {
           VALUES (?,?,?,?,?,?,?,?,?)`, args: [this.sourceId, `${normalizeText(point.WijkenEnBuurten)}:${normalizeText(point.SoortMisdrijf)}`, point.Perioden,
           assessment.observed, assessment.expected, assessment.robustZ, assessment.cityNow, DETECTOR_VERSION, JSON.stringify(assessment)] });
       }
+      if (!baseline) for (const digest of municipalityDigests) {
+        const identifier = `politie-digest:${digest.area}:${latestPeriod}:${DIGEST_DETECTOR_VERSION}`;
+        const exists = await this.db.execute({ sql: 'SELECT id FROM kg_events WHERE source_id=? AND source_identifier=?', args: [this.sourceId, identifier] });
+        if (exists.rows.length) continue;
+        const itemProvenance = digest.items.map(item => ({ crime_code: item.crime, crime_name: item.crimeName,
+          observed: item.observed, year_ago: item.yearAgo, expected: item.expected, q_value: item.qValue,
+          local_change: item.localChange, national_change: item.nationalChange,
+          local_rate_per_1000: item.localRatePer1000, national_rate_per_1000: item.nationalRatePer1000 }));
+        const headlineItems = digest.items.slice(0, 2).map(item => `${item.crimeName} ${signedPercentage(item.localChange)}`).join(', ');
+        const summaryItems = digest.items.map(item => `${item.crimeName}: ${signedPercentage(item.localChange)} ` +
+          `(landelijk ${signedPercentage(item.nationalChange)}; ${item.localRatePer1000.toFixed(1)} tegen ` +
+          `${item.nationalRatePer1000.toFixed(1)} per 1.000 inwoners)`).join('; ');
+        const containsTraffic = digest.items.some(item => item.crime === '1.3.1');
+        const warning = 'Geregistreerde misdrijven; aangiftebereidheid en registratie-effecten kunnen het beeld beïnvloeden.' +
+          (containsTraffic ? ' Categorie 1.3.1 kan door een registratiewijziging zijn beïnvloed; verifieer dit bij politie/CBS.' : '');
+        const provenance = { source_name: META.name, source_class: META.sourceClass, source_url: SOURCE_URL,
+          source_identifier: identifier, fetched_at: new Date().toISOString(), adapter_version: VERSION,
+          detector_version: DIGEST_DETECTOR_VERSION, raw_object_hashes: snapshots.map(item => item.hash), map_year: mapYear,
+          reason: 'municipality_digest', area_code: digest.area, area_name: digest.areaName, area_level: 'gemeente',
+          period: latestPeriod, window_months: 12, classification: 'statistically_distinct', population: digest.population,
+          national_population: digest.nationalPopulation, population_dataset: '86165NED', items: itemProvenance, warning };
+        await this.db.execute({ sql: `INSERT INTO kg_events(event_type,title,summary,occurred_at,published_at,fetched_at,source_id,source_url,
+          source_identifier,raw_object_hash,parser_version,detection_rule,provenance) VALUES ('CRIME_TREND_DIGEST',?,?,?, ?,datetime('now'),?,?,?,?,?,'R5',?)`,
+          args: [`Misdaadbeeld ${digest.areaName}: ${headlineItems}`, `Laatste twaalf maanden tegenover een jaar eerder. ${summaryItems}.`,
+            `${latestPeriod.slice(0,4)}-${latestPeriod.slice(-2)}-01T00:00:00.000Z`, `${latestPeriod.slice(0,4)}-${latestPeriod.slice(-2)}-01T00:00:00.000Z`,
+            this.sourceId, SOURCE_URL, identifier, snapshots.at(-1)?.hash || semanticHash(rows), VERSION, JSON.stringify(provenance)] });
+        events++;
+        for (const item of digest.items) await this.db.execute({ sql: `INSERT OR REPLACE INTO statistical_baselines
+          (source_id,series_key,period,observed,expected,robust_z,municipality_expected,detector_version,explanation)
+          VALUES (?,?,?,?,?,?,?,?,?)`, args: [this.sourceId, `digest12:${digest.area}:${item.crime}`, latestPeriod,
+          item.observed, item.expected, item.zScore, null, DIGEST_DETECTOR_VERSION, JSON.stringify(itemProvenance.find(value => value.crime_code === item.crime))] });
+      }
       if (!baseline) for (const assessment of trendCandidates) {
         const crime = crimes.find(item => normalizeText(item.Key) === assessment.crime);
         const label = crimeLabel(crime?.Title || assessment.crime);
@@ -432,13 +551,15 @@ class PolitieCbsAdapter {
           national_observed: assessment.nationalObserved, national_year_ago: assessment.nationalYearAgo,
           national_ratio: assessment.nationalRatio, period_from: assessment.periodFrom, period_to: assessment.periodTo,
           municipality_observed: assessment.municipalityObserved, municipality_year_ago: assessment.municipalityYearAgo,
-          municipality_ratio: assessment.municipalityRatio,
+          municipality_ratio: assessment.municipalityRatio, municipality_share: assessment.municipalityShare,
+          possible_location_cluster: assessment.possibleLocationCluster,
           comparison_from: assessment.comparisonFrom, comparison_to: assessment.comparisonTo,
-          warning: 'Geregistreerde misdrijven; aangiftebereidheid, registratie-effecten, gebiedswijzigingen en kleine aantallen kunnen het beeld beïnvloeden.' };
+          warning: trendWarning(assessment) };
         const summary = `${assessment.observed} registraties in ${periodLabel(assessment.periodFrom)}–${periodLabel(assessment.periodTo)}, ` +
           `tegen ${assessment.yearAgo} in dezelfde periode een jaar eerder (${percentage >= 0 ? '+' : ''}${percentage}% na landelijke correctie; ` +
           `landelijk ${nationalPercentage >= 0 ? '+' : ''}${nationalPercentage}%` +
-          `${municipalityPercentage === null || assessment.area.startsWith('GM') ? '' : `; gemeente ${municipalityPercentage >= 0 ? '+' : ''}${municipalityPercentage}%`}).`;
+          `${municipalityPercentage === null || assessment.area.startsWith('GM') ? '' : `; gemeente ${municipalityPercentage >= 0 ? '+' : ''}${municipalityPercentage}%`}).` +
+          `${assessment.possibleLocationCluster ? ' Mogelijk gaat het om één locatie, instelling of registratielocatie.' : ''}`;
         await this.db.execute({ sql: `INSERT INTO kg_events(event_type,title,summary,occurred_at,published_at,fetched_at,source_id,source_url,
           source_identifier,raw_object_hash,parser_version,detection_rule,provenance) VALUES ('CRIME_TREND_DETECTED',?,?,?, ?,datetime('now'),?,?,?,?,?,'R5',?)`,
           args: [`${label} ${trendDirectionLabel(assessment.direction)} in ${assessment.areaName}`, summary,
@@ -454,22 +575,28 @@ class PolitieCbsAdapter {
     const trendBacktest = backtestCrimeTrends(rows, areaMap, 24);
     if (backtest.months < 24) throw new Error(`Politie-backtest te kort: ${backtest.months} maanden`);
     if (trendBacktest.months < 24) throw new Error(`Politie-trendbacktest te kort: ${trendBacktest.months} maanden`);
-    if (!this.dryRun) await this.db.execute({ sql: `INSERT INTO phase3_backtests(test_name,period_from,period_to,months,detector_version,input_count,signal_count,suppressed_count,metrics_json)
+    if (!this.dryRun) await executeWithRetry(this.db, { sql: `INSERT INTO phase3_backtests(test_name,period_from,period_to,months,detector_version,input_count,signal_count,suppressed_count,metrics_json)
       VALUES ('politie-r5',?,?,?,?,?,?,?,?)`, args: [backtest.from, backtest.to, backtest.months, DETECTOR_VERSION, backtest.evaluated, backtest.signals, backtest.suppressed, JSON.stringify(backtest)] });
-    if (!this.dryRun) await this.db.execute({ sql: `INSERT INTO phase3_backtests(test_name,period_from,period_to,months,detector_version,input_count,signal_count,suppressed_count,metrics_json)
+    if (!this.dryRun) await executeWithRetry(this.db, { sql: `INSERT INTO phase3_backtests(test_name,period_from,period_to,months,detector_version,input_count,signal_count,suppressed_count,metrics_json)
       VALUES ('politie-r5-trends',?,?,?,?,?,?,?,?)`, args: [trendBacktest.from, trendBacktest.to, trendBacktest.months, TREND_DETECTOR_VERSION,
       trendBacktest.evaluated, trendBacktest.candidates, trendBacktest.evaluated - trendBacktest.candidates, JSON.stringify(trendBacktest)] });
     return { sourceId: this.sourceId, baseline, total: rows.length, latestPeriod, mapYear, areas: areaRows.length, crimes: crimes.length,
       anomalies: baseline ? 0 : anomalies.length, trendCandidates: baseline ? 0 : trendCandidates.length,
+      municipalityDigests: baseline ? 0 : municipalityDigests.length,
       trendTests: trendAssessment.tests, trendSignificant: trendAssessment.significant, trendNotable: trendAssessment.notable,
+      digestPreview: municipalityDigests.map(digest => ({ area: digest.areaName,
+        items: digest.items.map(item => ({ crime: item.crime, change: signedPercentage(item.localChange),
+          nationalChange: signedPercentage(item.nationalChange), localRatePer1000: Number(item.localRatePer1000.toFixed(1)),
+          nationalRatePer1000: Number(item.nationalRatePer1000.toFixed(1)) })) })),
       trendPreview: trendCandidates.map(item => ({ area: item.areaName, crime: item.crime, windowMonths: item.windowMonths,
         direction: item.direction, classification: item.classification, observed: item.observed, yearAgo: item.yearAgo,
         expected: Number(item.expected.toFixed(1)), qValue: Number(item.qValue.toFixed(4)) })),
       events, revisions, backtest, trendBacktest };
   }
-  async health() { return { status: this.sourceId ? 'ok' : 'error', message: `CBS 47022NED, detectoren ${DETECTOR_VERSION}/${TREND_DETECTOR_VERSION}` }; }
+  async health() { return { status: this.sourceId ? 'ok' : 'error', message: `CBS 47022NED/86165NED, detectoren ${DETECTOR_VERSION}/${TREND_DETECTOR_VERSION}/${DIGEST_DETECTOR_VERSION}` }; }
 }
 
-module.exports = { BASE, CRIME_CODES, CRIME_PATTERN, DETECTOR_VERSION, TREND_DETECTOR_VERSION, META, PolitieCbsAdapter,
+module.exports = { BASE, POPULATION_BASE, CRIME_CODES, CRIME_PATTERN, DETECTOR_VERSION, TREND_DETECTOR_VERSION, DIGEST_DETECTOR_VERSION, META, PolitieCbsAdapter,
   aggregateTrendRows, applyFalseDiscoveryRate, assessCrimePoint, assessCrimeTrends, backtestCrime, backtestCrimeTrends, binomialTwoSided,
-  buildAssessmentContext, districtCode, median, periodRange, previousPeriod, robustZ, selectTrendCandidates, trendMetric };
+  buildAssessmentContext, buildMunicipalityDigests, districtCode, executeWithRetry, isPossibleLocationCluster, median, municipalityDigestGroups, periodRange, previousPeriod,
+  robustZ, selectTrendCandidates, trendMetric, trendWarning };
