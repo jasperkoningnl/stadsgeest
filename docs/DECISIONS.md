@@ -4,6 +4,19 @@
 **Status:** gezaghebbend.
 **Lees wanneer:** bij roadmapafwijkingen of wanneer een eerdere ontwerpkeuze ter discussie staat.
 
+## 2026-10-02 — Woondashboard blijft onzichtbaar op /nieuwsplein33
+
+Het redactiedashboard (`/nieuwsplein33`, inclusief `LOGBOEK.md`) noemt het
+woondashboard voor de beleidsadviseur wonen (`/beleidsadviseur`) nergens, ook
+niet in het logboek of in uitlegteksten. Jasper besloot dit op 2 oktober 2026
+en liet de eerdere logboekmelding erover verwijderen. Beide dashboards zijn
+gescheiden producten voor gescheiden gebruikers; de redactie hoeft niet te
+weten dat het woondashboard bestaat. `scripts/check-docs.mjs` controleert
+`LOGBOEK.md` en `src/app/nieuwsplein33/` op de woorden "woondashboard" en
+"beleidsadviseur" en laat `npm run docs:check`, en daarmee iedere build, falen
+als ze voorkomen. Technische documentatie onder `docs/` mag het woondashboard
+wel beschrijven.
+
 ## 2026-09-13 — Migratieplan geïntegreerd, niet langer zelfstandig leidend
 
 De blijvende contracten uit het migratieplan zijn opgenomen in

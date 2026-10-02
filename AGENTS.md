@@ -49,6 +49,8 @@ andere repositories; daarvoor blijft afzonderlijke toestemming nodig.
   volgens `docs/HANDOFF-TEMPLATE.md`.
 - `LOGBOEK.md` is productinhoud voor de redactie: alleen merkbare veranderingen,
   geen dagelijkse tips of technisch werk.
+- Het woondashboard (`/beleidsadviseur`) wordt nooit genoemd in `LOGBOEK.md` of
+  onder `/nieuwsplein33`; `npm run docs:check` bewaakt dit.
 - Werk relevante documentatie in dezelfde commit bij als de code.
 
 ## Operationele veiligheid

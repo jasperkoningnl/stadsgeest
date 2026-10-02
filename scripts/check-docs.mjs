@@ -70,9 +70,41 @@ for (const file of linkFiles) {
   }
 }
 
+// Het woondashboard voor de beleidsadviseur wonen (/beleidsadviseur) mag nergens
+// op het redactiedashboard /nieuwsplein33 genoemd worden, ook niet in het
+// logboek dat daar getoond wordt. Zie docs/DECISIONS.md (2026-10-02).
+const verbodenWoorden = [/woondashboard/i, /beleidsadviseur/i]
+const bewaaktePaden = ['LOGBOEK.md', 'src/app/nieuwsplein33']
+
+function tekstBestanden(target) {
+  if (!fs.existsSync(target)) return []
+  const stat = fs.statSync(target)
+  if (stat.isFile()) return [target]
+  return fs.readdirSync(target, { withFileTypes: true }).flatMap((entry) => {
+    const absolute = path.join(target, entry.name)
+    if (entry.isDirectory()) return tekstBestanden(absolute)
+    return /\.(md|mdx|ts|tsx|js|jsx|json|css)$/.test(entry.name) ? [absolute] : []
+  })
+}
+
+for (const relative of bewaaktePaden) {
+  for (const file of tekstBestanden(path.join(root, relative))) {
+    const regels = fs.readFileSync(file, 'utf8').split(/\r?\n/)
+    regels.forEach((regel, index) => {
+      for (const woord of verbodenWoorden) {
+        if (woord.test(regel)) {
+          failures.push(
+            `${path.relative(root, file)}:${index + 1} noemt het woondashboard (${woord.source}); dat mag niet op /nieuwsplein33.`,
+          )
+        }
+      }
+    })
+  }
+}
+
 if (failures.length > 0) {
   console.error(`Documentatiecontrole mislukt:\n- ${failures.join('\n- ')}`)
   process.exit(1)
 }
 
-console.log(`Documentatiecontrole geslaagd: ${required.length} kernbestanden en lokale links.`)
+console.log(`Documentatiecontrole geslaagd: ${required.length} kernbestanden, lokale links en geen woondashboardverwijzing op /nieuwsplein33.`)
