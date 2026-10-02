@@ -33,6 +33,7 @@ in `scripts/check-docs.mjs` en de reden in `docs/DECISIONS.md` (2026-10-02).
 ## 2026-10-03 — De knoppen bovenaan een tip werken nu echt
 
 De kleine knoppen in de balk bovenaan een tip (Oppakken, Parkeren, Afwijzen, Terugzetten) sloegen tot nu toe niets op: de pagina deed alsof, maar de tip bleef in de wachtrij staan. Dat is gerepareerd. Oppakken en Parkeren leggen de beslissing meteen vast en brengen je naar de volgende tip. Afwijzen opent het keuzeblok met redenen onder de kop, want een afwijzing vraagt altijd een reden; die telt mee bij het bijstellen van de selectie. Mislukt het opslaan, dan staat dat nu in de balk in plaats van dat er niets gebeurt. Heb je de afgelopen weken bovenaan op Oppakken of Parkeren gedrukt en zag je de tip later toch weer in de wachtrij, dan was dit de oorzaak.
+
 ## 2026-10-02 — B&W-besluiten van september komen alsnog binnen
 
 De losse stukken uit de besluitenlijsten van het college kwamen sinds eind augustus niet bij de weger aan. Dat is gerepareerd. De 71 stukken uit september worden bij de eerstvolgende verwerking alsnog aangeboden. Je ziet daardoor de komende dagen meer signalen dan normaal, en een deel staat als historisch gemarkeerd omdat het ouder is dan een week. Daar zit onder meer de begroting 2027 bij.
