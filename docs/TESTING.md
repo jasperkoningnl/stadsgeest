@@ -56,9 +56,11 @@ niet gevolgd. Classificeer en commit die niet automatisch.
 
 De gevolgde suite `scraper/__tests__/phase3/adapters.test.cjs` gebruikt kleine
 fixtures voor AFM XML/CSV, DNB, RVO, KOOP en NDW. Zij dekt daarnaast Inspectie-
-BRIN/oordeeldrempels, politie-kleine-aantallen en robuuste trigger, geometrische
-buffer, broncadans, stabiele feedidentiteit, tweerunsverwijdering en beide
-24-maandsbacktests. De volledige AFM-ZIP, RVO-export, NDW-gzip en CBS-OData
+BRIN/oordeeldrempels, politie-kleine-aantallen, wijkaggregatie, directe
+wijkregels, stijgingen en dalingen, landelijke correctie, meervoudige toetsing,
+selectiediversiteit en beide politieterugtests. Ook geometrische buffer,
+broncadans, stabiele feedidentiteit en tweerunsverwijdering zijn gedekt. De
+volledige AFM-ZIP, RVO-export, NDW-gzip en CBS-OData
 blijven live/dry-run-controles en worden niet in Git opgenomen.
 
 Voor fase 3 is naast `npm test` vereist:

@@ -224,14 +224,37 @@ const R4_LOCAL_PERSON_EXTERNAL = {
 const R5_CRIME_ANOMALY = {
   id: 'R5',
   name: 'Robuuste anomalie geregistreerde misdrijven',
-  eventTypes: ['CRIME_ANOMALY_DETECTED'],
+  eventTypes: ['CRIME_ANOMALY_DETECTED', 'CRIME_TREND_DETECTED'],
   async condition(event) {
     let p = {}; try { p = JSON.parse(event.provenance || '{}'); } catch { return false; }
+    if (event.event_type === 'CRIME_TREND_DETECTED') {
+      return p.reason === 'trend_trigger' && ['increase', 'decrease'].includes(p.direction) &&
+        Number(p.window_months) >= 3 && Number(p.expected) >= 5 && Number.isFinite(Number(p.ratio));
+    }
     return Number(p.observed) >= 5 && Number(p.expected) > 0 && Number(p.robustZ) >= 3.5 &&
       Number(p.observed) >= Math.max(2 * Number(p.expected), Number(p.expected) + 5) && p.reason === 'trigger';
   },
   async createSignal(event) {
     const p = JSON.parse(event.provenance || '{}');
+    if (event.event_type === 'CRIME_TREND_DETECTED') {
+      const classification = p.classification === 'statistically_distinct'
+        ? 'De afwijking blijft overeind na correctie voor meervoudig toetsen.'
+        : 'Dit is een redactioneel opvallend patroon, geen formeel significante afwijking.';
+      return { title: event.title, summary: `${event.summary} ${classification} Het gaat om geregistreerde misdrijven; registratie- en aangifte-effecten blijven mogelijk.`,
+        category: 'veiligheid', tier: 2,
+        noveltyScore: Math.min(92, p.classification === 'statistically_distinct' ? 78 + Math.round(Math.abs(Number(p.z_score))) : 68),
+        evidence: [`${p.observed} geregistreerd in ${p.window_months} maanden`, `${p.year_ago} in dezelfde periode een jaar eerder`,
+          `landelijke ontwikkeling ${Math.round((Number(p.national_ratio) - 1) * 100)}%`,
+          p.area_level === 'wijk' && Number(p.municipality_year_ago) > 0
+            ? `ontwikkeling gemeente ${Math.round((Number(p.municipality_ratio) - 1) * 100)}%` : null,
+          `landelijk gecorrigeerde verwachting ${Number(p.expected).toFixed(1)}`,
+          p.classification === 'statistically_distinct' ? `FDR q=${Number(p.q_value).toFixed(3)}` : 'redactioneel opvallend, niet formeel significant',
+          event.source_url].filter(Boolean),
+        entityPath: `${p.area_name || p.area_code} → ${p.crime_name || p.crime_code} → ${p.period_from}–${p.period_to}`,
+        provenance: { absolute_count: p.observed, year_ago_count: p.year_ago, expected_count: p.expected,
+          area_version: p.map_year, area_level: p.area_level, direction: p.direction, classification: p.classification,
+          methodology_warning: p.warning, national_trend_ratio: p.national_ratio, q_value: p.q_value }, entities: [] };
+    }
     return { title: event.title, summary: `${event.summary} Het gaat om geregistreerde misdrijven; registratie-effecten blijven mogelijk.`,
       category: 'veiligheid', tier: 2, noveltyScore: Math.min(90, 60 + Math.round(Number(p.robustZ))),
       evidence: [`${p.observed} geregistreerd`, `verwachting ${Number(p.expected).toFixed(1)}`, `robuuste z-score ${Number(p.robustZ).toFixed(1)}`,

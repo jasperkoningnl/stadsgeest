@@ -12,7 +12,8 @@ const { isLocalProject, parseRvoCsv, numberNl } = require('../../src/kg/adapters
 const { parseSru } = require('../../src/kg/adapters/koop-nonmunicipal.cjs');
 const { parseNdwXml, pointInGeometry, pointInGeometryBuffered } = require('../../src/kg/adapters/ndw-planning.cjs');
 const { assessInspectionChange, duoBranchCode, normalizeInspectionRecord } = require('../../src/kg/adapters/onderwijsinspectie-kwaliteit.cjs');
-const { assessCrimePoint, backtestCrime, robustZ } = require('../../src/kg/adapters/politie-cbs-anomalies.cjs');
+const { CRIME_CODES, CRIME_PATTERN, aggregateTrendRows, assessCrimePoint, assessCrimeTrends, backtestCrime, backtestCrimeTrends,
+  districtCode, previousPeriod, robustZ, selectTrendCandidates } = require('../../src/kg/adapters/politie-cbs-anomalies.cjs');
 const { R5_CRIME_ANOMALY, R11_SCHOOL_ENROLLMENT, R12_SCHOOL_FORECAST } = require('../../src/kg/detection-rules.cjs');
 const { evaluateHistoricalClusters } = require('../../backtest-phase3.cjs');
 
@@ -94,12 +95,69 @@ describe('fase 3 broncontracten', () => {
     assert.equal(await R5_CRIME_ANOMALY.condition(event), true);
   });
 
+  it('aggregeert buurten naar herkenbare wijken en selecteert brand/ontploffing', () => {
+    assert.equal(districtCode('BU03070801'), 'WK030708');
+    assert.equal(CRIME_PATTERN.test('1.6.1 Brand/ontploffing'), true);
+    assert.equal(CRIME_CODES.has('1.6.1'), true); assert.equal(CRIME_CODES.has('3.9.1'), true);
+    const aggregated = aggregateTrendRows([
+      { WijkenEnBuurten: 'BU03070800', SoortMisdrijf: '1.2.3', Perioden: '2026MM08', GeregistreerdeMisdrijven_1: 4 },
+      { WijkenEnBuurten: 'BU03070801', SoortMisdrijf: '1.2.3', Perioden: '2026MM08', GeregistreerdeMisdrijven_1: 7 },
+      { WijkenEnBuurten: 'WK030708', SoortMisdrijf: '1.2.3', Perioden: '2026MM08', GeregistreerdeMisdrijven_1: 12 },
+      { WijkenEnBuurten: 'NL00', SoortMisdrijf: '1.2.3', Perioden: '2026MM08', GeregistreerdeMisdrijven_1: 1000 },
+    ]);
+    assert.equal(aggregated.find(row => row.WijkenEnBuurten === 'WK030708').GeregistreerdeMisdrijven_1, 12);
+    assert.equal(aggregated.find(row => row.WijkenEnBuurten === 'NL00').GeregistreerdeMisdrijven_1, 1000);
+  });
+
+  it('maakt een wijktrend met landelijke seizoenscorrectie en FDR', async () => {
+    const latest = '2026MM08'; const rows = [];
+    for (let offset = 0; offset < 25; offset++) {
+      const period = previousPeriod(latest, offset);
+      const local = offset < 3 ? 12 : offset < 6 ? 5 : 6;
+      rows.push({ WijkenEnBuurten: 'BU03070800', SoortMisdrijf: '1.2.3', Perioden: period, GeregistreerdeMisdrijven_1: local });
+      rows.push({ WijkenEnBuurten: 'NL00', SoortMisdrijf: '1.2.3', Perioden: period, GeregistreerdeMisdrijven_1: 1000 });
+    }
+    const areas = new Map([['WK030708', { name: 'Schothorst-Zuid', municipality: 'GM0307' }]]);
+    const result = assessCrimeTrends(rows, areas, latest);
+    const candidate = result.candidates.find(item => item.area === 'WK030708');
+    assert.ok(candidate); assert.equal(candidate.windowMonths, 3); assert.equal(candidate.observed, 36);
+    assert.equal(candidate.yearAgo, 18); assert.equal(candidate.previousWindow, 15);
+    assert.equal(candidate.classification, 'statistically_distinct'); assert.ok(candidate.qValue <= 0.05);
+    const event = { event_type: 'CRIME_TREND_DETECTED', provenance: JSON.stringify({ reason: 'trend_trigger',
+      direction: candidate.direction, classification: candidate.classification, window_months: candidate.windowMonths,
+      observed: candidate.observed, year_ago: candidate.yearAgo, previous_window: candidate.previousWindow,
+      expected: candidate.expected, ratio: candidate.ratio, z_score: candidate.zScore, q_value: candidate.qValue,
+      national_ratio: candidate.nationalRatio, period_from: candidate.periodFrom, period_to: candidate.periodTo }) };
+    assert.equal(await R5_CRIME_ANOMALY.condition(event), true);
+    const signal = await R5_CRIME_ANOMALY.createSignal({ ...event, title: 'Diefstal stijgt', summary: '36 registraties.', source_url: 'https://bron' });
+    assert.match(signal.summary, /correctie voor meervoudig toetsen/);
+  });
+
   it('backtest 24 maanden telt onderdrukking en multi-sourceclusters uitlegbaar', () => {
     const rows = []; for (let month = 1; month <= 24; month++) rows.push({ WijkenEnBuurten: 'BU1', SoortMisdrijf: 'X', Perioden: `2024MM${String(month).padStart(2,'0')}`, GeregistreerdeMisdrijven_1: 1 });
     const result = backtestCrime(rows, new Map([['BU1', { municipality: 'GM1' }]]), 24); assert.equal(result.months, 24); assert.equal(result.signals, 0);
     const history = evaluateHistoricalClusters([{ signal_id: 1, source_id: 10, published_at: '2025-01-01', status: 'published' },
       { signal_id: 1, source_id: 11, published_at: '2025-01-15', status: 'published' }], 24);
     assert.equal(history.within90, 1); assert.equal(history.retainedRate, 1);
+  });
+
+  it('trendbacktest beslaat 24 maanden zonder losse buurttellingen als wijk te presenteren', () => {
+    const rows = [];
+    for (let offset = 0; offset < 36; offset++) {
+      const period = previousPeriod('2026MM08', offset);
+      rows.push({ WijkenEnBuurten: 'BU03070800', SoortMisdrijf: '1.2.3', Perioden: period, GeregistreerdeMisdrijven_1: 6 });
+      rows.push({ WijkenEnBuurten: 'NL00', SoortMisdrijf: '1.2.3', Perioden: period, GeregistreerdeMisdrijven_1: 1000 });
+    }
+    const result = backtestCrimeTrends(rows, new Map([['WK030708', { name: 'Schothorst-Zuid', municipality: 'GM0307' }]]), 24);
+    assert.equal(result.months, 24); assert.equal(result.candidates, 0);
+  });
+
+  it('begrensde trendselectie houdt variatie in delict en gebied', () => {
+    const selected = selectTrendCandidates([
+      { area: 'WK1', crime: 'A' }, { area: 'WK2', crime: 'A' }, { area: 'WK3', crime: 'A' },
+      { area: 'WK1', crime: 'B' }, { area: 'WK1', crime: 'C' }, { area: 'WK4', crime: 'D' },
+    ], 4);
+    assert.deepEqual(selected.map(item => `${item.area}:${item.crime}`), ['WK1:A', 'WK2:A', 'WK1:B', 'WK4:D']);
   });
 
   it('reserveert oorspronkelijke regelnummers en verplaatst DUO naar R11/R12', () => {

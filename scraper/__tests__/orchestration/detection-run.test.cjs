@@ -1,6 +1,6 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
-const { isDueAt, summarizeRun, parseOptions } = require('../../src/kg/detection-run.cjs');
+const { ADAPTERS, isDueAt, summarizeRun, parseOptions } = require('../../src/kg/detection-run.cjs');
 const { DetectionEngine, sourceUrlFallback } = require('../../src/kg/detection-engine.cjs');
 
 describe('detection-run orchestration', () => {
@@ -31,6 +31,11 @@ describe('detection-run orchestration', () => {
     assert.equal(isDueAt(null, 24, now), true);
     assert.equal(isDueAt('2026-09-13T00:00:00Z', 20, now), false);
     assert.equal(isDueAt('2026-09-12T12:00:00Z', 20, now), true);
+  });
+
+  it('controleert de maandelijkse politiecijfers minstens wekelijks op een nieuwe publicatie', () => {
+    const politie = ADAPTERS.find(([name]) => name === 'politie-cbs');
+    assert.ok(politie); assert.ok(politie[2].minimumHours <= 168);
   });
 
   it('dedupliceert een feeditem op officiële identifier en niet op de gedeelde feed-URL', () => {

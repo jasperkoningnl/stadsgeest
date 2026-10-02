@@ -1,7 +1,7 @@
 # Actuele toestand — Stadsgeest
 
 **Doel:** compacte herschrijfbare momentopname.
-**Status:** actueel per 1 oktober 2026.
+**Status:** actueel per 2 oktober 2026.
 **Lees wanneer:** bij iedere nieuwe taak. Historische details staan elders.
 
 ## Productie
@@ -33,12 +33,24 @@ events op. De BAG-backfill koppelde 79 van 82 locaties exact en legde drie
 niet-eenduidige gevallen vast. De handmatige organisatie-golden-set staat nog
 op 0 van 200 beoordelingen.
 
-Fase 3 en 4 zijn productieactief. Hun herhaalcontroles zagen uitsluitend
-ongewijzigde records en nul events. De zorgparser scheidt organisatienamen van
-persoons- en bestandsvelden; 178 verkeerd benoemde importorganisaties zijn via
+Fase 3 en 4 zijn productieactief. De eerdere baseline-herhaalcontroles zagen
+uitsluitend ongewijzigde records en nul events; R5 heeft inmiddels de hieronder
+beschreven augustus-signalen opgeleverd. De zorgparser scheidt organisatienamen
+van persoons- en bestandsvelden; 178 verkeerd benoemde importorganisaties zijn via
 KVK-identiteitsregels hersteld. De iBabs-keten heeft een begrensde OCR-naloop
 voor scans zonder tekstlaag. De bronnenwacht meldt na herstel en gemotiveerde
 uitschakelingen nul verdachte en nul dode bronnen.
+
+R5 volgt nu ook stijgende en dalende misdaadtrends over drie en twaalf maanden
+per wijk en gemeente, afgezet tegen dezelfde periode een jaar eerder en tegen
+de landelijke ontwikkeling. De augustuspublicatie staat in productie met acht
+trend-events en acht bijbehorende signalen; één bestaande maandpiek kwam daar
+apart bij. De wekelijkse broncontrole gebruikt kleinere OData-pagina's en leest
+alleen het relevante 25-maandsvenster uit de database. De laatste herstelruns
+na de eerste liveverwerking eindigden door een tijdelijke `fetch failed`; de
+opgeslagen augustusrecords, events en baselines zijn gericht geverifieerd, maar
+een volgende volledige `ok`-run moet de trendterugtest nog in productie
+registreren.
 
 De fase-5-leerloop legt redactionele besluiten idempotent vast met reden,
 dimensie en bevroren context van tip, signalen, regels, bronnen en entiteiten.

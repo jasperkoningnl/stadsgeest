@@ -53,7 +53,7 @@ const ADAPTERS = [
   ['koop', KoopNonMunicipalAdapter, { sourceName: 'KOOP — niet-gemeentelijke officiële publicaties', minimumHours: 20 }],
   ['afm', AfmRegisterAdapter, { sourceName: 'AFM — register financiële dienstverleners', minimumHours: 20 }],
   ['dnb', DnbRegisterAdapter, { sourceName: 'DNB — openbaar register', minimumHours: 20 }],
-  ['politie-cbs', PolitieCbsAdapter, { sourceName: 'Politie/CBS — geregistreerde misdrijven per buurt', minimumHours: 650 }],
+  ['politie-cbs', PolitieCbsAdapter, { sourceName: 'Politie/CBS — geregistreerde misdrijven per buurt', minimumHours: 144 }],
   ['ndw', NdwPlanningAdapter, { sourceName: 'NDW — wegwerkzaamheden en evenementen', minimumHours: 0.2 }],
   ['rvo', RvoProjectenAdapter, { sourceName: 'RVO — Projectendatabase', minimumHours: 144 }],
   ['zorg-jaarverantwoording', CareAccountabilityAdapter, { sourceName: 'Jaarverantwoording Zorg — openbare datasets', minimumHours: [3, 4, 5, 6, 9, 10].includes(new Date().getMonth() + 1) ? 144 : 650 }],

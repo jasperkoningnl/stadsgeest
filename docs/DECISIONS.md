@@ -338,3 +338,23 @@ recall (concernverbanden en merknamen zoals "MBO Amersfoort" vallen weg), maar
 een vals verband in een tip is erger dan een gemist verband. De uitkomst gaat
 naar eigen tabellen (`org_link_records`, `org_clusters`, `org_link_runs`),
 niet naar de KG. Zie `KOPPELING.md`.
+
+## 2026-10-02 — R5 volgt lokale misdaadtrends, niet alleen maandpieken
+
+R5 behoudt zijn bestaande identiteit, maar accepteert naast incidentele
+maandpieken ook trends in geregistreerde misdrijven. De detector vergelijkt per
+wijk en gemeente drie en twaalf maanden met hetzelfde tijdvak een jaar eerder,
+voor zowel stijgingen als dalingen. Directe officiële wijkcijfers hebben
+voorrang boven opgetelde buurtcijfers, omdat sommige delicten niet op
+buurtniveau worden gepubliceerd. De landelijke ontwikkeling is de referentie;
+een binomiale toets met Benjamini-Hochberg-correctie voorkomt dat honderden
+gelijktijdige vergelijkingen ieder als los bewijs worden gezien. Formele
+significantie en een redactioneel opvallend maar niet-formeel-significant
+patroon worden zichtbaar van elkaar onderscheiden. Maximaal acht kandidaten per
+datamaand, met spreiding over delicten en gebieden, gaan naar R5.
+
+Een ranglijst per duizend inwoners wordt niet automatisch gebruikt: die geeft
+op bedrijventerreinen en in wijken met weinig inwoners misleidende extremen.
+`Brand/ontploffing` uit de politieregistratie is opgenomen, maar wordt nooit
+gelijkgesteld aan alle woningbranden. Alle uitkomsten blijven onderzoekstips;
+registratie- en aangifte-effecten vereisen menselijke verificatie.

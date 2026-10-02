@@ -41,7 +41,8 @@ semantische diff. De orkestrator registreert momenteel onder meer:
 - Onderwijsinspectie-kwaliteitsoordelen, gekoppeld aan DUO-vestigingen;
 - KOOP niet-gemeentelijke officiële publicaties;
 - AFM volledig vergunningenregister en zes DNB-deelregisters;
-- Politie/CBS-buurtmaanden, NDW-planning en RVO-projecten;
+- Politie/CBS-maandcijfers voor buurt, wijk, gemeente en Nederland, NDW-planning
+  en RVO-projecten;
 - ANBI-register — Belastingdienst open data (wekelijks, RSIN-diff);
 - GLEIF — LEI-register (wekelijks, LEI-diff op adres en watchlist);
 - OpenStreetMap — Overpass contextlaag (wekelijks, fysieke objecten);
@@ -97,7 +98,19 @@ gemeente Amersfoort/Leusden wordt geaccepteerd. De nummeraanduiding-ID is de
 stabiele BAG-sleutel; een fuzzy resultaat wordt niet opgeslagen.
 
 Politie/CBS bouwt de lokale codeset uit de dimensietabel, bewaart het kaartjaar
-en haalt 60 maanden op voor de detector. NDW gebruikt de officiële CBS/PDOK-
+en haalt 60 maanden op. De wekelijkse controle vergelijkt per delict en wijk of
+gemeente de laatste drie en twaalf maanden met dezelfde periode een jaar eerder.
+De landelijke ontwikkeling (`NL00`) vormt de verwachting, zodat een landelijke
+golf niet automatisch een lokale tip wordt. De detector gebruikt de officiële
+wijkregels waar die bestaan en telt buurten alleen als terugvalroute op. Hij
+toetst stijgingen én dalingen, corrigeert de volledige reeks vergelijkingen voor
+meervoudig toetsen en laat per maand maximaal acht diverse kandidaten door.
+Een formeel significante afwijking wordt onderscheiden van een redactioneel
+opvallend patroon. Kleine aantallen en registratiewijzigingen blijven verplichte
+waarschuwingen; cijfers per inwoner worden niet automatisch gebruikt voor
+bedrijventerreinen en andere wijken met zeer weinig inwoners. De categorie
+`brand/ontploffing` is politiedata en mag niet als alle woningbranden worden
+gepresenteerd. NDW gebruikt de officiële CBS/PDOK-
 gemeentegeometrie met een buffer van één kilometer; een straatnaam is nooit een
 lokaal bewijs. Onderwijsinspectie behandelt een lege vigerend-oordeelrespons als
 ontbrekende data, niet als een negatief oordeel.
