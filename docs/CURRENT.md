@@ -15,9 +15,15 @@ Jaspers Windows-notebook voert de operationele keten uit. Het dashboard bevat
 partijengraaf. Sinds 2 oktober staat op `/beleidsadviseur` een apart
 woondashboard voor de beleidsadviseur wonen van de gemeente Amersfoort, achter
 het account `adviseur` (rol `beleid`). Alleen dat account en Jasper zien de
-pagina; het beleidsaccount ziet het redactiedashboard niet.
-De pagina toont alleen officiële of bevestigde feiten en cachet haar queries
-zes uur.
+pagina; het beleidsaccount ziet het redactiedashboard niet. Het dashboard heeft
+een eigen stijl en zes tabbladen: Overzicht (aandachtspunten, doelen tegen
+realisatie), Vergunningen (filters, lopende aanvragen met beslistermijn,
+CSV-export), Woningmarkt (CBS StatLine: voorraad, bouw, eigendom, waarde,
+huishoudens, wijken), Corporaties (dPi), Wonen en zorg (vergrijzing, Wmo,
+wijksignalen, opvang) en Raad en beleid. CBS-cijfers komen rechtstreeks uit de
+open data van het CBS (24 uur cache) en kosten geen Turso-reads; de
+databasequeries staan zes uur in de cache. Het dashboard toont alleen
+officiële of bevestigde feiten.
 
 `Stadsgeest Detection` start dagelijks om 06.15 uur; NDW draait iedere vijftien
 minuten. Na de dagrun volgen de geplande fase-5-maandevaluatie en

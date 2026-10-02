@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-10-03 — Woondashboard in tabbladen, met CBS-cijfers en wonen en zorg
+
+Het woondashboard op stadsgeest.nl/beleidsadviseur is opgedeeld in zes tabbladen en heeft een eigen, rustigere stijl. Het overzicht begint met wat aandacht vraagt: aanvragen waarvan de beslistermijn is verstreken, nieuwe raadsvragen en moties over wonen, geweigerde vergunningen, bouwplannen van vijf of meer woningen en corporaties die hun plannen naar beneden bijstellen. Daarnaast staan de woningbouwdoelen (1.000 woningen per jaar, 35 procent sociale huur, de regionale Woondeal) naast wat het CBS werkelijk telt. Nieuw zijn het tabblad Woningmarkt met CBS-cijfers over voorraad, nieuwbouw, bouwvergunningen, eigendom, WOZ-waarde, huishoudens en verhuizingen, met Nederland ernaast, en het tabblad Wonen en zorg met vergrijzing per wijk, Wmo-gebruik, de ouderenhuisvesters, subsidies aan opvang en beschermd wonen en de bijbehorende raadsstukken. Vergunningen zijn te filteren op soort, thema, wijk en periode en als CSV te downloaden, net als de wijkcijfers en de lopende aanvragen.
+
 ## 2026-10-02 — Woondashboard voor de beleidsadviseur wonen van de gemeente
 
 Op stadsgeest.nl/beleidsadviseur staat een aparte pagina voor de beleidsadviseur wonen van de gemeente Amersfoort, achter een eigen inlog. De pagina laat zien wat Stadsgeest over wonen vindt: omgevingsvergunningen per maand, thema en wijk, de prognoses van woningcorporaties (dPi), het feitenregister van het dossier Woningbouw en wonen, raadsstukken en regelingen over wonen, woonsubsidies en berichten van De Alliantie. Alleen officiële of bevestigde feiten staan erop; tips, scores en redactiebeslissingen niet. De pagina is alleen zichtbaar voor dat account en voor Jasper; het beleidsaccount kan het redactiedashboard niet zien.

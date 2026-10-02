@@ -120,7 +120,7 @@ nooit uitsluitend op naam automatisch samengevoegd.
 | Gebied | Locatie |
 |---|---|
 | Dashboardroutes | `src/app/nieuwsplein33/` |
-| Woondashboard beleidsadviseur | `src/app/beleidsadviseur/`, `src/lib/dashboard/wonenQueries.ts` |
+| Woondashboard beleidsadviseur | `src/app/beleidsadviseur/` (tabbladen, `woon.css`), `src/lib/dashboard/wonenQueries.ts`, `cbsWonen.ts` (CBS StatLine), `woonBeleid.ts` (beleidsdoelen), `vergunningenFilter.ts` |
 | Dashboardqueries | `src/lib/dashboard/` |
 | Inlog en rollen | `src/lib/dashboardAuth.ts`, `src/proxy.ts` |
 | Dossierpagina's | `src/app/nieuwsplein33/dossiers/`, `src/lib/dashboard/dossierQueries.ts` |
