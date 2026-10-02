@@ -200,7 +200,7 @@ productkeuzes en vragen Jaspers akkoord vooraf (werkafspraak in `AGENTS.md`).
 
 | # | Wat | Winst | Omvang | Afhankelijk van |
 |---|---|---|---|---|
-| 1 | Snelle beslisknoppen repareren: `request_id` meesturen, afwijzen vraagt reden, fout tonen | Beslissen bovenaan werkt echt; leerloop blijft gevoed | 1 bestand, 1 route | niets |
+| 1 | Snelle beslisknoppen repareren: `request_id` meesturen, afwijzen vraagt reden, fout tonen. *Gedaan op 3 oktober.* | Beslissen bovenaan werkt echt; leerloop blijft gevoed | 1 bestand, 1 route | niets |
 | 2 | Eén beslisflow met popover, daarna automatisch naar volgende tip, toetsen | Doorlooptijd per tip omlaag | `BeslisNavigatie`, `TipActies` | 1 |
 | 3 | Compacte kaart, naam van wie oppakte, filters Leusden en "nog nergens gebracht", nieuw-sinds-bezoek | Wachtrij in één blik te overzien | `TipRegel`, `page.tsx`, `tipQueries` | akkoord Jasper |
 | 4 | Veroudering: groep "ouder dan een maand" met één afsluitknop, of automatisch `niet_gebruikt` via de supertip-run | Wachtrij blijft eerlijk, 18 tips weg uit het zicht | wachtrij of `supertip-run` | keuze Jasper |
