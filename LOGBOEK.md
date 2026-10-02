@@ -30,6 +30,16 @@ wordt getoond. De documentatiecontrole (`npm run docs:check`, ook vóór iedere
 build) weigert een logboek waarin het voorkomt; welke woorden zij bewaakt staat
 in `scripts/check-docs.mjs` en de reden in `docs/DECISIONS.md` (2026-10-02).
 
+## 2026-10-03 — Sneller beslissen, oude tips opruimen, dossiers en verkenner verbeterd
+
+Een flinke ronde aan het dashboard, vooral om het beslissen lichter te maken.
+
+- Op een tip is er nog één manier van beslissen: de knoppen in de balk bovenaan. Oppakken, Parkeren en Afwijzen openen direct onder de balk het keuzeblok met redenen; na "Vastleggen" ga je meteen door naar de volgende tip in de wachtrij. De grote knoppen onder de kop zijn weg. Met de toetsen 1, 2 en 3 kies je, met de pijltjes omhoog en omlaag blader je door de wachtrij, Esc sluit het keuzeblok.
+- Tips die langer dan een maand in de wachtrij staan, staan nu ingeklapt onderaan onder "Ouder dan een maand". Je kunt ze daar nog gewoon openen en oppakken, of in één keer allemaal afwijzen als oud nieuws. Ze blijven in het Archief terug te vinden en zijn los terug te zetten.
+- Bij een tip en bij een dossier zit een knop "Kopieer als tekst" of "Kopieer feitenlijst", voor in een mail of document. Bij een tip kun je ook direct een mail openen met kop, kern en link. Een gepubliceerde tip toont het artikel dat eruit kwam als klikbaar label, ook in de lijsten.
+- Een dossier begint nu met de tijdlijn en daaronder meteen de feiten; de afbakening staat ingeklapt. De tips uit het dossier hebben een eigen tab. In het dossieroverzicht en bovenaan een dossier staat de laatste ontwikkeling: het feit dat het laatst is vastgelegd.
+- De verkenner zoekt eerst in de partijen die Stadsgeest kent en in de plekken waar een naam in documenten is herkend. Dat gaat sneller en is zuiniger voor de database. Wil je toch door alle documenttitels zoeken, dan staat daar een link voor.
+
 ## 2026-10-03 — De knoppen bovenaan een tip werken nu echt
 
 De kleine knoppen in de balk bovenaan een tip (Oppakken, Parkeren, Afwijzen, Terugzetten) sloegen tot nu toe niets op: de pagina deed alsof, maar de tip bleef in de wachtrij staan. Dat is gerepareerd. Oppakken en Parkeren leggen de beslissing meteen vast en brengen je naar de volgende tip. Afwijzen opent het keuzeblok met redenen onder de kop, want een afwijzing vraagt altijd een reden; die telt mee bij het bijstellen van de selectie. Mislukt het opslaan, dan staat dat nu in de balk in plaats van dat er niets gebeurt. Heb je de afgelopen weken bovenaan op Oppakken of Parkeren gedrukt en zag je de tip later toch weer in de wachtrij, dan was dit de oorzaak.

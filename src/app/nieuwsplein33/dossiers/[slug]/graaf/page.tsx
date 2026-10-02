@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { hasTurso } from '@/lib/turso'
-import { getDossierBySlug } from '@/lib/dashboard/dossierQueries'
+import { getDossierBySlug, getDossierTips } from '@/lib/dashboard/dossierQueries'
 import { getDossierGraaf } from '@/lib/dashboard/dossierGraaf'
 import { formatDate, formatDateTime } from '@/lib/dashboard/format'
 import { ontstreep } from '@/lib/dashboard/briefing'
@@ -29,7 +29,7 @@ export default async function DossierGraafPagina({ params }: Props) {
   const dossier = await getDossierBySlug(slug)
   if (!dossier) notFound()
 
-  const graaf = await getDossierGraaf(dossier.id)
+  const [graaf, tips] = await Promise.all([getDossierGraaf(dossier.id), getDossierTips(dossier.id)])
   const partijOpId = new Map(graaf.partijen.map((p) => [p.id, p]))
   const docOpId = new Map(graaf.documenten.map((d) => [d.id, d]))
   const v = graaf.verantwoording
@@ -62,7 +62,7 @@ export default async function DossierGraafPagina({ params }: Props) {
       <header className="np-dos-kop">
         <h1>{ontstreep(dossier.naam, ' · ')}</h1>
       </header>
-      <DossierTabs slug={dossier.slug} actief="graaf" />
+      <DossierTabs slug={dossier.slug} actief="graaf" tips={tips.length} />
 
       <section className="np-dos-context np-graaf-uitleg">
         <div className="np-dos-context-kop">Waar kijk je naar?</div>

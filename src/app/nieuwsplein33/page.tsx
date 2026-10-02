@@ -7,6 +7,11 @@ import { formatDate, kalenderdagenGeleden, supertipVastgezet } from '@/lib/dashb
 import { ontstreep } from '@/lib/dashboard/briefing'
 import TipRegel from './TipRegel'
 import GeenDatabase from './GeenDatabase'
+import VerouderdeTips from './VerouderdeTips'
+
+// Na zoveel kalenderdagen in de wachtrij schuift een tip naar de ingeklapte
+// groep "Ouder dan een maand", met één knop om alles daarin af te sluiten.
+const OUD_NA_DAGEN = 30
 
 // Geen caching: een redacteur die net een tip heeft geparkeerd moet dat meteen
 // terugzien. Met een revalidate van 30 seconden bleef een afgehandelde tip in de
@@ -28,19 +33,22 @@ export default async function WachtrijPagina() {
   // chronologie.
   const vast = tips.filter((t) => supertipVastgezet(t))
 
-  // Vier dagkopjes: vandaag, gisteren, deze week, eerder.
+  // Vier dagkopjes: vandaag, gisteren, deze week, eerder. Wat langer dan een
+  // maand ligt gaat naar een ingeklapte groep onderaan (sinds 3 oktober 2026).
   const groepen: { kop: string; tips: TipRij[] }[] = [
     { kop: 'Vandaag', tips: [] },
     { kop: 'Gisteren', tips: [] },
     { kop: 'Deze week', tips: [] },
     { kop: 'Eerder', tips: [] },
   ]
+  const oud: TipRij[] = []
   for (const tip of tips) {
     if (vast.includes(tip)) continue
     const dagen = kalenderdagenGeleden(tip.created_at)
     if (dagen !== null && dagen <= 0) groepen[0].tips.push(tip)
     else if (dagen === 1) groepen[1].tips.push(tip)
     else if (dagen !== null && dagen <= 7) groepen[2].tips.push(tip)
+    else if (dagen !== null && dagen > OUD_NA_DAGEN) oud.push(tip)
     else groepen[3].tips.push(tip)
   }
 
@@ -109,7 +117,20 @@ export default async function WachtrijPagina() {
               {g.tips.map((tip) => <TipRegel key={tip.id} tip={tip} />)}
             </div>
           </section>
-        ))}</>
+        ))}
+        {oud.length > 0 && (
+          <details className="np-daggroep np-daggroep-oud">
+            <summary className="np-daggroep-kop">
+              Ouder dan een maand
+              <span className="np-daggroep-tel">{oud.length}</span>
+              <span className="np-daggroep-uitleg">ingeklapt; klik om te bekijken of af te sluiten</span>
+            </summary>
+            <VerouderdeTips tipIds={oud.map((t) => t.id)} />
+            <div className="np-lijst">
+              {oud.map((tip) => <TipRegel key={tip.id} tip={tip} />)}
+            </div>
+          </details>
+        )}</>
       )}
     </>
   )

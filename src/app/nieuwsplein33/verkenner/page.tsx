@@ -22,16 +22,21 @@ function euro(bedrag: number): string {
   return bedrag.toLocaleString('nl-NL')
 }
 
+const SOORT_PARTIJ: Record<string, string> = { person: 'persoon', organization: 'organisatie', location: 'locatie' }
+
 export default async function VerkennerPagina({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>
+  searchParams: Promise<{ q?: string; alles?: string }>
 }) {
   if (!hasTurso()) return <GeenDatabase />
 
-  const { q } = await searchParams
+  const { q, alles } = await searchParams
   const term = (q ?? '').trim()
-  const resultaat = term.length >= 2 ? await verken(term) : null
+  // alles=1: ook de zware zoektocht door alle documenttitels (zie verkennerQueries).
+  const metAlles = alles === '1'
+  const resultaat = term.length >= 2 ? await verken(term, metAlles) : null
+  const allesLink = `/nieuwsplein33/verkenner?q=${encodeURIComponent(term)}&alles=1`
 
   return (
     <div className="np-verkenner">
@@ -67,6 +72,7 @@ export default async function VerkennerPagina({
           {/* Springnavigatie: ankers naar de secties met resultaten */}
           {(() => {
             const secties = [
+              resultaat.partijen.length > 0 && { id: 'v-partijen', label: `Partijen (${resultaat.partijen.length})` },
               resultaat.tips.length > 0 && { id: 'v-tips', label: `Tips (${resultaat.tips.length})` },
               resultaat.subsidieTotalen.length > 0 && { id: 'v-subsidies', label: 'Subsidies' },
               resultaat.feiten.length > 0 && { id: 'v-feiten', label: `Feiten (${resultaat.feiten.length})` },
@@ -82,6 +88,26 @@ export default async function VerkennerPagina({
               </nav>
             )
           })()}
+
+          {resultaat.partijen.length > 0 && (
+            <section id="v-partijen" className="np-verkenner-blok">
+              <h3 className="np-kopje">Bekende partijen ({resultaat.partijen.length})</h3>
+              <p className="np-tekst np-stil">
+                Organisaties, personen en locaties die Stadsgeest als partij kent. Het aantal is het aantal documenten
+                waarin de koppeling is bevestigd; de documenten hieronder zijn op naam gevonden en kunnen ruimer zijn.
+              </p>
+              <div className="np-chips">
+                {resultaat.partijen.map((p) => (
+                  <Link key={p.id} href={`/nieuwsplein33/verkenner?q=${encodeURIComponent(p.naam)}`} className="np-chip np-chip-naam"
+                    title={p.alias ? `Gevonden via de naam ${p.alias}` : `Alles over ${p.naam}`}>
+                    <span className="np-chip-prefix">{SOORT_PARTIJ[p.soort] ?? p.soort}</span>
+                    <span>{p.naam}</span>
+                    {p.documenten > 0 && <span className="np-chip-prefix">{p.documenten}</span>}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
 
           {resultaat.tips.length > 0 && (
             <section id="v-tips" className="np-verkenner-blok">
@@ -185,6 +211,11 @@ export default async function VerkennerPagina({
                   ? ` (nieuwste ${resultaat.documenten.length} van ${resultaat.documentenTotaal})`
                   : ` (${resultaat.documenten.length})`}
               </h3>
+              <p className="np-tekst np-stil">
+                {resultaat.alles
+                  ? 'Gevonden op de documenttitel en op herkende naamvermeldingen in de tekst.'
+                  : <>Gevonden op herkende naamvermeldingen in de tekst. Staat wat je zoekt er niet bij? <Link href={allesLink} className="np-telling-link">Zoek ook in alle documenttitels</Link>; dat duurt iets langer.</>}
+              </p>
               <ol className="np-doclijst">
                 {resultaat.documenten.map((d, i) => (
                   <li key={i} className="np-doc">
@@ -195,6 +226,9 @@ export default async function VerkennerPagina({
                       <span className="np-bron">{d.bron}</span>
                       <span className="np-regel-scheiding">·</span>
                       <span>{formatDate(d.datum)}</span>
+                      {d.vermeldingen !== undefined && (
+                        <><span className="np-regel-scheiding">·</span><span>{d.vermeldingen}× genoemd</span></>
+                      )}
                     </div>
                   </li>
                 ))}
@@ -202,7 +236,14 @@ export default async function VerkennerPagina({
             </section>
           )}
 
-          {resultaat.tips.length + resultaat.signalen.length + resultaat.feiten.length
+          {resultaat.documenten.length === 0 && !resultaat.alles && (
+            <p className="np-tekst np-stil">
+              Geen documenten met een herkende vermelding van &ldquo;{resultaat.term}&rdquo;.{' '}
+              <Link href={allesLink} className="np-telling-link">Zoek ook in alle documenttitels</Link>.
+            </p>
+          )}
+
+          {resultaat.tips.length + resultaat.signalen.length + resultaat.feiten.length + resultaat.partijen.length
             + resultaat.subsidies.length + resultaat.documenten.length === 0 && (
             <div className="np-leeg">
               <p className="np-leeg-kop">Niets gevonden</p>

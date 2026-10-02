@@ -11,8 +11,9 @@ Amersfoort en Leusden. De keten loopt van publieke bronnen via bronrecords,
 events, entiteiten, signalen en de weger naar tips, dossiers en het
 redactiedashboard op `stadsgeest.nl/nieuwsplein33`. Vercel host het dashboard;
 Jaspers Windows-notebook voert de operationele keten uit. Het dashboard bevat
-22 dossiers met ruim 300 feiten, inclusief overzicht, feitenlijst, tijdas en
-partijengraaf. Sinds 2 oktober staat op `/beleidsadviseur` een apart
+22 dossiers met ruim 300 feiten. Sinds 3 oktober: één beslisflow met toetsen,
+bulkafsluiting van oude wachtrijtips, verkenner via entiteiten en
+Beheer > Redactie. Sinds 2 oktober staat op `/beleidsadviseur` een apart
 woondashboard voor de beleidsadviseur wonen van de gemeente Amersfoort, achter
 het account `adviseur` (rol `beleid`). Alleen dat account en Jasper zien de
 pagina; het beleidsaccount ziet het redactiedashboard niet. Het dashboard heeft
@@ -53,11 +54,10 @@ voor scans zonder tekstlaag. De bronnenwacht meldt na herstel en gemotiveerde
 uitschakelingen nul verdachte en nul dode bronnen.
 
 Sinds 2 oktober leest de keten ook de Statenstukken van de provincie Utrecht
-rechtstreeks uit het Statenplatform (alleen stukken die Amersfoort of Leusden
-noemen, tier 1) en zijn de Leusder Krant en De Stadsbron als spiegelbron
-toegevoegd. De eerste Statenrun was 2 oktober (bron 164, 6 lokale stukken uit
-30); de achterstand van 200 is rond 5 oktober weg. De spiegelbronnen krijgen
-hun bronrij bij de run-all van 3 oktober.
+(alleen stukken over Amersfoort of Leusden, tier 1); de Leusder Krant en De
+Stadsbron zijn spiegelbron. Eerste Statenrun 2 oktober (bron 164, 6 lokale
+stukken uit 30); de achterstand van 200 is rond 5 oktober weg. De spiegelbronnen
+krijgen hun bronrij bij de run-all van 3 oktober.
 
 R5 volgt stijgende en dalende misdaadtrends over drie en twaalf maanden per wijk
 en gemeente, vergeleken met een jaar eerder en Nederland. Een gemeentelijk

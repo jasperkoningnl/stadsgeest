@@ -29,6 +29,8 @@ export interface DossierOverzichtRij {
   open_tips: number
   /** Aantal feiten per maand, oudste eerst, over de laatste twaalf maanden. */
   per_maand: number[]
+  /** Het laatst vastgelegde feit: de "laatste ontwikkeling" in het overzicht. */
+  laatste_feit: { id: number; titel: string; datum: string | null } | null
 }
 
 export interface Dossier {
@@ -79,7 +81,7 @@ export function laatsteTwaalfMaanden(nu = new Date()): string[] {
 
 export async function getDossierOverzicht(): Promise<DossierOverzichtRij[]> {
   const maanden = laatsteTwaalfMaanden()
-  const [dossiers, tips, perMaand] = await Promise.all([
+  const [dossiers, tips, perMaand, laatste] = await Promise.all([
     q<any>(
       `SELECT d.id, d.naam, d.slug, d.omschrijving,
               COUNT(f.id) AS feiten,
@@ -102,7 +104,15 @@ export async function getDossierOverzicht(): Promise<DossierOverzichtRij[]> {
        FROM dossier_facts WHERE datum >= ? GROUP BY dossier_id, maand`,
       [`${maanden[0]}-01`],
     ),
+    // Het nieuwste feit per dossier. Eén keer de kleine feitentabel lezen is
+    // goedkoper dan een subquery per dossier.
+    q<any>(`SELECT id, dossier_id, titel, datum, created_at FROM dossier_facts ORDER BY created_at DESC, id DESC`),
   ])
+  const laatsteFeit = new Map<number, { id: number; titel: string; datum: string | null }>()
+  for (const f of laatste) {
+    const id = Number(f.dossier_id)
+    if (!laatsteFeit.has(id)) laatsteFeit.set(id, { id: Number(f.id), titel: f.titel, datum: f.datum ?? null })
+  }
 
   const tipTelling = new Map<number, { n: number; open: number }>(
     tips.map((r) => [Number(r.dossier_id), { n: Number(r.n), open: Number(r.open ?? 0) }]),
@@ -131,6 +141,7 @@ export async function getDossierOverzicht(): Promise<DossierOverzichtRij[]> {
       tips: tipTelling.get(Number(d.id))?.n ?? 0,
       open_tips: tipTelling.get(Number(d.id))?.open ?? 0,
       per_maand: maandTelling.get(Number(d.id)) ?? new Array(12).fill(0),
+      laatste_feit: laatsteFeit.get(Number(d.id)) ?? null,
     }))
     // Wat het laatst is aangevuld staat bovenaan: daar gebeurt iets.
     .sort((a, b) => (b.laatst_toegevoegd ?? '').localeCompare(a.laatst_toegevoegd ?? ''))

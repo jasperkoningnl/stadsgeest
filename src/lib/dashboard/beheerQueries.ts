@@ -542,3 +542,126 @@ export async function getLeerDashboard(dagen = 30): Promise<LeerDashboard> {
     reviewMaand: review[0]?.review_month ?? null, reviewStatus: review[0]?.status ?? null,
   }
 }
+
+// ── Redactie: doorstroom van tips ─────────────────────────────────────────
+//
+// Beheer mat tot 3 oktober 2026 alleen de machine. Het knelpunt zat bij de
+// doorstroom: meer dan de helft van alle tips stond nog in de wachtrij. Deze
+// cijfers komen uit twee kleine tabellen (tips en tip_feedback, samen enkele
+// honderden rijen) die één keer worden gelezen; het rekenwerk gebeurt hier.
+
+export interface DoorstroomWeek {
+  /** Maandag van de week, jjjj-mm-dd. */
+  week: string
+  gemaakt: number
+  /** Tips uit deze week die inmiddels een eerste beslissing hebben. */
+  beslist: number
+  /** Mediane uren van aanmaak tot eerste beslissing, voor de besliste tips. */
+  mediaanUren: number | null
+}
+
+export interface DoorstroomGebruiker {
+  gebruiker: string
+  goedgekeurd: number
+  geparkeerd: number
+  afgekeurd: number
+  heropend: number
+  totaal: number
+}
+
+export interface Doorstroom {
+  weken: DoorstroomWeek[]
+  /** Wachtrij nu, naar ouderdom in kalenderdagen. */
+  wachtrij: { totaal: number; totWeek: number; totMaand: number; ouder: number; oudsteDagen: number | null }
+  /** Beslissingen in de afgelopen 30 dagen, per gebruiker. */
+  gebruikers: DoorstroomGebruiker[]
+  /** Mediane uren tot eerste beslissing over alle besliste tips. */
+  mediaanUrenTotaal: number | null
+  beslistTotaal: number
+  tipsTotaal: number
+}
+
+function maandagVan(iso: string): string {
+  const d = new Date(iso.includes('T') ? iso : iso.replace(' ', 'T') + 'Z')
+  const dag = (d.getUTCDay() + 6) % 7
+  d.setUTCDate(d.getUTCDate() - dag)
+  return d.toISOString().slice(0, 10)
+}
+
+function mediaan(xs: number[]): number | null {
+  if (xs.length === 0) return null
+  const s = [...xs].sort((a, b) => a - b)
+  const m = Math.floor(s.length / 2)
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2
+}
+
+export async function getDoorstroom(weken = 8): Promise<Doorstroom> {
+  const [tips, feedback] = await Promise.all([
+    q<{ id: number; created_at: string; status: string }>(`SELECT id, created_at, status FROM tips`),
+    q<{ tip_id: number; gebruiker: string; actie: string; created_at: string }>(
+      `SELECT tip_id, gebruiker, actie, created_at FROM tip_feedback ORDER BY created_at ASC`,
+    ),
+  ])
+  const ms = (iso: string) => new Date(iso.includes('T') ? iso : iso.replace(' ', 'T') + 'Z').getTime()
+  const nu = Date.now()
+
+  // Eerste echte beslissing per tip (heropenen telt niet).
+  const eerste = new Map<number, number>()
+  for (const f of feedback) {
+    if (f.actie === 'heropend') continue
+    const id = Number(f.tip_id)
+    if (!eerste.has(id)) eerste.set(id, ms(f.created_at))
+  }
+
+  // Weken: de laatste `weken` maandagen, oudste eerst.
+  const start = new Date(maandagVan(new Date(nu).toISOString()) + 'T00:00:00Z')
+  const sleutels: string[] = []
+  for (let i = weken - 1; i >= 0; i--) {
+    const d = new Date(start.getTime() - i * 7 * 864e5)
+    sleutels.push(d.toISOString().slice(0, 10))
+  }
+  const perWeek = new Map(sleutels.map((w) => [w, { gemaakt: 0, beslist: 0, uren: [] as number[] }]))
+  const alleUren: number[] = []
+  for (const t of tips) {
+    const w = maandagVan(t.created_at)
+    const b = eerste.get(Number(t.id))
+    const uren = b !== undefined ? (b - ms(t.created_at)) / 36e5 : null
+    if (uren !== null) alleUren.push(uren)
+    const rij = perWeek.get(w)
+    if (!rij) continue
+    rij.gemaakt++
+    if (uren !== null) { rij.beslist++; rij.uren.push(uren) }
+  }
+
+  const open = tips.filter((t) => t.status === 'wachtrij')
+  const dagen = open.map((t) => (nu - ms(t.created_at)) / 864e5)
+
+  const perGebruiker = new Map<string, DoorstroomGebruiker>()
+  const grens = nu - 30 * 864e5
+  for (const f of feedback) {
+    if (ms(f.created_at) < grens) continue
+    const g = perGebruiker.get(f.gebruiker) ?? { gebruiker: f.gebruiker, goedgekeurd: 0, geparkeerd: 0, afgekeurd: 0, heropend: 0, totaal: 0 }
+    if (f.actie === 'goedgekeurd' || f.actie === 'geparkeerd' || f.actie === 'afgekeurd' || f.actie === 'heropend') g[f.actie]++
+    g.totaal++
+    perGebruiker.set(f.gebruiker, g)
+  }
+
+  return {
+    weken: sleutels.map((w) => {
+      const r = perWeek.get(w)!
+      return { week: w, gemaakt: r.gemaakt, beslist: r.beslist, mediaanUren: mediaan(r.uren) }
+    }),
+    wachtrij: {
+      totaal: open.length,
+      totWeek: dagen.filter((d) => d <= 7).length,
+      totMaand: dagen.filter((d) => d > 7 && d <= 30).length,
+      ouder: dagen.filter((d) => d > 30).length,
+      oudsteDagen: dagen.length ? Math.round(Math.max(...dagen)) : null,
+    },
+    gebruikers: [...perGebruiker.values()].sort((a, b) => b.totaal - a.totaal),
+    mediaanUrenTotaal: mediaan(alleUren),
+    beslistTotaal: alleUren.length,
+    tipsTotaal: tips.length,
+  }
+}
+

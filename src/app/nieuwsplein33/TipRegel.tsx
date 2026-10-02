@@ -80,6 +80,15 @@ export default function TipRegel({ tip }: { tip: TipRij }) {
             )}
           </div>
           <div className="np-regel-meta">
+            {tip.status === 'gepubliceerd' && tip.artikel_url && (
+              <>
+                <a href={tip.artikel_url} target="_blank" rel="noreferrer" className="np-chip np-chip-klein np-chip-link np-chip-artikel"
+                  title={`Het artikel dat uit deze tip kwam\n${tip.artikel_url}`}>
+                  <span>artikel</span><span className="np-chip-pijl" aria-hidden>↗</span>
+                </a>
+                <span className="np-regel-scheiding">·</span>
+              </>
+            )}
             <span>{tip.aantal_documenten} {tip.aantal_documenten === 1 ? 'document' : 'documenten'}</span>
             {tip.dossier_naam && (
               <>

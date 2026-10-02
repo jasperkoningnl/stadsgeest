@@ -6,6 +6,7 @@ import { mln, pct, type Onbeschikbaar, type VerbruikSamenvatting } from '@/lib/d
 // (?tab=…&periode=…), zodat de server alleen de data van dat tabblad ophaalt.
 export const BEHEER_TABS = [
   { id: 'verbruik', label: 'Verbruik' },
+  { id: 'redactie', label: 'Redactie' },
   { id: 'bronnen', label: 'Bronnen' },
   { id: 'intake', label: 'Intake' },
   { id: 'weging', label: 'Weging' },
