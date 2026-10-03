@@ -30,9 +30,13 @@ wordt getoond. De documentatiecontrole (`npm run docs:check`, ook vóór iedere
 build) weigert een logboek waarin het voorkomt; welke woorden zij bewaakt staat
 in `scripts/check-docs.mjs` en de reden in `docs/DECISIONS.md` (2026-10-02).
 
+## 2026-10-03 — Uitspraken hebben hun tekst; 53 eerdere signalen worden opnieuw gewogen
+
+Van 119 uitspraken van de rechtbank en andere colleges ontbrak de tekst; die is alsnog opgehaald. Vaak publiceert de Rechtspraak eerst alleen het nummer en pas later de uitspraak zelf. Stadsgeest kijkt daarom voortaan elke week opnieuw of de tekst er inmiddels is. Daarnaast gaan 53 signalen van raadsstukken en uitspraken sinds 1 september opnieuw langs de weging, omdat ze eerder alleen op hun titel zijn beoordeeld. Dat kan de komende dagen een paar extra tips opleveren.
+
 ## 2026-10-03 — Raadsstukken hebben weer hun volledige tekst
 
-Schriftelijke vragen, raadsinformatiebrieven, moties en ingekomen brieven aan de raad kwamen grotendeels alleen met hun titel binnen: de website van de raad blokkeerde het ophalen van het stuk zelf. Dat is hersteld. Van 288 stukken uit 2026 is de tekst alsnog opgehaald, bij ingekomen brieven inclusief de bijlagen. Tips en dossiers kunnen daardoor leunen op wat er in het stuk staat in plaats van op de kop. Door deze inhaalslag komen er geen extra tips in de wachtrij. Bij 458 ingekomen stukken publiceert de raad alleen afzender en onderwerp; daar is geen document bij en die blijven dus zonder tekst.
+Schriftelijke vragen, raadsinformatiebrieven, moties en ingekomen brieven aan de raad kwamen grotendeels alleen met hun titel binnen: de website van de raad blokkeerde het ophalen van het stuk zelf. Dat is hersteld. Van 288 stukken uit 2026 is de tekst alsnog opgehaald, bij ingekomen brieven inclusief de bijlagen. Tips en dossiers kunnen daardoor leunen op wat er in het stuk staat in plaats van op de kop. Bij 458 ingekomen stukken publiceert de raad alleen afzender en onderwerp; daar is geen document bij en die blijven dus zonder tekst.
 
 ## 2026-10-03 — Weekmail toont alleen nog wat open staat; grondverkoop krijgt een eigen bron
 

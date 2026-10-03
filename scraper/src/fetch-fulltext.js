@@ -6,7 +6,9 @@
 //
 // Draait ná de scrapers. Idempotent: slaat items met full_text over. Mislukte
 // Notubiz-documenten worden na zeven dagen opnieuw geprobeerd, omdat ORI de tekst
-// later alsnog kan indexeren; overige mislukte URL's blijven afgevinkt.
+// later alsnog kan indexeren. Uitspraken zonder tekst worden tot 120 dagen na
+// het scrapen wekelijks opnieuw geprobeerd, omdat de Rechtspraak de tekst vaak
+// pas later publiceert. Overige mislukte URL's blijven afgevinkt.
 //
 // Gebruik:
 //   node src/fetch-fulltext.js              # standaard: max 400 items per run
@@ -18,6 +20,7 @@
 import * as cheerio from 'cheerio';
 import { createDb } from './lib.js';
 import { buildOriLookup, extractOriText, haalNotubizTekst, isNotubizUrl } from './notubiz-fulltext.mjs';
+import { haalRechtspraakTekst, rechtspraakEcli } from './rechtspraak-fulltext.mjs';
 
 // pdfjs-dist wordt pas geladen als er echt een PDF langskomt (legacy build, want
 // we draaien in Node zonder DOM). Vóór 2026-08-09 werden PDF's overgeslagen én
@@ -122,6 +125,13 @@ async function fetchText(url) {
     return { text: null, reason: direct.reason };
   }
 
+  // Rechtspraak (2026-10-03): de detailpagina is JavaScript zonder tekst en de
+  // RDF-metadata is geen uitspraak. Altijd het open-data-XML, en alleen de
+  // uitspraak zelf. Een ECLI zonder tekst blijft retrybaar (zie de selectie).
+  if (rechtspraakEcli(url)) {
+    return haalRechtspraakTekst(url, { ua: UA, minText: MIN_TEXT });
+  }
+
   const r = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(20000) });
   if (!r.ok) {
     throw new Error(`HTTP ${r.status}`);
@@ -159,6 +169,11 @@ async function run() {
               OR (
                 r.external_url LIKE '%notubiz.nl/document/%'
                 AND datetime(r.fulltext_fetched_at) < datetime('now', '-7 days')
+              )
+              OR (
+                r.external_url LIKE '%rechtspraak.nl/%'
+                AND datetime(r.fulltext_fetched_at) < datetime('now', '-7 days')
+                AND datetime(r.scraped_at) > datetime('now', '-120 days')
               )
             )
             AND r.external_url IS NOT NULL AND r.external_url != ''
