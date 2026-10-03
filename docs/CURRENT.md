@@ -55,9 +55,9 @@ uitschakelingen nul verdachte en nul dode bronnen.
 
 Sinds 2 oktober leest de keten ook de Statenstukken van de provincie Utrecht
 (alleen stukken over Amersfoort of Leusden, tier 1); de Leusder Krant en De
-Stadsbron zijn spiegelbron. Eerste Statenrun 2 oktober (bron 164, 6 lokale
-stukken uit 30); de achterstand van 200 is rond 5 oktober weg. De spiegelbronnen
-krijgen hun bronrij bij de run-all van 3 oktober.
+Stadsbron zijn spiegelbron (bronnen 165 en 166, sinds 3 oktober). Na twee runs
+zijn 60 van de 230 Statenstukken beoordeeld (bron 164, 11 lokaal); de
+achterstand is rond 5 oktober weg.
 
 R5 volgt stijgende en dalende misdaadtrends over drie en twaalf maanden per wijk
 en gemeente, vergeleken met een jaar eerder en Nederland. Een gemeentelijk
