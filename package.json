@@ -9,8 +9,9 @@
     "start": "next start",
     "lint": "eslint src next.config.ts",
     "test": "npm --prefix scraper test",
+    "test:dashboard": "node --test \"src/lib/dashboard/__tests__/*.test.ts\"",
     "docs:check": "node scripts/check-docs.mjs",
-    "check": "npm run lint && npm test && npm run build"
+    "check": "npm run lint && npm test && npm run test:dashboard && npm run build"
   },
   "dependencies": {
     "@libsql/client": "^0.17.4",

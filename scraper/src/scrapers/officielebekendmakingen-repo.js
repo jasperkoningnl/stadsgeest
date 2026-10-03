@@ -29,25 +29,10 @@ const WINDOW_DAYS = Number(process.env.OB_WINDOW_DAYS || 7);
 const MAX_RECORDS = 100;
 const FETCH_DELAY_MS = 700;
 
-// Elk item krijgt een bron op basis van zijn rubriek. Zo blijft de tier-indeling
-// bruikbaar en kan de speurder onderscheid maken tussen een dakkapel en een
-// bestemmingsplanwijziging.
-const RUBRIEK_ROUTING = [
-  { match: /omgevingsvergunning|omgevingsmelding|bouw/i, source: 'ob-omgevingsvergunningen', name: 'Officiële Bekendmakingen — Omgevingsvergunningen Amersfoort', tier: 1 },
-  { match: /verkeersbesluit/i,                            source: 'ob-verkeersbesluiten',      name: 'Officiële Bekendmakingen — Verkeersbesluiten Amersfoort', tier: 1 },
-  { match: /verordening|algemeen verbindend voorschrift/i, source: 'ob-verordeningen',          name: 'Officiële Bekendmakingen — Verordeningen Amersfoort', tier: 1 },
-  { match: /beleidsregel/i,                               source: 'ob-beleidsregels',          name: 'Officiële Bekendmakingen — Beleidsregels Amersfoort', tier: 1 },
-  { match: /evenementenvergunning|apv|ontheffing/i,       source: 'ob-vergunningen-overig',    name: 'Officiële Bekendmakingen — Vergunningen overig Amersfoort', tier: 1 },
-  { match: /ruimtelijk|bestemmingsplan|omgevingsplan/i,   source: 'ob-ruimtelijke-plannen',    name: 'Officiële Bekendmakingen — Ruimtelijke plannen Amersfoort', tier: 1 },
-];
-const FALLBACK_SOURCE = { source: 'ob-gemeenteblad-overig', name: 'Officiële Bekendmakingen — Gemeenteblad overig Amersfoort', tier: 1 };
-
-function routeRubriek(docTypes) {
-  const joined = docTypes.join(' ');
-  for (const r of RUBRIEK_ROUTING) if (r.match.test(joined)) return r;
-  return FALLBACK_SOURCE;
-}
-
+// De routering van een publicatie naar een bronrij (rubriek, en sinds
+// 3 oktober 2026 de titel voor grond en vastgoed) staat in ../ob-routing.mjs,
+// met tests in __tests__/ob/routing.test.mjs.
+import { routeRubriek, ALLE_BRONNEN } from '../ob-routing.mjs';
 function isoDaysAgo(days) {
   const d = new Date(Date.now() - days * 86400000);
   return d.toISOString().slice(0, 10);
@@ -117,7 +102,7 @@ async function scrape() {
 
   // Bron-ids vooraf klaarzetten
   const sourceIds = {};
-  for (const def of [...RUBRIEK_ROUTING, FALLBACK_SOURCE]) {
+  for (const def of ALLE_BRONNEN) {
     sourceIds[def.source] = await ensureSource(db, {
       name: def.name,
       url: `${SRU}?rubriek=${def.source}`,
@@ -157,7 +142,7 @@ async function scrape() {
     if (records.length === 0) break;
 
     for (const rec of records) {
-      const route = routeRubriek(rec.docTypes);
+      const route = routeRubriek(rec.docTypes, rec.title);
       const publicUrl = `https://zoek.officielebekendmakingen.nl/${rec.identifier}.html`;
       try {
         const doc = await fetchDocument(rec);
@@ -197,7 +182,7 @@ async function scrape() {
   // de items, dus die kwamen wel binnen, maar er is sinds 24 juli 2026 geen enkele
   // rij in scrape_runs geschreven voor deze bronnen. In het bronnenoverzicht zag dat
   // eruit alsof de scraper nooit had gedraaid.
-  for (const def of [...RUBRIEK_ROUTING, FALLBACK_SOURCE]) {
+  for (const def of ALLE_BRONNEN) {
     await log(db, sourceIds[def.source], def.name, teller(def.source));
   }
   console.log(`[OB-REPO] volledige tekst opgehaald: ${stats.fulltext}, mislukt: ${stats.nofulltext}`);

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
+import './np.css'
 import RedactieNav from './RedactieNav'
 import ThemaSchakelaar from './ThemaSchakelaar'
 import FeedbackBalk from './FeedbackBalk'

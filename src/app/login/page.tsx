@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import '../nieuwsplein33/np.css'
 
 export const metadata: Metadata = {
   title: 'Inloggen — Stadsgeest',

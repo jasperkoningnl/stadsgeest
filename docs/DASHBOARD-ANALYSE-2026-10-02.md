@@ -208,8 +208,8 @@ productkeuzes en vragen Jaspers akkoord vooraf (werkafspraak in `AGENTS.md`).
 | 6 | Beheer-tab Redactie: doorstroom en ouderdom *Gedaan op 3 oktober.* | Jasper ziet het echte knelpunt wekelijks | `beheerQueries`, nieuwe tab | niets |
 | 7 | Verkenner eerst via entiteiten en vermeldingen, `raw_items` op verzoek *Gedaan op 3 oktober.* | Minder Turso-reads per klik op een naam | `verkennerQueries` | niets |
 | 8 | Kopieer als tekst op tip en dossier; artikelchip bij gepubliceerde tip *Gedaan op 3 oktober.* | Kleine dagelijkse gemakken | tippagina | niets |
-| 9 | Weekmail: kleurschaal, alleen wachtrij, ontvangers in env | Mail klopt weer | `weekmail/route.ts` | niets |
-| 10 | Tests voor briefingparser en naamontleding; CSS splitsen | Veiliger wijzigen | `scraper/__tests__`, css | niets |
+| 9 | Weekmail: kleurschaal, alleen wachtrij, ontvangers in env *Gedaan op 3 oktober.* | Mail klopt weer | `weekmail/route.ts` | niets |
+| 10 | Tests voor briefingparser en naamontleding; CSS splitsen *Gedaan op 3 oktober.* | Veiliger wijzigen | `scraper/__tests__`, css | niets |
 
 Buiten dit plan, maar het grootste hefboom van allemaal: de wachtrij wordt pas
 korter als de redactie er dagelijks vijf minuten in zit. Een korte
@@ -291,7 +291,7 @@ betaalde sleutel, formele stukken boven nieuwspagina's.
    Samen met de bestaande leerlingaantallen en inspectieoordelen maakt dat
    een patroonregel mogelijk: krimp plus zwak oordeel plus dalende
    solvabiliteit. Jaarlijkse bron, lage last.
-10. **Didam-publicaties als detectieregel.** Geen nieuwe bron maar een
+10. **Didam-publicaties als detectieregel.** *Gebouwd op 3 oktober als eigen bronrij via titelroutering, zie `SOURCES.md`.* Geen nieuwe bron maar een
     classificatie binnen bron 111: de gemeente moet elk voornemen tot
     verkoop of uitgifte van grond en vastgoed publiceren. Die publicaties
     noemen partij, locatie en vaak de prijsvorm en zijn vrijwel altijd nieuws.
@@ -301,6 +301,8 @@ betaalde sleutel, formele stukken boven nieuwspagina's.
     maar altijd een verhaal. Wekelijks zoeken op gemeentenaam volstaat.
 12. **Meldingen collectief ontslag (UWV, per arbeidsmarktregio).** Maandelijkse
     cijfers per regio Amersfoort; alleen als trendcontext, geen tipdrager.
+
+**Verkend op 3 oktober, niet bouwbaar vanuit de cloud:** 2, 4, 5, 6, 7, 8, 9 en 11 (zie `SOURCES.md`, bronverkenning).
 
 **Bewust niet voorgesteld.** Kadaster-transacties en KVK-deponeringen (betaald,
 uitgesloten in het uitbreidingsplan), EP-online en Huurcommissie (sleutel of

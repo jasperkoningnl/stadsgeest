@@ -425,3 +425,39 @@ waren vanuit de cloudomgeving niet bereikbaar of gaven niets; controleer vanaf d
 notebook of de Notubiz-omgeving van Leusden (organisatie 2090) een
 besluitenlijstencategorie heeft.
 
+## Officiële Bekendmakingen — Grond en vastgoed (Didam)
+
+Sinds 3 oktober 2026 routeert `scraper/src/ob-routing.mjs` (tests in
+`scraper/__tests__/ob/routing.test.mjs`) een Amersfoortse bekendmaking op titel
+naar de bron 'Officiële Bekendmakingen — Grond en vastgoed Amersfoort' (tier 1,
+sleutel `ob-grond-vastgoed`) vóórdat de rubriek beslist. Het gaat om de
+publicaties die de gemeente na het Didam-arrest moet doen bij elk voornemen tot
+verkoop, verhuur, ruil of uitgifte van grond, kavels en gebouwen ("voornemen tot
+verkoop", "enige serieuze gegadigde", gronduitgifte, erfpacht, snippergroen).
+Die vielen tot nu toe onder 'Gemeenteblad overig'. De bronrij ontstaat bij de
+eerstvolgende run van `officielebekendmakingen-repo.js`; bestaande items worden
+niet verplaatst. De patronen staan in `GROND_VASTGOED`; een valse treffer op een
+gewone vergunning ("berging op eigen grond") is in de tests afgedekt.
+
+## Bronverkenning 3 oktober 2026 (niet gebouwd)
+
+Vanuit de cloudomgeving gecontroleerd; bouwen vraagt eerst een ingang die
+machineleesbaar en zonder sleutel is (zie het contract hierboven).
+
+- **Autoriteit woningcorporaties, oordeelsbrieven (ILT):** de onderwerppagina
+  gaf 404 en de zoekpagina is JavaScript-gerenderd zonder documentlinks in de
+  HTML. Herbeoordelen met de ILT-documentenzoeker of de publicaties van de
+  corporaties zelf.
+- **IGJ-toezichtdocumenten:** toezichtdocumenten.igj.nl is een Mendix-toepassing
+  zonder gevonden open API. Bron 46 blijft uit.
+- **DUO financiële gegevens per schoolbestuur:** de verwachte paden onder
+  open_onderwijsdata gaven 404; de juiste datasetpagina moet worden opgezocht.
+- **Woo-besluiten rijk en provincie (open.overheid.nl):** de API geeft 401
+  zonder sleutel en de SRU-productarea `woo` is leeg. Ingang nog onbekend.
+- **Waterschap Vallei en Veluwe, bestuursstukken:** alleen `/over-ons/bestuur/`
+  gevonden; geen vergaderstukkenlijst of API in de HTML.
+- **Provinciaal subsidieregister:** 403 vanuit de cloud; vanaf de notebook
+  controleren.
+- **B&W-besluitenlijsten Leusden, RaadKijker, Nationale ombudsman (RSS):**
+  geblokkeerd of niet bereikbaar vanuit de cloud; alleen vanaf de notebook.
+

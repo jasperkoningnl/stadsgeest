@@ -5,6 +5,8 @@ import ThemaSchakelaar from '../nieuwsplein33/ThemaSchakelaar'
 import { AUTH_COOKIE, sessieGebruiker } from '@/lib/dashboardAuth'
 import TabBalk from './TabBalk'
 import './woon.css'
+// Alleen voor de sessieknop in de kop (np-sessie); de rest van het woondashboard gebruikt woon.css.
+import '../nieuwsplein33/np.css'
 
 export const metadata: Metadata = {
   title: 'Woondashboard Amersfoort',
