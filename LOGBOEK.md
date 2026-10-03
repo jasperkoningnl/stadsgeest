@@ -30,6 +30,10 @@ wordt getoond. De documentatiecontrole (`npm run docs:check`, ook vóór iedere
 build) weigert een logboek waarin het voorkomt; welke woorden zij bewaakt staat
 in `scripts/check-docs.mjs` en de reden in `docs/DECISIONS.md` (2026-10-02).
 
+## 2026-10-03 — Begroting en jaarverslag komen nu binnen
+
+De begroting 2027-2030 en het jaarverslag 2025 van de gemeente stonden niet in Stadsgeest: ze worden als aparte website gepubliceerd en niet als los document. Ze komen nu binnen, net als de kaderbrief en de zomerrapportage, die eerder alleen met een titel bekend waren. Bij zulke lange stukken wordt voorlopig alleen het eerste deel gelezen. Verder gaat een uitspraak of raadsstuk waarvan de tekst pas later wordt gepubliceerd voortaan vanzelf opnieuw langs de weging.
+
 ## 2026-10-03 — Uitspraken hebben hun tekst; 53 eerdere signalen worden opnieuw gewogen
 
 Van 119 uitspraken van de rechtbank en andere colleges ontbrak de tekst; die is alsnog opgehaald. Vaak publiceert de Rechtspraak eerst alleen het nummer en pas later de uitspraak zelf. Stadsgeest kijkt daarom voortaan elke week opnieuw of de tekst er inmiddels is. Daarnaast gaan 53 signalen van raadsstukken en uitspraken sinds 1 september opnieuw langs de weging, omdat ze eerder alleen op hun titel zijn beoordeeld. Dat kan de komende dagen een paar extra tips opleveren.

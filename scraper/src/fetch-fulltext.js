@@ -21,6 +21,7 @@ import * as cheerio from 'cheerio';
 import { createDb } from './lib.js';
 import { buildOriLookup, extractOriText, haalNotubizTekst, isNotubizUrl } from './notubiz-fulltext.mjs';
 import { haalRechtspraakTekst, rechtspraakEcli } from './rechtspraak-fulltext.mjs';
+import { biedSignalenOpnieuwAan } from './heraanbieden.mjs';
 
 // pdfjs-dist wordt pas geladen als er echt een PDF langskomt (legacy build, want
 // we draaien in Node zonder DOM). Vóór 2026-08-09 werden PDF's overgeslagen én
@@ -42,7 +43,9 @@ async function pdfNaarTekst(buffer) {
     disableFontFace: true,
   }).promise;
   const delen = [];
-  const maxPaginas = Math.min(doc.numPages, 60); // bijlagen van honderden pagina's leveren geen extra signaal
+  // 150 pagina's (was 60 tot 2026-10-03), gelijk aan de iBabs-bijlagen: de waarde
+  // zit juist in de lange stukken. full_text zelf blijft begrensd op 200.000 tekens.
+  const maxPaginas = Math.min(doc.numPages, 150);
   for (let p = 1; p <= maxPaginas; p++) {
     const page = await doc.getPage(p);
     const inhoud = await page.getTextContent();
@@ -74,6 +77,7 @@ const SOURCE_PATTERNS = [
   '%Subsidieregister%',
   '%ODU%',
   '%Omgevingsdienst%',
+  '%Financi%', // begroting, jaarverslag, kaderbrief en zomerrapportage (sinds 2026-10-03)
 ];
 
 function cleanText(html) {
@@ -132,7 +136,8 @@ async function fetchText(url) {
     return haalRechtspraakTekst(url, { ua: UA, minText: MIN_TEXT });
   }
 
-  const r = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(20000) });
+  // 60 seconden: de begroting en het jaarverslag zijn pdf's van tientallen MB.
+  const r = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(60000) });
   if (!r.ok) {
     throw new Error(`HTTP ${r.status}`);
   }
@@ -161,7 +166,8 @@ async function run() {
 
   const like = SOURCE_PATTERNS.map(() => 's.name LIKE ?').join(' OR ');
   const res = await db.execute({
-    sql: `SELECT r.id, r.title, r.external_url, s.name AS source_name
+    sql: `SELECT r.id, r.title, r.external_url, s.name AS source_name,
+                 r.fulltext_fetched_at AS eerder_geprobeerd
           FROM raw_items r JOIN sources s ON s.id = r.source_id
           WHERE r.full_text IS NULL
             AND (
@@ -184,7 +190,7 @@ async function run() {
   });
 
   console.log(`[FULLTEXT] ${res.rows.length} kandidaten`);
-  const stats = { ok: 0, leeg: 0, fout: 0, tekens: 0 };
+  const stats = { ok: 0, leeg: 0, fout: 0, tekens: 0, heraangeboden: 0 };
 
   for (const row of res.rows) {
     try {
@@ -198,6 +204,16 @@ async function run() {
         });
         stats.ok++;
         stats.tekens += text.length;
+        // Herkansing die alsnog tekst oplevert (uitspraak of raadsstuk dat later
+        // is gepubliceerd): het signaal is toen op titel of metadata gewogen en
+        // gaat daarom opnieuw naar de weger. Bij een eerste poging is dat niet
+        // nodig; dan draait de intake nog ná deze job.
+        if (row.eerder_geprobeerd) {
+          stats.heraangeboden += await biedSignalenOpnieuwAan(db, row.id, {
+            actor: 'fetch-fulltext',
+            reden: 'Tekst van het stuk is later alsnog gepubliceerd en opgehaald; eerder alleen op titel of metadata gewogen. Opnieuw aangeboden aan de weger.',
+          });
+        }
       } else {
         // Markeer als geprobeerd zodat we het niet elke run opnieuw doen
         await db.execute({
@@ -219,7 +235,7 @@ async function run() {
   }
 
   const gem = stats.ok ? Math.round(stats.tekens / stats.ok) : 0;
-  console.log(`[FULLTEXT] klaar: ${stats.ok} opgehaald (gem. ${gem} tekens), ${stats.leeg} leeg, ${stats.fout} fout`);
+  console.log(`[FULLTEXT] klaar: ${stats.ok} opgehaald (gem. ${gem} tekens), ${stats.leeg} leeg, ${stats.fout} fout, ${stats.heraangeboden} signalen opnieuw naar de weger`);
 }
 
 run().catch(e => { console.error('[FULLTEXT] fataal:', e); process.exit(1); });

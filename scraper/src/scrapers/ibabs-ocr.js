@@ -4,7 +4,7 @@
 
 import db from '../db.js';
 import { logResult } from '../utils.js';
-import { bouwFullText, isOcrKandidaat, MIN_OCR_TEKENS, ocrPdf } from '../ibabs-ocr-lib.js';
+import { bouwFullText, isLeesbareOcr, isOcrKandidaat, MIN_OCR_TEKENS, OCR_RUIS_MELDING, ocrPdf } from '../ibabs-ocr-lib.js';
 
 const UA = 'Stadsgeest033/1.0 (+https://stadsgeest.nl; redactie@nieuwsplein33.nl)';
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i > -1 ? process.argv[i + 1] : d; };
@@ -12,6 +12,12 @@ const MAX_DOCS = Number(arg('--max-docs', '2'));
 const MAX_PAGINAS = Number(arg('--max-paginas', '12'));
 const BUDGET_MS = Number(arg('--budget-ms', '100000'));
 const MAX_BYTES = 40 * 1024 * 1024;
+// Herkansing (2026-10-03) voor scans waar Tesseract op de tijdslimiet van 30
+// seconden per pagina stopte, meestal telefoonfoto's van 5 tot 8 MB. Handmatig:
+//   node src/scrapers/ibabs-ocr.js --herkans-timeouts --max-docs 10 --budget-ms 1500000 --pagina-timeout-ms 150000 --schaal 1
+const HERKANS_TIMEOUTS = process.argv.includes('--herkans-timeouts');
+const PAGINA_TIMEOUT_MS = Number(arg('--pagina-timeout-ms', '30000'));
+const SCHAAL = Number(arg('--schaal', '2'));
 
 async function tabelBestaat(naam) {
   return (await db.execute({ sql: "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", args: [naam] })).rows.length > 0;
@@ -25,7 +31,7 @@ async function zorgVoorKolommen() {
   if (!kolommen.includes('ocr_at')) await db.execute('ALTER TABLE raw_item_attachments ADD COLUMN ocr_at TEXT');
 }
 
-async function herbouwEnMarkeer(rawItemId) {
+export async function herbouwEnMarkeer(rawItemId) {
   const item = (await db.execute({ sql: 'SELECT content FROM raw_items WHERE id=?', args: [rawItemId] })).rows[0];
   const bijlagen = (await db.execute({ sql: "SELECT titel,tekst FROM raw_item_attachments WHERE raw_item_id=? AND status='ok' ORDER BY id", args: [rawItemId] })).rows;
   const volledig = bouwFullText(item?.content || '', bijlagen);
@@ -43,11 +49,17 @@ async function scrape() {
   await zorgVoorKolommen();
   const bron = (await db.execute("SELECT id FROM sources WHERE name='Bestuurlijke informatie gemeente Amersfoort (iBabs)' ORDER BY id LIMIT 1")).rows[0];
   if (!bron) throw new Error('iBabs-bron ontbreekt.');
-  const kandidaten = (await db.execute({
-    sql: `SELECT id,raw_item_id,url,status,ocr_pogingen FROM raw_item_attachments
-          WHERE status='geen_tekst' AND COALESCE(ocr_pogingen,0)<2 AND COALESCE(bytes,0)<=?
-          ORDER BY opgehaald_at DESC,id DESC LIMIT ?`, args: [MAX_BYTES, MAX_DOCS],
-  })).rows.filter((r) => isOcrKandidaat(String(r.status), Number(r.ocr_pogingen)));
+  const kandidaten = HERKANS_TIMEOUTS
+    ? (await db.execute({
+      sql: `SELECT id,raw_item_id,url,status,ocr_pogingen FROM raw_item_attachments
+            WHERE status='geen_tekst' AND ocr_fout LIKE 'Tesseract stopte%' AND COALESCE(ocr_pogingen,0)<4 AND COALESCE(bytes,0)<=?
+            ORDER BY id LIMIT ?`, args: [MAX_BYTES, MAX_DOCS],
+    })).rows
+    : (await db.execute({
+      sql: `SELECT id,raw_item_id,url,status,ocr_pogingen FROM raw_item_attachments
+            WHERE status='geen_tekst' AND COALESCE(ocr_pogingen,0)<2 AND COALESCE(bytes,0)<=?
+            ORDER BY opgehaald_at DESC,id DESC LIMIT ?`, args: [MAX_BYTES, MAX_DOCS],
+    })).rows.filter((r) => isOcrKandidaat(String(r.status), Number(r.ocr_pogingen)));
   const start = Date.now();
   let ok = 0, leeg = 0, fouten = 0, bekeken = 0;
   for (const k of kandidaten) {
@@ -58,13 +70,15 @@ async function scrape() {
       if (!resp.ok) throw new Error(`download HTTP ${resp.status}`);
       const buf = Buffer.from(await resp.arrayBuffer());
       if (buf.length > MAX_BYTES) throw new Error('PDF groter dan 40 MB');
-      const uit = await ocrPdf(buf, { maxPaginas: MAX_PAGINAS });
-      const voldoende = uit.tekst.replace(/\s/g, '').length >= MIN_OCR_TEKENS;
+      const uit = await ocrPdf(buf, { maxPaginas: MAX_PAGINAS, schaal: SCHAAL, paginaTimeoutMs: PAGINA_TIMEOUT_MS });
+      const genoegTekens = uit.tekst.replace(/\s/g, '').length >= MIN_OCR_TEKENS;
+      // Sinds 2026-10-03: ruis uit foto's en kaarten telt niet als gelezen tekst.
+      const voldoende = isLeesbareOcr(uit.tekst);
       await db.execute({
         sql: `UPDATE raw_item_attachments SET status=?,tekst=?,tekens=?,paginas=COALESCE(paginas,?),tekstbron=?,
               ocr_pogingen=COALESCE(ocr_pogingen,0)+1,ocr_fout=?,ocr_at=datetime('now'),opgehaald_at=datetime('now') WHERE id=?`,
         args: [voldoende ? 'ok' : 'geen_tekst', voldoende ? uit.tekst : null, voldoende ? uit.tekst.length : 0, uit.paginas,
-          voldoende ? 'ocr' : null, voldoende ? null : `OCR leverde minder dan ${MIN_OCR_TEKENS} tekens`, k.id],
+          voldoende ? 'ocr' : null, voldoende ? null : (genoegTekens ? OCR_RUIS_MELDING : `OCR leverde minder dan ${MIN_OCR_TEKENS} tekens`), k.id],
       });
       if (voldoende) { ok++; await herbouwEnMarkeer(Number(k.raw_item_id)); } else leeg++;
     } catch (e) {

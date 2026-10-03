@@ -5,6 +5,30 @@ import { createCanvas } from '@napi-rs/canvas';
 export const MIN_OCR_TEKENS = 200;
 export const MAX_OCR_POGINGEN = 2;
 
+// Tesseract maakt van een foto, kaart of handschrift ook "tekst": losse letters
+// en tekens. Zulke ruis telt niet als gelezen document. Maat: het aandeel
+// veelvoorkomende Nederlandse (en enkele Engelse) woorden onder alle tokens.
+// Alleen woorden van drie letters of meer: "de", "en" en "ik" ontstaan in ruis
+// ook bij toeval.
+const GEWONE_WOORDEN = new Set(('het een van dat die voor met niet zijn aan als ook bij door naar uit over maar dit deze wordt worden '
+  + 'heeft hebben kan zal nog wel dan tot was wij per zie the and for').split(' '));
+
+export function aandeelGewoneWoorden(tekst) {
+  const tokens = String(tekst || '').toLowerCase().split(/\s+/).map((t) => t.replace(/^[^a-zà-ÿ]+|[^a-zà-ÿ]+$/g, '')).filter(Boolean);
+  if (!tokens.length) return 0;
+  return tokens.filter((t) => GEWONE_WOORDEN.has(t)).length / tokens.length;
+}
+
+// Gemeten op 45 OCR-teksten (3 oktober 2026): leesbare mails en notities 0,18
+// tot 0,24, foto's en kaarten 0,04 of lager, foto's van flip-overs ertussenin.
+// Een tabel zonder zinnen valt ook af; dat is de prijs van een eenvoudige maat.
+export const MIN_AANDEEL_GEWONE_WOORDEN = 0.08;
+export const OCR_RUIS_MELDING = 'OCR leverde alleen ruis (foto, kaart of handschrift)';
+
+export function isLeesbareOcr(tekst) {
+  return String(tekst || '').replace(/\s/g, '').length >= MIN_OCR_TEKENS && aandeelGewoneWoorden(tekst) >= MIN_AANDEEL_GEWONE_WOORDEN;
+}
+
 export function isOcrKandidaat(status, pogingen = 0) {
   return status === 'geen_tekst' && Number(pogingen || 0) < MAX_OCR_POGINGEN;
 }

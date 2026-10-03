@@ -5,6 +5,7 @@
 import * as cheerio from 'cheerio';
 import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
+import { websitePublicaties, volledigePdf } from '../financien-lib.mjs';
 
 const BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 const PAGE_URL = 'https://financien.amersfoort.nl/';
@@ -43,6 +44,30 @@ async function scrape() {
   });
 
   let saved = 0, skipped = 0, errors = 0;
+
+  // Begroting en jaarverslag staan als eigen website, niet als pdf-link
+  // (toegevoegd 2026-10-03). De pdf van het hele stuk wordt het item, zodat
+  // fetch-fulltext.js de tekst ophaalt; zonder pdf de website zelf.
+  const links = $('a[href]').map((_, el) => ({ href: $(el).attr('href'), tekst: $(el).text() })).get();
+  for (const pub of websitePublicaties(links)) {
+    try {
+      const r = await fetch(`${pub.site}/`, { headers: { 'User-Agent': BROWSER_UA }, signal: AbortSignal.timeout(20000) });
+      const pdf = r.ok ? volledigePdf(await r.text(), pub.site) : null;
+      const result = await saveRawItem(db, {
+        sourceId,
+        externalUrl: pdf || pub.site,
+        title: pub.titel,
+        content: `${pub.titel}. Website: ${pub.site}${pdf ? `. Volledige pdf: ${pdf}` : ''}`,
+        summary: '',
+        publishedAt: pub.publicatiedatum,
+      });
+      if (result.saved) saved++; else skipped++;
+    } catch (err) {
+      errors++;
+      console.error(`Fout bij website "${pub.site}":`, err.message);
+    }
+  }
+
   for (const { url, title } of items) {
     try {
       const result = await saveRawItem(db, {
