@@ -30,6 +30,10 @@ wordt getoond. De documentatiecontrole (`npm run docs:check`, ook vóór iedere
 build) weigert een logboek waarin het voorkomt; welke woorden zij bewaakt staat
 in `scripts/check-docs.mjs` en de reden in `docs/DECISIONS.md` (2026-10-02).
 
+## 2026-10-03 — Raadsstukken hebben weer hun volledige tekst
+
+Schriftelijke vragen, raadsinformatiebrieven, moties en ingekomen brieven aan de raad kwamen grotendeels alleen met hun titel binnen: de website van de raad blokkeerde het ophalen van het stuk zelf. Dat is hersteld. Van 288 stukken uit 2026 is de tekst alsnog opgehaald, bij ingekomen brieven inclusief de bijlagen. Tips en dossiers kunnen daardoor leunen op wat er in het stuk staat in plaats van op de kop. Door deze inhaalslag komen er geen extra tips in de wachtrij. Bij 458 ingekomen stukken publiceert de raad alleen afzender en onderwerp; daar is geen document bij en die blijven dus zonder tekst.
+
 ## 2026-10-03 — Weekmail toont alleen nog wat open staat; grondverkoop krijgt een eigen bron
 
 De weekmail van maandag bevat voortaan alleen de nieuwe tips van die week die nog in de wachtrij staan, met de supertip bovenaan, en onderaan hoeveel er in totaal in de wachtrij staan. De kleuren bij de score kloppen weer met de schaal die Stadsgeest gebruikt. Daarnaast krijgen bekendmakingen over verkoop, verhuur of uitgifte van gemeentegrond en gebouwen (de zogeheten Didam-publicaties) een eigen bron, zodat ze niet meer tussen het overige Gemeenteblad verdwijnen. Een voornemen tot grondverkoop noemt vrijwel altijd partij en locatie en is daarmee vaak nieuws.

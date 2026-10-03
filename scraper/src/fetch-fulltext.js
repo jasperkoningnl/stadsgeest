@@ -17,7 +17,7 @@
 
 import * as cheerio from 'cheerio';
 import { createDb } from './lib.js';
-import { buildOriLookup, extractOriText, isNotubizUrl } from './notubiz-fulltext.mjs';
+import { buildOriLookup, extractOriText, haalNotubizTekst, isNotubizUrl } from './notubiz-fulltext.mjs';
 
 // pdfjs-dist wordt pas geladen als er echt een PDF langskomt (legacy build, want
 // we draaien in Node zonder DOM). Vóór 2026-08-09 werden PDF's overgeslagen én
@@ -108,13 +108,18 @@ async function oriTekst(url) {
 }
 
 async function fetchText(url) {
-  // ORI eerst: Notubiz blokkeert geautomatiseerde documentdownloads geregeld,
-  // terwijl ORI dezelfde oudere documenten met geëxtraheerde tekst aanbiedt.
-  // De nieuwe amersfoort.notubiz.nl-URL wordt daarbij naar de oude API-vorm
-  // genormaliseerd. Recente stukken kunnen nog ontbreken; die blijven retrybaar.
+  // Notubiz (herzien 2026-10-03): de opgeslagen URL op amersfoort.notubiz.nl zit
+  // achter Cloudflare en geeft HTTP 403, dus die wordt niet meer opgehaald.
+  // Eerst de pdf via api.notubiz.nl (alle documenten van een ingekomen stuk, en
+  // de actuele versie als de opgeslagen revisie weigert). Lukt dat niet, dan ORI,
+  // dat oudere documenten met geëxtraheerde tekst aanbiedt. Wat dan nog niets
+  // oplevert blijft retrybaar: na zeven dagen probeert de job het opnieuw.
   if (isNotubizUrl(url)) {
+    const direct = await haalNotubizTekst(url, { ua: UA, minText: MIN_TEXT });
+    if (direct.text) return { text: direct.text, reason: null };
     const tekst = await oriTekst(url);
     if (tekst) return { text: tekst, reason: null };
+    return { text: null, reason: direct.reason };
   }
 
   const r = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(20000) });
