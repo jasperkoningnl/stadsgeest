@@ -72,11 +72,18 @@ $registerExit = Invoke-NodeStep @('src\link-register-addresses.cjs')
 # Pand bij nieuwe verblijfsobjecten (zelfde gebouw, ander adres).
 $pandExit = Invoke-NodeStep @('src\link-bag-panden.cjs', '--limit', '2000')
 
+# Maak na de adreskoppeling een lokaal leesbaar scanbestand voor de dagelijkse
+# weger. Dit gebruikt uitsluitend de al gevulde BAG-cache en databasekoppelingen:
+# er vertrekt vanuit de Codex-weger zelf geen adres meer naar PDOK.
+$wegerScanDir = Join-Path $env:USERPROFILE '.codex\automations\stadsgeest-weger'
+$wegerScanPath = Join-Path $wegerScanDir ('verband-scan-prepared-{0}.json' -f (Get-Date -Format 'yyyy-MM-dd-HHmmss'))
+$wegerScanExit = Invoke-NodeStep @('src\prepare-weger-address-scan.cjs', '--output', $wegerScanPath)
+
 # Organisatiekoppeling (docs/KOPPELING.md): organisaties uit registers, geld- en
 # toezichtbronnen over bronnen heen koppelen (Splink, scraper\.koppel-venv).
 # Schrijft alleen naar org_link_records, org_clusters en org_link_runs; slaat
 # het rekenen over als de invoer niet is veranderd.
 $koppelExit = Invoke-NodeStep @('src\koppel-organisaties.cjs')
 
-if ($detectionExit -ne 0 -or $evaluationExit -ne 0 -or $retentionExit -ne 0 -or $nerExit -ne 0 -or $adresExit -ne 0 -or $registerExit -ne 0 -or $pandExit -ne 0 -or $koppelExit -ne 0) { exit 1 }
+if ($detectionExit -ne 0 -or $evaluationExit -ne 0 -or $retentionExit -ne 0 -or $nerExit -ne 0 -or $adresExit -ne 0 -or $registerExit -ne 0 -or $pandExit -ne 0 -or $wegerScanExit -ne 0 -or $koppelExit -ne 0) { exit 1 }
 exit 0
