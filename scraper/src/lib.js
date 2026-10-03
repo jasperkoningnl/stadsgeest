@@ -94,9 +94,14 @@ export function makeSummary(text, maxLen = 500) {
 export async function insertItem(db, { source_id, title, content, summary, external_url, scraped_at, is_historical = 0, full_text = null, published_at = null }) {
   const pub = naarPubIso(published_at);
   try {
+    // Twee losse zoekvragen die elk een index gebruiken (idx_raw_items_url en
+    // idx_raw_items_source_title). De eerdere vorm met OR las bij elk item de
+    // hele tabel: rond 30 mln Turso-reads per dag. Zie migrate-indexen-20261003.mjs.
     const existing = await db.execute({
-      sql: 'SELECT id, published_at FROM raw_items WHERE external_url = ? OR (title = ? AND source_id = ?)',
-      args: [external_url ?? '', title, source_id],
+      sql: `SELECT id, published_at FROM raw_items WHERE external_url = ?
+            UNION
+            SELECT id, published_at FROM raw_items WHERE source_id = ? AND title = ?`,
+      args: [external_url ?? '', source_id, title],
     });
     if (existing.rows.length > 0) {
       // Bestaand item: publicatiedatum alsnog invullen als die nog leeg is.

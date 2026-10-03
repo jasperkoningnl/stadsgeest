@@ -32,7 +32,7 @@ in `scripts/check-docs.mjs` en de reden in `docs/DECISIONS.md` (2026-10-02).
 
 ## 2026-10-03 — Begroting en jaarverslag komen nu binnen
 
-De begroting 2027-2030 en het jaarverslag 2025 van de gemeente stonden niet in Stadsgeest: ze worden als aparte website gepubliceerd en niet als los document. Ze komen nu binnen, net als de kaderbrief en de zomerrapportage, die eerder alleen met een titel bekend waren. Lange stukken, ook Woo-besluiten met veel bijlagen, worden nu in hun geheel doorzocht op namen en adressen; in de verkenner staan ze als "deel 2 van 7" en verder. Verder gaat een uitspraak of raadsstuk waarvan de tekst pas later wordt gepubliceerd voortaan vanzelf opnieuw langs de weging.
+De begroting 2027-2030 en het jaarverslag 2025 van de gemeente stonden niet in Stadsgeest: ze worden als aparte website gepubliceerd en niet als los document. Ze komen nu binnen, net als de kaderbrief en de zomerrapportage, die eerder alleen met een titel bekend waren. Lange stukken, ook Woo-besluiten met veel bijlagen, worden nu in hun geheel doorzocht op namen en adressen; in de verkenner staan ze als "deel 2 van 7" en verder. De financiële stukken hebben voortaan een leesbare titel, bijvoorbeeld "Zomerrapportage 2026". Verder gaat een uitspraak of raadsstuk waarvan de tekst pas later wordt gepubliceerd voortaan vanzelf opnieuw langs de weging.
 
 ## 2026-10-03 — Uitspraken hebben hun tekst; 53 eerdere signalen worden opnieuw gewogen
 

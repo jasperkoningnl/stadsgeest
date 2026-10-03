@@ -30,7 +30,7 @@ import { RAPPORTEN, rijNaarItem, documentLinks, leeftijdDagen, IBABS_BASE, bijla
 const UA = 'Stadsgeest033/1.0 (+https://stadsgeest.nl; redactie@nieuwsplein33.nl)';
 const VERSHEID_DAGEN = 30;
 const MAX_BYTES = 40 * 1024 * 1024;
-const MAX_PAGINAS = 150;
+const MAX_PAGINAS = 600; // was 150 tot 2026-10-03; wat niet in full_text past gaat naar deelitems
 const MAX_FULLTEXT = 200000;
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i > -1 ? process.argv[i + 1] : d; };
 const MAX_DOCS = Number(arg('--max-docs', '25')); // past binnen de 120s-timeout van run-weekly

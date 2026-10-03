@@ -22,7 +22,7 @@ import { createDb } from './lib.js';
 import { buildOriLookup, extractOriText, haalNotubizTekst, isNotubizUrl } from './notubiz-fulltext.mjs';
 import { haalRechtspraakTekst, rechtspraakEcli } from './rechtspraak-fulltext.mjs';
 import { biedSignalenOpnieuwAan } from './heraanbieden.mjs';
-import { werkDeelitemsBijMetHerkansing } from './deelitems.mjs';
+import { herkansBijVerbrokenVerbinding, werkDeelitemsBijMetHerkansing } from './deelitems.mjs';
 
 // pdfjs-dist wordt pas geladen als er echt een PDF langskomt (legacy build, want
 // we draaien in Node zonder DOM). Vóór 2026-08-09 werden PDF's overgeslagen én
@@ -58,6 +58,32 @@ async function pdfNaarTekst(buffer) {
 }
 
 const db = createDb();
+// Na een lange download sluit Turso de wachtende verbinding; de eerstvolgende
+// opdracht faalt dan met "fetch failed" (gezien op 2026-10-03 bij pdf's van
+// 15 MB). Alle opdrachten in deze job mogen veilig een tweede keer lopen.
+const ruweExecute = db.execute.bind(db);
+const ruweBatch = db.batch.bind(db);
+db.execute = (opdracht) => herkansBijVerbrokenVerbinding(() => ruweExecute(opdracht));
+db.batch = (opdrachten, modus) => herkansBijVerbrokenVerbinding(() => ruweBatch(opdrachten, modus));
+
+// OCR voor pdf's zonder tekstlaag (sinds 2026-10-03 ook buiten iBabs). Begrensd:
+// hoogstens vijf documenten per run en twaalf pagina's per document, en alleen
+// leesbare uitvoer telt (isLeesbareOcr). Zonder Tesseract gebeurt er niets.
+const MAX_OCR_PER_RUN = Number(process.env.FULLTEXT_MAX_OCR || 5);
+let ocrGedaan = 0;
+async function ocrTekst(buffer) {
+  if (ocrGedaan >= MAX_OCR_PER_RUN) return null;
+  ocrGedaan++;
+  try {
+    const { isLeesbareOcr, ocrPdf } = await import('./ibabs-ocr-lib.js');
+    const uit = await ocrPdf(Buffer.from(buffer), { maxPaginas: 12 });
+    return isLeesbareOcr(uit.tekst) ? uit.tekst.replace(/\s+/g, ' ').trim() : null;
+  } catch (e) {
+    console.log(`[FULLTEXT] OCR niet gelukt: ${e.message.substring(0, 120)}`);
+    return null;
+  }
+}
+
 const UA = 'Stadsgeest033/1.0 (lokale nieuwssite Amersfoort; redactie@stadsgeest.nl)';
 const MAX_ITEMS = Number(process.env.MAX_ITEMS || 400);
 const DELAY_MS = Number(process.env.FETCH_DELAY_MS || 800);
@@ -124,7 +150,7 @@ async function fetchText(url) {
   // dat oudere documenten met geëxtraheerde tekst aanbiedt. Wat dan nog niets
   // oplevert blijft retrybaar: na zeven dagen probeert de job het opnieuw.
   if (isNotubizUrl(url)) {
-    const direct = await haalNotubizTekst(url, { ua: UA, minText: MIN_TEXT });
+    const direct = await haalNotubizTekst(url, { ua: UA, minText: MIN_TEXT, ocr: ocrTekst });
     if (direct.text) return { text: direct.text, reason: null };
     const tekst = await oriTekst(url);
     if (tekst) return { text: tekst, reason: null };
@@ -149,8 +175,15 @@ async function fetchText(url) {
 
   if (ct.includes('pdf') || kop.startsWith('%PDF')) {
     try {
+      // Kopie vooraf: pdfjs kan de aangeleverde buffer ontkoppelen, en de OCR
+      // heeft het bestand daarna nog nodig.
+      const kopie = Buffer.from(new Uint8Array(buf));
       const pdfTxt = await pdfNaarTekst(buf);
-      if (pdfTxt.length < MIN_TEXT) return { text: null, reason: `pdf te kort (${pdfTxt.length}) — mogelijk een scan zonder tekstlaag` };
+      if (pdfTxt.length < MIN_TEXT) {
+        const gelezen = await ocrTekst(kopie);
+        if (gelezen) return { text: gelezen, reason: null };
+        return { text: null, reason: `pdf te kort (${pdfTxt.length}) — scan zonder tekstlaag, OCR leverde geen leesbare tekst` };
+      }
       return { text: pdfTxt, reason: null };
     } catch (e) {
       return { text: null, reason: `pdf onleesbaar: ${e.message}` };

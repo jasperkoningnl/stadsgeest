@@ -174,8 +174,15 @@ async function documentTekst(doc, opties) {
   }
   if (!buf) return { ...doc, revision, status, tekst: '' };
   try {
-    const tekst = await opties.pdfNaarTekst(buf);
-    return { ...doc, revision, status: tekst.length >= opties.minText ? 'ok' : 'scan', tekst, bytes: buf.length };
+    let tekst = await opties.pdfNaarTekst(buf);
+    let soort = tekst.length >= opties.minText ? 'ok' : 'scan';
+    // Scan zonder tekstlaag: OCR als de aanroeper die meegeeft. `ocr` geeft
+    // alleen leesbare tekst terug, anders null (zie isLeesbareOcr).
+    if (soort === 'scan' && opties.ocr) {
+      const gelezen = await opties.ocr(buf);
+      if (gelezen) { tekst = gelezen; soort = 'ocr'; }
+    }
+    return { ...doc, revision, status: soort, tekst, bytes: buf.length };
   } catch (e) {
     return { ...doc, revision, status: `pdf onleesbaar: ${e.message}`, tekst: '' };
   }
@@ -187,9 +194,9 @@ async function documentTekst(doc, opties) {
 // tekens, zodat een inhaalslag scans zonder tekstlaag kan tellen.
 export async function haalNotubizTekst(url, {
   fetchFn = fetch, pdfNaarTekst = pdfBufferNaarTekst, ua = UA_STANDAARD,
-  minText = MIN_TEXT, maxDocumenten = 25, pauzeMs = 400,
+  minText = MIN_TEXT, maxDocumenten = 25, pauzeMs = 400, ocr = null,
 } = {}) {
-  const opties = { fetchFn, pdfNaarTekst, ua, minText };
+  const opties = { fetchFn, pdfNaarTekst, ua, minText, ocr };
   const item = notubizModuleItem(url);
   const delen = notubizDocumentParts(url);
   let documenten = item ? documentenUitPayload(await haalJson(notubizModuleItemUrl(item), opties)) : [];

@@ -11,7 +11,7 @@ import { isGroteBijlageKandidaat, MIB } from '../ibabs-grote-bijlagen-lib.js';
 const UA = 'Stadsgeest033/1.0 (+https://stadsgeest.nl; redactie@nieuwsplein33.nl)';
 const MAX_BYTES = Number(process.env.IBABS_GROTE_BIJLAGE_MAX_MB || 100) * MIB;
 const DOWNLOAD_TIMEOUT_MS = Number(process.env.IBABS_GROTE_BIJLAGE_TIMEOUT_MS || 300000);
-const MAX_PAGINAS = Number(process.env.IBABS_GROTE_BIJLAGE_MAX_PAGINAS || 300);
+const MAX_PAGINAS = Number(process.env.IBABS_GROTE_BIJLAGE_MAX_PAGINAS || 600);
 const MAX_POGINGEN = 3;
 
 async function zorgVoorKolommen() {

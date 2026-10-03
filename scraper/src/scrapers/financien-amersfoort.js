@@ -5,7 +5,7 @@
 import * as cheerio from 'cheerio';
 import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
-import { websitePublicaties, volledigePdf } from '../financien-lib.mjs';
+import { pdfTitel, websitePublicaties, volledigePdf } from '../financien-lib.mjs';
 
 const BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 const PAGE_URL = 'https://financien.amersfoort.nl/';
@@ -35,9 +35,10 @@ async function scrape() {
     const href = $(el).attr('href') || '';
     if (!href) return;
     const url = href.startsWith('http') ? href : `${BASE_URL}/${href.replace(/^\//, '')}`;
-    const rawTitle = $(el).text().trim() ||
-                     href.split('/').pop()?.replace(/[_-]/g, ' ').replace('.pdf', '').replace('.PDF', '') || '';
-    const title = rawTitle || 'Financieel document gemeente Amersfoort';
+    // Bestandsnaam plus linktekst (sinds 2026-10-03). Bestaande items zijn met
+    // migrate-financien-titels-20261003.mjs naar dezelfde vorm omgezet; wijzig
+    // pdfTitel niet zonder die items opnieuw om te zetten, anders ontstaan dubbelen.
+    const title = pdfTitel(href, $(el).text());
     if (!items.find(i => i.url === url)) {
       items.push({ url, title });
     }

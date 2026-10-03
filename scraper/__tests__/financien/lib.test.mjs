@@ -37,3 +37,13 @@ test('vindt de pdf van het hele stuk op de startpagina van de website', () => {
   assert.equal(volledigePdf(html, 'https://amersfoort.begroting-2027.nl'), 'https://amersfoort.begroting-2027.nl/assets/docs/Meerjarenbegroting_2027-2030.pdf');
   assert.equal(volledigePdf('<a href="/p1/x">x</a>', 'https://amersfoort.begroting-2027.nl'), null);
 });
+
+test('maakt een leesbare titel uit bestandsnaam en linktekst', async () => {
+  const { pdfTitel } = await import('../../src/financien-lib.mjs');
+  assert.equal(pdfTitel('/assets/docs/Zomerrapportage 2026.pdf', '2026\n      gepubliceerd op 23 september2026'),
+    'Zomerrapportage 2026 (2026 gepubliceerd op 23 september 2026)');
+  assert.equal(pdfTitel('https://financien.amersfoort.nl/assets/docs/Gemeente Amersfoort Jaarstukken 2016.pdf', '2016Gepubliceerd in 2017'),
+    'Gemeente Amersfoort Jaarstukken 2016 (2016 Gepubliceerd in 2017)');
+  assert.equal(pdfTitel('/assets/docs/Treasurystatuut_Amersfoort.pdf', ''), 'Treasurystatuut Amersfoort');
+  assert.equal(pdfTitel('/assets/docs/Kaderbrief%202027-2030.pdf', 'Kaderbrief 2027-2030'), 'Kaderbrief 2027-2030');
+});

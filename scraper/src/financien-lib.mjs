@@ -49,3 +49,16 @@ export function volledigePdf(html, site) {
   if (!m) return null;
   return new URL(m[1], `${site}/`).toString();
 }
+
+// Titel voor een pdf op financien.amersfoort.nl. De linktekst alleen zegt niets
+// ("2026 gepubliceerd op 23 september2026"); de bestandsnaam wel. Samen:
+// "Zomerrapportage 2026 (2026 gepubliceerd op 23 september 2026)".
+export function pdfTitel(href, linktekst) {
+  let bestand = String(href || '').split('#')[0].split('/').pop() || '';
+  try { bestand = decodeURIComponent(bestand); } catch { /* laat staan */ }
+  const naam = bestand.replace(/\.pdf$/i, '').replace(/_+/g, ' ').replace(/\s+/g, ' ').trim();
+  const tekst = String(linktekst || '').replace(/\s+/g, ' ')
+    .replace(/(\d{4})(?=[A-Za-z])/g, '$1 ').replace(/([a-z])(\d{4})/g, '$1 $2').trim();
+  if (!naam) return tekst || 'Financieel document gemeente Amersfoort';
+  return (tekst && !naam.toLowerCase().includes(tekst.toLowerCase()) ? `${naam} (${tekst})` : naam).slice(0, 300);
+}

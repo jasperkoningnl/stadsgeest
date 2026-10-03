@@ -192,7 +192,13 @@ async function berekenGraaf(dossierId: number): Promise<DossierGraaf> {
   }
   const signaalIds = [...signaalNaarFeiten.keys()]
   const items = await inStukken<any>(signaalIds, (g, a) =>
-    q(`SELECT signal_id, raw_item_id FROM signal_items WHERE signal_id IN (${g})`, a))
+    // Ook de deelitems van lange documenten (raw_item_parts, sinds 2026-10-03):
+    // de partijen uit deel 2 en verder van een Woo-besluit horen bij het dossier.
+    q(`SELECT signal_id, raw_item_id FROM signal_items WHERE signal_id IN (${g})
+       UNION ALL
+       SELECT si.signal_id, p.part_id AS raw_item_id
+       FROM signal_items si JOIN raw_item_parts p ON p.parent_id = si.raw_item_id
+       WHERE si.signal_id IN (${g})`, [...a, ...a]))
   const docSignalen = new Map<number, Set<number>>()
   const docFeiten = new Map<number, Set<number>>()
   for (const r of items) {

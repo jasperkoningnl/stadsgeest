@@ -110,7 +110,13 @@ async function main(argv = process.argv.slice(2)) {
                    COALESCE(r.fulltext_fetched_at,r.scraped_at) AS updated_at,
                    COALESCE(r.full_text,r.content,r.summary,'') AS body
             FROM raw_items r JOIN sources s ON s.id=r.source_id
-            WHERE r.id>? ORDER BY r.id LIMIT ?`,
+            WHERE r.id>?
+              -- Deelitems van een stuk met bijlagen overslaan: die tekst komt al
+              -- per bijlage in het archief en zou anders dubbel worden gevonden.
+              AND NOT EXISTS (SELECT 1 FROM raw_item_parts p
+                              JOIN raw_item_attachments a ON a.raw_item_id=p.parent_id
+                              WHERE p.part_id=r.id)
+            ORDER BY r.id LIMIT ?`,
     });
     const attachments = await syncType(remote, local, {
       initial, batch, lookback, stateName: 'attachments_high_water', map: documentFromAttachment,

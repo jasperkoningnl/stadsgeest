@@ -62,8 +62,10 @@ export async function saveRawItem(db, { sourceId, externalUrl, title, content, s
       if (pub) {
         try {
           await db.execute({
-            sql: `UPDATE raw_items SET published_at = ? WHERE content_hash = ? AND published_at IS NULL`,
-            args: [pub, hash],
+            // source_id erbij: zo gebruikt de zoekvraag idx_raw_items_dedup in
+            // plaats van de hele tabel te lezen (zie migrate-indexen-20261003.mjs).
+            sql: `UPDATE raw_items SET published_at = ? WHERE source_id = ? AND content_hash = ? AND published_at IS NULL`,
+            args: [pub, sourceId, hash],
           });
         } catch { /* backfill is een extraatje, geen reden om de run te breken */ }
       }
@@ -76,8 +78,8 @@ export async function saveRawItem(db, { sourceId, externalUrl, title, content, s
                   SET full_text = CASE WHEN full_text IS NULL THEN ? ELSE full_text END,
                       fulltext_fetched_at = CASE WHEN full_text IS NULL THEN ? ELSE fulltext_fetched_at END,
                       entities_scanned_at = CASE WHEN full_text IS NULL THEN NULL ELSE entities_scanned_at END
-                  WHERE content_hash = ?`,
-            args: [completeText, fetchedAt, hash],
+                  WHERE source_id = ? AND content_hash = ?`,
+            args: [completeText, fetchedAt, sourceId, hash],
           });
         } catch { /* fulltext-backfill is een extraatje, geen reden om de run te breken */ }
       }

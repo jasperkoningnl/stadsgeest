@@ -96,3 +96,17 @@ export async function werkDeelitemsBijMetHerkansing(db, ouderId, volledigeTekst,
     }
   }
 }
+
+// Dezelfde herkansing voor een losse databaseopdracht. Alleen voor opdrachten
+// die veilig twee keer mogen lopen (UPDATE op id, SELECT, idempotente INSERT).
+export async function herkansBijVerbrokenVerbinding(opdracht, { pogingen = 3, wachtMs = 1500 } = {}) {
+  for (let poging = 1; ; poging++) {
+    try {
+      return await opdracht();
+    } catch (e) {
+      const melding = `${e.message} ${e.cause?.message || ''}`;
+      if (poging >= pogingen || !/fetch failed|socket|ECONNRESET/i.test(melding)) throw e;
+      await new Promise((klaar) => setTimeout(klaar, wachtMs * poging));
+    }
+  }
+}

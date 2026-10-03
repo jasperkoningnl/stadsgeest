@@ -10,6 +10,16 @@ const { normaliseerNaam } = require('./koppel/normaliseer.cjs');
 const MAX_CONTENT_CHARS = 4000;
 const MAX_ITEMS_PER_SIGNAL = 6;
 
+// De items van een signaal plus de deelitems van lange documenten daarin
+// (raw_item_parts, sinds 2026-10-03). Zo ziet de weger ook de namen en adressen
+// uit deel 2 en verder van een Woo-besluit of de begroting. Gebruik: twee keer
+// de signaal-id als eerste parameters, gevolgd door de overige.
+const SIGNAAL_ITEMS_MET_DELEN = `(SELECT signal_id, raw_item_id FROM signal_items WHERE signal_id = ?
+            UNION ALL
+            SELECT s0.signal_id, p.part_id AS raw_item_id
+            FROM signal_items s0 JOIN raw_item_parts p ON p.parent_id = s0.raw_item_id
+            WHERE s0.signal_id = ?)`;
+
 function usage() {
   return `Gebruik: node scraper/src/weger-workset.cjs [--limit 10] [--summary]\n\n` +
     `Geeft een compacte JSON-werkset voor de Codex-weger. Alleen signalen die nog\n` +
@@ -94,12 +104,12 @@ async function loadEntities(db, signalId) {
   if (!(await tableExists(db, 'entities'))) return [];
   const result = await db.execute({
     sql: `SELECT DISTINCT e.entity_type, e.name, e.normalized_name, e.context
-          FROM signal_items si
+          FROM ${SIGNAAL_ITEMS_MET_DELEN} si
           JOIN entities e ON e.raw_item_id = si.raw_item_id
           WHERE si.signal_id = ?
           ORDER BY e.entity_type, e.normalized_name
           LIMIT 100`,
-    args: [signalId],
+    args: [signalId, signalId, signalId],
   });
   return result.rows;
 }
@@ -118,7 +128,7 @@ async function loadNerKgCandidates(db, signalId) {
                  MIN(dm.context_snippet) AS context,
                  MAX(dm.resolution_status) AS status,
                  GROUP_CONCAT(DISTINCT s.name) AS bronnen
-          FROM signal_items si
+          FROM ${SIGNAAL_ITEMS_MET_DELEN} si
           JOIN document_mentions dm ON dm.raw_item_id = si.raw_item_id
           JOIN kg_entities ke ON ke.id = dm.resolved_entity_id
           JOIN raw_items r ON r.id = dm.raw_item_id
@@ -135,7 +145,7 @@ async function loadNerKgCandidates(db, signalId) {
           GROUP BY dm.resolved_entity_id
           ORDER BY vermeldingen DESC
           LIMIT 25`,
-    args: [signalId],
+    args: [signalId, signalId, signalId],
   });
   // Een kandidaat die de bron zelf is ('NS' in 'NS Verstoringen') zegt niets.
   const isSource = (row) => {
@@ -163,10 +173,10 @@ async function loadAddressLinks(db, signalId) {
   const addresses = (await db.execute({
     sql: `SELECT da.nummeraanduiding_id AS bag_id, MIN(da.address_text) AS adres, MIN(da.buurtcode) AS buurtcode,
                  MIN(da.verblijfsobject_id) AS vbo
-          FROM signal_items si JOIN document_addresses da ON da.raw_item_id = si.raw_item_id
+          FROM ${SIGNAAL_ITEMS_MET_DELEN} si JOIN document_addresses da ON da.raw_item_id = si.raw_item_id
           WHERE si.signal_id = ? AND da.match_status = 'exact'
           GROUP BY da.nummeraanduiding_id LIMIT 10`,
-    args: [signalId],
+    args: [signalId, signalId, signalId],
   })).rows;
   const out = [];
   for (const a of addresses) {
