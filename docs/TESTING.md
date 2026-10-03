@@ -15,8 +15,10 @@ npm run build
 ```
 
 `npm test` draait de offline scraper-, detectie- en weger-tests via het eigen
-package in `scraper/`. `npm run check` voert alle drie controles achter elkaar
-uit. Database-afhankelijke schema- en entity-tests staan apart onder
+package in `scraper/`. `npm run test:dashboard` draait de tests van de pure
+dashboardhelpers (`src/lib/dashboard/__tests__/`, briefingparser en
+naamontleding) rechtstreeks met Node (type stripping, dus imports met `.ts`).
+`npm run check` voert lint, beide testsets en de build achter elkaar uit. Database-afhankelijke schema- en entity-tests staan apart onder
 `npm --prefix scraper run test:integration`; draai die alleen met geldige
 productietoegang en behandel ze als gerichte livecontrole.
 

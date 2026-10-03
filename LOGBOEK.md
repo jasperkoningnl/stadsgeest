@@ -30,6 +30,10 @@ wordt getoond. De documentatiecontrole (`npm run docs:check`, ook vóór iedere
 build) weigert een logboek waarin het voorkomt; welke woorden zij bewaakt staat
 in `scripts/check-docs.mjs` en de reden in `docs/DECISIONS.md` (2026-10-02).
 
+## 2026-10-03 — Weekmail toont alleen nog wat open staat; grondverkoop krijgt een eigen bron
+
+De weekmail van maandag bevat voortaan alleen de nieuwe tips van die week die nog in de wachtrij staan, met de supertip bovenaan, en onderaan hoeveel er in totaal in de wachtrij staan. De kleuren bij de score kloppen weer met de schaal die Stadsgeest gebruikt. Daarnaast krijgen bekendmakingen over verkoop, verhuur of uitgifte van gemeentegrond en gebouwen (de zogeheten Didam-publicaties) een eigen bron, zodat ze niet meer tussen het overige Gemeenteblad verdwijnen. Een voornemen tot grondverkoop noemt vrijwel altijd partij en locatie en is daarmee vaak nieuws.
+
 ## 2026-10-03 — Sneller beslissen, oude tips opruimen, dossiers en verkenner verbeterd
 
 Een flinke ronde aan het dashboard, vooral om het beslissen lichter te maken.
