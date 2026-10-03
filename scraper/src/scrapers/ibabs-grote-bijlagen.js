@@ -4,6 +4,7 @@
 
 import db from '../db.js';
 import { logResult } from '../utils.js';
+import { werkDeelitemsBij } from '../deelitems.mjs';
 import { bouwFullText } from '../ibabs-ocr-lib.js';
 import { isGroteBijlageKandidaat, MIB } from '../ibabs-grote-bijlagen-lib.js';
 
@@ -51,6 +52,8 @@ async function herbouwFullText(rawItemId) {
     sql: 'UPDATE raw_items SET full_text=?,fulltext_fetched_at=?,entities_scanned_at=NULL WHERE id=?',
     args: [bouwFullText(item?.content || '', bijlagen), new Date().toISOString(), rawItemId],
   });
+  // Wat niet in full_text past gaat naar deelitems (sinds 2026-10-03).
+  await werkDeelitemsBij(db, rawItemId, bouwFullText(item?.content || '', bijlagen, Number.MAX_SAFE_INTEGER));
 }
 
 async function kiesKandidaat() {

@@ -4,6 +4,7 @@
 
 import db from '../db.js';
 import { logResult } from '../utils.js';
+import { werkDeelitemsBij } from '../deelitems.mjs';
 import { bouwFullText, isLeesbareOcr, isOcrKandidaat, MIN_OCR_TEKENS, OCR_RUIS_MELDING, ocrPdf } from '../ibabs-ocr-lib.js';
 
 const UA = 'Stadsgeest033/1.0 (+https://stadsgeest.nl; redactie@nieuwsplein33.nl)';
@@ -43,6 +44,8 @@ export async function herbouwEnMarkeer(rawItemId) {
   if (await tabelBestaat('document_addresses')) stmts.unshift({ sql: 'DELETE FROM document_addresses WHERE raw_item_id=?', args: [rawItemId] });
   if (await tabelBestaat('address_scans')) stmts.unshift({ sql: 'DELETE FROM address_scans WHERE raw_item_id=?', args: [rawItemId] });
   await db.batch(stmts, 'write');
+  // Wat niet in full_text past gaat naar deelitems (sinds 2026-10-03).
+  await werkDeelitemsBij(db, rawItemId, bouwFullText(item?.content || '', bijlagen, Number.MAX_SAFE_INTEGER));
 }
 
 async function scrape() {

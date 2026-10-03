@@ -118,9 +118,10 @@ export function documentenUitPayload(payload) {
 }
 
 let pdfjs = null;
-// Standaard pdf-extractie. 150 pagina's, gelijk aan de iBabs-bijlagen: de
-// waarde zit in de lange stukken. verbosity 0 houdt fontwaarschuwingen van stderr.
-export async function pdfBufferNaarTekst(buffer, maxPaginas = 150) {
+// Standaard pdf-extractie. 600 pagina's: de waarde zit in de lange stukken, en
+// wat niet in full_text past gaat naar deelitems. verbosity 0 houdt
+// fontwaarschuwingen van stderr.
+export async function pdfBufferNaarTekst(buffer, maxPaginas = 600) {
   if (!pdfjs) pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
   const doc = await pdfjs.getDocument({
     data: new Uint8Array(buffer), useSystemFonts: true, isEvalSupported: false, disableFontFace: true, verbosity: 0,

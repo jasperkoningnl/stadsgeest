@@ -22,6 +22,7 @@ import { createDb } from './lib.js';
 import { buildOriLookup, extractOriText, haalNotubizTekst, isNotubizUrl } from './notubiz-fulltext.mjs';
 import { haalRechtspraakTekst, rechtspraakEcli } from './rechtspraak-fulltext.mjs';
 import { biedSignalenOpnieuwAan } from './heraanbieden.mjs';
+import { werkDeelitemsBijMetHerkansing } from './deelitems.mjs';
 
 // pdfjs-dist wordt pas geladen als er echt een PDF langskomt (legacy build, want
 // we draaien in Node zonder DOM). Vóór 2026-08-09 werden PDF's overgeslagen én
@@ -43,9 +44,10 @@ async function pdfNaarTekst(buffer) {
     disableFontFace: true,
   }).promise;
   const delen = [];
-  // 150 pagina's (was 60 tot 2026-10-03), gelijk aan de iBabs-bijlagen: de waarde
-  // zit juist in de lange stukken. full_text zelf blijft begrensd op 200.000 tekens.
-  const maxPaginas = Math.min(doc.numPages, 150);
+  // 600 pagina's (was 60 tot 2026-10-03): de waarde zit juist in de lange
+  // stukken. full_text zelf blijft begrensd op 200.000 tekens; wat daarna komt
+  // gaat naar deelitems (deelitems.mjs).
+  const maxPaginas = Math.min(doc.numPages, 600);
   for (let p = 1; p <= maxPaginas; p++) {
     const page = await doc.getPage(p);
     const inhoud = await page.getTextContent();
@@ -183,6 +185,7 @@ async function run() {
               )
             )
             AND r.external_url IS NOT NULL AND r.external_url != ''
+            AND r.external_url NOT LIKE '%#deel=%'
             AND (${like})
           ORDER BY r.id DESC
           LIMIT ?`,
@@ -190,7 +193,7 @@ async function run() {
   });
 
   console.log(`[FULLTEXT] ${res.rows.length} kandidaten`);
-  const stats = { ok: 0, leeg: 0, fout: 0, tekens: 0, heraangeboden: 0 };
+  const stats = { ok: 0, leeg: 0, fout: 0, tekens: 0, heraangeboden: 0, deelitems: 0 };
 
   for (const row of res.rows) {
     try {
@@ -204,6 +207,12 @@ async function run() {
         });
         stats.ok++;
         stats.tekens += text.length;
+        // Langer dan het tekstveld: de rest gaat naar deelitems, zodat ook de
+        // entiteiten- en adresscan het hele stuk lezen.
+        if (text.length > 200000) {
+          const d = await werkDeelitemsBijMetHerkansing(db, row.id, text);
+          stats.deelitems += d.aangemaakt + d.bijgewerkt;
+        }
         // Herkansing die alsnog tekst oplevert (uitspraak of raadsstuk dat later
         // is gepubliceerd): het signaal is toen op titel of metadata gewogen en
         // gaat daarom opnieuw naar de weger. Bij een eerste poging is dat niet
@@ -235,7 +244,7 @@ async function run() {
   }
 
   const gem = stats.ok ? Math.round(stats.tekens / stats.ok) : 0;
-  console.log(`[FULLTEXT] klaar: ${stats.ok} opgehaald (gem. ${gem} tekens), ${stats.leeg} leeg, ${stats.fout} fout, ${stats.heraangeboden} signalen opnieuw naar de weger`);
+  console.log(`[FULLTEXT] klaar: ${stats.ok} opgehaald (gem. ${gem} tekens), ${stats.leeg} leeg, ${stats.fout} fout, ${stats.heraangeboden} signalen opnieuw naar de weger, ${stats.deelitems} deelitems`);
 }
 
 run().catch(e => { console.error('[FULLTEXT] fataal:', e); process.exit(1); });

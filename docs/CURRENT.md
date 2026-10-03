@@ -53,6 +53,14 @@ KVK-identiteitsregels hersteld. De iBabs-keten heeft een begrensde OCR-naloop
 voor scans zonder tekstlaag. De bronnenwacht meldt na herstel en gemotiveerde
 uitschakelingen nul verdachte en nul dode bronnen.
 
+Sinds 3 oktober halen raadsstukken van Notubiz hun tekst via `api.notubiz.nl`
+en uitspraken via `data.rechtspraak.nl`; krijgt een stuk pas later tekst, dan
+gaat het signaal opnieuw naar de weger. Documenten langer dan 200.000 tekens
+(Woo-besluiten, begroting, jaarverslag) zijn gesplitst in deelitems: eigen
+`raw_items` met URL `...#deel=N`, verwerkt en historisch, gekoppeld via
+`raw_item_parts`. Tel ze niet mee als losse stukken. OCR-uitvoer telt alleen
+als tekst wanneer zij leesbaar is (`isLeesbareOcr`).
+
 Sinds 2 oktober leest de keten ook de Statenstukken van de provincie Utrecht
 (alleen stukken over Amersfoort of Leusden, tier 1); de Leusder Krant en De
 Stadsbron zijn spiegelbron (bronnen 165 en 166, sinds 3 oktober). Na twee runs

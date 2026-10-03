@@ -24,6 +24,7 @@
 import * as cheerio from 'cheerio';
 import db from '../db.js';
 import { contentHash, getOrCreateSource, logResult, naarPublicatieIso } from '../utils.js';
+import { werkDeelitemsBij } from '../deelitems.mjs';
 import { RAPPORTEN, rijNaarItem, documentLinks, leeftijdDagen, IBABS_BASE, bijlageIsAfgehandeld } from '../ibabs-lib.js';
 
 const UA = 'Stadsgeest033/1.0 (+https://stadsgeest.nl; redactie@nieuwsplein33.nl)';
@@ -192,11 +193,14 @@ async function scrape() {
         // full_text opnieuw samenstellen uit itemtekst en alle bijlagen met tekst.
         const bijlagen = (await db.execute({ sql: "SELECT titel, tekst FROM raw_item_attachments WHERE raw_item_id = ? AND status = 'ok' ORDER BY id", args: [rawId] })).rows;
         if (bijlagen.length) {
-          const volledig = [detail, ...bijlagen.map(b => `\n\n=== Bijlage: ${b.titel} ===\n${b.tekst}`)].join('').substring(0, MAX_FULLTEXT);
+          const alles = [detail, ...bijlagen.map(b => `\n\n=== Bijlage: ${b.titel} ===\n${b.tekst}`)].join('');
+          const volledig = alles.substring(0, MAX_FULLTEXT);
           await db.execute({
             sql: `UPDATE raw_items SET full_text = ?, fulltext_fetched_at = ?, entities_scanned_at = NULL WHERE id = ?`,
             args: [volledig, new Date().toISOString(), rawId],
           });
+          // Wat niet in full_text past gaat naar deelitems (sinds 2026-10-03).
+          await werkDeelitemsBij(db, rawId, alles);
         }
       } catch (e) {
         fouten++;
