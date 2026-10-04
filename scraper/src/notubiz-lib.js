@@ -52,11 +52,26 @@ export function verzamelDocumenten(meeting) {
 }
 
 // Titel voor raw_items: vergadering, datum, agendapunt en document.
-export function itemTitel(vergadering, datum, doc) {
+export function itemTitel(vergadering, datum, doc, prefix = 'Raad Leusden') {
   const kop = [vergadering, datum].filter(Boolean).join(' ');
   const punt = doc.agendapunt && !doc.titel.toLowerCase().includes(doc.agendapunt.toLowerCase().replace(/^\d+\s+/, ''))
     ? `${doc.agendapunt} — ` : '';
-  return `Raad Leusden: ${kop}: ${punt}${doc.titel}`.replace(/\s+/g, ' ').slice(0, 300);
+  return `${prefix}: ${kop}: ${punt}${doc.titel}`.replace(/\s+/g, ' ').slice(0, 300);
+}
+
+// Notubiz-document-id's die al in raw_items staan, uit een lijst opgeslagen URL's.
+// Hetzelfde stuk komt voor als api.notubiz.nl/document/<id>/<versie>,
+// <gemeente>.notubiz.nl/document/<id> en <gemeente>.raadsinformatie.nl/document/<id>.
+// Eén keer per run laden; een LIKE-zoekvraag per document leest telkens de hele tabel.
+const BEKEND_URL = /(?:notubiz\.nl|raadsinformatie\.nl)\/document\/(\d+)/;
+
+export function bekendeDocumentIds(urls) {
+  const ids = new Set();
+  for (const u of urls || []) {
+    const m = String(u || '').match(BEKEND_URL);
+    if (m) ids.add(m[1]);
+  }
+  return ids;
 }
 
 // Een vergadering die langer dan `dagen` geleden was, levert achtergrond op en

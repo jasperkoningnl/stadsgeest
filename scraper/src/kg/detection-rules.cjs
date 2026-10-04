@@ -667,6 +667,11 @@ const R14_NDW_IMPACT = {
   id: 'R14', name: 'Grote lokale verkeersmaatregel',
   eventTypes: ['ROADWORK_PLANNED', 'ROAD_CLOSURE_CHANGED', 'EVENT_TRAFFIC_MEASURE'],
   async condition(event) { let p = {}; try { p = JSON.parse(event.provenance || '{}'); } catch { return false; }
+    // Uit sinds 2026-10-04 (besluit Jasper, zie docs/DECISIONS.md): in dertig dagen
+    // maakte deze regel 124 signalen en de weger zette ze alle 124 weg. De
+    // NDW-events blijven in kg_events staan; alleen het signaal vervalt. Met
+    // STADSGEEST_R14_SIGNALEN=1 staat de regel weer aan.
+    if (process.env.STADSGEEST_R14_SIGNALEN !== '1') return false;
     return p.journalistically_relevant === true; },
   async createSignal(event) { const p = JSON.parse(event.provenance || '{}');
     return { title: event.title, summary: event.summary, category: 'verkeer-infra', tier: p.current?.closure ? 2 : 3, noveltyScore: 65,

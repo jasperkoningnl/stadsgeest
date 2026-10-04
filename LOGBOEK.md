@@ -323,3 +323,7 @@ bij, met de indienende partij, zoals "Geef Leusdense boeren toekomstperspectief"
 (Pro-Leusden) van de raad van 24 september. Stukken van vergaderingen die al
 langer dan een week geleden waren, dienen als achtergrond en leveren geen tip
 op. Keerzijde: of een Leusdense motie is aangenomen, staat er nog niet bij.
+
+## 2026-10-04 - Raadsstukken Amersfoort komen weer binnen
+
+Agenda's, raadsvoorstellen en bijlagen van de gemeenteraad Amersfoort kwamen sinds de zomer niet meer binnen. Dat is hersteld: Stadsgeest leest ze nu rechtstreeks uit het raadsinformatiesysteem, zoals al voor Leusden gebeurde. De eerste dagen wordt een achterstand van zo'n driehonderd stukken ingehaald; je kunt daardoor tijdelijk meer tips over raadsvergaderingen zien. Meldingen over wegwerkzaamheden leveren geen signalen meer op; die werden altijd weggezet.

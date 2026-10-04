@@ -138,9 +138,41 @@ async function fetchBuffer(url, options = {}) {
   throw lastError;
 }
 
+const SNAPSHOT_MIN_UREN = Number(process.env.SNAPSHOT_MIN_UREN || 20);
+
+/** Zuivere beslissing: bewaren we deze momentopname, gegeven de laatste van dezelfde bron? */
+function magSnapshotBewaren(laatste, hash, nu = new Date(), minUren = SNAPSHOT_MIN_UREN) {
+  if (!laatste) return { bewaren: true, storageUri: null };
+  if (laatste.content_hash === hash) return { bewaren: false, storageUri: laatste.storage_uri || null };
+  const t = Date.parse(String(laatste.fetched_at || '').replace(' ', 'T').replace(/Z?$/, 'Z'));
+  if (Number.isFinite(t) && nu.getTime() - t < minUren * 3600000) return { bewaren: false, storageUri: null };
+  return { bewaren: true, storageUri: null };
+}
+
+// Per bron én URL: een samengestelde bron (zorg, dPi, politie) haalt in één run
+// meerdere bestanden op, en elk officieel bestand hoort bewaard te blijven.
+async function snapshotBeleid(db, sourceId, hash, url) {
+  try {
+    const r = await db.execute({
+      sql: 'SELECT fetched_at, content_hash, storage_uri FROM source_snapshots WHERE source_id=? AND source_url=? ORDER BY fetched_at DESC LIMIT 1',
+      args: [sourceId, url],
+    });
+    return magSnapshotBewaren(r.rows[0], hash);
+  } catch {
+    return { bewaren: true, storageUri: null }; // bij twijfel bewaren, zoals voorheen
+  }
+}
+
 async function archiveSnapshot(db, sourceId, sourceName, fetched, dryRun) {
   const hash = rawHash(fetched.buffer);
   if (dryRun) return { hash, storageUri: null };
+  // Niet elke ophaalbeurt hoeft op schijf (2026-10-04). NDW haalt elk kwartier
+  // 17 MB op: 29 GB in drie weken. En een ongewijzigd bestand (zorg, AFM) werd
+  // bij elke run opnieuw weggeschreven. Regel: dezelfde inhoud als de laatste
+  // momentopname van dezelfde URL wordt niet nogmaals bewaard, en per URL komt er
+  // hoogstens één momentopname per SNAPSHOT_MIN_UREN bij.
+  const beleid = await snapshotBeleid(db, sourceId, hash, fetched.url);
+  if (!beleid.bewaren) return { hash, storageUri: beleid.storageUri };
   const safeName = sourceName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const folder = path.join(SNAPSHOT_DIR, safeName);
   await fs.mkdir(folder, { recursive: true });
@@ -355,7 +387,7 @@ function changedFields(previous, current, fields) {
 }
 
 module.exports = {
-  BASELINE_KEY, LOCAL_PLACES, archiveSnapshot, canonicalize, changedFields, ensureSource, extractFirstZipEntry,
+  BASELINE_KEY, LOCAL_PLACES, archiveSnapshot, magSnapshotBewaren, canonicalize, changedFields, ensureSource, extractFirstZipEntry,
   ensureOrganization, fetchBuffer, isLocalPlace, isRecoveredUnconfirmed, missingTransition, normalizePlace, normalizeText, parseDelimited, rawHash,
   requireColumns, runVersionedDataset, semanticHash,
 };

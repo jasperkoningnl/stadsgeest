@@ -461,3 +461,25 @@ machineleesbaar en zonder sleutel is (zie het contract hierboven).
 - **B&W-besluitenlijsten Leusden, RaadKijker, Nationale ombudsman (RSS):**
   geblokkeerd of niet bereikbaar vanuit de cloud; alleen vanaf de notebook.
 
+
+## Raad Amersfoort - vergaderstukken via Notubiz
+
+Scraper `scraper/src/scrapers/notubiz-amersfoort.js`, drie keer per dag via
+`run-all.js`, toegevoegd 4 oktober 2026 naar het voorbeeld van Leusden. De
+ORI-index voor Amersfoort staat sinds juli stil en bron 120 kreeg na 9 augustus
+niets meer; agenda's, raadsvoorstellen en bijlagen kwamen niet binnen.
+
+- Zelfde openbare API als Leusden, organisatie 867. Venster 45 dagen terug tot
+  30 dagen vooruit, de nieuwste vergadering eerst.
+- Bron 'Raad Amersfoort — vergaderstukken (Notubiz)', tier 1, gemeente
+  Amersfoort. Elk document één raw_item; vergaderingen van langer dan 7 dagen
+  geleden zijn achtergrond.
+- Ontdubbeling op Notubiz-document-id over alle bronnen, met één leesbeurt per
+  run (`bekendeDocumentIds` in `notubiz-lib.js`). `notubiz-leusden.js` doet nog
+  een `LIKE`-zoekvraag per document; die leest telkens de hele tabel.
+- Hoogstens 20 documenten en 48 seconden per run, 300 pagina's per pdf, tekst
+  tot 200.000 tekens. Gemeten bij de eerste run: 34 vergaderingen, 329
+  documenten, 5 al bekend.
+- `NOTUBIZ_DRYRUN=1` toont wat hij zou doen zonder te schrijven.
+- NVWA: `nvwa-inspectieresultaten.js` leest sinds 4 oktober per dag een zevende
+  van de postcodes; `SG_NVWA_ALLES=1` draait alles.

@@ -375,3 +375,19 @@ registratiewaarschuwing. `Brand/ontploffing` uit de politieregistratie is
 opgenomen, maar wordt nooit gelijkgesteld aan alle woningbranden. Alle
 uitkomsten blijven onderzoekstips; registratie- en aangifte-effecten vereisen
 menselijke verificatie.
+
+## 2026-10-04 - R14 maakt geen signalen meer; momentopnamen worden begrensd
+
+R14 (grote lokale verkeersmaatregel) blijft als regelidentiteit bestaan, maar
+maakt geen signalen meer. In dertig dagen leverde de regel 124 signalen op en
+de weger zette ze alle 124 weg. Dit is een besluit van Jasper op grond van de
+weger-oordelen en loopt vooruit op het leercontract van fase 5; het verlaagt
+ruis en verandert geen rangschikking. De NDW-events blijven in `kg_events`.
+Met `STADSGEEST_R14_SIGNALEN=1` staat de regel weer aan.
+
+`archiveSnapshot` bewaart per bron en URL hoogstens één momentopname per twintig
+uur (`SNAPSHOT_MIN_UREN`) en geen kopie van ongewijzigde inhoud. Aanleiding: NDW
+schreef elk kwartier 17 MB weg, 29 GB in drie weken. Samengestelde bronnen
+houden ieder officieel bestand, omdat de regel per URL geldt. De hash van elke
+ophaalbeurt blijft in de run staan. `scraper/src/snapshot-opruimen.cjs` ruimt
+de bestaande achterstand op en draait standaard droog.
