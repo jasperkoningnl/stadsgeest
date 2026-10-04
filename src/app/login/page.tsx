@@ -40,6 +40,10 @@ export default async function LoginPage({
           <p className="np-inlog-fout">Onjuiste gebruikersnaam of wachtwoord. Probeer het opnieuw.</p>
         )}
 
+        {params.error === 'wacht' && (
+          <p className="np-inlog-fout">Te veel mislukte pogingen. Probeer het over een kwartier opnieuw.</p>
+        )}
+
         {nietIngesteld && (
           <p className="np-inlog-fout">
             De inlog is nog niet ingesteld op deze omgeving. Zet <code>DASHBOARD_SESSIE_SECRET</code> en

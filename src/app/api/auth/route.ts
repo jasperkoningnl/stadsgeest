@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { noteerMisluktePoging, teVeelPogingen } from '@/lib/dashboard/inlogLimiet'
 import { AUTH_COOKIE, isGeconfigureerd, maakSessie, magNaar, startpagina, wachtwoordKlopt } from '@/lib/dashboardAuth'
 
 export async function POST(request: Request) {
@@ -16,8 +17,15 @@ export async function POST(request: Request) {
 
   if (!isGeconfigureerd()) return terugNaarLogin('config')
 
+  // Rem op raden: na vijf mislukte pogingen voor dezelfde naam vanaf hetzelfde
+  // adres een kwartier wachten (zie src/lib/dashboard/inlogRegels.ts).
+  if (await teVeelPogingen(gebruikersnaam, request)) return terugNaarLogin('wacht')
+
   const geldigeGebruiker = await wachtwoordKlopt(gebruikersnaam, wachtwoord)
-  if (!geldigeGebruiker) return terugNaarLogin('1')
+  if (!geldigeGebruiker) {
+    await noteerMisluktePoging(gebruikersnaam, request)
+    return terugNaarLogin('1')
+  }
 
   const sessie = await maakSessie(geldigeGebruiker)
   if (!sessie) return terugNaarLogin('config')

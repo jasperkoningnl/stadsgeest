@@ -42,7 +42,17 @@ async function scrape() {
     }
   });
 
+  // Ontdubbelen op URL (2026-10-04). saveRawItem ontdubbelt op titel plus URL, en
+  // de linktekst op deze pagina wisselt per run; hetzelfde bericht werd daardoor
+  // steeds opnieuw opgeslagen (bijna 200 keer per week) en pas door de intake
+  // als URL-duplicaat weggefilterd. Eén leesbeurt op de bronindex.
+  const bekend = new Set(
+    (await db.execute({ sql: 'SELECT external_url FROM raw_items WHERE source_id = ?', args: [sourceId] }))
+      .rows.map((r) => String(r.external_url)),
+  );
+
   for (const { url, title } of links) {
+    if (bekend.has(url)) { skipped++; continue; }
     try {
       const result = await saveRawItem(db, {
         sourceId,

@@ -16,6 +16,7 @@ import {
   woordMatchScore,
 } from './src/intake-matching.mjs';
 import { isOmnibus, splitsOmnibus } from './src/omnibus-split-lib.mjs';
+import { routineReden } from './src/routine-lib.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -550,6 +551,16 @@ async function run() {
           await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', 'Nextdoor-advertentie (Marktplaats-link of te-koop-taal), geen buurtnieuws'));
           continue;
         }
+      }
+
+      // Routinebekendmakingen (2026-10-04): tijdelijk gebruik van de weg en een
+      // verlengde beslistermijn werden door de weger elke run één voor één
+      // weggezet. De regels staan in src/routine-lib.mjs.
+      const routine = routineReden(item);
+      if (routine) {
+        stats.gefilterd++; stats.ids.push(item.id);
+        await decisionBatcher.push(decisionStmt(runId, item, tier, 'filtered', routine));
+        continue;
       }
 
       // Spiegelbronnen (Nieuwsplein33 en zijn partners) zijn geen signaalbron
