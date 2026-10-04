@@ -391,3 +391,9 @@ schreef elk kwartier 17 MB weg, 29 GB in drie weken. Samengestelde bronnen
 houden ieder officieel bestand, omdat de regel per URL geldt. De hash van elke
 ophaalbeurt blijft in de run staan. `scraper/src/snapshot-opruimen.cjs` ruimt
 de bestaande achterstand op en draait standaard droog.
+
+NDW wordt sinds dezelfde dag één keer per week opgehaald in plaats van elk
+kwartier (besluit Jasper): `minimumHours` 144 in `detection-run.cjs`, binnen de
+dagelijkse detectietaak. De Windows-taak `Stadsgeest NDW` is uitgeschakeld, niet
+verwijderd; `Enable-ScheduledTask -TaskName 'Stadsgeest NDW'` zet hem terug,
+samen met `minimumHours` 0.2.

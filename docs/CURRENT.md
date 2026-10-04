@@ -26,8 +26,7 @@ open data van het CBS (24 uur cache) en kosten geen Turso-reads; de
 databasequeries staan zes uur in de cache. Het dashboard toont alleen
 officiële of bevestigde feiten.
 
-`Stadsgeest Detection` start dagelijks om 06.15 uur; NDW draait iedere vijftien
-minuten. Na de dagrun volgen de geplande fase-5-maandevaluatie en
+`Stadsgeest Detection` start dagelijks om 06.15 uur; NDW draait daarin wekelijks mee. Na de dagrun volgen de geplande fase-5-maandevaluatie en
 privacyretentie. Adapter-, evaluatie- en retentiefouten zijn geïsoleerd en
 idempotente invoer levert geen dubbele uitkomsten op. Beide taken eindigen
 normaal met resultaatcode 0; dode proceslocks worden opgeruimd. De gecombineerde

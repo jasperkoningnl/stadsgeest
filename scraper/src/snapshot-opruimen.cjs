@@ -55,12 +55,16 @@ function teVerwijderen(namen, { kwartier = false, nu = new Date(), bewaarUren = 
 }
 
 function main(argv = process.argv.slice(2)) {
-  const apply = argv.includes('--apply');
+  const verplaats = argv.includes('--verplaats');
+  const apply = argv.includes('--apply') || verplaats;
+  // --verplaats verwijdert niets: de bestanden gaan naar de map _te-verwijderen
+  // binnen de snapshotmap, zodat iemand die in één keer zelf kan weggooien.
+  const doelRoot = path.join(DIR, '_te-verwijderen');
   const i = argv.indexOf('--kwartier');
   const voorvoegsels = (i >= 0 ? argv[i + 1] : 'ndw-').split(',').map((s) => s.trim()).filter(Boolean);
   if (!fs.existsSync(DIR)) { console.log('Geen snapshotmap gevonden.'); return; }
   let totaalAantal = 0, totaalBytes = 0;
-  for (const map of fs.readdirSync(DIR, { withFileTypes: true }).filter((d) => d.isDirectory())) {
+  for (const map of fs.readdirSync(DIR, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== '_te-verwijderen')) {
     const pad = path.join(DIR, map.name);
     const namen = fs.readdirSync(pad);
     const weg = teVerwijderen(namen, { kwartier: voorvoegsels.some((v) => map.name.startsWith(v)) });
@@ -69,12 +73,17 @@ function main(argv = process.argv.slice(2)) {
     for (const naam of weg) {
       const bestand = path.join(pad, naam);
       bytes += fs.statSync(bestand).size;
-      if (apply) fs.unlinkSync(bestand);
+      if (verplaats) {
+        const doel = path.join(doelRoot, map.name);
+        fs.mkdirSync(doel, { recursive: true });
+        fs.renameSync(bestand, path.join(doel, naam));
+      } else if (apply) fs.unlinkSync(bestand);
     }
     totaalAantal += weg.length; totaalBytes += bytes;
-    console.log(`${map.name}: ${weg.length} van ${namen.length} bestanden ${apply ? 'verwijderd' : 'kunnen weg'} (${(bytes / 1024 ** 3).toFixed(2)} GB)`);
+    console.log(`${map.name}: ${weg.length} van ${namen.length} bestanden ${verplaats ? 'verplaatst' : apply ? 'verwijderd' : 'kunnen weg'} (${(bytes / 1024 ** 3).toFixed(2)} GB)`);
   }
-  console.log(`${apply ? 'Verwijderd' : 'Droog: zou verwijderen'}: ${totaalAantal} bestanden, ${(totaalBytes / 1024 ** 3).toFixed(2)} GB.${apply ? '' : ' Draai met --apply om het uit te voeren.'}`);
+  const wat = verplaats ? `Verplaatst naar ${doelRoot}` : apply ? 'Verwijderd' : 'Droog: zou verwijderen';
+  console.log(`${wat}: ${totaalAantal} bestanden, ${(totaalBytes / 1024 ** 3).toFixed(2)} GB.${apply ? '' : ' Draai met --verplaats of --apply om het uit te voeren.'}`);
 }
 
 if (require.main === module) main();

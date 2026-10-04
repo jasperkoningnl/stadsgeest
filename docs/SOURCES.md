@@ -122,8 +122,7 @@ ontbrekende data, niet als een negatief oordeel.
 
 De productie-enums blijven grof (`registry`/`data` en
 `hourly`/`daily`/`weekly`). Het manifest bewaart de echte domeinen en cadans.
-De dagelijkse orkestrator respecteert minimumintervallen; `Stadsgeest NDW`
-draait daarnaast werkelijk iedere vijftien minuten.
+De dagelijkse orkestrator respecteert minimumintervallen; NDW draait sinds 4 oktober 2026 wekelijks mee in die run; de taak `Stadsgeest NDW` staat uit.
 
 ## Fase-4-broncontracten
 
