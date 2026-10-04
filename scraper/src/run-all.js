@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import db from './db.js';
@@ -48,7 +48,10 @@ for (const scraper of scrapers) {
   let status = 'ok';
   let errorMessage = null;
   try {
-    const result = execSync(`node "${path.join(__dirname, 'scrapers', scraper)}"`, {
+    // Direct via node, niet via cmd.exe: bij een timeout stopte op Windows alleen de
+    // shell en liep de scraper als wees door, dwars door de volgende scrapers heen
+    // (gemeten 4 oktober 2026). Zo is 'timeout' ook echt gestopt.
+    const result = execFileSync(process.execPath, [path.join(__dirname, 'scrapers', scraper)], {
       stdio: 'pipe',
       timeout: 60000,
       encoding: 'utf8',

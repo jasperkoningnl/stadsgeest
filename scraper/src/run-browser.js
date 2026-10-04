@@ -2,7 +2,7 @@
 // Draait 1x per dag via PM2. Elke scraper lanceert zijn eigen headless Chromium,
 // dus timeout is hoger: 3 minuten per scraper.
 
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import db from './db.js';
@@ -38,6 +38,12 @@ const scrapers = [
   'provincie-utrecht.js',       // C11: Provincie Utrecht — draait, levert 0, te repareren
 ];
 
+// Afwijkende tijdgrens per scraper. Een nieuwe B&W-besluitenlijst met tientallen
+// pdf's past niet in drie minuten; bekende lijsten slaat de scraper zelf over.
+const TIMEOUT_MS = {
+  'bw-besluiten.js': 600000,
+};
+
 console.log(`\n=== Browser-scrape-run gestart: ${new Date().toISOString()} ===\n`);
 
 for (const scraper of scrapers) {
@@ -45,9 +51,14 @@ for (const scraper of scrapers) {
   let status = 'ok';
   let errorMessage = null;
   try {
-    const result = execSync(`node "${path.join(__dirname, 'scrapers', scraper)}"`, {
+    // Direct via node, niet via cmd.exe: bij een timeout stopte op Windows alleen de
+    // shell en liep de scraper als wees door, dwars door de volgende scrapers heen
+    // (gemeten 4 oktober 2026). Zo is 'timeout' ook echt gestopt.
+    const result = execFileSync(process.execPath, [path.join(__dirname, 'scrapers', scraper)], {
       stdio: 'pipe',
-      timeout: 180000,   // 3 min per scraper (browser-launch + render + netwerk)
+      // 3 min per scraper (browser-launch + render + netwerk), tenzij hieronder
+      // een eigen grens staat. De timeout stopt de scraper nu ook echt.
+      timeout: TIMEOUT_MS[scraper] ?? 180000,
       encoding: 'utf8',
       env: { ...process.env, SCRAPE_JOB_NAME: JOB_NAME },
     });

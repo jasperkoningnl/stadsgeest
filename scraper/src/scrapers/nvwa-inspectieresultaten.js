@@ -35,6 +35,19 @@ const POSTCODES = {
   Leusden: [3831, 3832, 3833, 3834, 3835],
 };
 
+// Aangepast 2026-10-04. Alle 24 postcodes in één run kost ruim vijf minuten
+// (gemeten: 338 s) en past niet in de drie minuten van run-browser.js; elke run
+// eindigde daar als 'timeout'. De NVWA publiceert pas twee weken na een inspectie,
+// dus elke postcode één keer per week is ruim genoeg. De postcodes zijn over de
+// zeven dagen verdeeld; met SG_NVWA_ALLES=1 of SG_POSTCODES draai je alles of een
+// eigen keuze. Het tijdbudget voorkomt dat een trage dag alsnog wordt afgekapt.
+const BUDGET_MS = Number(process.env.NVWA_BUDGET_MS || 150000);
+
+/** De postcodes die op deze dag aan de beurt zijn: positie in de lijst modulo zeven. */
+export function prefixenVoorDag(prefixen, dagnummer) {
+  return prefixen.filter((_, i) => i % 7 === dagnummer % 7);
+}
+
 // Oordelen die de moeite van een signaal waard zijn. "Voldoet" en "Geen recente
 // gegevens" slaan we over.
 const RELEVANT = ['Verbeterpunten vastgesteld', 'Verscherpt toezicht'];
@@ -64,6 +77,7 @@ function naarTekstregels(html) {
 async function haal(url) {
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Stadsgeest/1.0 (persbureau Amersfoort)' },
+    signal: AbortSignal.timeout(20000),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} op ${url}`);
   return res.text();
@@ -176,9 +190,21 @@ export async function scrape({ proef = false } = {}) {
   // Met SG_POSTCODES=3812,3813 draai je een klein stukje, handig bij het proeven.
   const beperking = (process.env.SG_POSTCODES || '').split(',').map((s) => Number(s.trim())).filter(Boolean);
 
+  const gestart = Date.now();
+  const alles = process.env.SG_NVWA_ALLES === '1';
+  const allePrefixen = Object.values(POSTCODES).flat();
+  const vandaag = new Set(prefixenVoorDag(allePrefixen, Math.floor(Date.now() / 86400000)));
+  const uitgesteld = [];
+
   for (const [gemeente, prefixen] of Object.entries(POSTCODES)) {
     for (const prefix of prefixen) {
-      if (beperking.length && !beperking.includes(prefix)) continue;
+      if (beperking.length ? !beperking.includes(prefix) : (!alles && !vandaag.has(prefix))) continue;
+      // Een volledige run of een eigen keuze is bewust; alleen de dagelijkse
+      // rotatie houdt zich aan het budget.
+      if (!alles && !beperking.length && Date.now() - gestart > BUDGET_MS) {
+        uitgesteld.push(prefix);
+        continue;
+      }
       let slugs;
       try {
         slugs = await zoekSlugs(prefix);
@@ -227,7 +253,13 @@ export async function scrape({ proef = false } = {}) {
     return;
   }
 
-  await logResult(db, sourceId, BRON.name, opgeslagen, overgeslagen, fouten, relevante.length);
+  if (uitgesteld.length) {
+    console.warn(`NVWA: tijdbudget bereikt, postcodes ${uitgesteld.join(', ')} schuiven een week op.`);
+  }
+  // items_found = gelezen detailpagina's, niet het aantal tekortkomingen. Op een
+  // dag zonder tekortkomingen in deze postcodes is de bron wel bereikt; anders
+  // ziet de bronnenwacht een gezonde bron als leeg.
+  await logResult(db, sourceId, BRON.name, opgeslagen, overgeslagen, fouten, bekeken);
 }
 
 // Direct aangeroepen? Dan draaien. Met --proef schrijft hij niets weg.

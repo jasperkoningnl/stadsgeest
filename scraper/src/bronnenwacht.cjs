@@ -24,6 +24,7 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { createClient } = require('@libsql/client');
+const { falendeScrapers, langStilleBronnen } = require('./bewaking-lib.cjs');
 const db = createClient({ url: process.env.TURSO_URL, authToken: process.env.TURSO_AUTH_TOKEN });
 
 async function ensureColumns() {
@@ -74,7 +75,7 @@ async function main() {
   // Alleen actieve bronnen. Uitgezette rijen (dubbel, eenmalig, vervangen) houden hun
   // vastgelegde health; anders zou een oude dubbele rij met veel historische runs
   // elke run opnieuw als 'dood' worden gemarkeerd.
-  const sources = (await db.execute("SELECT id, name, url, category, expected_yield, health, is_active, scrape_frequency FROM sources WHERE COALESCE(health,'ok') != 'uitgeschakeld' AND COALESCE(is_active,1) = 1")).rows;
+  const sources = (await db.execute("SELECT id, name, url, category, expected_yield, health, is_active, scrape_frequency, tier, bronrol FROM sources WHERE COALESCE(health,'ok') != 'uitgeschakeld' AND COALESCE(is_active,1) = 1")).rows;
   const regels = [];
   let nVerdacht = 0, nDood = 0, nReces = 0, nGeenRuns = 0;
 
@@ -82,7 +83,11 @@ async function main() {
   const GEEN_RUNS_DAGEN = 30;
   const laatsteRun = new Map((await db.execute("SELECT source_id, MAX(started_at) m FROM scrape_runs GROUP BY source_id")).rows.map(r => [Number(r.source_id), r.m]));
   const laatsteFetch = new Map((await db.execute("SELECT source_id, MAX(started_at) m FROM fetch_runs GROUP BY source_id")).rows.map(r => [Number(r.source_id), r.m]));
-  const laatsteItem = new Map((await db.execute("SELECT source_id, MAX(scraped_at) m FROM raw_items GROUP BY source_id")).rows.map(r => [Number(r.source_id), r.m]));
+  // Zelfde leesbeurt als voorheen, met het aantal items van de laatste 90 dagen erbij
+  // (voor de melding 'lang stil' onderaan).
+  const itemRijen = (await db.execute("SELECT source_id, MAX(scraped_at) m, SUM(scraped_at >= datetime('now','-90 days')) n90 FROM raw_items GROUP BY source_id")).rows;
+  const laatsteItem = new Map(itemRijen.map(r => [Number(r.source_id), r.m]));
+  const itemStats = new Map(itemRijen.map(r => [Number(r.source_id), { laatste: r.m, n90: Number(r.n90 || 0) }]));
   const grens = new Date(Date.now() - GEEN_RUNS_DAGEN * 86400000).toISOString().substring(0, 10);
 
   for (const s of sources) {
@@ -167,6 +172,29 @@ async function main() {
     if (health === 'verdacht') { nVerdacht++; regels.push(`- VERDACHT: ${s.name} — ${note}`); }
     if (health === 'dood') { nDood++; regels.push(`- DOOD: ${s.name} — ${note}`); }
     if (health === 'reces') { regels.push(`- RECES: ${s.name} — ${note}`); }
+  }
+
+  // Scrapers die de runner afbrak (2026-10-04). Zo'n run laat alleen een regel met
+  // scraper_file achter en geen regel per bron; de lus hierboven ziet hem dus niet.
+  // Drie fouten of timeouts op rij is een storing, wat de bronrij ook zegt.
+  let falend = [];
+  try {
+    const sinds = new Date(Date.now() - 10 * 86400000).toISOString();
+    const runnerRijen = (await db.execute({ sql: "SELECT scraper_file, status, started_at FROM scrape_runs WHERE started_at >= ? AND scraper_file IS NOT NULL", args: [sinds] })).rows;
+    falend = falendeScrapers(runnerRijen);
+    for (const f of falend) {
+      regels.push(`- SCRAPER FAALT: ${f.scraper} - laatste ${f.aantal} runs eindigden in een fout of timeout (in elk geval sinds ${f.sinds}; er is tien dagen teruggekeken; laatste status ${f.status})`);
+    }
+  } catch (e) { console.error('Bronnenwacht: controle op falende scrapers mislukt:', e.message); }
+
+  // Tier-1-bronnen die eerder leverden en al drie weken niets brengen. Kalendertijd,
+  // dus alleen een melding ter beoordeling; de health van de bron verandert niet.
+  const langStil = langStilleBronnen(sources, itemStats);
+  for (const b of langStil) {
+    regels.push(`- LANG STIL: ${b.name || b.naam} (bron ${b.id}) - laatste item ${b.laatste}, ${b.n90} items in de laatste 90 dagen`);
+  }
+  if (falend.length || langStil.length) {
+    console.log(`Bronnenwacht: ${falend.length} scraper(s) falen herhaald${falend.length ? ` (${falend.map(f => f.scraper).join(', ')})` : ''}, ${langStil.length} tier-1-bron(nen) lang stil.`);
   }
 
   // rapport

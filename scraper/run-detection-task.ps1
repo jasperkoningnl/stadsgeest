@@ -85,5 +85,16 @@ $wegerScanExit = Invoke-NodeStep @('src\prepare-weger-address-scan.cjs', '--outp
 # het rekenen over als de invoer niet is veranderd.
 $koppelExit = Invoke-NodeStep @('src\koppel-organisaties.cjs')
 
+# Exitcode per stap in het log (2026-10-04). De taak eindigde met resultaatcode 1
+# terwijl alle adapters 'ok' waren; zonder deze regel is niet te zien welke stap
+# faalde.
+$stappen = [ordered]@{
+  detectie = $detectionExit; evaluatie = $evaluationExit; retentie = $retentionExit
+  ner = $nerExit; adressen = $adresExit; registeradressen = $registerExit
+  panden = $pandExit; wegerscan = $wegerScanExit; koppeling = $koppelExit
+}
+$samenvatting = ($stappen.GetEnumerator() | ForEach-Object { '{0}={1}' -f $_.Key, $_.Value }) -join ' '
+[System.IO.File]::AppendAllText($logFile, ("[Taak] {0} exitcodes: {1}`n" -f (Get-Date -Format 'yyyy-MM-ddTHH:mm:ss'), $samenvatting), $utf8)
+
 if ($detectionExit -ne 0 -or $evaluationExit -ne 0 -or $retentionExit -ne 0 -or $nerExit -ne 0 -or $adresExit -ne 0 -or $registerExit -ne 0 -or $pandExit -ne 0 -or $wegerScanExit -ne 0 -or $koppelExit -ne 0) { exit 1 }
 exit 0

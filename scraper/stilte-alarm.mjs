@@ -22,6 +22,7 @@
  */
 
 import { createDb } from './src/lib.js';
+import bewaking from './src/bewaking-lib.cjs';
 
 const UREN_ITEMS  = Number(process.env.ALARM_UREN_ITEMS  || 24);
 const UREN_INTAKE = Number(process.env.ALARM_UREN_INTAKE || 30);
@@ -82,6 +83,19 @@ try {
     if (u === null || u > UREN_SCANS) {
       meldingen.push(`ALARM laatste ${naam} is ${u === null ? 'onbekend' : Math.round(u) + ' uur'} geleden (drempel ${UREN_SCANS})`);
     }
+  }
+
+  // Scrapers die de runner drie keer op rij afbrak of zag falen (2026-10-04).
+  // Er komen dan nog wel items binnen uit andere bronnen, dus de controles
+  // hierboven blijven rustig. Leest alleen de runner-regels van tien dagen, via
+  // de index op started_at.
+  const sinds = new Date(Date.now() - 10 * 86400000).toISOString();
+  const runnerRijen = await db.execute({
+    sql: 'SELECT scraper_file, status, started_at FROM scrape_runs WHERE started_at >= ? AND scraper_file IS NOT NULL',
+    args: [sinds],
+  });
+  for (const f of bewaking.falendeScrapers(runnerRijen.rows)) {
+    meldingen.push(`ALARM scraper ${f.scraper} eindigde ${f.aantal} keer op rij in een fout of timeout (in elk geval sinds ${f.sinds})`);
   }
 
   if (meldingen.length === 0) {

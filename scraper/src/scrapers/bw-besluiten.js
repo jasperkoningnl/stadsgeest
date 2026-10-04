@@ -23,7 +23,23 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
 import db from '../db.js';
-import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
+import { saveRawItem, getOrCreateSource, logResult, contentHash } from '../utils.js';
+
+// Aangepast 2026-10-04. De scraper opende bij elke run álle besluitenlijsten van
+// het jaar opnieuw en downloadde al hun pdf's (56 lijsten begin oktober). Dat
+// paste niet meer in de drie minuten van run-browser.js: elke run eindigde als
+// 'timeout'. Een lijst die al is opgeslagen wordt nu overgeslagen vóórdat de
+// detailpagina opengaat. Dat verliest niets: saveRawItem ontdubbelt op titel plus
+// URL, dus een bekende lijst werd toch nooit bijgewerkt. Daarnaast een tijdbudget:
+// na zeven minuten begint hij niet meer aan een nieuwe lijst en pakt de volgende
+// run de rest op. Eén lijst met tientallen pdf's kan minuten duren; run-browser.js
+// geeft deze scraper daarom tien minuten in plaats van drie.
+const BUDGET_MS = Number(process.env.BW_BUDGET_MS || 420000);
+
+/** Titel waaronder een besluitenlijst wordt opgeslagen; ook de sleutel voor ontdubbeling. */
+export function lijstTitel(rij) {
+  return `B&W besluitenlijst: ${rij.titel} — ${rij.datum}`.substring(0, 500);
+}
 
 const YEAR = new Date().getFullYear();
 const SOURCE_URL = `https://amersfoort.raadsinformatie.nl/modules/12/Besluitenlijsten/view?month=all&year=${YEAR}`;
@@ -75,7 +91,13 @@ async function scrape() {
     scrapeFrequency: 'weekly',
   });
 
-  let saved = 0, skipped = 0, errors = 0, gevonden = 0;
+  let saved = 0, skipped = 0, errors = 0, gevonden = 0, uitgesteld = 0;
+  const gestart = Date.now();
+  // Eén leesbeurt op de bronindex (idx_raw_items_dedup), geen query per lijst.
+  const bekend = new Set(
+    (await db.execute({ sql: 'SELECT content_hash FROM raw_items WHERE source_id = ?', args: [sourceId] }))
+      .rows.map((r) => String(r.content_hash)),
+  );
   const overslagenPdfs = [];  // signalering: welke PDF's zijn te groot
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bw-pdf-'));
 
@@ -116,6 +138,15 @@ async function scrape() {
 
     // ---- Stap 2 + 3: per besluitenlijst detail + documenten ----
     for (const rij of rijen) {
+      // Al opgeslagen: niet opnieuw openen en downloaden.
+      if (bekend.has(contentHash(`${lijstTitel(rij)}${rij.href}`))) {
+        skipped++;
+        continue;
+      }
+      if (Date.now() - gestart > BUDGET_MS) {
+        uitgesteld++;
+        continue;
+      }
       try {
         await pauze(PAUZE_MS);
         console.log(`[B&W] Detail: ${rij.titel} (${rij.datum})`);
@@ -199,7 +230,7 @@ async function scrape() {
         const result = await saveRawItem(db, {
           sourceId,
           externalUrl: rij.href,
-          title: `B&W besluitenlijst: ${rij.titel} — ${rij.datum}`.substring(0, 500),
+          title: lijstTitel(rij),
           content: content.substring(0, 500000),
           summary: detailTekst.substring(0, 500),
           publishedAt: rij.datum || null,
@@ -246,7 +277,14 @@ async function scrape() {
     }
   }
 
+  if (uitgesteld > 0) {
+    console.warn(`[B&W] Tijdbudget van ${Math.round(BUDGET_MS / 1000)} s bereikt: ${uitgesteld} nieuwe lijst(en) uitgesteld tot de volgende run.`);
+  }
   await logResult(db, sourceId, 'B&W besluitenlijsten gemeente Amersfoort', saved, skipped, errors, gevonden);
 }
 
-scrape().catch(console.error);
+// Direct aangeroepen? Dan draaien. (Zo kan een test lijstTitel importeren zonder
+// dat er een browser start.)
+if (process.argv[1] && process.argv[1].endsWith('bw-besluiten.js')) {
+  scrape().catch((e) => { console.error(e); process.exitCode = 1; });
+}

@@ -51,7 +51,8 @@ beschreven augustus-signalen opgeleverd. De zorgparser scheidt organisatienamen
 van persoons- en bestandsvelden; 178 verkeerd benoemde importorganisaties zijn via
 KVK-identiteitsregels hersteld. De iBabs-keten heeft een begrensde OCR-naloop
 voor scans zonder tekstlaag. De bronnenwacht meldt na herstel en gemotiveerde
-uitschakelingen nul verdachte en nul dode bronnen.
+uitschakelingen twee dode bronnen en sinds 4 oktober ook herhaald falende
+scrapers en lang stille tier-1-bronnen.
 
 Documenten boven 200.000 tekens hebben sinds 3 oktober deelitems (`#deel=N`,
 tabel `raw_item_parts`): verwerkt en historisch; tel ze niet als losse stukken.
