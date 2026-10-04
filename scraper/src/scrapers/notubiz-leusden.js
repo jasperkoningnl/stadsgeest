@@ -23,7 +23,7 @@
 // run; de rest volgt bij de volgende run (drie keer per dag).
 import db from '../db.js';
 import { getOrCreateSource, logResult, makeSummary, contentHash, naarPublicatieIso } from '../utils.js';
-import { attribuut, startdatum, verzamelDocumenten, itemTitel, isHistorisch } from '../notubiz-lib.js';
+import { attribuut, startdatum, verzamelDocumenten, itemTitel, isHistorisch, bekendeDocumentIds } from '../notubiz-lib.js';
 
 const API = 'https://api.notubiz.nl';
 const ORGANISATIE = 2090;
@@ -80,6 +80,12 @@ async function scrape() {
       .catch((e) => console.error('notubiz-leusden: tier/gemeente niet gezet:', e.message));
   }
 
+  // Eén leesbeurt voor alle bekende documenten (2026-10-04). Voorheen een
+  // LIKE-zoekvraag per document; die las elke keer de hele tabel raw_items.
+  const bekendeIds = bekendeDocumentIds(
+    (await db.execute("SELECT external_url FROM raw_items WHERE external_url LIKE '%/document/%'")).rows.map((r) => r.external_url),
+  );
+
   const lijst = await json(`/events?organisation_id=${ORGANISATIE}&date_from=${datumPlus(-DAGEN_TERUG)}%2000:00:00&date_to=${datumPlus(DAGEN_VOORUIT)}%2023:59:59`);
   const events = (lijst.events || []).filter((e) => !e.canceled && !e.inactive && e.permission_group === 'public');
   const vergaderingen = [];
@@ -103,8 +109,8 @@ async function scrape() {
     const docs = verzamelDocumenten(meeting);
     gevonden += docs.length;
     for (const d of docs) {
-      const bestaat = await db.execute({ sql: 'SELECT id FROM raw_items WHERE external_url LIKE ? LIMIT 1', args: [`%notubiz.nl/document/${d.id}/%`] });
-      if (bestaat.rows.length) { bekend++; continue; }
+      const bestaat = bekendeIds.has(String(d.id));
+      if (bestaat) { bekend++; continue; }
       if (!binnenBudget() || pdfs >= MAX_PDF) { uitgesteld++; continue; }
       pdfs++;
       let pdf = { status: 'overgeslagen', tekst: null };
@@ -125,6 +131,7 @@ async function scrape() {
             naarPublicatieIso(d.publicatiedatum || datum), pdf.tekst ? `${kop}\n\n${pdf.tekst}`.substring(0, 200000) : null,
             pdf.tekst ? new Date().toISOString() : null, historisch ? 1 : 0, historisch ? 1 : 0],
         });
+        bekendeIds.add(String(d.id));
         nieuw++;
       } catch (e) {
         if (String(e.message).includes('UNIQUE')) bekend++; else { fouten++; console.error(`notubiz-leusden: ${d.id}: ${e.message}`); }

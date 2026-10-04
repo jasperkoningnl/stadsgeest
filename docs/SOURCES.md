@@ -474,8 +474,7 @@ niets meer; agenda's, raadsvoorstellen en bijlagen kwamen niet binnen.
   Amersfoort. Elk document één raw_item; vergaderingen van langer dan 7 dagen
   geleden zijn achtergrond.
 - Ontdubbeling op Notubiz-document-id over alle bronnen, met één leesbeurt per
-  run (`bekendeDocumentIds` in `notubiz-lib.js`). `notubiz-leusden.js` doet nog
-  een `LIKE`-zoekvraag per document; die leest telkens de hele tabel.
+  run (`bekendeDocumentIds` in `notubiz-lib.js`). `notubiz-leusden.js` gebruikt sinds 4 oktober dezelfde leesbeurt; tot dan deed die een `LIKE`-zoekvraag per document.
 - Hoogstens 20 documenten en 48 seconden per run, 300 pagina's per pdf, tekst
   tot 200.000 tekens. Gemeten bij de eerste run: 34 vergaderingen, 329
   documenten, 5 al bekend.
