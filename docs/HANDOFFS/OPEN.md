@@ -16,7 +16,7 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 - Staan `WEEKMAIL_ONTVANGERS`, `CRON_SECRET` en `WACHTWOORD_BELEIDSADVISEUR` op Vercel? Vanuit de repo niet te controleren (10-02, 10-03).
 - Dossiers: additieve velden voor baan (intern/openbaar) en open vraag/wederhoor (10-01).
 - Dossiergraaf: niet-gekoppelde organisatienamen als eigen knoop, of eerst de KG verrijken (10-01).
-- Clusteren op zaak- en documentkenmerk: steekproef van de droge meting beoordelen (10-05).
+- Clusteren op zaakkenmerk: steekproef beoordelen en beslissen wat er gebeurt als een nieuw stuk bij een al weggezette zaak hoort (10-05).
 
 ## Keten en bewaking
 
@@ -28,7 +28,7 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 - `Kon scrape_runs niet bijwerken ... fetch failed` in het errorlog van `scrape-dagelijks`; oorzaak onbekend (10-03).
 - De tests van de ANBI-bestuursmonitor schrijven bij elke testrun in de echte snapshotmap (10-04).
 - Wekelijks archiefonderzoek mislukte op 30 september (`fetch failed`); geen herkansing ingebouwd.
-- De weger slaat dagen over en meldt dat nergens.
+- De weger slaat dagen over als het budget op is; dat wordt nergens gemeld.
 
 ## Bronnen en tekst
 
