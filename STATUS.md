@@ -3,7 +3,7 @@
 De actuele projecttoestand staat in [`docs/CURRENT.md`](docs/CURRENT.md).
 
 Lees bij een nieuwe taak eerst [`AGENTS.md`](AGENTS.md) en
-[`docs/INDEX.md`](docs/INDEX.md). Het technische maandlog staat onder
+[`docs/INDEX.md`](docs/INDEX.md). Het technische weeklog staat onder
 [`docs/HANDOFFS/`](docs/HANDOFFS/); lees dit alleen wanneer recente uitvoering
 of een overdracht relevant is.
 

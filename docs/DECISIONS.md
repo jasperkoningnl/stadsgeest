@@ -397,3 +397,19 @@ kwartier (besluit Jasper): `minimumHours` 144 in `detection-run.cjs`, binnen de
 dagelijkse detectietaak. De Windows-taak `Stadsgeest NDW` is uitgeschakeld, niet
 verwijderd; `Enable-ScheduledTask -TaskName 'Stadsgeest NDW'` zet hem terug,
 samen met `minimumHours` 0.2.
+
+## 2026-10-05 - Stand gegenereerd, overdrachten per week
+
+`docs/CURRENT.md` bevat alleen nog vaste tekst. Tellingen staan in
+`docs/STAND.md`, dat `scraper/src/stand.cjs` (`npm run stand`) uit Turso, de
+taakplanner en PM2 genereert. Aanleiding: in `CURRENT.md` stonden op 4 oktober
+drie cijfers die niet meer klopten (golden set, taakresultaat, dode bronnen).
+Het bestand wordt met de hand vernieuwd, niet door een geplande taak; de datum
+staat bovenaan.
+
+Overdrachten staan per ISO-week in `docs/HANDOFFS/JJJJ-Www.md` in plaats van per
+maand (afwijking van besluit 0001): het maandbestand van oktober telde na vier
+dagen 379 regels. `docs/HANDOFFS/OPEN.md` is de bijgehouden lijst van open
+punten. `npm run docs:check` bewaakt de bestandsnamen.
+
+Uitgevoerde eenmalige scripts staan in `scraper/eenmalig/`.

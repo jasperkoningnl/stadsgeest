@@ -6,7 +6,7 @@
 // waar de metadata als "tekst" is opgeslagen (korter dan 500 tekens) gaan mee.
 // Bron 95 is de oude, uitgeschakelde rechtspraakbron; die items zijn historisch
 // en krijgen tekst voor het archief en de entiteitenscan. Er ontstaan geen
-// nieuwe signalen. Zie docs/HANDOFFS/2026-10.md.
+// nieuwe signalen. Zie docs/HANDOFFS/2026-W40.md.
 //
 // Gebruik (vanuit scraper/):
 //   node backfill-rechtspraak-tekst-20261003.mjs              droog: haalt op, schrijft niets
@@ -16,10 +16,10 @@ import dotenv from 'dotenv';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { haalRechtspraakTekst } from './src/rechtspraak-fulltext.mjs';
+import { haalRechtspraakTekst } from '../src/rechtspraak-fulltext.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 const arg = (naam, std) => { const i = process.argv.indexOf(naam); return i > -1 ? process.argv[i + 1] : std; };
 const APPLY = process.argv.includes('--apply');
 const LIMIT = Number(arg('--limit', '0'));
@@ -61,7 +61,7 @@ for (const r of werk) {
 }
 
 console.log('per bron:', JSON.stringify(tel, null, 1));
-const uitMap = path.join(__dirname, 'tmp', 'notubiz-proef');
+const uitMap = path.join(__dirname, '..', 'tmp', 'notubiz-proef');
 fs.mkdirSync(uitMap, { recursive: true });
 const bestand = path.join(uitMap, `rechtspraak-inhaalslag-${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
 fs.writeFileSync(bestand, JSON.stringify({ apply: APPLY, tel, verslag }, null, 1));

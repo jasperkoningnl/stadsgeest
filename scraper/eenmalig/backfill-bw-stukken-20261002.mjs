@@ -2,7 +2,7 @@
 // 1 september als URL-duplicaat zijn weggefilterd, opnieuw aanbieden aan de intake.
 //
 // De stukken hielden de URL van de besluitenlijst en zijn daardoor nooit een
-// signaal geworden (zie docs/HANDOFFS/2026-10.md). Dit script geeft elk stuk een
+// signaal geworden (zie docs/HANDOFFS/2026-W40.md). Dit script geeft elk stuk een
 // eigen URL en zet is_processed terug op 0. Exacte dubbelen (zelfde lijst, titel
 // en tekst) blijven staan; alleen het oudste exemplaar gaat mee.
 //
@@ -13,10 +13,10 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import crypto from 'crypto';
-import { stukUrl, STUK_KENMERK } from './src/omnibus-split-lib.mjs';
+import { stukUrl, STUK_KENMERK } from '../src/omnibus-split-lib.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 const APPLY = process.argv.includes('--apply');
 const VANAF = '2026-09-01';
 const BRON_ID = 131;

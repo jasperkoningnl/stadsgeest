@@ -11,11 +11,11 @@
     "test": "npm --prefix scraper test",
     "test:dashboard": "node --test \"src/lib/dashboard/__tests__/*.test.ts\"",
     "docs:check": "node scripts/check-docs.mjs",
+    "stand": "node scraper/src/stand.cjs",
     "check": "npm run lint && npm test && npm run test:dashboard && npm run build"
   },
   "dependencies": {
     "@libsql/client": "^0.17.4",
-    "@portabletext/react": "^6.2.0",
     "next": "16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",

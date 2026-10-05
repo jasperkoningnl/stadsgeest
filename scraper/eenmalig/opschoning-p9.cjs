@@ -4,7 +4,7 @@
 // Alles gelogd naar opschoning-2026-08-02.md (terugdraaibaar).
 const path = require('path');
 const fs = require('fs');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { createClient } = require('@libsql/client');
 const db = createClient({ url: process.env.TURSO_URL, authToken: process.env.TURSO_AUTH_TOKEN });
 
@@ -46,6 +46,6 @@ const STRIP_ALL = [98, 31, 35, 33, 197, 41, 32]; // discarded: alles los
   }
   const vrij = (await db.execute("SELECT COUNT(*) n FROM raw_items WHERE is_processed=0")).rows[0].n;
   log.push(`\n---\nTotaal losgekoppeld: ${totLos}. Items nu op is_processed=0 (klaar voor herintake): ${vrij}.`);
-  fs.writeFileSync(path.join(__dirname, '..', 'opschoning-2026-08-02.md'), log.join('\n') + '\n', 'utf8');
+  fs.writeFileSync(path.join(__dirname, '..', '..', 'docs', 'HISTORY', 'opschoning-2026-08-02.md'), log.join('\n') + '\n', 'utf8');
   console.log(`Klaar. ${totLos} items losgekoppeld over ${all.length} signalen. ${vrij} items vrijgegeven voor herintake. Log: opschoning-2026-08-02.md`);
 })().catch(e => { console.error(e); process.exit(1); });

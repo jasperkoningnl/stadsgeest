@@ -8,10 +8,10 @@
 //
 // Daarna wordt full_text van de betrokken items opnieuw opgebouwd, inclusief
 // deelitems. Gebruik (vanuit scraper/): node herlees-ibabs-bijlagen-20261003.mjs [--apply]
-import db from './src/db.js';
-import { isLeesbareOcr, ocrPdf } from './src/ibabs-ocr-lib.js';
-import { herbouwEnMarkeer } from './src/scrapers/ibabs-ocr.js';
-import { herkansBijVerbrokenVerbinding } from './src/deelitems.mjs';
+import db from '../src/db.js';
+import { isLeesbareOcr, ocrPdf } from '../src/ibabs-ocr-lib.js';
+import { herbouwEnMarkeer } from '../src/scrapers/ibabs-ocr.js';
+import { herkansBijVerbrokenVerbinding } from '../src/deelitems.mjs';
 
 const APPLY = process.argv.includes('--apply');
 const UA = 'Stadsgeest033/1.0 (+https://stadsgeest.nl; redactie@nieuwsplein33.nl)';

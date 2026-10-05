@@ -7,7 +7,7 @@
 // 600 items per run-all en vier runs per dag is dat rond 30 mln reads per dag,
 // het grootste deel van het Turso-verbruik. Gemeten op 3 oktober: 11 mln reads
 // rond de run-all van 21.30 uur. Zie docs/DATABASE-LEZEN.md.
-import db from './src/db.js';
+import db from '../src/db.js';
 
 for (const sql of [
   'CREATE INDEX IF NOT EXISTS idx_raw_items_url ON raw_items(external_url)',

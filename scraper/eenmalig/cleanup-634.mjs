@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const TURSO_URL = process.env.TURSO_URL.replace('libsql://', 'https://');
 const TURSO_TOKEN = process.env.TURSO_AUTH_TOKEN;

@@ -17,7 +17,7 @@
  * Zonder --doen rapporteert hij alleen wat hij zou wijzigen.
  */
 
-import { createDb } from './src/lib.js';
+import { createDb } from '../src/lib.js';
 
 const db = createDb();
 const DOEN = process.argv.includes('--doen');

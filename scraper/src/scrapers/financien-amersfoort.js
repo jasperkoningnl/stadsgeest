@@ -36,7 +36,7 @@ async function scrape() {
     if (!href) return;
     const url = href.startsWith('http') ? href : `${BASE_URL}/${href.replace(/^\//, '')}`;
     // Bestandsnaam plus linktekst (sinds 2026-10-03). Bestaande items zijn met
-    // migrate-financien-titels-20261003.mjs naar dezelfde vorm omgezet; wijzig
+    // eenmalig/migrate-financien-titels-20261003.mjs naar dezelfde vorm omgezet; wijzig
     // pdfTitel niet zonder die items opnieuw om te zetten, anders ontstaan dubbelen.
     const title = pdfTitel(href, $(el).text());
     if (!items.find(i => i.url === url)) {

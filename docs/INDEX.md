@@ -1,12 +1,13 @@
 # Documentatiekaart
 
 **Doel:** minimale, betrouwbare leesroute voor Stadsgeest-taken.
-**Status:** gezaghebbend; bijgewerkt 2026-09-13.
+**Status:** gezaghebbend; bijgewerkt 2026-10-05.
 **Lees wanneer:** altijd, direct na `AGENTS.md`.
 
 ## Standaard
 
-Lees `CURRENT.md`. Kies daarna alleen de route die bij de taak past:
+Lees `CURRENT.md` (vaste tekst) en voor cijfers `STAND.md` (gegenereerd). Kies
+daarna alleen de route die bij de taak past:
 
 | Taak | Lees daarnaast |
 |---|---|
@@ -30,13 +31,15 @@ Lees `CURRENT.md`. Kies daarna alleen de route die bij de taak past:
 
 - `STATUS.md`: alleen een verwijzer.
 - `LOGBOEK.md`: productinhoud voor het dashboard.
-- `HANDOFFS/`: alleen voor recente uitvoering of overdracht.
+- `HANDOFFS/`: weeklogs, alleen voor recente uitvoering of overdracht. Open
+  punten staan in `HANDOFFS/OPEN.md`.
+- `scraper/eenmalig/`: uitgevoerde inhaalslagen, migraties en controlescripts.
 - `HISTORY/`, oude weekreviews, rapporten, exports en ontwerpen.
 - Grote bronbestanden of onderzoeksnotities, tenzij de taak ze noemt.
 
 ## Eén gezaghebbende plek
 
-Actuele toestand staat alleen in `CURRENT.md`; duurzame projectuitleg in
+Actuele toestand staat alleen in `CURRENT.md`, tellingen in `STAND.md`; duurzame projectuitleg in
 `PROJECT-OVERVIEW.md`; techniek in `ARCHITECTURE.md`; bronbeleid in `SOURCES.md`;
 uitvoering in `RUNBOOKS/`; leer- en privacycontract in `EDITORIAL-LEARNING.md`;
 roadmap in `ROADMAP.md`; actieve scope in `PHASES/`;

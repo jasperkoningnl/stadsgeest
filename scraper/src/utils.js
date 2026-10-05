@@ -63,7 +63,7 @@ export async function saveRawItem(db, { sourceId, externalUrl, title, content, s
         try {
           await db.execute({
             // source_id erbij: zo gebruikt de zoekvraag idx_raw_items_dedup in
-            // plaats van de hele tabel te lezen (zie migrate-indexen-20261003.mjs).
+            // plaats van de hele tabel te lezen (zie eenmalig/migrate-indexen-20261003.mjs).
             sql: `UPDATE raw_items SET published_at = ? WHERE source_id = ? AND content_hash = ? AND published_at IS NULL`,
             args: [pub, sourceId, hash],
           });

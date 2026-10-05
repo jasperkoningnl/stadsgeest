@@ -1,4 +1,4 @@
-import db from './src/db.js';
+import db from '../src/db.js';
 
 // Alle B&W items met contentlengte
 const items = await db.execute(`

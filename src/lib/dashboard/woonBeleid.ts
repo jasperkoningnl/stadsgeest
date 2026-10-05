@@ -4,7 +4,7 @@
 // scrape. Elke regel noemt bron en datum, zodat de beleidsadviseur kan zien
 // waar een getal vandaan komt en het kan laten corrigeren.
 //
-// Gecontroleerd op 2 oktober 2026 (zie docs/HANDOFFS/2026-10.md).
+// Gecontroleerd op 2 oktober 2026 (zie docs/HANDOFFS/2026-W40.md).
 
 export interface Beleidsdoel {
   id: string

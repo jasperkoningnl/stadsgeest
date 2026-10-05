@@ -7,9 +7,9 @@
 // Ook de deelitems en signalen die de oude titel droegen gaan mee.
 //
 // Gebruik (vanuit scraper/): node migrate-financien-titels-20261003.mjs [--apply]
-import db from './src/db.js';
-import { contentHash } from './src/utils.js';
-import { pdfTitel } from './src/financien-lib.mjs';
+import db from '../src/db.js';
+import { contentHash } from '../src/utils.js';
+import { pdfTitel } from '../src/financien-lib.mjs';
 
 const APPLY = process.argv.includes('--apply');
 const items = (await db.execute(`SELECT id, title, external_url FROM raw_items

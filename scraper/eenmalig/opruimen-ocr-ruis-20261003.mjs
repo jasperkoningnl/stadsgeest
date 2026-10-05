@@ -9,9 +9,9 @@
 //
 // Gebruik (vanuit scraper/): node opruimen-ocr-ruis-20261003.mjs            droog
 //                            node opruimen-ocr-ruis-20261003.mjs --apply
-import db from './src/db.js';
-import { aandeelGewoneWoorden, isLeesbareOcr, OCR_RUIS_MELDING } from './src/ibabs-ocr-lib.js';
-import { herbouwEnMarkeer } from './src/scrapers/ibabs-ocr.js';
+import db from '../src/db.js';
+import { aandeelGewoneWoorden, isLeesbareOcr, OCR_RUIS_MELDING } from '../src/ibabs-ocr-lib.js';
+import { herbouwEnMarkeer } from '../src/scrapers/ibabs-ocr.js';
 
 const APPLY = process.argv.includes('--apply');
 const rijen = (await db.execute("SELECT id, raw_item_id, tekens, tekst FROM raw_item_attachments WHERE tekstbron = 'ocr' AND status = 'ok' ORDER BY id")).rows;

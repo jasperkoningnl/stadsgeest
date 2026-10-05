@@ -8,6 +8,8 @@ const required = [
   'STATUS.md',
   'docs/INDEX.md',
   'docs/CURRENT.md',
+  'docs/STAND.md',
+  'docs/HANDOFFS/OPEN.md',
   'docs/PROJECT-OVERVIEW.md',
   'docs/ARCHITECTURE.md',
   'docs/SOURCES.md',
@@ -27,6 +29,7 @@ const budgets = new Map([
   ['AGENTS.md', 450],
   ['docs/INDEX.md', 400],
   ['docs/CURRENT.md', 800],
+  ['docs/HANDOFFS/OPEN.md', 700],
 ])
 
 const failures = []
@@ -41,6 +44,16 @@ for (const [relative, maximum] of budgets) {
   if (!fs.existsSync(absolute)) continue
   const count = fs.readFileSync(absolute, 'utf8').trim().split(/\s+/).filter(Boolean).length
   if (count > maximum) failures.push(`${relative} is ${count} woorden; maximum is ${maximum}.`)
+}
+
+// Overdrachten staan per ISO-week; open punten in OPEN.md. Geen maandbestanden meer.
+const handoffDir = path.join(root, 'docs', 'HANDOFFS')
+if (fs.existsSync(handoffDir)) {
+  for (const name of fs.readdirSync(handoffDir)) {
+    if (name !== 'OPEN.md' && !/^\d{4}-W\d{2}\.md$/.test(name)) {
+      failures.push(`docs/HANDOFFS/${name}: verwacht OPEN.md of JJJJ-Www.md (ISO-week).`)
+    }
+  }
 }
 
 function markdownFiles(directory) {

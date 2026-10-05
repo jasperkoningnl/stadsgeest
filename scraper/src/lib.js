@@ -96,7 +96,7 @@ export async function insertItem(db, { source_id, title, content, summary, exter
   try {
     // Twee losse zoekvragen die elk een index gebruiken (idx_raw_items_url en
     // idx_raw_items_source_title). De eerdere vorm met OR las bij elk item de
-    // hele tabel: rond 30 mln Turso-reads per dag. Zie migrate-indexen-20261003.mjs.
+    // hele tabel: rond 30 mln Turso-reads per dag. Zie eenmalig/migrate-indexen-20261003.mjs.
     const existing = await db.execute({
       sql: `SELECT id, published_at FROM raw_items WHERE external_url = ?
             UNION

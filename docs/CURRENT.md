@@ -1,7 +1,8 @@
 # Actuele toestand — Stadsgeest
 
 **Doel:** compacte herschrijfbare momentopname.
-**Status:** actueel per 2 oktober 2026.
+**Status:** vaste tekst, bijgewerkt 5 oktober 2026. Tellingen staan
+in `STAND.md` (`npm run stand`).
 **Lees wanneer:** bij iedere nieuwe taak. Historische details staan elders.
 
 ## Productie
@@ -10,8 +11,7 @@ Stadsgeest is de lokale journalistieke signalerings- en tipmachine voor
 Amersfoort en Leusden. De keten loopt van publieke bronnen via bronrecords,
 events, entiteiten, signalen en de weger naar tips, dossiers en het
 redactiedashboard op `stadsgeest.nl/nieuwsplein33`. Vercel host het dashboard;
-Jaspers Windows-notebook voert de operationele keten uit. Het dashboard bevat
-22 dossiers met ruim 300 feiten. Sinds 3 oktober: één beslisflow met toetsen,
+Jaspers Windows-notebook voert de operationele keten uit. Sinds 3 oktober: één beslisflow met toetsen,
 bulkafsluiting van oude wachtrijtips, verkenner via entiteiten en
 Beheer > Redactie. Sinds 2 oktober staat op `/beleidsadviseur` een apart
 woondashboard voor de beleidsadviseur wonen van de gemeente Amersfoort, achter
@@ -28,8 +28,8 @@ officiële of bevestigde feiten.
 
 `Stadsgeest Detection` start dagelijks om 06.15 uur; NDW draait daarin wekelijks mee. Na de dagrun volgen de geplande fase-5-maandevaluatie en
 privacyretentie. Adapter-, evaluatie- en retentiefouten zijn geïsoleerd en
-idempotente invoer levert geen dubbele uitkomsten op. Beide taken eindigen
-normaal met resultaatcode 0; dode proceslocks worden opgeruimd. De gecombineerde
+idempotente invoer levert geen dubbele uitkomsten op. Het laatste resultaat per
+taak staat in `STAND.md`; dode proceslocks worden opgeruimd. De gecombineerde
 detectierun heeft een heaplimiet van 1,5 GB.
 
 De supertip-run draait donderdag om 09.00 uur en schrijft hoogstens één tip met
@@ -41,16 +41,15 @@ Alleen deze run mag het veld zetten.
 Fase 0 en fase 2 zijn gesloten en groen. Fase 1 heeft operationele baselines
 voor ANBI, GLEIF en OpenStreetMap; herhaalruns leverden nul wijzigingen en nul
 events op. De BAG-backfill koppelde 79 van 82 locaties exact en legde drie
-niet-eenduidige gevallen vast. De handmatige organisatie-golden-set staat nog
-op 0 van 200 beoordelingen.
+niet-eenduidige gevallen vast. De handmatige organisatie-golden-set vereist
+200 beoordelingen en 98% precisie; de stand staat in `STAND.md`.
 
 Fase 3 en 4 zijn productieactief. De eerdere baseline-herhaalcontroles zagen
 uitsluitend ongewijzigde records en nul events; R5 heeft inmiddels de hieronder
 beschreven augustus-signalen opgeleverd. De zorgparser scheidt organisatienamen
 van persoons- en bestandsvelden; 178 verkeerd benoemde importorganisaties zijn via
 KVK-identiteitsregels hersteld. De iBabs-keten heeft een begrensde OCR-naloop
-voor scans zonder tekstlaag. De bronnenwacht meldt na herstel en gemotiveerde
-uitschakelingen twee dode bronnen en sinds 4 oktober ook herhaald falende
+voor scans zonder tekstlaag. De bronnenwacht meldt dode bronnen en sinds 4 oktober ook herhaald falende
 scrapers en lang stille tier-1-bronnen.
 
 Documenten boven 200.000 tekens hebben sinds 3 oktober deelitems (`#deel=N`,

@@ -2,7 +2,7 @@
 // krijgen alsnog hun bewijsitem.
 //
 // Door een gedeelde hash werd per run alleen het eerste bewijsitem opgeslagen
-// (zie docs/HANDOFFS/2026-10.md). Dit script loopt de open signalen (new en
+// (zie docs/HANDOFFS/2026-W40.md). Dit script loopt de open signalen (new en
 // watching) zonder document na en legt het bewijsitem vast via dezelfde functie
 // als de detectierun. Er komen geen nieuwe signalen bij: bewijsitems staan
 // meteen op verwerkt.
@@ -10,8 +10,8 @@
 // Gebruik: node backfill-bewijsitems-20261002.cjs            (droog, wijzigt niets)
 //          node backfill-bewijsitems-20261002.cjs --apply
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
-const { DetectionEngine, createDb } = require('./src/kg/detection-engine.cjs');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+const { DetectionEngine, createDb } = require('../src/kg/detection-engine.cjs');
 
 const APPLY = process.argv.includes('--apply');
 

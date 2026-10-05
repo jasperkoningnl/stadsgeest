@@ -13,7 +13,7 @@
 //   die tabel leeg laat (gecontroleerd op 2 oktober 2026).
 //
 // Tabelnummers en veldnamen zijn op 2 oktober 2026 gecontroleerd tegen de
-// catalogus; de controlescripts staan beschreven in docs/HANDOFFS/2026-10.md.
+// catalogus; de controlescripts staan beschreven in docs/HANDOFFS/2026-W40.md.
 import { unstable_cache } from 'next/cache'
 
 const GEMEENTE = 'GM0307'

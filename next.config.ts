@@ -15,11 +15,6 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/nieuwsplein33/**': ['./LOGBOEK.md'],
   },
-  images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: 'cdn.sanity.io' },
-    ],
-  },
   async headers() {
     return [
       {

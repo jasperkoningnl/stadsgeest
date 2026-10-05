@@ -1,6 +1,6 @@
 // check-notubiz-browser.mjs — test Notubiz browser-scrape
 // Draai vanuit scraper/: node check-notubiz-browser.mjs
-import { withBrowser } from './src/browser.js';
+import { withBrowser } from '../src/browser.js';
 
 const result = await withBrowser(async (page) => {
   // Vang responses op om networkidle langer actief te houden

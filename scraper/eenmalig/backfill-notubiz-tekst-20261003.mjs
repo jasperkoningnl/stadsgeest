@@ -5,7 +5,7 @@
 // (Cloudflare), waardoor fetch-fulltext.js deze stukken als mislukt afvinkte.
 // De nachtjob gebruikt sinds vandaag de pdf-route en zou de achterstand binnen
 // een week zelf inlopen; dit script doet dat in één keer en telt wat het vindt.
-// Zie docs/HANDOFFS/2026-10.md.
+// Zie docs/HANDOFFS/2026-W40.md.
 //
 // Stukken die al een signaal hebben krijgen alleen tekst; er ontstaan geen
 // nieuwe signalen. entities_scanned_at gaat leeg, zodat de entiteitenscan de
@@ -21,10 +21,10 @@ import dotenv from 'dotenv';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { haalNotubizTekst, notubizDocumentParts } from './src/notubiz-fulltext.mjs';
+import { haalNotubizTekst, notubizDocumentParts } from '../src/notubiz-fulltext.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 const arg = (naam, std) => { const i = process.argv.indexOf(naam); return i > -1 ? process.argv[i + 1] : std; };
 const APPLY = process.argv.includes('--apply');
 const MET_MODULES = process.argv.includes('--met-modules');
@@ -73,7 +73,7 @@ for (const r of werk) {
 }
 
 console.log('per bron:', JSON.stringify(tel, null, 1));
-const uitMap = path.join(__dirname, 'tmp', 'notubiz-proef');
+const uitMap = path.join(__dirname, '..', 'tmp', 'notubiz-proef');
 fs.mkdirSync(uitMap, { recursive: true });
 const bestand = path.join(uitMap, `inhaalslag-${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
 fs.writeFileSync(bestand, JSON.stringify({ apply: APPLY, tel, verslag }, null, 1));

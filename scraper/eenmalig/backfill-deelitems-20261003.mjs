@@ -11,11 +11,11 @@
 // Gebruik (vanuit scraper/, na migrate-raw-item-parts.mjs):
 //   node backfill-deelitems-20261003.mjs            droog: telt, schrijft niets
 //   node backfill-deelitems-20261003.mjs --apply    opties: --alleen woo | pdf
-import db from './src/db.js';
-import { bouwFullText } from './src/ibabs-ocr-lib.js';
-import { verdeelRest, HOOFDITEM_TEKENS } from './src/deelitems-lib.mjs';
-import { werkDeelitemsBij } from './src/deelitems.mjs';
-import { haalNotubizTekst, isNotubizUrl, pdfBufferNaarTekst } from './src/notubiz-fulltext.mjs';
+import db from '../src/db.js';
+import { bouwFullText } from '../src/ibabs-ocr-lib.js';
+import { verdeelRest, HOOFDITEM_TEKENS } from '../src/deelitems-lib.mjs';
+import { werkDeelitemsBij } from '../src/deelitems.mjs';
+import { haalNotubizTekst, isNotubizUrl, pdfBufferNaarTekst } from '../src/notubiz-fulltext.mjs';
 
 const APPLY = process.argv.includes('--apply');
 const i = process.argv.indexOf('--alleen');

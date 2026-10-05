@@ -13,10 +13,10 @@ import {
   entiteitMatchToegestaan,
   normalizeTitle,
   woordMatchScore,
-} from './src/intake-matching.mjs';
+} from '../src/intake-matching.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const db = createClient({
   url: process.env.TURSO_URL,
