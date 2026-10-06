@@ -16,6 +16,8 @@
 //   --drempel 40000          ondergrens in tekens
 //   --max 200000             grootste leeseenheid in tekens
 //   --sinds JJJJ-MM-DD       bij --kandidaten: binnengekomen sinds
+//   --alles                   toon ook eenheden waarvan dezelfde tekstversie al
+//                            in document_uittreksels staat
 //   --zonder-uittreksel <map> bij --kandidaten: sla over wat daar al een
 //                            uittreksel heeft
 //   --uit <map>              bij --exporteer; standaard scraper/tmp/documentlezer/teksten
@@ -108,7 +110,7 @@ function heeftUittreksel(map, sleutel) {
   return fs.existsSync(path.join(map, `${sleutel}.json`)) || fs.existsSync(path.join(map, `${sleutel}-d1.json`));
 }
 
-async function kandidaten(db, drempel, sinds, zonder) {
+async function kandidaten(db, drempel, sinds, zonder, alles = false) {
   const { items, bijlagen } = await laadOverzicht(db);
   const rijen = [];
   for (const r of items) {
@@ -116,6 +118,7 @@ async function kandidaten(db, drempel, sinds, zonder) {
     if (lengte <= drempel || (sinds && String(r.scraped_at) < sinds)) continue;
     rijen.push({
       sleutel: `item-${r.id}`, soort: Number(r.is_deel) ? 'deelitem' : 'item', bron: `${r.source_id} ${r.bron}`,
+      sleutelsoort: 'item', sleutelid: Number(r.id),
       tekens: lengte, extra: Number(r.delen) ? `+${r.delen} deelitems` : '', datum: String(r.scraped_at).slice(0, 10),
       signaal: Number(r.is_deel) ? '' : (Number(r.signalen) > 0 ? 'signaal' : 'geen signaal'), titel: r.title,
     });
@@ -124,17 +127,40 @@ async function kandidaten(db, drempel, sinds, zonder) {
     if (Number(a.t) <= drempel || (sinds && String(a.opgehaald_at) < sinds)) continue;
     rijen.push({
       sleutel: `bijlage-${a.id}`, soort: 'bijlage', bron: `${a.source_id} ${a.bron}`, tekens: Number(a.t),
+      sleutelsoort: 'bijlage', sleutelid: Number(a.id),
       extra: a.paginas ? `${a.paginas} blz.` : '', datum: String(a.opgehaald_at).slice(0, 10), signaal: '',
       titel: `${a.item_titel} — ${a.titel}`,
     });
   }
-  const over = zonder ? rijen.filter((r) => !heeftUittreksel(zonder, r.sleutel)) : rijen;
+  const heeftTabel = !alles && (await db.execute(
+    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='document_uittreksels'"
+  )).rows.length > 0;
+  const over = [];
+  let alGelezen = 0;
+  for (const r of rijen) {
+    if (zonder && heeftUittreksel(zonder, r.sleutel)) { alGelezen += 1; continue; }
+    if (heeftTabel) {
+      const sleutels = await lib.sleutelsVan(db, r.sleutelsoort, r.sleutelid);
+      let compleet = true;
+      for (const sleutel of sleutels) {
+        const e = await lib.laadEenheid(db, sleutel);
+        const gevonden = (await db.execute({
+          sql: `SELECT 1 FROM document_uittreksels
+                WHERE sleutel=? AND tekst_sha=? AND instructie_versie='productie-2' LIMIT 1`,
+          args: [sleutel, e.sha],
+        })).rows.length > 0;
+        if (!gevonden) { compleet = false; break; }
+      }
+      if (compleet) { alGelezen += 1; continue; }
+    }
+    over.push(r);
+  }
   over.sort((x, y) => x.bron.localeCompare(y.bron) || y.tekens - x.tekens);
   for (const r of over) {
     console.log([r.sleutel, r.soort, r.bron, nl(r.tekens), r.extra, r.datum, r.signaal,
       String(r.titel || '').replace(/\s+/g, ' ').slice(0, 140)].join(' | '));
   }
-  console.log(`(${over.length} kandidaten${zonder ? `, ${rijen.length - over.length} al gelezen` : ''})`);
+  console.log(`(${over.length} kandidaten${alGelezen ? `, ${alGelezen} met dezelfde tekstversie al gelezen` : ''})`);
 }
 
 async function exporteer(db, invoer, uit, max) {
@@ -173,7 +199,7 @@ async function main(argv = process.argv.slice(2)) {
   const db = lib.openKopie(optie(argv, '--kopie'));
   try {
     if (argv.includes('--tel')) await tel(db, drempel, max);
-    else if (argv.includes('--kandidaten')) await kandidaten(db, drempel, optie(argv, '--sinds'), optie(argv, '--zonder-uittreksel'));
+    else if (argv.includes('--kandidaten')) await kandidaten(db, drempel, optie(argv, '--sinds'), optie(argv, '--zonder-uittreksel'), argv.includes('--alles'));
     else if (argv.includes('--exporteer')) {
       await exporteer(db, optie(argv, '--exporteer'), path.resolve(optie(argv, '--uit', path.join(lib.STANDAARD_MAP, 'teksten'))), max);
     } else {

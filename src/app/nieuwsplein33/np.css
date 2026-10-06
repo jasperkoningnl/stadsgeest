@@ -560,6 +560,27 @@ html[data-np-thema="donker"] .np-nav-item-actief { box-shadow: 0 1px 2px rgba(0,
 .np-tier-2 { border-color: var(--np-blauw); color: var(--np-blauw); background: var(--np-blauw-z); }
 .np-tier-3 { border-color: var(--np-rand); color: var(--np-inkt3); }
 
+/* Bewijs uit grote brondocumenten, alleen zichtbaar bij gewone tips. */
+.np-documentbewijs { margin-bottom: 24px; }
+.np-bewijs-stuk {
+  margin: 10px 0; padding: 0 14px; background: var(--np-kaart);
+  border: 1px solid var(--np-rand); border-radius: 10px;
+}
+.np-bewijs-stuk summary {
+  display: flex; justify-content: space-between; gap: 12px; align-items: baseline;
+  padding: 12px 0; cursor: pointer; font-family: var(--f-d); font-weight: 700;
+}
+.np-bewijs-stuk summary small { color: var(--np-inkt3); font-weight: 500; white-space: nowrap; }
+.np-bewijs-lijst { padding-left: 22px; }
+.np-bewijs-lijst li { margin: 14px 0 20px; }
+.np-bewijs-lijst strong { display: block; font-family: var(--f-b); font-size: 15px; line-height: 1.5; }
+.np-bewijs-lijst blockquote {
+  margin: 9px 0 0; padding: 9px 12px; border-left: 3px solid var(--np-accent);
+  background: var(--np-accent-z); color: var(--np-inkt2); font: 14px/1.5 var(--f-b);
+}
+.np-bewijs-lijst cite { display: block; margin-top: 5px; color: var(--np-inkt3); font-size: 12px; font-style: normal; }
+.np-bewijs-waarschuwing { color: var(--np-amber); font-size: 13px; font-weight: 600; }
+
 /* ── Verkenner ──────────────────────────────────────────── */
 .np-verkenner { max-width: 860px; }
 .np-zoekbalk { display: flex; gap: 8px; margin-bottom: 20px; }

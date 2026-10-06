@@ -123,6 +123,14 @@ Lees bij een dragende officiële bron de volledige beschikbare tekst. Als de
 opgeslagen tekst zichtbaar is afgekapt of leeg is, open dan de officiële URL.
 Ken geen patroon of detail toe dat niet uit het gelezen materiaal blijkt.
 
+`document_uittreksels` bevat gecontroleerde leeswijzers bij grote documenten:
+een kern en maximaal acht gerangschikte bronbevindingen met letterlijke citaten
+en vindplaatsen. Dit is automatisch gewonnen bronmateriaal, geen tweede bron en
+geen bevestiging. Controleer de volledige passage en context via de bronlink
+voordat je een bevinding in een tip gebruikt. Het ontbreken van een bevinding
+bewijst niets en een uittreksel maakt nooit vanzelf een tip; pas de gewone
+bronregel, spiegelcheck en scoredrempel toe.
+
 ## 2. Harde bronregel
 
 Een tip vereist minimaal één dragende tier-1- of onderscheidende tier-2-bron.

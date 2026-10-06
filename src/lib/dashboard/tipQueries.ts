@@ -7,6 +7,8 @@
 // worden — 'bron' en 'document', nooit 'signaal' of 'raw_item'.
 import { q, qOne } from '@/lib/turso'
 import { supertipVastgezet } from './format'
+import { parseDocumentFeiten, type TipDocumentUittreksel } from './documentUittreksels'
+export type { DocumentCitaat, DocumentFeit, TipDocumentUittreksel } from './documentUittreksels'
 
 export type TipStatus =
   | 'wachtrij' | 'goedgekeurd' | 'in_behandeling'
@@ -179,6 +181,31 @@ export async function getTipDocumenten(tipId: number): Promise<TipDocument[]> {
               COALESCE(ri.published_at, ri.scraped_at) ASC`,
     [tipId],
   )
+}
+
+/** Gecontroleerde leeswijzers bij de brondocumenten van een tip. */
+export async function getTipDocumentUittreksels(tipId: number): Promise<TipDocumentUittreksel[]> {
+  const rijen = await q<any>(
+    `SELECT DISTINCT u.sleutel,u.kern,u.feiten,u.afgekapt,
+            ri.title AS titel,ri.external_url AS url,src.name AS bron
+     FROM tip_signals ts
+     JOIN signal_items si ON si.signal_id=ts.signal_id
+     JOIN document_uittreksels u ON u.raw_item_id=si.raw_item_id
+     JOIN raw_items ri ON ri.id=u.raw_item_id
+     JOIN sources src ON src.id=ri.source_id
+     WHERE ts.tip_id=?
+       AND u.id=(SELECT MAX(u2.id) FROM document_uittreksels u2 WHERE u2.sleutel=u.sleutel)
+     ORDER BY u.raw_item_id,u.begin_in_document
+     LIMIT 12`,
+    [tipId],
+  )
+  return rijen.map((rij) => {
+    const feiten = parseDocumentFeiten(rij.feiten)
+    return {
+      sleutel: rij.sleutel, titel: rij.titel, url: rij.url, bron: rij.bron,
+      kern: rij.kern, afgekapt: Boolean(rij.afgekapt), feiten,
+    }
+  }).filter((rij) => rij.feiten.length > 0)
 }
 
 /** De tijdlijn van het dossier waar deze tip bij hoort. Dit is de dwarsverbandenkant. */

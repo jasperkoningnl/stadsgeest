@@ -1,6 +1,6 @@
 # Documentlezer — leesinstructie
 
-**Versie:** proef-1 (4 oktober 2026). Wijzig deze tekst niet per document; een
+**Versie:** productie-2 (5 oktober 2026). Wijzig deze tekst niet per document; een
 andere instructie is een andere versie.
 
 Je leest één document, of één deel van een groot document, volledig en maakt er
@@ -18,12 +18,17 @@ later of er een tip in zit. Jij levert het materiaal: wat staat er, en waar.
 3. **Alleen dit document.** Gebruik geen voorkennis en zoek niets op. Je kent
    de eerdere berichtgeving niet; schrijf dus nergens dat iets 'nieuw' of 'nog
    niet gemeld' is.
-4. **Elk feit heeft een letterlijk citaat.** Een citaat is één aaneengesloten
+4. **Elke bewering heeft letterlijk bewijs.** Eén feit bevat één controleerbare
+   hoofdclaim. Iedere actor, datum, hoeveelheid, vergelijking, oorzaak en
+   conclusie in `zin` moet rechtstreeks in de meegeleverde citaten staan.
+   Voeg geen context uit een andere passage aan de zin toe zonder die passage
+   ook te citeren. Een citaat is één aaneengesloten
    stuk tekst, teken voor teken overgenomen: met spelfouten, afbreekstreepjes
    en vreemde spaties. Geen weglatingen, geen '…', geen twee plekken aan elkaar,
    geen verbeteringen. Lengte 40 tot 300 tekens. Loopt het citaat over een
    regeleinde, schrijf dan een spatie op die plek. Citeer uit een tabel een
-   hele rij zoals die in de tekst staat.
+   hele rij inclusief de noodzakelijke rij- en kolomkoppen. Kan een tabel door
+   extractieruis niet zelfstandig worden uitgelegd, neem het feit dan niet op.
 5. **Geen particulieren.** Noem geen burgers, bewoners, indieners van een
    zienswijze of bezwaar, of Woo-verzoekers bij naam, ook niet als de naam
    leesbaar is gebleven; kies dan een citaat zonder die naam. Bestuurders,
@@ -38,8 +43,10 @@ later of er een tip in zit. Jij levert het materiaal: wat staat er, en waar.
 `kern`: wat staat erin, in precies drie zinnen. Wie schrijft aan wie, waarover,
 en wat is de uitkomst of het voorstel.
 
-`feiten`: hoogstens twintig, de journalistiek zwaarste eerst. Liever acht
-scherpe dan twintig vage. Een routinestuk mag nul tot drie feiten hebben. Geef
+`feiten`: geen minimum, normaal hoogstens acht en alleen bij een uitzonderlijk
+informatierijk stuk hoogstens twaalf, de journalistiek zwaarste eerst. Een
+routinestuk mag nul feiten hebben. Neem geen varianten, herhalingen of
+achtergrondfeiten op om een aantal te halen. Geef
 bij regionale of provinciale stukken voorrang aan wat Amersfoort of Leusden
 raakt. Elk feit heeft één soort:
 
@@ -54,16 +61,15 @@ raakt. Elk feit heeft één soort:
 
 Per feit:
 - `zin`: het feit in één zelfstandig leesbare zin, met wie, wat, hoeveel en wanneer.
-- `citaat`: zie regel 4.
-- `plek`: kop, paragraaf, bijlage- of paginanummer zoals dat in de tekst staat.
-- `regel`: het regelnummer in het bestand waar het citaat begint.
+- `bewijsstatus`: `direct` bij één bewijsplaats, `samengesteld` als twee of drie
+  passages samen nodig zijn, of `extractie_onzeker` als OCR of een tabel de
+  interpretatie onzeker maakt. Gebruik de laatste status alleen om het probleem
+  vast te leggen; zo'n feit gaat niet naar de weger.
+- `citaten`: één tot drie bewijsplaatsen. Iedere bewijsplaats bevat `tekst`,
+  `plek` en `regel`. Samen moeten ze de volledige zin dragen.
 
-`nieuwswaarde`:
-- `oordeel`: `aanleiding` (hier kan een tip in zitten), `geen_aanleiding`
-  (routine, oud of niet lokaal) of `twijfel`.
-- `waarom`: twee tot vier zinnen. Wat is het mogelijke verhaal, of waarom is
-  het routine. Noem wat de weger nog moet nagaan, bijvoorbeeld wat de raad
-  hierover te horen kreeg.
+Geef geen oordeel over de nieuwswaarde. De weger kent eerdere berichtgeving en
+de redactionele context; jij rangschikt alleen de bronbevindingen.
 
 ## Uitvoer
 
@@ -72,7 +78,7 @@ eromheen en zonder codeblok:
 
 ```json
 {
-  "versie": "proef-1",
+  "versie": "productie-2",
   "sleutel": "item-12345",
   "gelezen": { "regels": 1234, "volledig": true, "opmerking": "" },
   "kern": "Zin een. Zin twee. Zin drie.",
@@ -80,12 +86,12 @@ eromheen en zonder codeblok:
     {
       "soort": "bedrag",
       "zin": "…",
-      "citaat": "…",
-      "plek": "…",
-      "regel": 412
+      "bewijsstatus": "direct",
+      "citaten": [
+        { "tekst": "…", "plek": "…", "regel": 412 }
+      ]
     }
-  ],
-  "nieuwswaarde": { "oordeel": "aanleiding", "waarom": "…" }
+  ]
 }
 ```
 

@@ -37,10 +37,10 @@ test('ontleedSleutel herkent item, bijlage en knipdeel', () => {
   assert.throws(() => lib.ontleedSleutel('document-7'));
 });
 
-test('de leestekst is de langste van full_text en content; de weger ziet full_text eerst', () => {
+test('de leestekst en de weger gebruiken de langste documenttekst', () => {
   const rij = { full_text: 'menu', content: 'het eigenlijke stuk', summary: '' };
   assert.equal(lib.leestekstVanItem(rij), 'het eigenlijke stuk');
-  assert.equal(lib.wegerTekst(rij), 'menu');
+  assert.equal(lib.wegerTekst(rij), 'het eigenlijke stuk');
   assert.equal(lib.wegerTekst({ full_text: 'a'.repeat(9000) }).length, lib.WEGER_TEKENS);
 });
 
@@ -54,17 +54,22 @@ function eenheid() {
 
 function uittreksel(feiten) {
   return {
-    versie: 'proef-1', sleutel: 'item-1', gelezen: { regels: 0, volledig: true, opmerking: '' },
+    versie: 'productie-2', sleutel: 'item-1', gelezen: { regels: 0, volledig: true, opmerking: '' },
     kern: 'Eerste zin. Tweede zin. Derde zin.', feiten,
-    nieuwswaarde: { oordeel: 'aanleiding', waarom: 'Daarom.' },
+  };
+}
+
+function feit(citaten, extra = {}) {
+  return {
+    soort: 'risico', zin: 'Het tekort loopt op.', bewijsstatus: citaten.length === 1 ? 'direct' : 'samengesteld',
+    citaten: citaten.map((tekst) => ({ tekst, plek: 'slot', regel: 1 })), ...extra,
   };
 }
 
 test('een letterlijk citaat wordt gevonden, ook over een regeleinde', () => {
-  const r = controleerUittreksel(uittreksel([{
-    soort: 'risico', zin: 'Het tekort loopt op.', plek: 'slot', regel: 1,
-    citaat: 'het tekort in 2028 oploopt tot € 4,2 miljoen als de bezuiniging niet wordt gehaald',
-  }]), eenheid());
+  const r = controleerUittreksel(uittreksel([feit([
+    'het tekort in 2028 oploopt tot € 4,2 miljoen als de bezuiniging niet wordt gehaald',
+  ])]), eenheid());
   assert.deepEqual(r.vormfouten, []);
   assert.equal(r.feiten[0].gevonden, true);
   assert.equal(r.feiten[0].bij_weger, false);
@@ -72,10 +77,9 @@ test('een letterlijk citaat wordt gevonden, ook over een regeleinde', () => {
 });
 
 test('een citaat uit het begin staat bij de weger', () => {
-  const r = controleerUittreksel(uittreksel([{
-    soort: 'toezegging', zin: 'De reserve wordt aangevuld.', plek: 'kop', regel: 1,
-    citaat: 'Het college stelt voor de reserve aan te vullen.',
-  }]), eenheid());
+  const r = controleerUittreksel(uittreksel([feit([
+    'Het college stelt voor de reserve aan te vullen.',
+  ], { soort: 'toezegging', zin: 'De reserve wordt aangevuld.' })]), eenheid());
   assert.equal(r.feiten[0].gevonden, true);
   assert.equal(r.feiten[0].bij_weger, true);
   assert.equal(r.feiten[0].voorbij_grens, false);
@@ -88,18 +92,33 @@ test('een verbeterd, ingekort of samengevoegd citaat wordt afgekeurd', () => {
     'Het college stelt voor de reserve aan te vullen. De accountant waarschuwt dat het tekort',
     'het tekort in 2028 oploopt tot €4,2 miljoen als de bezuiniging niet wordt gehaald',
   ];
-  const r = controleerUittreksel(uittreksel(fout.map((citaat) => ({
-    soort: 'bedrag', zin: 'Zin.', plek: 'slot', regel: 1, citaat,
-  }))), eenheid());
+  const r = controleerUittreksel(uittreksel(fout.map((citaat) => feit([citaat], { soort: 'bedrag', zin: 'Zin.' }))), eenheid());
   assert.deepEqual(r.feiten.map((f) => f.gevonden), [false, false, false, false]);
 });
 
-test('vormfouten: onbekende soort, ontbrekend oordeel, niet volledig gelezen', () => {
-  const u = uittreksel([{ soort: 'mening', zin: 'Zin.', plek: 'x', regel: 1, citaat: 'Het college stelt voor de reserve aan te vullen.' }]);
-  u.nieuwswaarde.oordeel = 'misschien';
+test('vormfouten: onbekende soort, ongeldige bewijsstatus, niet volledig gelezen', () => {
+  const u = uittreksel([feit(['Het college stelt voor de reserve aan te vullen.'], { soort: 'mening', bewijsstatus: 'misschien' })]);
   u.gelezen.volledig = false;
   const r = controleerUittreksel(u, eenheid());
   assert.equal(r.vormfouten.length, 3);
+});
+
+test('samengesteld bewijs vereist en vindt twee afzonderlijke citaten', () => {
+  const r = controleerUittreksel(uittreksel([feit([
+    'Het college stelt voor de reserve aan te vullen.',
+    'het tekort in 2028 oploopt tot € 4,2 miljoen als de bezuiniging niet wordt gehaald',
+  ])]), eenheid());
+  assert.deepEqual(r.vormfouten, []);
+  assert.equal(r.feiten[0].gevonden, true);
+  assert.equal(r.feiten[0].citaten.length, 2);
+});
+
+test('privacycontrole blokkeert contactgegevens', () => {
+  const r = controleerUittreksel(uittreksel([feit([
+    'Het college stelt voor de reserve aan te vullen.',
+  ], { zin: 'Mail naar inwoner@example.nl.' })]), eenheid());
+  assert.ok(r.vormfouten.some((f) => f.includes('e-mailadres')));
+  assert.deepEqual(lib.privacyTreffers('bewoner Jan van Dijk diende bezwaar in'), ['naam van mogelijke particulier']);
 });
 
 test('regelVan geeft de regel van de leesversie', () => {

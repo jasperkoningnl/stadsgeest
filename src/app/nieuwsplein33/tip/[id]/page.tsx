@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation'
 import { hasTurso } from '@/lib/turso'
 import {
   getTipDetail, getTipDocumenten, getTipFeedback, getDossierTijdlijn,
-  getWachtrijIds,
-  type TipDocument,
+  getWachtrijIds, getTipDocumentUittreksels,
+  type TipDocument, type TipDocumentUittreksel,
 } from '@/lib/dashboard/tipQueries'
 import { formatDate, formatDateTime, safeParseJson, safeParseJsonArray } from '@/lib/dashboard/format'
 import { parseBriefing, ontstreep, type GeparsedeBriefing } from '@/lib/dashboard/briefing'
@@ -99,6 +99,40 @@ function Alinea({ tekst }: { tekst: string }) {
         </p>
       ))}
     </>
+  )
+}
+
+function DocumentBewijs({ uittreksels }: { uittreksels: TipDocumentUittreksel[] }) {
+  if (uittreksels.length === 0) return null
+  return (
+    <section className="np-documentbewijs">
+      <h3 className="np-kopje">Uit het brondocument</h3>
+      <p className="np-tekst np-stil">Automatisch uit grote documenten gehaald. Controleer citaat en context in de bron voordat je het gebruikt.</p>
+      {uittreksels.map((u) => (
+        <details key={u.sleutel} className="np-bewijs-stuk">
+          <summary>
+            <span>{ontstreep(u.titel, ' · ')}</span>
+            <small>{u.feiten.length} bevinding{u.feiten.length === 1 ? '' : 'en'}</small>
+          </summary>
+          <p className="np-tekst np-stil">{ontstreep(u.kern)}</p>
+          {u.afgekapt && <p className="np-bewijs-waarschuwing">De opgeslagen brontekst was mogelijk onvolledig.</p>}
+          <ol className="np-bewijs-lijst">
+            {u.feiten.map((feit, i) => (
+              <li key={i}>
+                <strong>{ontstreep(feit.zin)}</strong>
+                {feit.citaten.map((citaat, j) => (
+                  <blockquote key={j}>
+                    “{citaat.tekst}”
+                    <cite>{citaat.plek}</cite>
+                  </blockquote>
+                ))}
+              </li>
+            ))}
+          </ol>
+          {u.url && <a className="np-bronlink" href={u.url} target="_blank" rel="noopener noreferrer">Open het originele document ↗</a>}
+        </details>
+      ))}
+    </section>
   )
 }
 
@@ -270,8 +304,9 @@ export default async function TipPagina({ params }: Props) {
   const tip = await getTipDetail(id)
   if (!tip) notFound()
 
-  const [documenten, feedback, tijdlijn, wachtrijIds] = await Promise.all([
+  const [documenten, uittreksels, feedback, tijdlijn, wachtrijIds] = await Promise.all([
     getTipDocumenten(id),
+    getTipDocumentUittreksels(id),
     getTipFeedback(id),
     tip.dossier_id ? getDossierTijdlijn(tip.dossier_id) : Promise.resolve([]),
     getWachtrijIds(),
@@ -351,7 +386,7 @@ export default async function TipPagina({ params }: Props) {
       id: 'bronnen',
       label: 'Bronnen',
       aantal: documenten.length,
-      inhoud: <Bronnen documenten={documenten} />,
+      inhoud: <><DocumentBewijs uittreksels={uittreksels} /><Bronnen documenten={documenten} /></>,
     },
     {
       id: 'gevonden',

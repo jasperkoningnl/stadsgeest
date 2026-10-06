@@ -17,7 +17,6 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 - Dossiers: additieve velden voor baan (intern/openbaar) en open vraag/wederhoor (10-01).
 - Dossiergraaf: niet-gekoppelde organisatienamen als eigen knoop, of eerst de KG verrijken (10-01).
 - Clusteren op zaakkenmerk: steekproef beoordelen en beslissen wat er gebeurt als een nieuw stuk bij een al weggezette zaak hoort (10-05).
-- Documentlezer: vijf uittreksels beoordelen en het opslagvoorstel in `operations/DOCUMENTLEZER.md` goedkeuren of aanpassen (10-05).
 
 ## Keten en bewaking
 
@@ -41,8 +40,6 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 - B&W-besluitenlijsten Leusden ontbreken; op de notebook nagaan of Notubiz Leusden ze heeft (10-02).
 - OCR-drempel voor leesbaarheid (0,08) is op 45 teksten bepaald (10-03).
 - R5: de stijging van verkeersmisdrijven (1.3.1) kan een registratiewijziging zijn; niet nagevraagd (10-02).
-- B&W-stukken (bron 131): `full_text` bevat de paginatekst van de besluitenlijst en gaat in `weger-workset.cjs` vóór `content`; de weger ziet het stuk zelf niet (10-05).
-- Documentlezer: het oordeel nieuwswaarde onderscheidt niet en de grens van twintig feiten werkt als doel; leesinstructie pas bijstellen na het oordeel van Jasper (10-05).
 
 ## Dashboard
 

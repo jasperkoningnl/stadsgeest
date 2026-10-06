@@ -7,9 +7,9 @@
 // legt de reden vast in signal_events. Signalen met een tip of met een
 // eindstatus (published, parked, researching) blijven ongemoeid.
 //
-// signal_items heeft geen index op raw_item_id: één aanroep leest de hele
-// koppeltabel (enkele duizenden rijen). Bedoeld voor een handvol aanroepen per
-// run, niet voor een lus over honderden items; zie docs/DATABASE-LEZEN.md.
+// `idx_signal_items_raw_item` maakt de koppeling vanaf een document gericht;
+// de documentlezer kan daardoor meerdere nieuwe uittreksels verwerken zonder
+// de hele koppeltabel per item opnieuw te lezen.
 
 export async function biedSignalenOpnieuwAan(db, rawItemId, { actor, reden }) {
   const res = await db.execute({

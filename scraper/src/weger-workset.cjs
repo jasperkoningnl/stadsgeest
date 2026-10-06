@@ -83,7 +83,8 @@ async function loadItems(db, signalId) {
     args: [signalId, MAX_ITEMS_PER_SIGNAL],
   });
   const items = result.rows.map((row) => {
-    const body = clip(row.full_text || row.content || row.summary || '');
+    const body = clip([row.full_text, row.content, row.summary]
+      .map((value) => String(value || '')).sort((a, b) => b.length - a.length)[0]);
     return {
       id: Number(row.id),
       title: row.title,
@@ -98,6 +99,42 @@ async function loadItems(db, signalId) {
     };
   });
   return { items, total: Number(countResult.rows[0]?.n ?? items.length) };
+}
+
+// Gecontroleerde bronbevindingen uit grote documenten. De documentlezer
+// selecteert niet op nieuwswaarde; de weger gebruikt dit alleen als compacte
+// leeswijzer en controleert de bron voordat een claim in een tip komt.
+async function loadDocumentUittreksels(db, signalId) {
+  if (!(await tableExists(db, 'document_uittreksels'))) return [];
+  const rows = (await db.execute({
+    sql: `SELECT u.id,u.sleutel,u.raw_item_id,u.kern,u.feiten,u.tekstbron,u.afgekapt,
+                 u.document_tekens,u.tekens,u.begin_in_document,u.instructie_versie,
+                 r.title,r.external_url,s.name AS bron
+          FROM signal_items si
+          JOIN document_uittreksels u ON u.raw_item_id=si.raw_item_id
+          JOIN raw_items r ON r.id=u.raw_item_id
+          JOIN sources s ON s.id=r.source_id
+          WHERE si.signal_id=?
+            AND u.id=(SELECT MAX(u2.id) FROM document_uittreksels u2 WHERE u2.sleutel=u.sleutel)
+          ORDER BY u.raw_item_id,u.begin_in_document,u.id`,
+    args: [signalId],
+  })).rows;
+  return rows.map((row) => {
+    let feiten = [];
+    try { feiten = JSON.parse(row.feiten || '[]'); } catch { feiten = []; }
+    feiten = feiten.filter((f) => ['direct', 'samengesteld'].includes(f.bewijsstatus)).slice(0, 8).map((f) => ({
+      soort: f.soort, zin: short(f.zin, 420), bewijsstatus: f.bewijsstatus,
+      citaten: (f.citaten || []).slice(0, 3).map((c) => ({ tekst: short(c.tekst, 320), plek: short(c.plek, 160) })),
+    }));
+    return {
+      sleutel: row.sleutel, raw_item_id: Number(row.raw_item_id), titel: row.title,
+      bron: row.bron, url: row.external_url, kern: short(row.kern, 800), feiten,
+      tekstbron: row.tekstbron, afgekapt: Boolean(row.afgekapt),
+      gelezen: { tekens: Number(row.tekens), document_tekens: Number(row.document_tekens), begin: Number(row.begin_in_document) },
+      instructie_versie: row.instructie_versie,
+      waarschuwing: 'Automatisch uit het brondocument gehaald; controleer citaat, context en bron voor gebruik.',
+    };
+  }).filter((u) => u.feiten.length > 0);
 }
 
 async function loadEntities(db, signalId) {
@@ -537,7 +574,7 @@ async function main(argv = process.argv.slice(2)) {
     const candidates = [];
     for (const signal of signals.rows) {
       const signalId = Number(signal.id);
-      const [itemSet, entities, recentEvents, nerKgCandidates, addressLinks, orgVerbanden, wooVondsten] = await Promise.all([
+      const [itemSet, entities, recentEvents, nerKgCandidates, addressLinks, orgVerbanden, wooVondsten, documentUittreksels] = await Promise.all([
         loadItems(db, signalId),
         loadEntities(db, signalId),
         loadRecentEvents(db, signalId),
@@ -545,6 +582,7 @@ async function main(argv = process.argv.slice(2)) {
         loadAddressLinks(db, signalId),
         loadOrgVerbanden(db, signalId, orgRunId),
         loadWooVondsten(db, signalId),
+        loadDocumentUittreksels(db, signalId),
       ]);
       candidates.push({
         signal: { ...signal, id: signalId },
@@ -556,6 +594,7 @@ async function main(argv = process.argv.slice(2)) {
         adres_koppelingen: addressLinks,
         organisatie_verbanden: orgVerbanden,
         woo_vondsten: wooVondsten,
+        document_uittreksels: documentUittreksels,
         recent_events: recentEvents,
       });
     }
@@ -608,5 +647,5 @@ if (require.main === module) {
 }
 
 module.exports = {
-  clip, jsonValue, parseLimit, loadNerKgCandidates, loadAddressLinks, loadOrgVerbanden, loadKruisbronKandidaten, latestOrgRun, loadWooVondsten, loadWooKandidaten, loadArchiefKandidaten,
+  clip, jsonValue, parseLimit, loadDocumentUittreksels, loadNerKgCandidates, loadAddressLinks, loadOrgVerbanden, loadKruisbronKandidaten, latestOrgRun, loadWooVondsten, loadWooKandidaten, loadArchiefKandidaten,
 };

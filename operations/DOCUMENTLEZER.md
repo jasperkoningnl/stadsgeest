@@ -2,9 +2,9 @@
 
 **Doel:** van elk groot document een uittreksel met letterlijke citaten maken,
 zodat de weger meer ziet dan de eerste 4.000 tekens.
-**Status:** proef van 5 oktober 2026 (Claude); structureel werk is voor Codex.
-Er is nog geen tabel en niets schrijft naar de database. Het opslagvoorstel
-hieronder wacht op akkoord van Jasper.
+**Status:** productieroute gebouwd op 5 oktober 2026. Uittreksels worden pas na
+vorm-, citaat- en privacycontrole opgeslagen. De weger bepaalt de nieuwswaarde;
+de redactie ziet bewijs alleen bij een gewone tip.
 **Lees wanneer:** bij werk aan de documentlezer of aan wat de weger van een
 document te zien krijgt.
 
@@ -39,7 +39,7 @@ Werkmap: `scraper/tmp/documentlezer/` (buiten Git).
 ```powershell
 # 1. Wat ligt er? Omvang, of de lijst met nog niet gelezen stukken.
 node scraper/src/documentlezer-selectie.cjs --tel
-node scraper/src/documentlezer-selectie.cjs --kandidaten --sinds 2026-10-05 --zonder-uittreksel scraper/tmp/documentlezer/uittreksels
+node scraper/src/documentlezer-selectie.cjs --kandidaten --sinds 2026-10-05
 
 # 2. Leesversies en manifest klaarzetten (sleutels met komma's, of @bestand).
 node scraper/src/documentlezer-selectie.cjs --exporteer item-11943,bijlage-184
@@ -48,8 +48,13 @@ node scraper/src/documentlezer-selectie.cjs --exporteer item-11943,bijlage-184
 #    context. Die krijgt de leesinstructie, het bestand, de sleutel, het aantal
 #    regels en de titel, en schrijft uittreksels/<sleutel>.json.
 
-# 4. Controleren. Code 1 bij een citaat dat niet letterlijk in de bron staat.
+# 4. Controleren. Code 1 bij een citaat-, vorm- of privacyfout.
 node scraper/src/documentlezer-controle.cjs
+
+# 5. Voorcontrole en daarna opslag. De migratie wordt één keer uitgevoerd.
+node scraper/migrate-documentlezer.cjs
+node scraper/src/documentlezer-opslaan.cjs --model <modelnaam>
+node scraper/src/documentlezer-opslaan.cjs --model <modelnaam> --input-tokens <n> --output-tokens <n> --vaste-overhead-tokens <n> --apply
 ```
 
 Regels voor stap 3:
@@ -63,7 +68,7 @@ Regels voor stap 3:
 - De leesinstructie is vast. Een gewijzigde tekst krijgt een nieuw
   versienummer; uittreksels van verschillende versies zijn niet vergelijkbaar.
 
-De controle rapporteert per stuk: citaatfouten, vormfouten, hoeveel feiten niet
+De controle rapporteert per stuk: citaatfouten, vorm- en privacyfouten, hoeveel feiten niet
 staan in wat de weger nu krijgt, en hoeveel voorbij teken 4.000 van het document
 beginnen. Details per feit staan in `controle-rapport.json` in de werkmap.
 
@@ -73,7 +78,7 @@ Uittreksels, leesversies en het controlerapport zijn verhaalvondsten of
 brontekst. Ze blijven in `scraper/tmp/` of buiten de repo. Hier staan alleen
 scripts, de leesinstructie en dit document.
 
-## Voorstel voor opslag (niet uitgevoerd)
+## Opslag
 
 Eén nieuwe tabel, één rij per leeseenheid:
 
@@ -90,18 +95,22 @@ CREATE TABLE document_uittreksels (
   instructie_versie TEXT NOT NULL,
   model TEXT NOT NULL,
   kern TEXT NOT NULL,
-  oordeel TEXT NOT NULL CHECK (oordeel IN ('aanleiding','geen_aanleiding','twijfel')),
-  waarom TEXT NOT NULL,
-  feiten TEXT NOT NULL,               -- JSON: soort, zin, citaat, plek, positie
-  feiten_buiten_weger INTEGER NOT NULL,
-  gecontroleerd_at TEXT NOT NULL,     -- alleen rijen zonder citaatfout
+  feiten TEXT NOT NULL,               -- JSON: soort, zin, bewijsstatus, citaten
+  controle TEXT NOT NULL,
+  tekstbron TEXT,
+  afgekapt INTEGER NOT NULL DEFAULT 0,
+  input_tokens INTEGER,
+  output_tokens INTEGER,
+  vaste_overhead_tokens INTEGER,
+  gecontroleerd_at TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  UNIQUE (sleutel, tekst_sha, instructie_versie)
+  UNIQUE (sleutel, tekst_sha, instructie_versie, model)
 );
 CREATE INDEX idx_document_uittreksels_item ON document_uittreksels(raw_item_id);
+CREATE INDEX idx_signal_items_raw_item ON signal_items(raw_item_id, signal_id);
 ```
 
-Keuzes die Jasper moet zien:
+Vaste keuzes:
 
 1. **Feiten als JSON in de rij, geen aparte feitentabel.** De weger leest per
    signaal en heeft de feiten bij elkaar nodig. Een aparte tabel
@@ -114,27 +123,34 @@ Keuzes die Jasper moet zien:
    later meer tekst (OCR, herkansing), dan verandert de hash en volgt een nieuwe
    rij; de oude blijft staan.
 4. **Alleen gecontroleerde uittreksels worden geschreven.** Het schrijfscript
-   draait de controle zelf en weigert bij een citaatfout.
+   draait de controle zelf en weigert bij een citaat-, vorm- of privacyfout.
+5. **De lezer filtert niet op nieuwswaarde.** Nieuwe geldige tekst wordt één
+   keer aan de weger aangeboden. De bestaande redactionele criteria bepalen of
+   er een tip komt.
 
 Hoe de weger het te lezen krijgt:
 
-- `weger-workset.cjs` zet per item een veld `uittreksel` in de werkset: kern,
-  oordeel met reden, en de acht zwaarste feiten met citaat en plek. Dat is
+- `weger-workset.cjs` zet per signaal `document_uittreksels` in de werkset: kern
+  en de acht zwaarste zekere feiten met één tot drie citaten en vindplaatsen. Dat is
   hooguit 3.000 tekens per groot stuk, naast de bestaande 4.000 tekens.
-- Bovenaan de werkset een lijst `lees_kandidaten`: uittreksels met oordeel
-  `aanleiding` van stukken zonder signaal, zoals `woo_kandidaten` nu.
-- Een nieuw uittreksel bij een al gewogen signaal biedt het signaal opnieuw aan
-  via `heraanbieden.mjs`, alleen bij oordeel `aanleiding` of `twijfel`.
+- Een nieuw uittreksel bij een al gewogen signaal biedt het signaal idempotent
+  opnieuw aan via `heraanbieden.mjs`. Een signaal met een bestaande tip blijft
+  ongemoeid.
 - In `operations/WEGER.md` komt de regel dat een uittreksel een aanwijzing is:
   de weger opent de bron op de genoemde plek voordat hij iets claimt, en toetst
   zelf of het feit afwijkt van wat pers en raad al hadden.
 
-Verbruik: per signaalitem één `SEARCH ... USING INDEX`, per leesbeurt één rij
+In het dashboard verschijnt bij tips met zo'n stuk onder `Bronnen` de sectie
+`Uit het brondocument`: standaard ingeklapt, met bevindingen, letterlijke
+citaten, vindplaats en bronlink. Onzekere extracties worden daar niet getoond.
+
+Verbruik: per signaal één geïndexeerde zoekvraag, per leesbeurt één rij
 schrijven. Het aanmaken van tabel en index leest geen bestaande tabel.
 
 ## Bekende grenzen
 
-- 'Volledig' betekent: alles wat in de database staat. Gesplitste B&W-stukken
+- `gelezen.volledig` betekent: alle aangeboden tekst is doorlopen, niet dat het
+  oorspronkelijke document compleet in de database staat. Gesplitste B&W-stukken
   zijn afgekapt op 50.000 tekens, Notubiz-stukken van bron 168 op 200.000, en
   sommige pdf's op een paginagrens.
 - De controle bewijst dat een citaat in de bron staat, niet dat de zin erbij het

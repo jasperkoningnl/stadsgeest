@@ -56,8 +56,7 @@ function controleerUittreksel(u, eenheid) {
   if (typeof u.kern !== 'string' || !u.kern.trim()) vormfouten.push('kern ontbreekt');
   else if (zinnen(u.kern) !== 3) waarschuwingen.push(`kern heeft ${zinnen(u.kern)} zinnen in plaats van 3`);
   if (!Array.isArray(u.feiten)) vormfouten.push('feiten is geen lijst');
-  if (!lib.OORDELEN.includes(u.nieuwswaarde?.oordeel)) vormfouten.push(`nieuwswaarde.oordeel ongeldig: ${u.nieuwswaarde?.oordeel}`);
-  if (typeof u.nieuwswaarde?.waarom !== 'string' || !u.nieuwswaarde.waarom.trim()) vormfouten.push('nieuwswaarde.waarom ontbreekt');
+  if (u.versie !== 'productie-2') vormfouten.push(`versie ${u.versie} hoort productie-2 te zijn`);
   if (u.gelezen?.volledig !== true) vormfouten.push('gelezen.volledig is niet true');
   if (Number(u.gelezen?.regels) !== leesregels.length) waarschuwingen.push(`gelezen.regels ${u.gelezen?.regels}, leesversie heeft ${leesregels.length}`);
   const lijst = Array.isArray(u.feiten) ? u.feiten : [];
@@ -66,27 +65,42 @@ function controleerUittreksel(u, eenheid) {
   const feiten = lijst.map((f, i) => {
     const nr = i + 1;
     if (!lib.SOORTEN.includes(f?.soort)) vormfouten.push(`feit ${nr}: soort ongeldig: ${f?.soort}`);
-    for (const veld of ['zin', 'citaat', 'plek']) {
-      if (typeof f?.[veld] !== 'string' || !f[veld].trim()) vormfouten.push(`feit ${nr}: ${veld} ontbreekt`);
-    }
-    const citaat = lib.normaliseer(f?.citaat);
-    if (citaat.length < lib.CITAAT_MIN || citaat.length > lib.CITAAT_MAX) {
-      waarschuwingen.push(`feit ${nr}: citaat is ${citaat.length} tekens (hoort ${lib.CITAAT_MIN}-${lib.CITAAT_MAX})`);
-    }
-    const positie = citaat ? bron.indexOf(citaat) : -1;
-    const gevonden = positie >= 0;
-    const regel = gevonden ? regelVan(leesregels, positie) : null;
-    if (gevonden && Number.isInteger(f?.regel) && Math.abs(f.regel - regel) > 1) {
-      waarschuwingen.push(`feit ${nr}: regel ${f.regel} opgegeven, citaat begint op regel ${regel}`);
-    }
-    // Positie in het hele document, bij benadering: de genormaliseerde tekst is
-    // iets korter dan de opgeslagen tekst.
-    const inDocument = gevonden ? eenheid.begin_in_document + positie : null;
+    if (typeof f?.zin !== 'string' || !f.zin.trim()) vormfouten.push(`feit ${nr}: zin ontbreekt`);
+    if (!lib.BEWIJSSTATUSSEN.includes(f?.bewijsstatus)) vormfouten.push(`feit ${nr}: bewijsstatus ongeldig: ${f?.bewijsstatus}`);
+    const citaten = Array.isArray(f?.citaten) ? f.citaten : [];
+    if (citaten.length < 1 || citaten.length > 3) vormfouten.push(`feit ${nr}: citaten moet 1 tot 3 bewijsplaatsen bevatten`);
+    if (f?.bewijsstatus === 'direct' && citaten.length !== 1) vormfouten.push(`feit ${nr}: direct bewijs heeft precies één citaat`);
+    if (f?.bewijsstatus === 'samengesteld' && citaten.length < 2) vormfouten.push(`feit ${nr}: samengesteld bewijs heeft minstens twee citaten`);
+    const gecontroleerdeCitaten = citaten.map((c, ci) => {
+      for (const veld of ['tekst', 'plek']) {
+        if (typeof c?.[veld] !== 'string' || !c[veld].trim()) vormfouten.push(`feit ${nr}, citaat ${ci + 1}: ${veld} ontbreekt`);
+      }
+      const citaat = lib.normaliseer(c?.tekst);
+      if (citaat.length < lib.CITAAT_MIN || citaat.length > lib.CITAAT_MAX) {
+        waarschuwingen.push(`feit ${nr}, citaat ${ci + 1}: ${citaat.length} tekens (hoort ${lib.CITAAT_MIN}-${lib.CITAAT_MAX})`);
+      }
+      const positie = citaat ? bron.indexOf(citaat) : -1;
+      const gevonden = positie >= 0;
+      const regel = gevonden ? regelVan(leesregels, positie) : null;
+      if (gevonden && Number.isInteger(c?.regel) && Math.abs(c.regel - regel) > 1) {
+        waarschuwingen.push(`feit ${nr}, citaat ${ci + 1}: regel ${c.regel} opgegeven, citaat begint op regel ${regel}`);
+      }
+      const inDocument = gevonden ? eenheid.begin_in_document + positie : null;
+      return {
+        tekst: c?.tekst, plek: c?.plek, gevonden, regel, positie_in_document: inDocument,
+        bij_weger: gevonden && weger.includes(citaat),
+        voorbij_grens: gevonden && inDocument + citaat.length > lib.WEGER_TEKENS,
+      };
+    });
+    const privacy = lib.privacyTreffers([f?.zin, ...citaten.map((c) => c?.tekst)].join(' '));
+    if (privacy.length) vormfouten.push(`feit ${nr}: privacycontrole blokkeert ${privacy.join(', ')}`);
     return {
-      nr, soort: f?.soort, zin: f?.zin, citaat: f?.citaat, plek: f?.plek,
-      gevonden, regel, positie_in_document: inDocument,
-      bij_weger: gevonden && weger.includes(citaat),
-      voorbij_grens: gevonden && inDocument + citaat.length > lib.WEGER_TEKENS,
+      nr, soort: f?.soort, zin: f?.zin, bewijsstatus: f?.bewijsstatus,
+      citaten: gecontroleerdeCitaten,
+      gevonden: gecontroleerdeCitaten.length > 0 && gecontroleerdeCitaten.every((c) => c.gevonden),
+      bij_weger: gecontroleerdeCitaten.length > 0 && gecontroleerdeCitaten.every((c) => c.bij_weger),
+      voorbij_grens: gecontroleerdeCitaten.some((c) => c.voorbij_grens),
+      privacy,
     };
   });
   return { vormfouten, waarschuwingen, feiten };
@@ -128,14 +142,14 @@ async function main(argv = process.argv.slice(2)) {
         sleutel, titel: eenheid.titel, bron: `${eenheid.bron_id} ${eenheid.bron}`, url: eenheid.url,
         tekstveld: eenheid.tekstveld, tekens: eenheid.tekens, document_tekens: eenheid.document_tekens,
         begin_in_document: eenheid.begin_in_document, sha: eenheid.sha,
-        oordeel: u.nieuwswaarde?.oordeel, feiten: r.feiten.length, citaatfouten: fout.length,
+        feiten: r.feiten.length, citaatfouten: fout.length,
         niet_bij_weger: nietBijWeger.length, voorbij_grens: voorbij.length,
         vormfouten: r.vormfouten, waarschuwingen: r.waarschuwingen, per_feit: r.feiten,
       });
       console.log([sleutel.padEnd(20), String(r.feiten.length).padStart(6), String(fout.length).padStart(10),
         String(nietBijWeger.length).padStart(14), String(voorbij.length).padStart(13),
-        String(r.vormfouten.length).padStart(4), u.nieuwswaarde?.oordeel || '?'].join(' | '));
-      for (const f of fout) console.log(`   CITAAT NIET GEVONDEN feit ${f.nr}: ${String(f.citaat).slice(0, 120)}`);
+        String(r.vormfouten.length).padStart(4), '-'].join(' | '));
+      for (const f of fout) console.log(`   CITAAT NIET GEVONDEN feit ${f.nr}`);
       for (const v of r.vormfouten) console.log(`   VORM ${v}`);
     }
   } finally {

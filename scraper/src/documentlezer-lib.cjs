@@ -22,8 +22,9 @@ const MAX_REGEL = 1000;
 const EXTRA_BRONNEN = [131];
 
 const SOORTEN = ['bedrag', 'partij', 'toezegging', 'risico', 'termijn', 'afwijking'];
-const OORDELEN = ['aanleiding', 'geen_aanleiding', 'twijfel'];
-const MAX_FEITEN = 20;
+const BEWIJSSTATUSSEN = ['direct', 'samengesteld', 'extractie_onzeker'];
+const MAX_FEITEN = 12;
+const STANDAARD_FEITEN = 8;
 const CITAAT_MIN = 40;
 const CITAAT_MAX = 300;
 
@@ -58,6 +59,21 @@ function sha(tekst) {
   return crypto.createHash('sha256').update(tekst, 'utf8').digest('hex').slice(0, 16);
 }
 
+// Fail-closed controle voor gegevens die nooit in een redactioneel uittreksel
+// horen. Namen blijven primair een instructieregel: zonder betrouwbare rol- en
+// entiteitscontext kan een reguliere expressie bestuurders niet van burgers
+// onderscheiden. Contactgegevens en identificatienummers kunnen wel hard
+// worden tegengehouden.
+function privacyTreffers(tekst) {
+  const regels = [
+    ['e-mailadres', /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i],
+    ['telefoonnummer', /(?:\+31|0031|0)\s*[-(]?\s*\d(?:[\s().-]*\d){7,9}\b/],
+    ['BSN', /\b\d{9}\b/],
+    ['naam van mogelijke particulier', /\b(?:bewoner|indiener|bezwaarmaker|woo-verzoeker|cliënt|klant)\s+[A-ZÀ-Ý][\p{L}'-]+(?:\s+(?:van|de|der|den|ten|ter))*\s+[A-ZÀ-Ý][\p{L}'-]+/u],
+  ];
+  return regels.filter(([, patroon]) => patroon.test(String(tekst || ''))).map(([naam]) => naam);
+}
+
 // De eigenlijke documenttekst: de langste van full_text en content. Bij
 // B&W-stukken (bron 131) is full_text kort en staat het stuk in content.
 function leestekstVanItem(rij) {
@@ -66,9 +82,12 @@ function leestekstVanItem(rij) {
   return ft.length >= c.length ? ft : c;
 }
 
-// Wat de weger nu van een item ziet (weger-workset.cjs, loadItems).
+// Wat de weger van een item ziet: de langste beschikbare documenttekst. Dit
+// voorkomt dat paginatekst of een korte samenvatting het eigenlijke stuk
+// verdringt, zoals eerder bij B&W-bron 131 gebeurde.
 function wegerTekst(rij) {
-  return String(rij.full_text || rij.content || rij.summary || '').slice(0, WEGER_TEKENS);
+  const teksten = [rij.full_text, rij.content, rij.summary].map((v) => String(v || ''));
+  return teksten.sort((a, b) => b.length - a.length)[0].slice(0, WEGER_TEKENS);
 }
 
 // Knipt een tekst in stukken van hoogstens `max` tekens, bij voorkeur op een
@@ -189,8 +208,8 @@ async function sleutelsVan(db, soort, id, max = MAX_EENHEID) {
 }
 
 module.exports = {
-  WEGER_TEKENS, MAX_EENHEID, MAX_REGEL, EXTRA_BRONNEN, SOORTEN, OORDELEN, MAX_FEITEN, CITAAT_MIN, CITAAT_MAX,
+  WEGER_TEKENS, MAX_EENHEID, MAX_REGEL, EXTRA_BRONNEN, SOORTEN, BEWIJSSTATUSSEN, MAX_FEITEN, STANDAARD_FEITEN, CITAAT_MIN, CITAAT_MAX,
   STANDAARD_KOPIE, STANDAARD_MAP,
-  vindKopie, openKopie, kopieDatum, normaliseer, sha, leestekstVanItem, wegerTekst,
+  vindKopie, openKopie, kopieDatum, normaliseer, sha, privacyTreffers, leestekstVanItem, wegerTekst,
   knip, leesversie, ontleedSleutel, laadDocument, laadEenheid, sleutelsVan,
 };
