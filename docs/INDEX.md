@@ -21,6 +21,7 @@ daarna alleen de route die bij de taak past:
 | Werk aan een specifieke fase | `PHASES/README.md`, daarna alleen het betreffende fasebestand |
 | Roadmapafwijking of technische ontwerpbeslissing | `DECISIONS.md` en het relevante gezaghebbende document |
 | Dagelijkse redactionele weging | `../operations/WEGER.md`, `EDITORIAL-PROFILE.md` |
+| Wekelijkse supertipselectie | `../operations/SUPERTIP.md`, `EDITORIAL-PROFILE.md` |
 | Documentlezer: grote stukken en uittreksels | `../operations/DOCUMENTLEZER.md`, `DATABASE-LEZEN.md` |
 | Feedback, kwaliteitsmeting of privacy | `EDITORIAL-LEARNING.md`, `TESTING.md` |
 | NER, documentvermeldingen of entiteitskwaliteit | `NER.md`, `ARCHITECTURE.md` |

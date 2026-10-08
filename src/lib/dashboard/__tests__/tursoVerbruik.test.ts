@@ -9,6 +9,6 @@ test('benoemt de dagelijkse Stadsgeest-weger om 09.00 uur', () => {
 test('benoemt op donderdag zowel de weger als de supertip-run', () => {
   assert.equal(
     jobsOpUur(new Date('2026-10-08T07:00:00.000Z')),
-    'Stadsgeest-weger, supertip-run (Cowork)',
+    'Stadsgeest-weger, supertip-run (Codex)',
   )
 })
