@@ -52,3 +52,19 @@ test('tier-1-bron die leverde en drie weken niets brengt, komt op de lijst lang 
     { id: 120, naam: 'Raad — Vergaderingen en overig', laatste: '2026-08-09', n90: 40 },
   ]);
 });
+
+test('recente vondsten en bewust stille verzamelbronnen geven geen vals stilte-alarm', () => {
+  const bronnen = [
+    { id: 16, name: 'PDOK BAG', tier: 1, bronrol: null },
+    { id: 117, name: 'Amendementen', tier: 1, bronrol: null },
+    { id: 120, name: 'Raad Amersfoort — Vergaderingen en overig', tier: 1, bronrol: null },
+    { id: 130, name: 'Werkelijk stil', tier: 1, bronrol: null },
+  ];
+  const stats = new Map(bronnen.map((b) => [b.id, { laatste: '2026-08-01', n90: 20 }]));
+  assert.deepEqual(langStilleBronnen(bronnen, stats, new Date('2026-10-08T10:00:00Z'), {
+    recentLevend: new Set([16, 117]),
+    bewustStil: new Set([120]),
+  }), [
+    { id: 130, naam: 'Werkelijk stil', laatste: '2026-08-01', n90: 20 },
+  ]);
+});

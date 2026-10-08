@@ -7,6 +7,7 @@ import Parser from 'rss-parser';
 import * as cheerio from 'cheerio';
 import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
+import { laadFeedOfHtml } from '../rss-fallback.mjs';
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 const parser = new Parser({ headers: { 'User-Agent': UA } });
@@ -131,8 +132,8 @@ async function scrape() {
     let saved = 0, skipped = 0, errors = 0;
 
     try {
-      const feed = await fetchFeed(src.feedUrl);
-      const items = feed.items?.length ? feed.items : (src.htmlFallback ? await fetchHtmlItems(src.htmlFallback) : []);
+      const { items, route } = await laadFeedOfHtml(src, { fetchFeed, fetchHtmlItems });
+      if (route.startsWith('html')) console.log(`${src.name}: HTML-terugval gebruikt (${route})`);
       for (const item of items) {
         // Filter voor landelijke bronnen: alleen items met 'amersfoort' in titel of tekst
         if (src.filter) {

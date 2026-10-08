@@ -78,6 +78,8 @@ async function main() {
   const sources = (await db.execute("SELECT id, name, url, category, expected_yield, health, is_active, scrape_frequency, tier, bronrol FROM sources WHERE COALESCE(health,'ok') != 'uitgeschakeld' AND COALESCE(is_active,1) = 1")).rows;
   const regels = [];
   let nVerdacht = 0, nDood = 0, nReces = 0, nGeenRuns = 0;
+  const recentLevend = new Set();
+  const bewustStil = new Set(sources.filter(isStilleRaadsCatchall).map(s => Number(s.id)));
 
   // Laatste teken van leven per bron: een scraperrun, een adapterrun of een nieuw item.
   const GEEN_RUNS_DAGEN = 30;
@@ -109,6 +111,9 @@ async function main() {
     }
 
     const runs = (await db.execute({ sql: "SELECT items_found, status FROM scrape_runs WHERE source_id = ? ORDER BY id DESC LIMIT 12", args: [s.id] })).rows;
+    if (runs.slice(0, 6).some(r => r.status !== 'error' && r.status !== 'timeout' && Number(r.items_found || 0) > 0)) {
+      recentLevend.add(Number(s.id));
+    }
     if (runs.length < 6) {
       // Te weinig runs voor een oordeel over de feed. Een eerder 'geen_runs' is
       // inmiddels achterhaald (er draait weer iets), dus terug naar 'ok'.
@@ -189,7 +194,7 @@ async function main() {
 
   // Tier-1-bronnen die eerder leverden en al drie weken niets brengen. Kalendertijd,
   // dus alleen een melding ter beoordeling; de health van de bron verandert niet.
-  const langStil = langStilleBronnen(sources, itemStats);
+  const langStil = langStilleBronnen(sources, itemStats, new Date(), { recentLevend, bewustStil });
   for (const b of langStil) {
     regels.push(`- LANG STIL: ${b.name || b.naam} (bron ${b.id}) - laatste item ${b.laatste}, ${b.n90} items in de laatste 90 dagen`);
   }

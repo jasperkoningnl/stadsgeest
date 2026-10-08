@@ -33,6 +33,8 @@ export interface TipRij {
   artikel_url: string | null
   bronnen: { naam: string; tier: number | null; spiegel: boolean }[]
   aantal_documenten: number
+  bron_datum_eerste: string | null
+  bron_datum_laatste: string | null
 }
 
 export interface TipDetail extends TipRij {
@@ -100,8 +102,11 @@ async function verrijkMetBronnen(tips: any[]): Promise<TipRij[]> {
 
   const bronRijen = await q<any>(`${BRON_SELECT} WHERE ts.tip_id IN (${gaten})`, ids)
   const telRijen = await q<any>(
-    `SELECT ts.tip_id, COUNT(DISTINCT si.raw_item_id) AS n
+    `SELECT ts.tip_id, COUNT(DISTINCT si.raw_item_id) AS n,
+            MIN(COALESCE(ri.published_at,ri.scraped_at)) AS eerste,
+            MAX(COALESCE(ri.published_at,ri.scraped_at)) AS laatste
      FROM tip_signals ts JOIN signal_items si ON si.signal_id = ts.signal_id
+     JOIN raw_items ri ON ri.id = si.raw_item_id
      WHERE ts.tip_id IN (${gaten}) GROUP BY ts.tip_id`,
     ids,
   )
@@ -112,7 +117,7 @@ async function verrijkMetBronnen(tips: any[]): Promise<TipRij[]> {
     lijst.push({ naam: r.naam, tier: r.tier ?? null, spiegel: r.bronrol === 'spiegel' })
     perTip.set(r.tip_id, lijst)
   }
-  const tellingen = new Map<number, number>(telRijen.map((r) => [r.tip_id, Number(r.n)]))
+  const tellingen = new Map<number, any>(telRijen.map((r) => [r.tip_id, r]))
 
   return tips.map((t) => ({
     ...t,
@@ -121,7 +126,9 @@ async function verrijkMetBronnen(tips: any[]): Promise<TipRij[]> {
       if (a.spiegel !== b.spiegel) return a.spiegel ? 1 : -1
       return (a.tier ?? 9) - (b.tier ?? 9)
     }),
-    aantal_documenten: tellingen.get(t.id) ?? 0,
+    aantal_documenten: Number(tellingen.get(t.id)?.n ?? 0),
+    bron_datum_eerste: tellingen.get(t.id)?.eerste ?? null,
+    bron_datum_laatste: tellingen.get(t.id)?.laatste ?? null,
   }))
 }
 

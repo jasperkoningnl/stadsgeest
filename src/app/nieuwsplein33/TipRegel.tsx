@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { TipRij } from '@/lib/dashboard/tipQueries'
-import { formatDate } from '@/lib/dashboard/format'
+import { formatBronPeriode, formatDate } from '@/lib/dashboard/format'
 import { ontstreep } from '@/lib/dashboard/briefing'
 import { kortDossierNaam } from '@/lib/dashboard/dossierNamen'
 
@@ -55,7 +55,9 @@ export default function TipRegel({ tip }: { tip: TipRij }) {
             {tier !== null && (
               <span className={`np-tier np-tier-${tier}`} title={`Hoogste bron: tier ${tier}`}>tier {tier}</span>
             )}
-            <span className="np-regel-datum">{formatDate(tip.created_at)}</span>
+            <span className="np-regel-datum" title={`Tip gemaakt ${formatDate(tip.created_at)}`}>
+              {formatBronPeriode(tip.bron_datum_eerste, tip.bron_datum_laatste)}
+            </span>
           </div>
 
           <Link href={`/nieuwsplein33/tip/${tip.id}`} className="np-regel-titel np-regel-link">{titel}</Link>

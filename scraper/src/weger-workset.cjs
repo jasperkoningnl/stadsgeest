@@ -6,6 +6,7 @@ const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { createClient } = require('@libsql/client');
 const { normaliseerNaam } = require('./koppel/normaliseer.cjs');
+const { bronTijd, spiegelKandidaten } = require('./weger-context.cjs');
 
 const MAX_CONTENT_CHARS = 4000;
 const MAX_ITEMS_PER_SIGNAL = 6;
@@ -99,6 +100,15 @@ async function loadItems(db, signalId) {
     };
   });
   return { items, total: Number(countResult.rows[0]?.n ?? items.length) };
+}
+
+async function loadSpiegelItems(db) {
+  const result = await db.execute(`SELECT r.id,r.title,r.summary,substr(r.content,1,1500) AS content,
+      r.external_url AS url,r.published_at,r.scraped_at,s.name AS source_name
+    FROM raw_items r JOIN sources s ON s.id=r.source_id
+    WHERE s.bronrol='spiegel' AND r.scraped_at >= datetime('now','-120 days')
+    ORDER BY COALESCE(r.published_at,r.scraped_at) DESC LIMIT 300`);
+  return result.rows;
 }
 
 // Gecontroleerde bronbevindingen uit grote documenten. De documentlezer
@@ -570,7 +580,7 @@ async function main(argv = process.argv.slice(2)) {
       args: [limit],
     });
 
-    const orgRunId = await latestOrgRun(db);
+    const [orgRunId, spiegelItems] = await Promise.all([latestOrgRun(db), loadSpiegelItems(db)]);
     const candidates = [];
     for (const signal of signals.rows) {
       const signalId = Number(signal.id);
@@ -589,6 +599,8 @@ async function main(argv = process.argv.slice(2)) {
         items: itemSet.items,
         item_count: itemSet.total,
         items_omitted: Math.max(0, itemSet.total - itemSet.items.length),
+        bron_tijd: bronTijd(itemSet.items.filter((item) => item.source?.role !== 'spiegel')),
+        spiegel_kandidaten: spiegelKandidaten(signal, itemSet.items, spiegelItems),
         entities,
         ner_kg_kandidaten: nerKgCandidates,
         adres_koppelingen: addressLinks,
@@ -627,6 +639,8 @@ async function main(argv = process.argv.slice(2)) {
           signal_id: candidate.signal.id,
           item_count: candidate.item_count,
           included_items: candidate.items.length,
+          bron_tijd: candidate.bron_tijd,
+          spiegel_kandidaten: candidate.spiegel_kandidaten.length,
           organisatie_verbanden: candidate.organisatie_verbanden.length,
           woo_vondsten: candidate.woo_vondsten.length,
         })),

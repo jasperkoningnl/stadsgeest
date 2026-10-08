@@ -5,6 +5,7 @@
 import * as cheerio from 'cheerio';
 import db from '../db.js';
 import { saveRawItem, getOrCreateSource, logResult } from '../utils.js';
+import { extractMboLinks } from '../mbo-links.mjs';
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
@@ -85,11 +86,12 @@ async function scrapeMboAmersfoort() {
   let saved = 0, skipped = 0, errors = 0;
   try {
     const html = await fetchHtml(PAGE_URL);
-    const $ = cheerio.load(html);
-    const links = extractLinks($, BASE_URL, ['/nieuws/', '/actueel/']);
+    let links = extractMboLinks(html, PAGE_URL);
+    // De oude overzichtspagina is bereikbaar maar bevat soms geen artikelen;
+    // de homepage toont dan wel de actuele nieuwskaarten.
+    if (links.size === 0) links = extractMboLinks(await fetchHtml(`${BASE_URL}/`), `${BASE_URL}/`);
 
     for (const [url, title] of links) {
-      if (url === PAGE_URL || url.endsWith('/actueel/') || url.endsWith('/nieuws/')) continue;
       try {
         const r = await saveRawItem(db, { sourceId, externalUrl: url, title, content: '', summary: '' });
         if (r.saved) saved++; else skipped++;

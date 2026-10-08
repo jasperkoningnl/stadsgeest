@@ -1279,8 +1279,8 @@ a.np-chip:hover .np-chip-pijl { transform: translateX(2px); }
 }
 .np-regel-bronnen + .np-regel-meta { margin-top: 8px; }
 .np-regel-datum {
-  margin-left: auto; font-family: var(--f-b); font-size: 13px;
-  color: var(--np-inkt3); white-space: nowrap;
+  margin-left: auto; font-family: var(--f-b); font-size: 14px; font-weight: 700;
+  color: var(--np-inkt2); white-space: nowrap;
 }
 
 /* Supertip: volle rand en een band in de accentkleur, grotere kop,

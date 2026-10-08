@@ -32,6 +32,15 @@ export function formatDate(iso: string | null | undefined): string {
   return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric', timeZone: TIJDZONE })
 }
 
+/** Compacte bronperiode voor een tipkaart; één dag wordt niet dubbel getoond. */
+export function formatBronPeriode(eerste: string | null | undefined, laatste: string | null | undefined): string {
+  if (!eerste && !laatste) return 'Brondatum onbekend'
+  const begin = formatDate(eerste || laatste)
+  const eind = formatDate(laatste || eerste)
+  if (String(eerste || '').slice(0, 10) === String(laatste || eerste || '').slice(0, 10)) return `Bron ${eind}`
+  return `Bronnen ${begin} – ${eind}`
+}
+
 export function formatTime(iso: string | null | undefined): string {
   const d = parseDbDate(iso)
   if (!d) return '–'

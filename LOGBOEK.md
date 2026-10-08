@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-10-08 — Brondatum duidelijker, oudere tips strenger gecontroleerd
+
+Op iedere tipkaart staat nu opvallend wanneer de brondocumenten zijn gepubliceerd. Als documenten uit verschillende perioden komen, zie je de eerste en laatste datum. Daardoor valt sneller op dat een vers binnengekomen stuk over een ouder besluit gaat. De selectie waarschuwt daar voortaan ook voor en zoekt vóór een tip breder naar eerdere berichtgeving, ook als de kop anders is.
+
 **Wat hier niet in hoort.** Dit logboek is alleen voor de redactie van
 Nieuwsplein33. Het aparte gemeentedashboard over wonen wordt hier nooit
 genoemd, ook niet zijdelings; dat geldt voor alles wat onder `/nieuwsplein33`

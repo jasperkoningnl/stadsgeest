@@ -481,3 +481,11 @@ niets meer; agenda's, raadsvoorstellen en bijlagen kwamen niet binnen.
 - `NOTUBIZ_DRYRUN=1` toont wat hij zou doen zonder te schrijven.
 - NVWA: `nvwa-inspectieresultaten.js` leest sinds 4 oktober per dag een zevende
   van de postcodes; `SG_NVWA_ALLES=1` draait alles.
+
+## Website-terugval bij organisatiebronnen
+
+RSS-bronnen met een `htmlFallback` gebruiken de nieuwswebsite ook wanneer de
+feed zelf een HTTP- of parsefout geeft, niet alleen wanneer een geldige feed
+leeg is. Kamp Amersfoort gebruikt zo `/nieuws/` als terugval voor de instabiele
+feed. MBO Amersfoort controleert na een lege oude overzichtspagina de
+nieuwskaarten op de homepage; echte artikelen staan onder `/nieuws/`.

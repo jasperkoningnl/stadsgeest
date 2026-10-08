@@ -47,16 +47,19 @@ function falendeScrapers(rijen, reeks = 3) {
  * bronnen: [{ id, name, tier, bronrol }]; stats: Map(id -> { laatste, n90 }) met
  * `laatste` de datum van het nieuwste item en `n90` het aantal items in 90 dagen.
  */
-function langStilleBronnen(bronnen, stats, nu = new Date(), { dagen = 21, minEerder = 5 } = {}) {
+function langStilleBronnen(bronnen, stats, nu = new Date(), {
+  dagen = 21, minEerder = 5, recentLevend = new Set(), bewustStil = new Set(),
+} = {}) {
   const grens = new Date(nu.getTime() - dagen * 86400000).toISOString().substring(0, 10);
   const uit = [];
   for (const b of bronnen || []) {
-    if (Number(b.tier) !== 1 || b.bronrol === 'spiegel') continue;
-    const s = stats.get(Number(b.id));
+    const id = Number(b.id);
+    if (Number(b.tier) !== 1 || b.bronrol === 'spiegel' || recentLevend.has(id) || bewustStil.has(id)) continue;
+    const s = stats.get(id);
     if (!s || !s.laatste || Number(s.n90 || 0) < minEerder) continue;
     const laatste = String(s.laatste).substring(0, 10);
     if (laatste >= grens) continue;
-    uit.push({ id: Number(b.id), naam: b.name, laatste, n90: Number(s.n90) });
+    uit.push({ id, naam: b.name, laatste, n90: Number(s.n90) });
   }
   return uit.sort((a, b) => a.laatste.localeCompare(b.laatste));
 }

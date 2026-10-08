@@ -71,6 +71,13 @@ moet lezen. Ken punten zoals 'bekende bestuurder direct betrokken' alleen toe
 als het gelezen document het bevestigt, en let op naamgenoten bij gewone namen.
 Zie `docs/NER.md`.
 
+`bron_tijd` zet de eerste en laatste publicatiedatum van de dragende stukken
+naast het scrapemoment en waarschuwt bij oude stukken of een grote spreiding.
+Behandel een recent opnieuw opgedoken document nooit vanzelf als nieuw nieuws:
+noem de oorspronkelijke datum en maak alleen een tip als er een aantoonbaar
+nieuwe beslissing, wijziging of actuele aanleiding is. Een nieuw vergaderstuk
+over een oud plan maakt dat plan zelf niet opnieuw nieuw.
+
 `adres_koppelingen` noemt per exact BAG-adres in het signaal de andere
 documenten, registers (onder meer rijksmonumenten, kinderopvang, scholen,
 zorgaanbieders, GLEIF) en KG-organisaties op precies datzelfde adres, en onder
@@ -220,9 +227,14 @@ bronregel blijft gelden.
 
 ## 4. Spiegelcheck
 
-Zoek vóór iedere tip gericht bij Nieuwsplein33 en de spiegelbronnen uit
-`docs/EDITORIAL-PROFILE.md`. Leg per treffer medium, titel, directe URL en datum
-vast. Noteer in één zin wat Stadsgeest toevoegt.
+Bekijk vóór iedere tip eerst `spiegel_kandidaten` uit de werkset. Dit zijn
+thematische en woordelijke zoekaanwijzingen, geen bewijs van bestaande dekking.
+Open kansrijke treffers en zoek daarna gericht bij Nieuwsplein33 en de
+spiegelbronnen uit `docs/EDITORIAL-PROFILE.md`, ook met onderwerp, wijk,
+organisatie en bronsoort in plaats van alleen de voorgestelde kop. Leg per
+echte treffer medium, titel, directe URL en datum vast. Noteer in één zin wat
+Stadsgeest toevoegt. Schrijf niet "niet gebracht" als alleen een exacte
+kopzoekactie niets vond.
 
 ## 5. Scoren
 
