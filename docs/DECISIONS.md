@@ -4,18 +4,9 @@
 **Status:** gezaghebbend.
 **Lees wanneer:** bij roadmapafwijkingen of wanneer een eerdere ontwerpkeuze ter discussie staat.
 
-## 2026-10-02 — Woondashboard blijft onzichtbaar op /nieuwsplein33
+## 2026-10-12 — Woondashboard verwijderd
 
-Het redactiedashboard (`/nieuwsplein33`, inclusief `LOGBOEK.md`) noemt het
-woondashboard voor de beleidsadviseur wonen (`/beleidsadviseur`) nergens, ook
-niet in het logboek of in uitlegteksten. Jasper besloot dit op 2 oktober 2026
-en liet de eerdere logboekmelding erover verwijderen. Beide dashboards zijn
-gescheiden producten voor gescheiden gebruikers; de redactie hoeft niet te
-weten dat het woondashboard bestaat. `scripts/check-docs.mjs` controleert
-`LOGBOEK.md` en `src/app/nieuwsplein33/` op de woorden "woondashboard" en
-"beleidsadviseur" en laat `npm run docs:check`, en daarmee iedere build, falen
-als ze voorkomen. Technische documentatie onder `docs/` mag het woondashboard
-wel beschrijven.
+Het woondashboard voor de beleidsadviseur wonen (`/beleidsadviseur`) is op 12 oktober 2026 volledig verwijderd: route, queries, CBS-laag, het account `adviseur` en de rol `beleid`. Jasper besloot dit. Het stond nooit op `/nieuwsplein33` of in `LOGBOEK.md`, en dat blijft zo. De documentcontrole op die woorden is vervallen. `sessieGebruiker` accepteert sindsdien alleen sessies van accounts die in `dashboardAuth.ts` staan, zodat een oude cookie van een verwijderd account ook bij de API-routes niets meer doet.
 
 ## 2026-09-13 — Migratieplan geïntegreerd, niet langer zelfstandig leidend
 

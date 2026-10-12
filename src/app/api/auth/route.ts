@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { noteerMisluktePoging, teVeelPogingen } from '@/lib/dashboard/inlogLimiet'
-import { AUTH_COOKIE, isGeconfigureerd, maakSessie, magNaar, startpagina, wachtwoordKlopt } from '@/lib/dashboardAuth'
+import { AUTH_COOKIE, isGeconfigureerd, maakSessie, REDACTIE_PAD, wachtwoordKlopt } from '@/lib/dashboardAuth'
 
 export async function POST(request: Request) {
   const formData = await request.formData()
@@ -31,10 +31,8 @@ export async function POST(request: Request) {
   if (!sessie) return terugNaarLogin('config')
 
   // Alleen paden binnen deze site toestaan, anders is dit een open redirect.
-  // En alleen paden die deze gebruiker mag zien: het beleidsaccount dat via
-  // /login?from=/nieuwsplein33 binnenkomt, gaat naar zijn eigen dashboard.
   const binnenSite = from.startsWith('/') && !from.startsWith('//')
-  const pad = binnenSite && magNaar(geldigeGebruiker, from.split('?')[0]) ? from : startpagina(geldigeGebruiker)
+  const pad = binnenSite ? from : REDACTIE_PAD
   const response = NextResponse.redirect(new URL(pad, request.url), { status: 303 })
 
   response.cookies.set(AUTH_COOKIE, sessie.waarde, {

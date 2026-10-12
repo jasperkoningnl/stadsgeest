@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/nieuwsplein33', '/beleidsadviseur', '/login', '/api/'],
+      disallow: ['/nieuwsplein33', '/login', '/api/'],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   }

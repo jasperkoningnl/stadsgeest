@@ -13,7 +13,7 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 - Turso: plan verhogen of verbruik terugbrengen; 35% van het maandquotum op 5 oktober.
 - Statenstukken: strengere toets (treffers naar lengte) of achtergrondstatus voor grote provinciebrede stukken (10-02).
 - Tier 3: andere oplossing dan niet meer opslaan (10-04). Rolcontrole in de API-routes en de weekmailroute zijn geparkeerd.
-- Staan `WEEKMAIL_ONTVANGERS`, `CRON_SECRET` en `WACHTWOORD_BELEIDSADVISEUR` op Vercel? Vanuit de repo niet te controleren (10-02, 10-03).
+- Staan `WEEKMAIL_ONTVANGERS` en `CRON_SECRET` op Vercel? Vanuit de repo niet te controleren (10-02, 10-03).
 - Dossiers: additieve velden voor baan (intern/openbaar) en open vraag/wederhoor (10-01).
 - Dossiergraaf: niet-gekoppelde organisatienamen als eigen knoop, of eerst de KG verrijken (10-01).
 - Clusteren op zaakkenmerk: steekproef beoordelen en beslissen wat er gebeurt als een nieuw stuk bij een al weggezette zaak hoort (10-05).
