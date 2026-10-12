@@ -48,7 +48,7 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 
 ## Leerloop
 
-- Jev-documentproef: 300 paren beoordeeld en 40 volgordecontroles gedaan; eerst de blinde 30-parencontrole door Jasper, daarna modelvergelijking. Geen bewezen kwaliteitswinst of productie-integratie (10-12).
+- Jev-documentproef: Codex controleerde 40 paren en vier volledige bronparen; de 31 extra kandidaten gaan allemaal over Isselt. Eerst bronstructuur, passagekeuze en dossier-versus-zaaklabels verbeteren. Geen vereiste labeltaak voor Jasper, geen menselijke golden set of productie-integratie (10-12).
 
 - De augustus-reviewcyclus van fase 5 staat open.
 - Golden set fase 1: met de huidige beoordelingen is 98% precisie niet haalbaar; de vijf afwijkingen bekijken.
