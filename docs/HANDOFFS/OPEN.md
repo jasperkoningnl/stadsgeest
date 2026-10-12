@@ -48,7 +48,7 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 
 ## Leerloop
 
-- Jev-vervolgproef afgerond: 39 paren, Codex-referentie door Jasper geaccepteerd, gecombineerde voorstellen behouden 26 referentieverbanden. Volgende stap is een gerichte weger-werksetproef met Codex-controle; geen autonome merges of rangwijzigingen. Document-/zaak-/dossieridentiteit blijven apart (10-12).
+- Jev-context is aangesloten en live geverifieerd; huidige reguliere weger-werkset is leeg. Inhoudelijke meerwaarde in een volgende relevante weging is nog niet gemeten. Bevroren pilot, geen doorlopende API-taak; geen autonome merges of rangwijzigingen (10-12).
 
 - De augustus-reviewcyclus van fase 5 staat open.
 - Golden set fase 1: met de huidige beoordelingen is 98% precisie niet haalbaar; de vijf afwijkingen bekijken.

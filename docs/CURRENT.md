@@ -73,6 +73,12 @@ transactioneel en geaudit.
 
 ## Bewijsgrens en risico's
 
+De weger kan brongebonden Jev-pilotverbanden meekrijgen bij exact gekoppelde
+signalen, met bevroren passages en Codex-controle. Gewijzigde bronstukken worden
+overgeslagen. Dit is een lokale, begrensde pilot: geen doorlopende API-taak,
+nieuwe signalen, automatische merges of scorewijzigingen. De controle heeft
+herkomst `ai` en telt niet als menselijke golden set of redactionele feedback.
+
 De leerdata bewijst reproduceerbaarheid, nog geen kwaliteitsverbetering of
 causaliteit. Rapporteer cijfers pas vanaf 10 beoordelingen; overweeg handmatige
 kalibratie vanaf 30; beoordeel een wijzigingsvoorstel pas vanaf 50 per bron of

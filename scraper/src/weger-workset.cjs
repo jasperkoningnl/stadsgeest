@@ -3,6 +3,7 @@
 
 const path = require('path');
 const fs = require('fs');
+const { loadJevContext } = require('./weger-jev.cjs');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { createClient } = require('@libsql/client');
 const { normaliseerNaam } = require('./koppel/normaliseer.cjs');
@@ -613,6 +614,12 @@ async function main(argv = process.argv.slice(2)) {
     const kruisbronKandidaten = await loadKruisbronKandidaten(db, orgRunId);
     const wooKandidaten = await loadWooKandidaten(db);
     const archiefKandidaten = await loadArchiefKandidaten(db);
+    const jevContext = await loadJevContext(db);
+    for (const candidate of candidates) {
+      candidate.jev_verbanden = jevContext.bySignal.get(candidate.signal.id) || [];
+    }
+    const jevPilot = { ...jevContext.summary,
+      offered_in_workset: candidates.reduce((n, c) => n + c.jev_verbanden.length, 0) };
 
     const dossierResult = await db.execute(
       'SELECT id, naam, slug, trefwoorden, omschrijving FROM dossiers ORDER BY naam'
@@ -625,6 +632,7 @@ async function main(argv = process.argv.slice(2)) {
       kruisbron_kandidaten: kruisbronKandidaten,
       woo_kandidaten: wooKandidaten,
       archief_kandidaten: archiefKandidaten,
+      jev_pilot: jevPilot,
       dossiers: dossierResult.rows.map((row) => ({ ...row, id: Number(row.id) })),
     };
     if (argv.includes('--summary')) {
@@ -635,6 +643,7 @@ async function main(argv = process.argv.slice(2)) {
         kruisbron_kandidaten: output.kruisbron_kandidaten.length,
         woo_kandidaten: output.woo_kandidaten.length,
         archief_kandidaten: output.archief_kandidaten.length,
+        jev_pilot: output.jev_pilot,
         candidates: output.candidates.map((candidate) => ({
           signal_id: candidate.signal.id,
           item_count: candidate.item_count,
@@ -643,6 +652,7 @@ async function main(argv = process.argv.slice(2)) {
           spiegel_kandidaten: candidate.spiegel_kandidaten.length,
           organisatie_verbanden: candidate.organisatie_verbanden.length,
           woo_vondsten: candidate.woo_vondsten.length,
+          jev_verbanden: candidate.jev_verbanden.length,
         })),
       }, null, 2));
     } else {

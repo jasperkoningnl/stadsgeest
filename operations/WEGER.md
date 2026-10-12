@@ -140,6 +140,29 @@ bronregel, spiegelcheck en scoredrempel toe.
 
 ## 2. Harde bronregel
 
+De optionele `jev_verbanden` per signaal bevat uitsluitend exact gekoppelde
+documentparen uit de lokale, bevroren Jev-pilot. `jev_pilot` meldt of de invoer
+ontbreekt, ongeldig is of bronstukken inmiddels gewijzigd zijn. Een ontbrekende
+pilot blokkeert de gewone weging niet. De loader valideert bron-, aanvraag- en
+reviewhashes en vergelijkt beide stukken met de actuele database; gewijzigde of
+ontbrekende stukken worden overgeslagen. Ook deelitems worden gericht gekoppeld.
+
+Gebruik de bronpassages met hun posities, URL's, publicatiedatums en Codex'
+gemotiveerde `review` als leeswijzer. `relation` en `document_identity` komen
+uit die controle; de afzonderlijke `model_*`-velden en `flags` houden afwijkende
+Jev-antwoorden zichtbaar. De controle blijft `ai`, geen menselijke golden set
+of redactionele feedback. Lees de oorspronkelijke stukken voor feitelijke
+conclusies: de AI-context vormt geen onafhankelijke bevestiging, nieuwsfeit,
+merge-instructie of reden om een score te verhogen. Hetzelfde dossier is niet
+automatisch dezelfde zaak of hetzelfde bronstuk.
+
+De pilot verandert de selectie, status of nieuwheidsregels niet. Een voorstel
+heropent geen eerder beoordeeld of afgewezen signaal; bij een lege werkset
+blijft het context voor een latere relevante weging. De werkset doet geen Jev-
+aanroepen. De pilotbestanden staan genegeerd onder
+`scraper/tmp/jev-experiment/followup/`; op een andere machine ontbreken ze totdat
+de gecontroleerde invoer daar beschikbaar is.
+
 Een tip vereist minimaal één dragende tier-1- of onderscheidende tier-2-bron.
 Tier 3 en spiegelbronnen mogen nooit zelfstandig dragen. Spiegelbronnen zijn wel
 verplicht voor de controle of Nieuwsplein33 of partners het verhaal al hebben.
