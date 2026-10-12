@@ -20,7 +20,6 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 
 ## Keten en bewaking
 
-- Detectietaak eindigt op 1: op 5 oktober `ner=1` (libsql `SERVER_ERROR`, HTTP 400) en `registeradressen=1` (`RCE SPARQL HTTP 503`); op 4 oktober alleen de RCE (10-04).
 - Kamp Amersfoort geeft sinds 4 oktober elke nacht `error` zonder foutmelding (10-04).
 - Routinefilter in de intake is nog niet in werking gezien: de run van 5 oktober bevatte geen bekendmaking van die soort. Na een werkdag tellen op reden `routine:` (10-04).
 - NDW in de gecombineerde detectierun: rond 11 oktober nakijken of `ndw` op `ok` staat binnen de heaplimiet (10-04).

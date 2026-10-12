@@ -13,6 +13,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
+const { contextSnippet } = require('./ner/context.cjs');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { createClient } = require('@libsql/client');
 const db = createClient({ url: process.env.TURSO_URL, authToken: process.env.TURSO_AUTH_TOKEN });
@@ -160,6 +161,7 @@ async function main() {
 
   for (const r of results) {
     const text = texts.get(r.id);
+    const characters = Array.from(text);
     const known = new Set((await db.execute({ sql: 'SELECT entity_type, normalized_name FROM entities WHERE raw_item_id = ?', args: [r.id] }))
       .rows.map((e) => e.entity_type + '|' + e.normalized_name));
     // Privacy: een persoonsnaam bewaren we alleen als die al in de KG staat
@@ -181,7 +183,7 @@ async function main() {
     const rows = r.kept.map((m) => {
       const { res } = m;
       const overlap = known.has(m.type + '|' + m.norm) ? 1 : 0;
-      const snippet = text.substring(Math.max(0, m.start - 60), m.end + 90).replace(/\s+/g, ' ').trim();
+      const snippet = contextSnippet(characters, m.start, m.end);
       stats.byType[m.type] = (stats.byType[m.type] || 0) + 1;
       stats.byStatus[res.status] = (stats.byStatus[res.status] || 0) + 1;
       stats.aliasOverlap += overlap;

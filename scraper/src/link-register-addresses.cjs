@@ -11,14 +11,12 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { createClient } = require('@libsql/client');
 const { EXTRACTOR_VERSION, parseStreetLine, lookup } = require('./kg/address-links.cjs');
+const { loadMonumentAddresses } = require('./kg/rce-monument-addresses.cjs');
 
 const db = createClient({ url: process.env.TURSO_URL, authToken: process.env.TURSO_AUTH_TOKEN });
 const DRY = process.argv.includes('--dry-run');
 const onlyArg = process.argv.indexOf('--only');
 const ONLY = onlyArg > -1 ? new Set(process.argv[onlyArg + 1].split(',')) : null;
-
-const RCE_SPARQL = 'https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql';
-const MONUMENT_SOURCE_ID = 154;
 
 async function latest(sourceId, key) {
   const sql = key
@@ -96,22 +94,7 @@ const SOURCES = {
     return m ? { sourceId: 138, ref: r.source_key, role: 'overtredingslocatie', label: `${v.bedrijf} (asbestovertreding)`, line: `${m[1]} ${m[2]}`, postcode: m[3] } : null;
   }).filter(Boolean),
   // Rijksmonumenten: BAG-relatie uit het RCE-register (per verblijfsobject).
-  monumenten: async () => {
-    const query = `PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
-      SELECT DISTINCT ?nr ?pc ?adres WHERE {
-        ?m ceo:rijksmonumentnummer ?nr ; ceo:heeftBasisregistratieRelatie ?b .
-        ?b ceo:gemeentenaam ?g . FILTER(?g IN ("Amersfoort", "Leusden"))
-        ?b ceo:heeftBAGRelatie ?r . ?r ceo:postcode ?pc ; ceo:volledigAdres ?adres . }`;
-    const url = new URL(RCE_SPARQL);
-    url.searchParams.set('query', query);
-    const res = await fetch(url, { headers: { Accept: 'application/sparql-results+json', 'User-Agent': 'Stadsgeest/1.0' }, signal: AbortSignal.timeout(60_000) });
-    if (!res.ok) throw new Error(`RCE SPARQL HTTP ${res.status}`);
-    const rows = (await res.json()).results.bindings;
-    return rows.map((b) => ({
-      sourceId: MONUMENT_SOURCE_ID, ref: `monument:${b.nr.value}#${b.adres.value}`, role: 'monument',
-      label: `Rijksmonument ${b.nr.value}`, line: b.adres.value, postcode: b.pc.value,
-    }));
-  },
+  monumenten: loadMonumentAddresses,
 };
 
 async function main() {
