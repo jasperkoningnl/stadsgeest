@@ -3,6 +3,7 @@
 const fs = require('node:fs'), path = require('node:path');
 const { createClient } = require('@libsql/client');
 const v1 = require('./jev-experiment-lib.cjs'), lib = require('./jev-followup-lib.cjs');
+const sharedBudget = require('./jev-budget.cjs');
 const ROOT = path.join(__dirname, '..'), BASE = path.join(ROOT, 'tmp', 'jev-experiment');
 const OUT = path.join(BASE, 'followup'), ARCHIVE = path.join(ROOT, 'data', 'archive-research', 'archive.sqlite');
 const SOURCE_IDS = [115, 116, 117, 118, 121, 122, 124, 129, 163, 164, 168, 162];
@@ -95,13 +96,12 @@ async function run(argv) {
   if (!['short', 'selected', 'reverse'].includes(mode)) throw new Error('Modus: short, selected of reverse.');
   const ledger = read('ledger.json', { entries: [] });
   if (ledger.entries.some(e => e.reference_hash !== refs.reference_hash)) throw new Error('Referenties gewijzigd na begin proef.');
-  const prior = JSON.parse(fs.readFileSync(path.join(BASE, 'ledger.json'), 'utf8'));
   const pairs = mode === 'reverse' ? dataset.pairs.filter((_, i) => i % 3 === 0).slice(0, 16) : dataset.pairs;
   let done = 0;
   for (const pair of pairs) {
     const request = lib.requestFor(pair, mode === 'short' ? 'short' : 'selected', mode === 'reverse'), requestHash = v1.hash(request);
     if (ledger.entries.some(e => e.request_hash === requestHash && e.status !== 'not_sent')) continue;
-    if (!v1.canReserve([...prior.entries, ...ledger.entries], 1)) throw new Error('Gedeeld proefbudget bereikt; gestopt vóór verzoek.');
+    if (!sharedBudget.mayReserve(5)) throw new Error('Gedeeld proefbudget bereikt; gestopt vóór verzoek.');
     const body = JSON.stringify(request); if (Buffer.byteLength(body) > 28000) throw new Error('Invoer te groot.');
     const entry = { pair_id: pair.id, request_hash: requestHash, dataset_hash: dataset.dataset_hash, reference_hash: refs.reference_hash, request, mode,
       status: 'reserved', reserved_usd: v1.RESERVATION, started_at: new Date().toISOString() };
@@ -116,9 +116,9 @@ async function run(argv) {
       throw new Error(e.message.startsWith('Jev HTTP') ? e.message : 'Aanroep niet bevestigd; geen automatische retry.');
     }
     write('ledger.json', ledger); done++;
-    if (done % 15 === 0) console.log(JSON.stringify({ mode, done, total_accounted_usd: v1.budgetUsed([...prior.entries, ...ledger.entries]) }));
+    if (done % 15 === 0) console.log(JSON.stringify({ mode, done, total_accounted_usd: sharedBudget.total() }));
   }
-  console.log(JSON.stringify({ mode, done, total_accounted_usd: v1.budgetUsed([...prior.entries, ...ledger.entries]) }));
+  console.log(JSON.stringify({ mode, done, total_accounted_usd: sharedBudget.total() }));
 }
 function report() {
   const dataset = read('dataset.json', null), refs = read('references.json', null), ledger = read('ledger.json', { entries: [] });
@@ -168,7 +168,7 @@ function report() {
     strata: Object.fromEntries([...new Set(dataset.pairs.map(p => p.stratum))].map(k => [k, dataset.pairs.filter(p => p.stratum === k).length])),
     structure_candidates: structureLinks.length, structural,
     modes, hybrid, reverse_tests: reverse.length, reverse_relation_changes: changes.map(e => e.pair_id),
-    cost_followup_usd: v1.budgetUsed(ledger.entries), cost_all_experiments_usd: v1.budgetUsed([...prior.entries, ...ledger.entries]),
+    cost_followup_usd: v1.budgetUsed(ledger.entries), cost_all_experiments_usd: sharedBudget.total(),
     turso_reads: 0, production_writes: 0, limitation: 'Overeenstemming met door Jasper geaccepteerde Codex-controle, geen onafhankelijke menselijke nauwkeurigheidsmeting. Geen productiepromotie.' };
   write('report.json', summary); console.log(JSON.stringify(summary, null, 2));
 }

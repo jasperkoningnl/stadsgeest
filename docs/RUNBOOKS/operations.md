@@ -84,6 +84,17 @@ de lokale FTS5-index. Hoogstens tien nieuwe historische items worden gericht
 voor intake heropend. Controleer na de eerste en de eerste geplande run Beheer →
 Verbruik en leg het verschil vast.
 
+De wekelijkse runner gebruikt batches van tien documenten voor de sync. Na
+twee verbindingsfouten bij grotere batches slaagde de hervatting met tien;
+dezelfde geïndexeerde cursor en overlap blijven gelden. De weger zoekt
+documentverbanden lokaal en haalt actuele signaalstukken alleen op exacte ID
+op, zodat nieuwe stukken ook vóór de volgende archiefsync voorbereid worden.
+De voorbereiding doet geen Jev-aanroepen of productiewrites. Betaalde
+vergelijkingsproeven worden expliciet gestart met `jev-study.cjs`; alle drie
+Jev-runners delen één lock en één kostenbewaking van maximaal $5 inclusief
+eerder bevestigd en onzeker verbruik. Bevroren invoer/reviews blijven in
+`scraper/tmp/jev-experiment/`; controleer het rapport, niet alleen een exitcode.
+
 ## Grote iBabs-bijlagen
 
 De gewone bijlagenrunner stopt bij 40 MB. Verwerk de aparte wachtrij buiten

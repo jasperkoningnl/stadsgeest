@@ -7,6 +7,7 @@ const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const { createClient } = require('@libsql/client');
 const lib = require('./jev-experiment-lib.cjs');
+const sharedBudget = require('./jev-budget.cjs');
 const ROOT = path.join(__dirname, '..');
 const OUT = path.join(ROOT, 'tmp', 'jev-experiment');
 const ARCHIVE = path.join(ROOT, 'data', 'archive-research', 'archive.sqlite');
@@ -103,17 +104,16 @@ async function run(argv) {
   const budget = Number(option(argv, '--budget', '1'));
   const limit = Number(option(argv, '--limit', '300'));
   const reverse = argv.includes('--reverse-options');
-  if (!Number.isFinite(budget) || budget <= 0 || budget > 1) throw new Error('Proefbudget moet tussen 0 en 1 USD liggen.');
+  if (!Number.isFinite(budget) || budget <= 0 || budget > 5) throw new Error('Proefbudget moet tussen 0 en 5 USD liggen.');
   if (!Number.isInteger(limit) || limit < 1 || limit > 300) throw new Error('Limiet moet 1–300 zijn.');
   const ledger = read('ledger.json', { entries: [] });
-  const followupLedger = read('followup/ledger.json', { entries: [] });
   let done = 0;
   const strata = ['title_link', 'weak_overlap', 'different'].map(bucket => dataset.pairs.filter(p => p.bucket === bucket));
   const candidates = reverse ? Array.from({ length: Math.max(...strata.map(s => s.length)) }, (_, i) => strata.map(s => s[i]).filter(Boolean)).flat() : dataset.pairs;
   for (const pair of candidates.slice(0, limit)) {
     const request = lib.requestFor(pair, reverse), key = lib.hash(request);
     if (ledger.entries.some(e => e.request_hash === key && e.status !== 'not_sent')) continue;
-    if (!lib.canReserve([...ledger.entries, ...followupLedger.entries], budget)) { console.log('Budgetgrens bereikt; gestopt vóór volgend verzoek.'); break; }
+    if (!sharedBudget.mayReserve(budget)) { console.log('Budgetgrens bereikt; gestopt vóór volgend verzoek.'); break; }
     // UTF-8-bytes zijn een conservatieve invoermaat. Ruim onder beide contextlimieten.
     const encoded = JSON.stringify(request);
     if (Buffer.byteLength(encoded, 'utf8') > 28000) throw new Error('Invoer te groot; niet verzonden.');
@@ -141,9 +141,9 @@ async function run(argv) {
     // in het tijdelijke bestand voor herstel zonder opnieuw betaald verzoek.
     write('ledger.json', ledger);
     done++;
-    if (done % 25 === 0) console.log(JSON.stringify({ completed_this_run: done, accounted_usd: lib.budgetUsed(ledger.entries) }));
+    if (done % 25 === 0) console.log(JSON.stringify({ completed_this_run: done, accounted_usd: sharedBudget.total() }));
   }
-  console.log(JSON.stringify({ completed_this_run: done, requests_recorded: ledger.entries.length, accounted_usd: lib.budgetUsed(ledger.entries) }));
+  console.log(JSON.stringify({ completed_this_run: done, requests_recorded: ledger.entries.length, accounted_usd: sharedBudget.total() }));
 }
 function importReviews(input) {
   if (!input) throw new Error('Geef het gedownloade beoordelingenbestand op.');

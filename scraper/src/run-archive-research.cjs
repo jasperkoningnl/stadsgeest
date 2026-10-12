@@ -21,7 +21,9 @@ function step(script, args = []) {
 }
 
 function main() {
-  step('archive-sync.cjs');
+  // Na twee fetch-fouten bij 100 slaagde de hervatting bij 10. Kleinere
+  // responses via dezelfde geïndexeerde cursor behouden de recordselectie.
+  step('archive-sync.cjs', ['--batch', '10']);
   step('archive-research.cjs', ['--promote', '--max', '20', '--max-promoties', '10']);
 }
 

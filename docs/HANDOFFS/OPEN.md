@@ -48,7 +48,7 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 
 ## Leerloop
 
-- Jev-context is aangesloten en live geverifieerd; huidige reguliere weger-werkset is leeg. Inhoudelijke meerwaarde in een volgende relevante weging is nog niet gemeten. Bevroren pilot, geen doorlopende API-taak; geen autonome merges of rangwijzigingen (10-12).
+- Algemene documentvoorbereiding is aangesloten; grotere Jev-proef afgerond (200 ontwikkelparen, 59 bruikbare controleparen). Meerwaarde voor echte tips nog niet gemeten. Jev helpt kandidaatselectie maar onthoudt zich te weinig bij metadata; Codex-controle blijft nodig. Geen doorlopende betaalde taak (10-12).
 
 - De augustus-reviewcyclus van fase 5 staat open.
 - Golden set fase 1: met de huidige beoordelingen is 98% precisie niet haalbaar; de vijf afwijkingen bekijken.

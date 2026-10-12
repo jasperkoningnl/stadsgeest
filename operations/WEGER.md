@@ -140,6 +140,31 @@ bronregel, spiegelcheck en scoredrempel toe.
 
 ## 2. Harde bronregel
 
+`document_verbanden` bereidt mogelijke relaties bij de geselecteerde signalen
+voor, zonder Jev-aanroep. Actuele signaalstukken worden op exacte ID gelezen;
+oudere partners komen uit het lokale archief. De voorbereiding gebruikt
+gescopete zaakkenmerken, specifieke agendapunten of minstens twee inhoudelijke
+titelwoorden. Fractienamen en vaste bestuurlijke woorden tellen niet. Maximaal
+drie partners per ankerstuk en 150 paren per werkset; de samenvatting
+`document_voorbereiding` meldt dekking, actualiteitscontrole en weggelaten
+ankers. Een lege werkset start geen vervangende archiefsweep.
+
+Deze voorstellen hebben `state: unreviewed` en `review: null`. Lees de gerichte
+passages en waar nodig de volledige oorspronkelijke stukken. Beoordeel apart:
+(1) hetzelfde document, verschillende documenten of onvoldoende informatie;
+(2) dezelfde concrete zaak, hetzelfde specifieke dossier, verwante dossiers,
+geen onderbouwd verband of onvoldoende informatie. Zaakkenmerken in bijlagen
+kunnen van een andere overheid afkomstig zijn; controleer die context.
+Bewaar het oordeel met bron-ID's/URL's, vindplaats en een concrete reden in het
+wegerrapport. Een relatie tussen verzamelstukken moet op het gedeelde
+subonderwerp worden afgebakend. Alleen een titel, een confidence-getal of een
+algemeen beleidsthema is geen inhoudelijk bewijs. Als inhoud ontbreekt, kies
+onvoldoende informatie. Behoud verschillen tussen concept en definitieve versie.
+
+Het resultaat blijft AI-controle en is geen tweede bron, autonome merge of
+nieuw feit. De voorbereiding verandert geen signaalstatus, regelidentiteit of
+score; de onderstaande bronregel, nieuwheidsregels en spiegelcheck blijven gelden.
+
 De optionele `jev_verbanden` per signaal bevat uitsluitend exact gekoppelde
 documentparen uit de lokale, bevroren Jev-pilot. `jev_pilot` meldt of de invoer
 ontbreekt, ongeldig is of bronstukken inmiddels gewijzigd zijn. Een ontbrekende

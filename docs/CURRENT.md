@@ -73,11 +73,17 @@ transactioneel en geaudit.
 
 ## Bewijsgrens en risico's
 
-De weger kan brongebonden Jev-pilotverbanden meekrijgen bij exact gekoppelde
-signalen, met bevroren passages en Codex-controle. Gewijzigde bronstukken worden
-overgeslagen. Dit is een lokale, begrensde pilot: geen doorlopende API-taak,
-nieuwe signalen, automatische merges of scorewijzigingen. De controle heeft
-herkomst `ai` en telt niet als menselijke golden set of redactionele feedback.
+De weger bereidt bij geselecteerde signalen documentverbanden voor via actuele
+bronstukken en het lokale archief: zaakkenmerken, specifieke agendacontext en
+inhoudelijke titelwoorden, met gerichte passages en oorspronkelijke datums.
+Fractienamen en bestuurlijke sjabloonwoorden dragen geen kandidaat. Codex
+beoordeelt document-, zaak- en dossieridentiteit afzonderlijk, inclusief
+onvoldoende informatie. Gewijzigde archiefpartners vallen weg. De bevroren
+Jev-pilot kan daarnaast gecontroleerde context leveren. De voorbereiding doet
+geen betaalde API-aanroepen, nieuwe signalen, merges of scorewijzigingen.
+Jev blijft een afzonderlijk gestart vergelijkingshulpmiddel met een gezamenlijk
+proefbudget. Codex-controle heeft herkomst `ai` en telt niet als menselijke
+golden set of redactionele feedback.
 
 De leerdata bewijst reproduceerbaarheid, nog geen kwaliteitsverbetering of
 causaliteit. Rapporteer cijfers pas vanaf 10 beoordelingen; overweeg handmatige

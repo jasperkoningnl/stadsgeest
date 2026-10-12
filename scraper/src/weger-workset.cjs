@@ -4,6 +4,7 @@
 const path = require('path');
 const fs = require('fs');
 const { loadJevContext } = require('./weger-jev.cjs');
+const { prepareWorkset } = require('./document-relations.cjs');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { createClient } = require('@libsql/client');
 const { normaliseerNaam } = require('./koppel/normaliseer.cjs');
@@ -615,8 +616,10 @@ async function main(argv = process.argv.slice(2)) {
     const wooKandidaten = await loadWooKandidaten(db);
     const archiefKandidaten = await loadArchiefKandidaten(db);
     const jevContext = await loadJevContext(db);
+    const documentContext = await prepareWorkset(db,candidates);
     for (const candidate of candidates) {
       candidate.jev_verbanden = jevContext.bySignal.get(candidate.signal.id) || [];
+      candidate.document_verbanden = documentContext.bySignal.get(candidate.signal.id) || [];
     }
     const jevPilot = { ...jevContext.summary,
       offered_in_workset: candidates.reduce((n, c) => n + c.jev_verbanden.length, 0) };
@@ -633,6 +636,7 @@ async function main(argv = process.argv.slice(2)) {
       woo_kandidaten: wooKandidaten,
       archief_kandidaten: archiefKandidaten,
       jev_pilot: jevPilot,
+      document_voorbereiding: documentContext.summary,
       dossiers: dossierResult.rows.map((row) => ({ ...row, id: Number(row.id) })),
     };
     if (argv.includes('--summary')) {
@@ -644,6 +648,7 @@ async function main(argv = process.argv.slice(2)) {
         woo_kandidaten: output.woo_kandidaten.length,
         archief_kandidaten: output.archief_kandidaten.length,
         jev_pilot: output.jev_pilot,
+        document_voorbereiding: output.document_voorbereiding,
         candidates: output.candidates.map((candidate) => ({
           signal_id: candidate.signal.id,
           item_count: candidate.item_count,
@@ -653,6 +658,7 @@ async function main(argv = process.argv.slice(2)) {
           organisatie_verbanden: candidate.organisatie_verbanden.length,
           woo_vondsten: candidate.woo_vondsten.length,
           jev_verbanden: candidate.jev_verbanden.length,
+          document_verbanden: candidate.document_verbanden.length,
         })),
       }, null, 2));
     } else {
