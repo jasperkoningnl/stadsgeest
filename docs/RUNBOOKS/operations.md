@@ -90,10 +90,20 @@ dezelfde geïndexeerde cursor en overlap blijven gelden. De weger zoekt
 documentverbanden lokaal en haalt actuele signaalstukken alleen op exacte ID
 op, zodat nieuwe stukken ook vóór de volgende archiefsync voorbereid worden.
 De voorbereiding doet geen Jev-aanroepen of productiewrites. Betaalde
-vergelijkingsproeven worden expliciet gestart met `jev-study.cjs`; alle drie
+vergelijkingsproeven worden expliciet gestart met `jev-study.cjs`; alle
 Jev-runners delen één lock en één kostenbewaking van maximaal $5 inclusief
 eerder bevestigd en onzeker verbruik. Bevroren invoer/reviews blijven in
 `scraper/tmp/jev-experiment/`; controleer het rapport, niet alleen een exitcode.
+
+`jev-weger-shadow.cjs` vergelijkt bewaarde dagruns met Jev zonder productie-
+writes. `prepare` bevriest werksets en bestaande oordelen, `run pairs` beoordeelt
+de originele documentpassages en `run without` / `run with` vergelijken een
+begrensde signaalcontext zonder/met extra documentpassages. Bestaande oordelen
+gaan niet in de API-invoer. Een signaal zonder extra context hergebruikt zijn
+antwoord. `report` maakt JSON plus een leesbare `vergelijking.html` onder
+`scraper/tmp/jev-experiment/weger-shadow/`. Deze Jev-voorselectie voert geen
+zelfstandige bron-, spiegel- of volledige wegingscontrole uit; kandidaten zijn
+geen kant-en-klare tips en de proef bewijst geen causale tipverbetering.
 
 ## Grote iBabs-bijlagen
 

@@ -2,7 +2,7 @@
 const fs = require('node:fs'), path = require('node:path');
 const { budgetUsed, canReserve, PRICE } = require('./jev-experiment-lib.cjs');
 const BASE = path.join(__dirname, '..', 'tmp', 'jev-experiment');
-const LEDGERS = ['ledger.json','followup/ledger.json','large/ledger.json'];
+const LEDGERS = ['ledger.json','followup/ledger.json','large/ledger.json','weger-shadow/ledger.json'];
 function allEntries(base = BASE) {
   return LEDGERS.flatMap(name => {
     const file = path.join(base,name);
