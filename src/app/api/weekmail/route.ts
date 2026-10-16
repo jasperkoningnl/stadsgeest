@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { q } from '@/lib/turso'
+import { formatDate } from '@/lib/dashboard/format'
 
 const CRON_SECRET = process.env.CRON_SECRET
 
@@ -151,6 +152,9 @@ function renderMail(tips: WeekTip[], baseUrl: string, stand: { wachtrij: number;
            style="color: #111827; font-weight: 600; text-decoration: none; font-size: 15px;">
           ${escapeHtml(tip.titel)}
         </a>
+        <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">
+          Tip gemaakt op ${escapeHtml(formatDate(tip.created_at))}
+        </div>
         <div style="color: #6b7280; font-size: 13px; margin-top: 4px; line-height: 1.4;">
           ${escapeHtml(tip.kern.length > 200 ? tip.kern.slice(0, 200) + '…' : tip.kern)}
         </div>
@@ -215,7 +219,7 @@ function renderMail(tips: WeekTip[], baseUrl: string, stand: { wachtrij: number;
 function renderPlainText(tips: WeekTip[], baseUrl: string, stand: { wachtrij: number; oud: number }): string {
   const regels = tips.map(
     (tip, i) =>
-      `${i + 1}. [${tip.score}] ${tip.supertip ? 'SUPERTIP: ' : ''}${tip.titel}\n   ${tip.kern.length > 160 ? tip.kern.slice(0, 160) + '…' : tip.kern}\n   ${baseUrl}/nieuwsplein33/tip/${tip.id}`
+      `${i + 1}. [${tip.score}] ${tip.supertip ? 'SUPERTIP: ' : ''}${tip.titel}\n   Tip gemaakt op ${formatDate(tip.created_at)}\n   ${tip.kern.length > 160 ? tip.kern.slice(0, 160) + '…' : tip.kern}\n   ${baseUrl}/nieuwsplein33/tip/${tip.id}`
   )
   return [
     `STADSGEEST WEEKOVERZICHT — ${weekLabel()}`,
