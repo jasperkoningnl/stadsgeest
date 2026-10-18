@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-10-18 — Minder losse tips, meer samenhang
+
+De bestaande wachtrij is inhoudelijk doorgelopen en teruggebracht van 53 naar 22 tips. Zeventien tips zijn afgesloten omdat ze onvoldoende nieuwswaarde hadden, achterhaald waren of overlapten; veertien zijn geparkeerd met concrete vervolgvragen. Bij MetMaya, de AZC-zoektocht en Koedijkerweg zijn telkens twee tips samengevoegd, zodat oudere en nieuwere informatie samen een onderzoeksvraag vormen. Oorspronkelijke inhoud, bronnen en redenen blijven bewaard. Bestaande scores en eerder goedgekeurde of gepubliceerde tips zijn niet gewijzigd. De opschoning sluit aan op de nieuwe koers: minder losse meldingen, meer reconstructies, historische vergelijkingen en onderbouwde patronen.
+
 ## 2026-10-18 — De Woo Factor
 
 Op de aparte pagina De Woo Factor onderzoekt Stadsgeest welke stukken in een dossier ontbreken. Eerst controleert het de bronverwerking en zoekt het online. Je ziet alleen onderbouwde voorstellen met een conceptverzoek, kunt het concept bewerken en goedkeuren of het voorstel afwijzen. Afgevallen onderzoeken worden niet getoond. Goedkeuring wordt vastgelegd; er wordt nog niets verstuurd.
