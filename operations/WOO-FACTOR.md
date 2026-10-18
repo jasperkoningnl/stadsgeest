@@ -1,7 +1,16 @@
 # De Woo Factor uitvoeren
 
-**Start:** afzonderlijke onderzoeksopdracht; geen automatische dagtaak.
+**Start:** wekelijks op maandag om 10.00 uur (Europe/Amsterdam), via de
+Codex-chatplanning `de-woo-factor-wekelijkse-onderzoeksronde`. Een gerichte
+onderzoeksopdracht tussendoor blijft mogelijk. Geen afzonderlijke Windows-taak.
 **Contract:** `docs/WOO-FACTOR.md`. **Pagina:** `/nieuwsplein33/woo-factor`.
+
+De wekelijkse ronde voert deze volledige routine uit en mag na lokale
+validatie uitsluitend nieuwe voorstellen importeren. Bestaande concepten en
+redactieoordelen worden niet gewijzigd. Hoogstens drie nieuwe voorstellen;
+nul is geldig. Meld alleen nieuwe voorstellen, betekenisvolle veranderingen,
+fouten of benodigde actie. Computer en Codex-app moeten actief zijn voor werk
+met de lokale repository.
 
 ## Voorbereiding en controle
 

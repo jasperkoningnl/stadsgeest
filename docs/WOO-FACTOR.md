@@ -42,7 +42,10 @@ dat een betere volgende stap is. Openbaarmaking wordt door het bestuursorgaan
 beoordeeld; mogelijk opvraagbaar betekent niet zeker openbaar.
 
 De eerste versie ondersteunt analyse, controle, conceptbewerking en een
-opgeslagen redactieoordeel. Indiening, termijnbewaking en behandeling van
+opgeslagen redactieoordeel. Een wekelijkse onderzoeksronde op maandag om
+10.00 uur (Europe/Amsterdam) bereidt nieuwe voorstellen voor volgens
+`operations/WOO-FACTOR.md`; gerichte opdrachten blijven mogelijk.
+Indiening, termijnbewaking en behandeling van
 ontvangen stukken zijn latere uitbreidingen. Er wordt niets automatisch
 verstuurd. Een inhoudelijke wijziging trekt een eerdere goedkeuring in.
 
