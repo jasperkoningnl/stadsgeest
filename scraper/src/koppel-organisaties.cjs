@@ -53,7 +53,7 @@ const SCHEMA = [
 
 function runWorker(records) {
   return new Promise((resolve, reject) => {
-    const py = spawn(PYTHON, [WORKER], { stdio: ['pipe', 'pipe', 'pipe'], env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
+    const py = spawn(PYTHON, [WORKER], { windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'], env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
     let out = ''; let err = '';
     py.stdout.on('data', (d) => { out += d; });
     py.stderr.on('data', (d) => { err += d; });

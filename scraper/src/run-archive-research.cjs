@@ -11,6 +11,7 @@ const { spawnSync } = require('node:child_process');
 
 function step(script, args = []) {
   const result = spawnSync(process.execPath, [path.join(__dirname, script), ...args], {
+    windowsHide: true,
     cwd: path.join(__dirname, '..'),
     encoding: 'utf8',
     stdio: 'inherit',

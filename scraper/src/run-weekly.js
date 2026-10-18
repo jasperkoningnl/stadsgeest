@@ -61,6 +61,7 @@ for (const scraper of scrapers) {
     // shell en liep de scraper als wees door, dwars door de volgende scrapers heen
     // (gemeten 4 oktober 2026). Zo is 'timeout' ook echt gestopt.
     const result = execFileSync(process.execPath, [path.join(__dirname, 'scrapers', scraper)], {
+      windowsHide: true,
       stdio: 'pipe',
       timeout: 120000,
       encoding: 'utf8',
@@ -93,7 +94,7 @@ for (const scraper of scrapers) {
   let status = 'ok';
   let errorMessage = null;
   try {
-    const wooOut = execSync(`node "${path.join(__dirname, 'woo-scan.cjs')}"`, { stdio: 'pipe', timeout: 300000, encoding: 'utf8', env: { ...process.env, SCRAPE_JOB_NAME: JOB_NAME } });
+    const wooOut = execSync(`node "${path.join(__dirname, 'woo-scan.cjs')}"`, { windowsHide: true, stdio: 'pipe', timeout: 300000, encoding: 'utf8', env: { ...process.env, SCRAPE_JOB_NAME: JOB_NAME } });
     if (wooOut) process.stdout.write(wooOut);
   } catch (err) {
     if (err.stdout) process.stdout.write(err.stdout);
@@ -110,7 +111,7 @@ for (const scraper of scrapers) {
 
 // Bronnenwacht (P4, 2026-08-02)
 try {
-  const bwOut = execSync(`node "${path.join(__dirname, 'bronnenwacht.cjs')}"`, { stdio: 'pipe', timeout: 300000, encoding: 'utf8', env: { ...process.env, SCRAPE_JOB_NAME: JOB_NAME } });
+  const bwOut = execSync(`node "${path.join(__dirname, 'bronnenwacht.cjs')}"`, { windowsHide: true, stdio: 'pipe', timeout: 300000, encoding: 'utf8', env: { ...process.env, SCRAPE_JOB_NAME: JOB_NAME } });
   if (bwOut) process.stdout.write(bwOut);
 } catch (err) {
   console.error('Bronnenwacht mislukt:', err.message);

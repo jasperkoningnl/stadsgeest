@@ -74,7 +74,7 @@ async function verzamel(db, nu) {
 function powershell(commando) {
   if (process.platform !== 'win32') return null;
   try {
-    const uit = execFileSync('powershell.exe', ['-NoProfile', '-Command', commando], { encoding: 'utf8', timeout: 30000 }).trim();
+    const uit = execFileSync('powershell.exe', ['-NoProfile', '-Command', commando], { windowsHide: true, encoding: 'utf8', timeout: 30000 }).trim();
     return uit ? JSON.parse(uit) : null;
   } catch { return null; }
 }
@@ -88,7 +88,7 @@ function machine() {
   if (process.platform === 'win32') {
     try {
       // Alleen lezen. Nooit `pm2 save` vanuit dit script (zie AGENTS.md).
-      const lijst = JSON.parse(execFileSync('cmd.exe', ['/c', 'pm2', 'jlist'], { encoding: 'utf8', timeout: 30000 }).trim().split(/\r?\n/).pop());
+      const lijst = JSON.parse(execFileSync('cmd.exe', ['/c', 'pm2', 'jlist'], { windowsHide: true, encoding: 'utf8', timeout: 30000 }).trim().split(/\r?\n/).pop());
       m.pm2 = lijst.map((p) => ({ naam: p.name, status: p.pm2_env?.status }));
     } catch { m.pm2 = null; }
   }

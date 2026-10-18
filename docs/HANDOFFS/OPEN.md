@@ -17,6 +17,7 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 - Dossiers: additieve velden voor baan (intern/openbaar) en open vraag/wederhoor (10-01).
 - Dossiergraaf: niet-gekoppelde organisatienamen als eigen knoop, of eerst de KG verrijken (10-01).
 - Clusteren op zaakkenmerk: steekproef beoordelen en beslissen wat er gebeurt als een nieuw stuk bij een al weggezette zaak hoort (10-05).
+- Bevestigen dat de PowerShell/node-vensters overdag (11:30-run en uurlijkse healthcheck) weg zijn na `windowsHide` en `conhost --headless` (10-17).
 
 ## Keten en bewaking
 
