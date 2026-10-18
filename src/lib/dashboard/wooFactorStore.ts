@@ -17,7 +17,9 @@ export class WooConflict extends Error {}
 
 export async function leesWooZaken(db: Client): Promise<WooZaak[]> {
   const result = await db.execute(`SELECT c.*,d.naam dossier_naam FROM woo_factor_cases c
-    JOIN dossiers d ON d.id=c.dossier_id ORDER BY c.created_at DESC,c.id LIMIT 100`)
+    JOIN dossiers d ON d.id=c.dossier_id
+    WHERE json_extract(c.analyse_json,'$.uitkomst')='informatieleemte'
+    ORDER BY c.created_at DESC,c.id LIMIT 100`)
   return result.rows.map(r => ({
     analyse: valideerWooAnalyse(JSON.parse(String(r.analyse_json))), dossier_naam: String(r.dossier_naam),
     concept: String(r.concept), revision: Number(r.revision), besluit: r.besluit as WooBesluit,

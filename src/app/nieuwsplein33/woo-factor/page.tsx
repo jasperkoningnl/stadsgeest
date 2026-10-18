@@ -31,7 +31,7 @@ export default async function WooFactorPagina() {
       <p>Welke stukken ontbreken in het verhaal? Eerst controleren we de bronverwerking en zoeken we online. Daarna volgt waar zinvol een gericht conceptverzoek voor de redactie.</p>
     </header>
     {zaken === null ? <p role="status">De Woo Factor wordt klaargezet. De analyses zijn nog niet beschikbaar.</p> : zaken.length === 0 ? <p>Er zijn nog geen analyses. Een vermoeden krijgt pas een conceptverzoek na de technische controle en het online onderzoek.</p> : <>
-      <p>{zaken.length} analyses · {zaken.filter(z => z.analyse.uitkomst === 'informatieleemte').length} met een conceptverzoek</p>
+      <p>{zaken.length} {zaken.length === 1 ? 'voorstel' : 'voorstellen'} met een conceptverzoek</p>
       {zaken.map(zaak => {
         const a = zaak.analyse
         return <section key={a.id} id={a.id} className="np-woo-zaak">

@@ -25,7 +25,7 @@ regel op de verkeerde plek zetten kan geen kwaad.
 
 ## 2026-10-18 — De Woo Factor
 
-Op de aparte pagina De Woo Factor onderzoekt Stadsgeest welke stukken in een dossier ontbreken. Eerst controleert het de bronverwerking en zoekt het online. Je ziet de bevindingen en bronnen, kunt een onderbouwd conceptverzoek bewerken en goedkeuren of het voorstel afwijzen. Goedkeuring wordt vastgelegd; er wordt nog niets verstuurd. De eerste drie analyses gaan over wijkteams, Wind op Isselt en parkeren.
+Op de aparte pagina De Woo Factor onderzoekt Stadsgeest welke stukken in een dossier ontbreken. Eerst controleert het de bronverwerking en zoekt het online. Je ziet alleen onderbouwde voorstellen met een conceptverzoek, kunt het concept bewerken en goedkeuren of het voorstel afwijzen. Afgevallen onderzoeken worden niet getoond. Goedkeuring wordt vastgelegd; er wordt nog niets verstuurd.
 
 ## 2026-10-17 — Onderzoeksvragen krijgen voorrang
 

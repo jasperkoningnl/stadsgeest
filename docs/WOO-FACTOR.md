@@ -29,6 +29,8 @@ misstanden op basis van afwezigheid, geen verzonnen documentnamen.
    zijn analyse, nooit menselijke redactionele goedkeuring.
 5. Toon dit op een aparte Woo Factor-pagina, met dossierverwijzing, controlelog,
    bewijsgrens en bewerkbaar concept. Goedkeuring is geen verzending.
+   Alleen onderbouwde informatieleemten met een concept komen op deze pagina;
+   afgevallen onderzoeken blijven uitsluitend als onderzoeksverantwoording bewaard.
 
 ## Verzoek en redactionele grens
 
