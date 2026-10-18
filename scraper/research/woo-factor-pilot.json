@@ -1,0 +1,215 @@
+[
+  {
+    "id": "wijkteams-afrekening-2025-v1",
+    "dossier_slug": "gemeentefinancien-amersfoort",
+    "titel": "Welke afrekening ligt onder de terugvordering bij de wijkteams?",
+    "vraag": "Hoe verhoudt de terugvordering over 2025 zich tot de afgesproken capaciteit en werkelijk geleverde ondersteuning?",
+    "belang": "Inwoners moeten kunnen beoordelen wat de gemeente met het geld voor ondersteuning bereikt. Dit verdiept bestaande tip 63; het is geen tweede tip.",
+    "vermoeden": "De Zomerrapportage 2026 noemt een terugvordering over 2025 van 2,37 miljoen euro en minder ingezette capaciteit. Een afrekening veronderstelt doorgaans ontvangen verantwoording en een gemeentelijke berekening. De precieze documenttitels zijn niet vastgesteld.",
+    "ontstaansgrond": "afgeleid",
+    "houder": "College van burgemeester en wethouders van Amersfoort; eigen afrekening en door de gemeente ontvangen verantwoordingsstukken",
+    "periode": {
+      "van": "2025-01-01",
+      "tot": "2026-10-17"
+    },
+    "documenten": [
+      "Gemeentelijke vastlegging en berekening van de terugvordering over 2025",
+      "Ontvangen financiële en inhoudelijke verantwoording 2025 die bij de afrekening is gebruikt",
+      "Daarbij gebruikte capaciteit- en prestatieafspraken en bestaande beoordeling van afwijkingen"
+    ],
+    "tegenverklaring": "Lagere personeelskosten, onvervulde uitbreidingsvacatures of uitstelbaar werk kunnen een overschot verklaren. Gemiste noodzakelijke hulp is niet aangetoond. Wachtlijsten voor specialistische jeugdhulp zijn niet hetzelfde als wachttijden bij wijkteams.",
+    "uitkomst": "informatieleemte",
+    "beperking": "Niet aangetroffen in de gecontroleerde bronnen. Geen volledige doorzoeking van ieder gemeentelijk systeem of Woo-archief. Bestaan van de specifieke onderliggende stukken is afgeleid, niet bevestigd door de documenthouder; openbaarmaking is onzeker. De lokale kopie bevat niet noodzakelijk alle online bijlagen.",
+    "vervolg": "Beoordeel het gerichte concept. Een gewone informatievraag kan eerst; dien alleen na redactionele goedkeuring in via het officiële gemeentelijke kanaal.",
+    "controle": {
+      "technisch": [
+        {
+          "datum": "2026-10-17",
+          "handeling": "Bronrecords, volledige tekst, bijlagen en deelitems",
+          "resultaat": "Lokale kopie van 17 oktober 2026 09:55 UTC: bronitems 6124 en 6125 hebben volledige tekst, geen geregistreerde losse bijlagen of delen. Zoekslag op wijkteamtitels in bijlagen levert een ander stuk met status ok op. Geen vastgesteld technisch mankement verklaart de gezochte afrekening.",
+          "status": "voltooid"
+        },
+        {
+          "datum": "2026-10-17",
+          "handeling": "Rechtstreekse hercontrole dragende stukken",
+          "resultaat": "Zomerrapportage: HTTP 200, 38 pagina’s; auditadvies: HTTP 200, 2 pagina’s, beide met leesbare PDF-tekst. Actuele passages bevestigen de afrekening als onderzoeksaanknopingspunt.",
+          "status": "voltooid",
+          "url": "https://api.notubiz.nl/document/17198704/2"
+        },
+        {
+          "datum": "2026-10-17",
+          "handeling": "Lokale archiefcontrole",
+          "resultaat": "151 bronitems met wijkteamtekst gevonden; gerichte passages gezocht over verantwoording, terugvordering, kwartaalrapportages en prestaties. Openbare jaarstukken bieden context, de specifiek onderliggende afrekening is in deze controle niet gevonden. Treffers zijn geen onafhankelijke gebeurtenissen.",
+          "status": "voltooid"
+        }
+      ],
+      "online": [
+        {
+          "datum": "2026-10-17",
+          "handeling": "Online zoeken naar stukken en eerdere openbaarmakingen",
+          "resultaat": "Zoekvragen: \"Stichting Sociale Wijkteams Amersfoort\" jaarverslag 2025 capaciteit; \"wijkteam\" \"Amersfoort\" \"2025\" \"verantwoording\"; \"wijkteams\" \"Amersfoort\" \"kwartaalrapportage\"; site.amersfoort.bestuurlijkeinformatie.nl \"wijkteams\" \"2025\"; \"wijkteams\" \"Amersfoort\" \"2025\" \"subsidievaststelling\". Geen geïdentificeerde afrekening bij de terugvordering gevonden; zoekmachine-index is onvolledig.",
+          "status": "voltooid"
+        },
+        {
+          "datum": "2026-10-17",
+          "handeling": "Officiële wijkteamsite en bestuurlijke informatie",
+          "resultaat": "Homepage, bestuurspagina en Wijkteam van Waarde bekeken. De openbare verhalenbundel beantwoordt een andere vraag en is niet de onderliggende financiële verantwoording.",
+          "status": "voltooid",
+          "url": "https://www.wijkteam-amersfoort.com/wijkteam-van-waarde-2/"
+        },
+        {
+          "datum": "2026-10-17",
+          "handeling": "Documenthouder en indieningsroute",
+          "resultaat": "Gemeentelijke Woo-instructie rechtstreeks bereikbaar (HTTP 200). Het verzoek betreft bestaande informatie die de gemeente zelf gebruikt of heeft ontvangen, niet automatisch alle informatie van de zelfstandige stichting.",
+          "status": "voltooid",
+          "url": "https://www.amersfoort.nl/een-woo-verzoek"
+        }
+      ]
+    },
+    "bronnen": [
+      {
+        "titel": "Zomerrapportage 2026",
+        "url": "https://api.notubiz.nl/document/17198704/2",
+        "toelichting": "Noemt terugvordering en capaciteit; koppeling met individuele hulpuitkomsten is niet bewezen."
+      },
+      {
+        "titel": "Advies auditcommissie",
+        "url": "https://api.notubiz.nl/document/17210897/1",
+        "toelichting": "Vraagt om meer inzicht in de maatschappelijke gevolgen van onderbesteding. Het stuk draagt datum 8 juli 2026 en heeft ook een afwijkend jaartal in de kop."
+      },
+      {
+        "titel": "Wijkteam van Waarde",
+        "url": "https://www.wijkteam-amersfoort.com/wijkteam-van-waarde-2/",
+        "toelichting": "Openbare verhalenbundel; geen afrekening over 2025."
+      },
+      {
+        "titel": "Gemeentelijke Woo-instructie",
+        "url": "https://www.amersfoort.nl/een-woo-verzoek",
+        "toelichting": "Officieel indieningskanaal en voorwaarden; gecontroleerd op 17 oktober 2026."
+      }
+    ],
+    "concept": "Aan het college van burgemeester en wethouders van Amersfoort\n\nBetreft: Woo-verzoek onderbouwing terugvordering Stichting Sociale Wijkteams Amersfoort over 2025\n\nGeacht college,\n\nOp grond van de Wet open overheid verzoeken wij om openbaarmaking van de volgende bestaande documenten die bij de gemeente berusten, opgesteld of ontvangen in de periode van 1 januari 2025 tot en met 17 oktober 2026:\n\n1. Het besluit, de vaststellingsbrief of andere vastlegging van de in de Zomerrapportage 2026 genoemde terugvordering van 2,37 miljoen euro over 2025 bij Stichting Sociale Wijkteams Amersfoort, met de daarbij gebruikte berekening en onderbouwing.\n2. De door de gemeente ontvangen inhoudelijke en financiële verantwoording over 2025 die voor deze terugvordering is gebruikt, inclusief bestaande bijlagen over begrote en gerealiseerde personele capaciteit en uitgevoerde activiteiten.\n3. De in die afrekening gebruikte subsidie- of uitvoeringsafspraken over capaciteit en prestaties in 2025 en de bestaande gemeentelijke beoordeling van afwijkingen daarop.\n\nAanleiding is de passage over wijkteams in de Zomerrapportage 2026. Wij willen onderzoeken hoe de financiële afrekening zich verhoudt tot de afgesproken en geleverde ondersteuning. Wij vragen geen nieuwe analyse, geen individuele cliëntdossiers en geen individuele personeelsgegevens.\n\nAls de gevraagde informatie al openbaar is, ontvangen wij graag de precieze vindplaats per document. Wij ontvangen de documenten bij voorkeur digitaal en verzoeken om een overzicht van de aangetroffen documenten en het besluit over openbaarmaking daarvan. Mocht verduidelijking nodig zijn, dan overleggen wij graag over de afbakening voordat deze wordt gewijzigd.\n\nMet vriendelijke groet,\nRedactie Nieuwsplein33"
+  },
+  {
+    "id": "isselt-veiligheidsonderzoek-v1",
+    "dossier_slug": "wind-op-isselt",
+    "titel": "Het externe veiligheidsonderzoek is al openbaar",
+    "vraag": "Ontbreekt het externe veiligheidsonderzoek bij de vergunningaanvraag van Wind op Isselt?",
+    "belang": "De veiligheidsafweging rond de turbines moet controleerbaar zijn voor omwonenden.",
+    "vermoeden": "De veiligheidsdiscussie suggereert een relevant onderliggend rapport. Eerst controleren of dit rapport al beschikbaar is.",
+    "ontstaansgrond": "expliciet",
+    "houder": "Gemeente Amersfoort",
+    "periode": {
+      "van": "2024-01-01",
+      "tot": "2026-10-17"
+    },
+    "documenten": [
+      "Extern veiligheidsonderzoek ten behoeve van de vergunningaanvraag, document 17386606 versie 1"
+    ],
+    "tegenverklaring": "Een bronitem met alleen agendametadata betekent niet dat alle stukken bij hetzelfde agendapunt ontbreken. Het rapport kan elders in dezelfde agenda staan.",
+    "uitkomst": "document_gevonden",
+    "beperking": "Deze uitkomst betreft alleen het geïdentificeerde externe veiligheidsonderzoek. Andere interne adviezen en hun openbaarheidsstatus zijn hiermee niet beoordeeld.",
+    "vervolg": "Lees en vergelijk het openbare rapport met de bestuurlijke afweging. Geen Woo-verzoek voor dit document.",
+    "controle": {
+      "technisch": [
+        {
+          "datum": "2026-10-17",
+          "handeling": "Documentidentiteit en lokale verwerking",
+          "resultaat": "Bronitem 12150 bevat document 17386606/1 met 83.753 tekens volledige tekst; geen geregistreerde losse bijlagen of delen. Bronitem 12151 bevat alleen metadata, maar is een ander document.",
+          "status": "voltooid"
+        },
+        {
+          "datum": "2026-10-17",
+          "handeling": "PDF rechtstreeks opnieuw opgehaald",
+          "resultaat": "HTTP 200; 56 pagina’s en leesbare tekst. Identiteit: Wind op Isselt, extern veiligheidsonderzoek ten behoeve van de vergunningaanvraag.",
+          "status": "voltooid",
+          "url": "https://api.notubiz.nl/document/17386606/1"
+        }
+      ],
+      "online": [
+        {
+          "datum": "2026-10-17",
+          "handeling": "Officiële projectpagina gecontroleerd",
+          "resultaat": "De gemeentelijke pagina Wind op Isselt is rechtstreeks bereikbaar met HTTP 200. Online gezocht op Wind op Isselt, veiligheidsregio, advies en PDF. De rechtstreeks gevonden openbare PDF neemt de onderzochte leemte weg.",
+          "status": "voltooid",
+          "url": "https://www.amersfoort.nl/wind-op-isselt"
+        },
+        {
+          "datum": "2026-10-17",
+          "handeling": "Openbaarheid van het geïdentificeerde rapport",
+          "resultaat": "De oorspronkelijke document-URL geeft het rapport zonder inloggen terug.",
+          "status": "voltooid",
+          "url": "https://api.notubiz.nl/document/17386606/1"
+        }
+      ]
+    },
+    "bronnen": [
+      {
+        "titel": "Extern veiligheidsonderzoek",
+        "url": "https://api.notubiz.nl/document/17386606/1",
+        "toelichting": "Openbaar aangetroffen én rechtstreeks opnieuw gelezen."
+      },
+      {
+        "titel": "Wind op Isselt",
+        "url": "https://www.amersfoort.nl/wind-op-isselt",
+        "toelichting": "Officiële gemeentelijke projectcontext."
+      }
+    ],
+    "concept": ""
+  },
+  {
+    "id": "parkeren-interne-mails-v1",
+    "dossier_slug": "parkeerbeleid-amersfoort",
+    "titel": "Over de gezochte parkeermails bestaat al een Woo-besluit",
+    "vraag": "Is er een nieuwe onderbouwde aanleiding om interne mails over afzonderlijke uitbreidingen van betaald parkeren op te vragen?",
+    "belang": "Inwoners moeten de grondslag van parkeeruitbreidingen kunnen controleren.",
+    "vermoeden": "Een leemte in de onderbouwing kan aanleiding zijn om interne besluitvormingsstukken te zoeken. Controle toont echter een eerder verzoek met dezelfde reikwijdte.",
+    "ontstaansgrond": "onvoldoende",
+    "houder": "Gemeente Amersfoort; voor mogelijk oud overgebracht materiaal kan Archief Eemland de aangewezen zoekroute zijn",
+    "periode": {
+      "van": "1990-01-01",
+      "tot": "2026-10-17"
+    },
+    "documenten": [
+      "Inhoudelijke interne e-mails over besluitvorming bij afzonderlijke uitbreidingen van het betaaldparkeergebied"
+    ],
+    "tegenverklaring": "Volgens het eerdere besluit leverde interne uitvraag geen documenten binnen de gepreciseerde reikwijdte op. Dat bewijst niet dat zulke stukken nooit bestonden of zijn vernietigd.",
+    "uitkomst": "onvoldoende_aanwijzingen",
+    "beperking": "Geen nieuwe aanwijzing gevonden die de eerdere zoekslag weerspreekt. Het besluit is geen onafhankelijke audit van de gemeentelijke archivering. De ruime periode beschrijft het onderzochte spoor en is geen voorstel voor een nieuw verzoek.",
+    "vervolg": "Gebruik eerst de aangewezen openbare besluitvorming en eventueel Archief Eemland. Alleen met nieuwe specifieke aanwijzingen opnieuw beoordelen; geen herhaalverzoek voorbereiden.",
+    "controle": {
+      "technisch": [
+        {
+          "datum": "2026-10-17",
+          "handeling": "Bestaande Woo-publicatie en bijlage gecontroleerd",
+          "resultaat": "Bronitem 13587 bevat de publicatie en besluittekst. Bijlage 2424 staat op ok met 5.369 tekens; geen deelitems voor deze publicatie.",
+          "status": "voltooid"
+        },
+        {
+          "datum": "2026-10-17",
+          "handeling": "Besluit opnieuw opgehaald en gelezen",
+          "resultaat": "HTTP 200; drie leesbare pagina’s. Zaak 2026-52-601169, besluitdatum 7 oktober 2026. Het besluit beschrijft de gepreciseerde reikwijdte, interne uitvraag en alternatieve openbare vindplaatsen.",
+          "status": "voltooid",
+          "url": "https://amersfoort.bestuurlijkeinformatie.nl/Document/View/c0ba2ec8-c5a5-42aa-ad15-e1b65363318f"
+        }
+      ],
+      "online": [
+        {
+          "datum": "2026-10-17",
+          "handeling": "Eerdere openbaarmaking gecontroleerd",
+          "resultaat": "Het officiële besluit is rechtstreeks openbaar bereikbaar. Online gezocht op \"Amersfoort\" \"601169\" parkeren Woo en \"601169\" \"parkeerregulering\"; geen nieuwe dragende aanwijzing aangetroffen.",
+          "status": "voltooid",
+          "url": "https://amersfoort.bestuurlijkeinformatie.nl/Document/View/c0ba2ec8-c5a5-42aa-ad15-e1b65363318f"
+        }
+      ]
+    },
+    "bronnen": [
+      {
+        "titel": "Woo-besluit 601169",
+        "url": "https://amersfoort.bestuurlijkeinformatie.nl/Document/View/c0ba2ec8-c5a5-42aa-ad15-e1b65363318f",
+        "toelichting": "Bestaande gemeentelijke zoekslag; geen bewijs dat stukken nooit hebben bestaan."
+      }
+    ],
+    "concept": ""
+  }
+]

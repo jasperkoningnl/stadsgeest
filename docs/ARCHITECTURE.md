@@ -61,6 +61,13 @@ beoordeling en het voorstel voor aansluiting staan in
 
 ## Schema en migraties
 
+De Woo Factor draait als afzonderlijk onderzoek via `operations/WOO-FACTOR.md`.
+`woo-factor-prepare.cjs` verzamelt alleen lokale vermoedens; online controle en
+inhoudelijk oordeel blijven verplicht. `woo-factor.cjs` installeert additief
+`woo_factor_cases` en `woo_factor_events` en importeert gevalideerde analyses.
+De aparte dashboardpagina bewaart conceptwijzigingen en redactieoordelen
+transactioneel met versiecontrole en snapshots. Geen verzending of planning.
+
 Schemawijzigingen zijn bij voorkeur additief, zodat de klassieke keten tijdens
 de overgang blijft werken. `scraper/migrate-kg-m1m2m3.cjs` en
 `scraper/migrate-kg-m4-seed.cjs` leggen het uitgevoerde KG-fundament vast. De

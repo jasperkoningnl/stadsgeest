@@ -1,0 +1,17 @@
+.np-woo { max-width: 860px; margin: 28px auto; }
+.np-woo-kop h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 4px 0 16px; }
+.np-woo p { line-height: 1.65; }
+.np-woo-zaak { border-top: 2px solid currentColor; margin-top: 36px; padding-top: 20px; }
+.np-woo-zaak h2 { margin: 8px 0 12px; font-size: 1.65rem; }
+.np-woo-zaak h3 { margin-top: 24px; font-size: 1.1rem; }
+.np-woo-label { font-weight: 700; margin-bottom: 6px; }
+.np-woo-controle { border: 1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius: 8px; padding: 14px; margin: 14px 0; }
+.np-woo-controle summary { cursor: pointer; font-weight: 600; }
+.np-woo-controle li { margin: 12px 0; }
+.np-woo-besluit { margin: 24px 0; padding: 18px; background: color-mix(in srgb, currentColor 4%, transparent); border-radius: 8px; }
+.np-woo-besluit textarea { display: block; width: 100%; box-sizing: border-box; padding: 12px; margin: 10px 0; border: 1px solid currentColor; border-radius: 5px; background: transparent; color: inherit; font: inherit; line-height: 1.6; resize: vertical; }
+.np-woo-knoppen { display: flex; flex-wrap: wrap; gap: 10px; }
+.np-woo-knoppen button { border: 1px solid currentColor; border-radius: 5px; background: transparent; color: inherit; font: inherit; padding: 10px 14px; cursor: pointer; }
+.np-woo-knoppen button:disabled { opacity: .45; cursor: default; }
+.np-woo a { text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.np-woo button:focus-visible, .np-woo textarea:focus-visible, .np-woo summary:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }

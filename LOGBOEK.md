@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-10-18 — De Woo Factor
+
+Op de aparte pagina De Woo Factor onderzoekt Stadsgeest welke stukken in een dossier ontbreken. Eerst controleert het de bronverwerking en zoekt het online. Je ziet de bevindingen en bronnen, kunt een onderbouwd conceptverzoek bewerken en goedkeuren of het voorstel afwijzen. Goedkeuring wordt vastgelegd; er wordt nog niets verstuurd. De eerste drie analyses gaan over wijkteams, Wind op Isselt en parkeren.
+
 ## 2026-10-17 — Onderzoeksvragen krijgen voorrang
 
 Stadsgeest beoordeelt voorbereide onderzoeksvragen voortaan vóór losse nieuwsaanwijzingen. Nieuwe tips wegen wat de vergelijking onthult, hoe stevig het bewijs is en wat de gevolgen zijn. Alleen een bedrag, adres of groot besluit levert geen extra punten meer op. Bij de puntentelling staat of een tip de nieuwe of eerdere weging gebruikt. Bestaande tips behouden hun oorspronkelijke beoordeling.

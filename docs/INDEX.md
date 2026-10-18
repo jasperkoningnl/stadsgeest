@@ -12,6 +12,7 @@ daarna alleen de route die bij de taak past:
 | Taak | Lees daarnaast |
 |---|---|
 | Productdoel of begrippen | `PROJECT-OVERVIEW.md` |
+| De Woo Factor | `WOO-FACTOR.md`, `WOO-FACTOR-PROEF-2026-10-17.md`, `../operations/WOO-FACTOR.md` |
 | Frontend of dashboard | `ARCHITECTURE.md`, `TESTING.md` |
 | Scraper, intake, detectie of database | `ARCHITECTURE.md`, `SOURCES.md`, `RUNBOOKS/operations.md`, `TESTING.md`, `DATABASE-LEZEN.md` |
 | Query's, analyse, backfill of hulpscripts op Turso | `DATABASE-LEZEN.md` |

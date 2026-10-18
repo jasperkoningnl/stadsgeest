@@ -31,6 +31,8 @@ Oudere scores blijven intact. Onderzoeksrondes blijven handmatig.
 
 ## Actieve oplevering
 
+Woo-onderzoek: [functiecontract](WOO-FACTOR.md).
+
 Fase 0 en fase 2 zijn gesloten en groen. Fase 1 heeft operationele baselines
 voor ANBI, GLEIF en OpenStreetMap; herhaalruns leverden nul wijzigingen en nul
 events op. De BAG-backfill koppelde 79 van 82 locaties exact en legde drie

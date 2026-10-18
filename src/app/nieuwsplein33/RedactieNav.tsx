@@ -11,6 +11,7 @@ const ITEMS = [
   { href: '/nieuwsplein33/geparkeerd', label: 'Geparkeerd', tel: ['geparkeerd'] },
   { href: '/nieuwsplein33/archief', label: 'Archief', tel: ['gepubliceerd', 'niet_gebruikt', 'afgekeurd'] },
   { href: '/nieuwsplein33/dossiers', label: 'Dossiers', tel: [] as string[] },
+  { href: '/nieuwsplein33/woo-factor', label: 'De Woo Factor', tel: [] as string[] },
   { href: '/nieuwsplein33/verkenner', label: 'Verkenner', tel: [] as string[] },
 ]
 
