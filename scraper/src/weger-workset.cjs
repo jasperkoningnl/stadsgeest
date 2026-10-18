@@ -9,6 +9,7 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { createClient } = require('@libsql/client');
 const { normaliseerNaam } = require('./koppel/normaliseer.cjs');
 const { bronTijd, spiegelKandidaten } = require('./weger-context.cjs');
+const { SCORE_MODEL, SCORE_THRESHOLD } = require('./weger-score.cjs');
 
 const MAX_CONTENT_CHARS = 4000;
 const MAX_ITEMS_PER_SIGNAL = 6;
@@ -631,18 +632,22 @@ async function main(argv = process.argv.slice(2)) {
       generated_at: new Date().toISOString(),
       limit,
       selected_count: candidates.length,
-      candidates,
+      selectiebeleid: { scoremodel: SCORE_MODEL, drempel: SCORE_THRESHOLD, maximum_tips_per_run: 3,
+        volgorde: ['voorberekende_onderzoeksvragen', 'actuele_nieuwsfeiten', 'overige_signaaltriage'],
+        ontbrekende_voorbereiding: 'Meld het ontbreken; start geen vervangende Turso-sweep.' },
       kruisbron_kandidaten: kruisbronKandidaten,
       woo_kandidaten: wooKandidaten,
       archief_kandidaten: archiefKandidaten,
       jev_pilot: jevPilot,
       document_voorbereiding: documentContext.summary,
+      candidates,
       dossiers: dossierResult.rows.map((row) => ({ ...row, id: Number(row.id) })),
     };
     if (argv.includes('--summary')) {
       console.log(JSON.stringify({
         generated_at: output.generated_at,
         selected_count: output.selected_count,
+        selectiebeleid: output.selectiebeleid,
         dossier_count: output.dossiers.length,
         kruisbron_kandidaten: output.kruisbron_kandidaten.length,
         woo_kandidaten: output.woo_kandidaten.length,

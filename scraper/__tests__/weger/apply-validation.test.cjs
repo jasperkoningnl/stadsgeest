@@ -16,9 +16,14 @@ function validPlan() {
       soort: 'nieuwsfeit',
       gemeente: 'Amersfoort',
       categorie: 'wonen',
-      score: 6,
+      score: 8,
       score_motivatie: 'Officieel besluit met duidelijke lokale gevolgen.',
-      weging: { primaire_bron: 3, lokale_impact: 3 },
+      weging: {
+        _model: 'redactioneel-2', _route: 'onderzoek', ontdekking: 3, bewijs: 3, gevolgen: 2,
+        _voorwaarden: { bronregel: true, lokaal: true, vergelijkbaar: true, nieuwheid: true, tegenverklaring: true },
+        _onderbouwing: { ontdekking: 'Twee planningen tonen een nieuw verschil.', bewijs: 'Dezelfde projecten en mijlpalen gecontroleerd.',
+          gevolgen: 'De planning raakt woningzoekenden.', tegenverklaring: 'Een andere projectfase is gecontroleerd.', nieuwheid: 'De vergelijking ontbreekt in eerdere berichtgeving.' },
+      },
       herkomst: [{ naam: 'Gemeente Amersfoort', tier: 1 }],
       elders_gebracht: [],
       toegevoegde_waarde: '',
@@ -66,18 +71,14 @@ test('werkset-JSON behoudt het hoofdobject en zet bigint om', () => {
   assert.deepEqual(JSON.parse(output), { signal_id: 42, confirmations: 3 });
 });
 
-test('een dunne tip zet de drempelwaarschuwing onderaan en niet in de wachtrijmotivatie', () => {
+test('een waarschuwing maakt een tip onder de nieuwe drempel niet geldig', () => {
   const plan = validPlan();
   plan.tips[0].score = 5;
   plan.tips[0].briefing = plan.tips[0].briefing.replace(
     '- Stellen dat de uitvoering al begonnen is',
     '- Stellen dat de uitvoering al begonnen is\n- Redactionele waarschuwing: deze tip blijft onder de gewone drempel'
   );
-  assert.deepEqual(validatePlan(plan), []);
-
-  plan.tips[0].score_motivatie = 'Deze tip ligt onder de gewone drempel.';
-  const errors = validatePlan(plan).join('\n');
-  assert.match(errors, /niet in score_motivatie/);
+  assert.match(validatePlan(plan).join('\n'), /geen uitzondering onder de drempel/);
 });
 
 test('briefingkoppen moeten exact op een eigen regel staan', () => {
@@ -94,7 +95,7 @@ test('supertip mag alleen in een supertip-run', () => {
   assert.deepEqual(validatePlan(plan), []);
 });
 
-test('een supertip-run maakt hoogstens één supertip, met minimaal score 6', () => {
+test('een supertip-run maakt hoogstens één supertip, met minimaal score 7', () => {
   const plan = validPlan();
   plan.run = 'supertip';
   plan.tips[0].supertip = true;
@@ -104,11 +105,60 @@ test('een supertip-run maakt hoogstens één supertip, met minimaal score 6', ()
   plan.reviews.push({ signal_id: 43, status_to: 'watching', reason: 'Gelezen.' });
   const errors = validatePlan(plan).join('\n');
   assert.match(errors, /hoogstens één supertip/);
-  assert.match(errors, /minimaal score 6/);
+  assert.match(errors, /minimaal score 7/);
 });
 
 test('Supertip hoort niet in de titel', () => {
   const plan = validPlan();
   plan.tips[0].titel = 'Supertip: raad besluit over woonwijk';
   assert.match(validatePlan(plan).join('\n'), /gebruik het veld supertip/);
+});
+
+test('oude bonusvelden kunnen de nieuwe drempel niet halen', () => {
+  const plan = validPlan();
+  plan.tips[0].weging = { tier_1: 3, concreet_bedrag: 2, precieze_locatie: 1 };
+  plan.tips[0].score = 6;
+  const errors = validatePlan(plan).join('\n');
+  assert.match(errors, /_model moet redactioneel-2/);
+  assert.match(errors, /geen losse bron-, bedrag- of locatiebonussen/);
+});
+
+test('puntensom, bovengrens en criteriumminima worden afzonderlijk gecontroleerd', () => {
+  const plan = validPlan();
+  plan.tips[0].score = 9;
+  assert.match(validatePlan(plan).join('\n'), /moet de som/);
+  plan.tips[0].weging.ontdekking = 1;
+  plan.tips[0].weging.gevolgen = 3;
+  plan.tips[0].score = 7;
+  assert.match(validatePlan(plan).join('\n'), /minstens 2 voor ontdekking/);
+  plan.tips[0].weging.ontdekking = 5;
+  plan.tips[0].score = 11;
+  assert.match(validatePlan(plan).join('\n'), /van 0 tot 4/);
+});
+
+test('onzekere nieuwheid of ontbrekende tegenverklaring blokkeert ook een hoge score', () => {
+  const plan = validPlan();
+  plan.tips[0].weging._voorwaarden.nieuwheid = false;
+  delete plan.tips[0].weging._onderbouwing.tegenverklaring;
+  const errors = validatePlan(plan).join('\n');
+  assert.match(errors, /_voorwaarden.nieuwheid/);
+  assert.match(errors, /_onderbouwing.tegenverklaring/);
+});
+
+test('nieuwsfeitroute vereist zwaar belang en een concrete uitzonderingsreden', () => {
+  const plan = validPlan();
+  plan.tips[0].weging._route = 'nieuwsfeit';
+  assert.match(validatePlan(plan).join('\n'), /zwaar lokaal belang/);
+  plan.tips[0].weging.gevolgen = 3;
+  plan.tips[0].score = 9;
+  plan.tips[0].weging._nieuwsfeit_reden = 'Een onverwachte sluiting heeft onmiddellijk gevolgen voor de hele stad.';
+  assert.deepEqual(validatePlan(plan), []);
+  plan.run = 'supertip';
+  plan.tips[0].supertip = true;
+  assert.match(validatePlan(plan).join('\n'), /supertip gebruikt de route onderzoek/);
+});
+
+test('nul tips blijft geldig en het nieuwe voorbeeld gebruikt het nieuwe model', () => {
+  assert.deepEqual(validatePlan({ reviews: [], tips: [], dossier_facts: [] }), []);
+  assert.deepEqual(validatePlan(require('../../../operations/weger-plan.example.json')), []);
 });

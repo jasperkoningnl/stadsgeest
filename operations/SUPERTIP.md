@@ -13,7 +13,8 @@ Werk rechtstreeks in de actieve repository. Lees eerst `AGENTS.md`,
 
 Nul is een goede uitkomst. Een supertip moet nieuw, publiek relevant, hard en
 dezelfde week redactioneel bruikbaar zijn. Hij rust op primaire documenten,
-haalt minimaal 6 punten volgens de scoretabel uit `WEGER.md` en is niet al
+haalt minimaal 7 van 10 volgens `redactioneel-2` uit `WEGER.md`, voldoet aan
+de vijf voorwaarden en de criteriumminima, gebruikt `_route: "onderzoek"` en is niet al
 volledig gebracht door Nieuwsplein33 of een spiegelbron.
 
 Wijzig tijdens de run geen Git-bestanden, documentatie of `LOGBOEK.md`. Toon

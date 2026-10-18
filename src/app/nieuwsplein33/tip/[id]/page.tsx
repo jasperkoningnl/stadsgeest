@@ -318,10 +318,12 @@ export default async function TipPagina({ params }: Props) {
 
   const superTip = Boolean(tip.supertip) || isSupertip(tip.titel)
   const vragen = safeParseJsonArray<string>(tip.vervolgvragen) ?? []
-  const wegingRaw = safeParseJson<Record<string, number | { punten: number; bron?: string }>>(tip.weging)
+  const wegingRaw = safeParseJson<Record<string, number | string | { punten: number; bron?: string }>>(tip.weging)
+  const nieuweWeging = wegingRaw?._model === 'redactioneel-2'
   const weging = wegingRaw
     ? Object.fromEntries(
-        Object.entries(wegingRaw).map(([k, v]) => [k, typeof v === 'object' && v !== null ? (v as { punten: number }).punten : v as number])
+        Object.entries(wegingRaw).filter(([k]) => !k.startsWith('_'))
+          .map(([k, v]) => [k, typeof v === 'object' && v !== null ? v.punten : v])
       )
     : null
   const herkomst = safeParseJsonArray<HerkomstBron>(tip.herkomst) ?? []
@@ -417,8 +419,9 @@ export default async function TipPagina({ params }: Props) {
             <>
               <h3 className="np-kopje">Hoe zwaar dit weegt</h3>
               <p className="np-tekst np-stil">
-                Stadsgeest kent punten toe aan wat een tip kansrijk maakt. Dit is die telling, zodat je kunt
-                zien waarom deze tip boven andere uitkwam, en waar de weging misschien niet klopt.
+                {nieuweWeging
+                  ? 'Deze tip weegt ontdekking, bewijs en gevolgen op een schaal van nul tot tien. Oudere tips gebruiken een andere puntentelling.'
+                  : 'Deze tip gebruikt de eerdere puntentelling. Deze score is niet rechtstreeks vergelijkbaar met de nieuwe weging op ontdekking, bewijs en gevolgen.'}
               </p>
               <table className="np-weging">
                 <tbody>

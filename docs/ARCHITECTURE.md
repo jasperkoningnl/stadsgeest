@@ -26,7 +26,10 @@
    maakt exact-once signalen; bruikbare detecties krijgen ook een primair
    `raw_item` en `signal_items`-koppeling voor de weger.
 6. De weger beoordeelt alleen nieuwe signalen of signalen met inhoudelijk nieuw
-   materiaal. De uitvoer gaat naar `tips`, `tip_signals`, `tip_events`,
+   materiaal, met beschikbare voorberekende onderzoeksvragen als eerste
+   beoordelingsroute. `weger-score.cjs` bewaakt `redactioneel-2` bij nieuwe
+   tipwrites; versie, route en onderbouwing staan in `tips.weging`. Historische
+   scores blijven ongewijzigd. De uitvoer gaat naar `tips`, `tip_signals`, `tip_events`,
    `dossiers` en `dossier_facts`.
 7. Het dashboard leest de productiedata. `LOGBOEK.md` wordt bij de Vercel-build
    meegeleverd als redactioneel productlogboek.
@@ -41,6 +44,13 @@ Zwaar archiefonderzoek is een lokale afgeleide laag: `archive-sync.cjs` kopieert
 documentteksten incrementeel naar een genegeerde SQLite-database met FTS5.
 `archive-research.cjs` produceert compacte kandidaten voor de weger. Turso blijft
 de productiebron; de lokale index is herstelbaar en nooit gezaghebbend.
+
+`onderzoeksronde.cjs` is een afzonderlijke handmatige proef op een bestaande
+lokale databasekopie: volledige maandvergelijkingen en dossierpassages bij
+afgebakende onderzoeksvragen. Het hulpmiddel heeft geen productieverbinding,
+schrijft geen signalen of tips en is niet ingepland. De eerste inhoudelijke
+beoordeling en het voorstel voor aansluiting staan in
+[Onderzoeksronde](ONDERZOEKSRONDE-2026-10-17.md).
 
 - Een baseline is opslag, geen nieuwsgebeurtenis.
 - Ontbreken in een periodiek bestand is niet automatisch sluiting of verwijdering.

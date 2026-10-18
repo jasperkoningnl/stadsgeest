@@ -8,23 +8,39 @@
   ],
   "tips": [
     {
-      "titel": "Raad besluit over nieuwe woonwijk",
-      "kern": "Het raadsbesluit maakt een eerder voornemen concreet en controleerbaar.",
-      "briefing": "WAT WE WETEN\n1. Controleerbaar feit. — Gemeente Amersfoort, tier 1, https://voorbeeld.invalid/besluit, 12 september 2026\n\nCONTEXT EN ACHTERGROND\nAlleen indien uitleg nodig is.\n\nBETROKKEN PERSONEN EN ORGANISATIES\n- Gemeente Amersfoort — besluitvormer — nam het besluit\n\nHOE DIT IS GEVONDEN\nHet officiële besluit is volledig gelezen.\n\nWAT WE NIET WETEN\n- Wanneer de uitvoering begint\n\nWAT HIER NIET IN MAG\n- Stellen dat de uitvoering al begonnen is\n\nELDERS GEBRACHT\nNiet aangetroffen bij de gevolgde spiegelmedia.",
+      "titel": "Woningbouwplanning verschuift ondanks blijvende doelen",
+      "kern": "Vergelijking van twee planningen laat zien welke woningbouwprojecten later worden verwacht, terwijl de gemeentelijke doelen blijven staan.",
+      "briefing": "WAT WE WETEN\n1. Voorbeeld: de twee officiële planningen noemen voor dezelfde projecten verschillende oplevermomenten. — Gemeente Amersfoort, tier 1, https://voorbeeld.invalid/besluit, 12 september 2026\n\nCONTEXT EN ACHTERGROND\nAlleen indien uitleg nodig is.\n\nBETROKKEN PERSONEN EN ORGANISATIES\n- Gemeente Amersfoort — besluitvormer — nam het besluit\n\nHOE DIT IS GEVONDEN\nDezelfde projecten en oplevermijlpalen zijn in twee oorspronkelijke planningen naast elkaar gelegd.\n\nWAT WE NIET WETEN\n- Waardoor de planning is veranderd\n\nWAT HIER NIET IN MAG\n- Stellen dat de uitvoering al begonnen is\n\nELDERS GEBRACHT\nVoorbeeld: leg hier de gecontroleerde eerdere publicaties en het verschil met deze vergelijking vast.",
       "vervolgvragen": [
         "Vraag de gemeente wanneer de uitvoering begint.",
         "Controleer het definitieve raadsbesluit en de financiële bijlage.",
         "Vraag betrokken bewoners naar de gevolgen."
       ],
-      "soort": "nieuwsfeit",
+      "soort": "patroon",
       "gemeente": "Amersfoort",
       "categorie": "wonen",
-      "score": 6,
-      "score_motivatie": "Officieel besluit met concrete lokale gevolgen.",
+      "score": 8,
+      "score_motivatie": "De vergelijking maakt een eerder niet uitgewerkt verschil in woningbouwplanning zichtbaar.",
       "weging": {
-        "tier_1": 3,
-        "concreet_besluit": 2,
-        "precieze_locatie": 1
+        "_model": "redactioneel-2",
+        "_route": "onderzoek",
+        "ontdekking": 3,
+        "bewijs": 3,
+        "gevolgen": 2,
+        "_voorwaarden": {
+          "bronregel": true,
+          "lokaal": true,
+          "vergelijkbaar": true,
+          "nieuwheid": true,
+          "tegenverklaring": true
+        },
+        "_onderbouwing": {
+          "ontdekking": "Dezelfde projecten en mijlpalen zijn in twee opeenvolgende planningen vergeleken.",
+          "bewijs": "Bronpassages, projectidentiteit, telwijze en oorspronkelijke datums zijn gecontroleerd.",
+          "gevolgen": "De gewijzigde planning is relevant voor woningzoekenden.",
+          "tegenverklaring": "Andere projectfasen of een gewijzigde telwijze verklaren het verschil niet; oorzaken blijven onderzoeksvragen.",
+          "nieuwheid": "Eerdere tips en thematisch gevonden artikelen zijn gelezen; deze vergelijking voegt een concreet nieuw verschil toe."
+        }
       },
       "herkomst": [
         {
@@ -37,11 +53,18 @@
         }
       ],
       "elders_gebracht": [],
-      "toegevoegde_waarde": "",
-      "trefwoorden": ["woonwijk", "raadsbesluit", "planning"],
+      "toegevoegde_waarde": "De vergelijking tussen de twee planningen; vul hier de daadwerkelijk gecontroleerde toevoeging in.",
+      "trefwoorden": [
+        "woonwijk",
+        "raadsbesluit",
+        "planning"
+      ],
       "dossier_id": null,
       "signals": [
-        { "id": 42, "rol": "dragend" }
+        {
+          "id": 42,
+          "rol": "dragend"
+        }
       ]
     }
   ],

@@ -20,10 +20,16 @@ Werk rechtstreeks in de lokale repository. Productiegeheimen staan in
 actief is. Wijzig tijdens een normale run geen Git-bestanden, `CURRENT.md` of
 `LOGBOEK.md`.
 
-Iedere run werkt de achterstand weg en beoordeelt daarnaast voorberekende
-verbanden en archiefkandidaten (sectie 3a en 3b). Een tip met een geverifieerd
-verband gaat vóór een tip uit één bron; nul tips is beter dan een geforceerde
-dunne tip.
+Iedere run begint met beschikbare voorberekende onderzoekskandidaten (sectie
+3b), beoordeelt daarna nieuwe ontwikkelingen en werkt de signaalachterstand
+weg. Een onderzoeksvraag is de eenheid: verschillende jaren, buurten,
+administraties, organisaties of verklaringen worden vergeleken om iets te
+ontdekken dat afzonderlijk niet zichtbaar was. Een extra document of bron is
+niet vanzelf een ontdekking. Nul tips is beter dan een geforceerde dunne tip.
+
+Nieuwe tips gebruiken scoremodel `redactioneel-2` (0–10). Bestaande tips en
+hun scores blijven historische beoordelingen volgens het toenmalige model;
+vergelijk die niet rechtstreeks met de nieuwe puntenschaal.
 
 Lees vóór de eerste beoordeling de laatste twintig redactieoordelen
 (`tip_feedback`, gekoppeld aan `tips`) en houd rekening met de redenen.
@@ -43,6 +49,14 @@ Het script selecteert signalen zonder eerder weger-oordeel en signalen waarvan
 signaal komen maximaal zes meest dragende documenten en per document hoogstens
 4.000 tekens mee. Is de selectie vol (25), haal dan na het wegschrijven een
 tweede batch op. De achterstand van ongelezen signalen moet per run krimpen.
+
+Lees vóór de gewone signaaltriage de beschikbare `archief_kandidaten`,
+`kruisbron_kandidaten` en `woo_kandidaten`, plus voorberekende documentverbanden
+en historische analyses. Beoordeel de meest kansrijke onderzoeksvragen eerst,
+ook wanneer gewone signalen al voldoende punten zouden krijgen. Gebruik
+sectie 3b als zoekleidraad. Maak pas na beoordeling van beide routes de
+eindselectie: hoogstens drie tips over de hele run, niet drie per batch.
+Schrijf de eerste batch dus niet meteen vol met losse besluiten.
 
 **Snelle triage.** Zet een routinesignaal zonder verband (zie 3a) op
 `discarded`, met een korte, specifieke reden: wat, waar, waarom routine, en
@@ -67,16 +81,18 @@ Per signaal staat in de werkset ook `ner_kg_kandidaten`: KG-entiteiten die
 spaCy in de documenten vond en die niet al in `entities` staan, vaak afgekorte
 namen als 'Portefeuillehouder J. Bulthuis'. Dit zijn koppelvoorstellen op
 exacte naam of alias, geen bevestigde feiten. Gebruik ze als aanwijzing waar je
-moet lezen. Ken punten zoals 'bekende bestuurder direct betrokken' alleen toe
-als het gelezen document het bevestigt, en let op naamgenoten bij gewone namen.
+moet lezen. Een bekende bestuurder levert geen zelfstandige punten op.
+Controleer de publieke rol en let op naamgenoten bij gewone namen.
 Zie `docs/NER.md`.
 
 `bron_tijd` zet de eerste en laatste publicatiedatum van de dragende stukken
 naast het scrapemoment en waarschuwt bij oude stukken of een grote spreiding.
 Behandel een recent opnieuw opgedoken document nooit vanzelf als nieuw nieuws:
 noem de oorspronkelijke datum en maak alleen een tip als er een aantoonbaar
-nieuwe beslissing, wijziging of actuele aanleiding is. Een nieuw vergaderstuk
-over een oud plan maakt dat plan zelf niet opnieuw nieuw.
+nieuwe beslissing, wijziging, oorspronkelijke vergelijking of onderbouwde
+nieuwe onderzoeksvraag is. Oud materiaal mag een nieuwe reconstructie dragen;
+de toegevoegde waarde moet concreet blijken. Een nieuw vergaderstuk over een
+oud plan maakt dat plan zelf niet opnieuw nieuw.
 
 `adres_koppelingen` noemt per exact BAG-adres in het signaal de andere
 documenten, registers (onder meer rijksmonumenten, kinderopvang, scholen,
@@ -97,8 +113,8 @@ NVWA "voldoet niet", een zwak inspectieoordeel of een insolventie
 (`rol: toezicht`), en registers. `koppeling` zegt hoe: "KvK-nummer (exact)"
 is een geverifieerde sleutel, "alleen naamovereenkomst" niet. Een naamtreffer
 telt pas als kruisbronverband als je in beide bronnen hetzelfde KvK-nummer,
-adres of dezelfde context vindt; anders geldt de scorepost
-`alleen_naamovereenkomst`. Een organisatie met zowel geld als toezicht staat
+adres of dezelfde context vindt. Alleen naamovereenkomst faalt als bewijs
+voor een verband. Een organisatie met zowel geld als toezicht staat
 bovenaan en is een reden om beide bronnen te lezen. Bovenaan de werkset staat
 daarnaast `kruisbron_kandidaten`: nieuwe verbanden van de afgelopen week tussen
 geld en toezicht, of met een insolventie, los van de signalen. Behandel ze als
@@ -124,7 +140,9 @@ sweepvondst (sectie 3b). Zie `docs/SOURCES.md`, 'iBabs-bijlagen'.
 fulltextzoekactie is al buiten Turso uitgevoerd. Per kandidaat staan zoekspoor,
 bron, URL, fragment en gevonden termen klaar. `signal_id` kan nog leeg zijn als
 de gerichte herpromotie pas bij de volgende intake een signaal krijgt. Behandel
-de kandidaat pas inhoudelijk wanneer er een signaal is en lees altijd de bron.
+de kandidaat inhoudelijk na lezen van de bron; zonder gekoppeld signaal wacht
+het wegschrijven op gerichte herpromotie en intake. Een ontbrekend signaal
+maakt een kansrijke onderzoeksvraag niet onzichtbaar in het verslag.
 
 Lees bij een dragende officiële bron de volledige beschikbare tekst. Als de
 opgeslagen tekst zichtbaar is afgekapt of leeg is, open dan de officiële URL.
@@ -207,6 +225,12 @@ tip wordt. Overschrijf geen dossierfeiten en los tegenstrijdige bronnen niet op
 door er één te negeren. Maak tijdens de automatische run geen nieuw dossier als
 de juiste afbakening inhoudelijk onzeker is; meld dat als voorgestelde actie.
 
+Controleer vóór een nieuwe tip bestaande tips over dezelfde onderzoeksvraag.
+Een nieuw stuk, andere titel of extra bron is geen nieuw verhaal. Neem een
+inhoudelijke aanvulling op in het verslag met het bestaande tip-ID en leg
+duurzame feiten zo mogelijk bij het dossier vast; schrijf geen dubbele tip.
+`weger-apply.cjs` maakt nieuwe tips en wijzigt geen bestaande briefings.
+
 ## 3a. Verbandencheck
 
 Doe deze check vóór elk oordeel, ook bij routine, voor elk signaal met een
@@ -245,12 +269,20 @@ routine meer. Noem geen particulieren.
 Leg in het rapport vast welke verbanden je vond en welke koppelgaten er waren:
 waar een verband niet te controleren was, en welke sleutel of bron ontbrak.
 
-## 3b. Voorberekende sweep als de werkset geen tip oplevert
+## 3b. Voorberekende onderzoekskandidaten eerst
 
-Levert de gewone werkset geen tip van 6 of hoger op, gebruik dan
-`archief_kandidaten` of `kruisbron_kandidaten`. Zoek tijdens de dagelijkse run
-nooit zelf met vrije tekst over de hele Turso-database. Is geen voorberekende
-kandidaat beschikbaar, dan is nul tips een geldige uitkomst.
+Beoordeel de beschikbare voorberekende kandidaten altijd vóór de gewone
+signaaltriage, ongeacht of losse besluiten een tip zouden kunnen opleveren.
+Gebruik `archief_kandidaten`, `kruisbron_kandidaten`, `woo_kandidaten` en
+relevante voorberekende document- en cijfervergelijkingen. Zoek tijdens de
+dagelijkse run nooit zelf met vrije tekst over de hele Turso-database.
+Ontbrekende voorbereiding is zichtbaar in het verslag; forceer geen tip.
+
+Een afzonderlijk handmatig gemaakte lokale onderzoeksronde kan als leeswijzer
+worden gebruikt. Controleer ouderdom, bron-ID's en de actuele dragende stukken;
+de proefuitvoer is geen automatisch gevalideerde invoer voor de werkset en
+geen nieuwe onafhankelijke bron. Start tijdens de weging geen volledige
+databasekopie of brede onderzoeksronde als vervanging voor ontbrekende invoer.
 
 1. Vergunningen van de laatste 60 dagen (bronnen 109, 123 en 127) ×
    rijksmonumenten, via `weger-adres.cjs` en bevestigd in het register.
@@ -261,7 +293,9 @@ kandidaat beschikbaar, dan is nul tips een geldige uitkomst.
    wethouders en subsidieontvangers.
 4. Winnaars van gemeentelijke aanbestedingen × asbest, Arbeidsinspectie en
    rechtspraak.
-5. Buurten met de sterkste misdrijfstijging (149) × raadsvragen en B&W-besluiten.
+5. Historische misdaadontwikkelingen (149): stijgingen én dalingen, dezelfde
+   maanden, wijk tegenover gemeente/Nederland. Een bestuurlijk stuk is niet
+   nodig om zo'n vergelijking journalistiek te laten dragen.
 6. Scholen met dalende leerlingaantallen of een dalende prognose (141, 142) ×
    inspectieoordeel (144) × huisvestingsbesluiten.
 7. Zorg- en jeugdaanbieders met gemeentelijke contracten × jaarverantwoording
@@ -272,6 +306,15 @@ weekroutine en voor gerichte controle van een voorberekende kandidaat. Een tip
 uit zo'n vondst koppel je aan het best passende bestaande signaal. Als er nog
 geen signaal is, wacht je de gerichte herpromotie en intake af. De harde
 bronregel blijft gelden.
+
+Werk per kansrijke kandidaat uit: wat onthult de vergelijking, welke passages
+of cijfers dragen dat, wat is het lokale belang, welke gewone verklaring kan
+het ontkrachten en wat ontbreekt? Controleer identiteit én tijdsvolgorde.
+Een inspectieoordeel uit 2026 verklaart geen telling uit 2025; een gewijzigde
+prognose is geen gerealiseerde verandering; een subsidiebeschikking is geen
+betaling. Valideer financiële cellen en eenheden. Een gedeeld adres bewijst
+geen eigendom of misstand. Verschillende projectfasen zijn geen tegenstrijdige
+opleverdatums. Onvoldoende informatie wordt geen patroon door extra punten.
 
 ## 4. Spiegelcheck
 
@@ -284,46 +327,64 @@ echte treffer medium, titel, directe URL en datum vast. Noteer in één zin wat
 Stadsgeest toevoegt. Schrijf niet "niet gebracht" als alleen een exacte
 kopzoekactie niets vond.
 
-## 5. Scoren
+## 5. Voorwaarden en scoremodel redactioneel-2
 
-Gebruik deze gewichten en bewaar de uitsplitsing als JSON:
+Toets eerst vijf harde voorwaarden. (1) De dragende bron voldoet aan sectie 2;
+(2) de gevolgen zijn lokaal relevant; (3) identiteit, perioden, definities,
+noemers en vergelijkingsbasis dragen de gemaakte claims; (4) eerdere tips en
+berichtgeving zijn gecontroleerd en er is een concrete oorspronkelijke
+bijdrage; (5) de belangrijkste tegenverklaring is onderzocht en onzekerheden
+staan bij de juiste claim. Bij een ontbrekende voorwaarde volgt geen tip,
+ongeacht de puntensom. Een onbeantwoorde raadsvraag bewijst geen misstand.
 
-| Criterium | Punten |
-|---|---:|
-| Dragende tier-1-bron, geen spiegel | +3 |
-| Tweede onafhankelijke dragende bron | +2 |
-| Aantoonbaar patroon met telling | +4 |
-| Entiteit in minstens drie signalen | +3 |
-| Bekende bestuurder of politicus direct betrokken | +2 |
-| Concreet bedrag of telbaar gegeven | +2 |
-| Precieze locatie | +1 |
-| Aansluiting op lopend dossier | +2 |
-| Aansluiting op redactionele agenda | +1 |
-| Leusden | +1 |
-| B&W-stuk met veel of grote bijlagen | +2 |
-| Vergunning met zienswijze of bezwaar | +2 |
-| Woo-besluit met gedeeltelijke openbaarmaking | +2 |
-| Alleen tier 3 dragend | −4 |
-| Volledig gedekt door spiegelbron | −4 |
-| Los incident zonder patroon of gewichtige betrokkene | −2 |
-| Routinehandeling zonder afwijking | −3 |
-| Onbeantwoorde raadsvraag als enige dragende bron | −3 |
-| Geverifieerd kruisbronverband, per onafhankelijke bron (max. +6) | +3 |
-| Verband rust alleen op naamovereenkomst | −3 |
+Gebruik daarna uitsluitend deze drie criteria:
 
-Gebruik in `weging` voor de laatste twee de sleutels `kruisbronverband` en
-`alleen_naamovereenkomst`.
+| Criterium | Punten | Ankers |
+|---|---:|---|
+| Ontdekking (`ontdekking`) | 0–4 | 0: herhaling; 1: extra context; 2: concrete oorspronkelijke onderzoeksvraag; 3: onderbouwd verschil of verband; 4: sterke oorspronkelijke reconstructie of verklaring uit samenhangende bevindingen |
+| Bewijskwaliteit (`bewijs`) | 0–3 | 0: suggestie; 1: belangrijke gaten; 2: bronnen dragen de afgebakende vraag; 3: dragende feiten en berekeningen gecontroleerd met context en tegenbewijs |
+| Gevolgen (`gevolgen`) | 0–3 | 0: geen aantoonbaar belang; 1: beperkt maar concreet; 2: duidelijke gevolgen voor een herkenbare groep; 3: grote of structurele gevolgen of een zwaar verantwoordingsvraagstuk |
 
-Score 6 of hoger wordt een tip. Daaronder blijft het bij een gemotiveerd oordeel
-en zo nodig dossierfeit. Rek scores niet op. Maak hoogstens drie tips per run.
+Een onderzoekstip vereist **minimaal 7 van 10**, met minstens 2 voor ontdekking,
+2 voor bewijs en 1 voor gevolgen. Bronnen mogen een vraag dragen zonder de
+oorzaak al te beantwoorden; presenteer die oorzaak dan niet als feit. Deze
+redactionele schaal is een expliciete keuze, geen geleerd of statistisch
+gekalibreerd model.
 
-Haalt niets 6, ook niet onder de voorberekende kandidaten, lever dan nul tips en
-leg uit waarom de beste kandidaat niet voldeed. Verlaag de drempel niet om de
-dagproductie kunstmatig te vullen.
+Er zijn geen losse bonussen meer voor officiële bronnen, concrete bedragen,
+adressen, bijlagen, Woo-besluiten, bekende bestuurders, gemeente of herhaalde
+entiteitsvermeldingen. Onafhankelijke bevestiging draagt bij aan bewijs;
+meerdere afgeleide publicaties tellen niet als meerdere onafhankelijke bronnen.
+Geschiedenis en kruisverbanden tellen via wat ze onthullen, niet als etiket.
 
-Bij meer dan twee tips en een meerderheid uit één
-broncategorie: bekijk de beste geldige kandidaat uit een andere categorie en
-voeg die alleen toe als redactionele verbreding werkelijk waarde heeft.
+**Uitzonderlijk actueel nieuwsfeit.** Gebruik `_route: "nieuwsfeit"` alleen
+voor een geverifieerde wezenlijke nieuwe ontwikkeling met zwaar lokaal belang
+(`gevolgen: 3`). Motiveer de urgentie en de oorspronkelijke bijdrage in
+`_nieuwsfeit_reden`. Ontdekking beoordeelt hier het nieuwe feit, zonder een
+historisch patroon te verzinnen. De vijf voorwaarden, totaaldrempel en minima
+blijven gelden. Een gewoon besluit met bedrag en adres voldoet hierdoor niet
+vanzelf. Een supertip gebruikt altijd de onderzoeksroute.
+
+Bewaar in `weging` de numerieke velden `ontdekking`, `bewijs`, `gevolgen` en:
+
+- `_model: "redactioneel-2"` en `_route: "onderzoek"` of `"nieuwsfeit"`;
+- `_voorwaarden`: `bronregel`, `lokaal`, `vergelijkbaar`, `nieuwheid` en
+  `tegenverklaring`, elk expliciet gecontroleerd en `true`;
+- `_onderbouwing`: concrete tekst per `ontdekking`, `bewijs`, `gevolgen`,
+  `tegenverklaring` en `nieuwheid`;
+- bij de nieuwsfeitroute `_nieuwsfeit_reden`; voor supertips blijft `_run`
+  toegestaan als herkomstmetadata.
+
+De `score` is exact de som van de drie puntenvelden. Zie het JSON-voorbeeld in
+`operations/weger-plan.example.json`. De schrijfvalidator controleert de
+vorm, minima, som en expliciete voorwaarden; hij kan het inhoudelijke oordeel
+niet vervangen. Oude modelvelden worden bij nieuwe writes geweigerd.
+
+Een kandidaat onder de drempel blijft een gemotiveerd oordeel en zo nodig een
+dossierfeit. De vroegere uitzondering voor één dunne tip is vervallen. Maak
+hoogstens drie tips over de gehele run. Nul, één of twee zijn volwaardige
+uitkomsten; geen bronquotum of verplicht dagelijks aantal. Leg ook bij nul tips
+uit waarom de beste kandidaat niet voldeed.
 
 ## 6. Tip schrijven
 
@@ -351,6 +412,12 @@ Nummer alleen de feiten onder `WAT WE WETEN` en gebruik streepjes voor de lijste
 5. WAT WE NIET WETEN.
 6. WAT HIER NIET IN MAG — niet-gedragen conclusies.
 7. ELDERS GEBRACHT — directe links en toegevoegde waarde.
+
+Leg onder HOE DIT IS GEVONDEN uit wat het naast elkaar leggen toevoegt. Zet de
+belangrijkste tegenverklaring en de nog ontbrekende controle onder WAT WE NIET
+WETEN; geef onder WAT HIER NIET IN MAG aan welke oorzaak of samenhang nog niet
+als feit mag worden gebracht. Verplaats interne scoremetadata niet naar de
+briefing.
 
 ## 7. Gecontroleerd wegschrijven
 
@@ -387,6 +454,9 @@ Rapporteer getelde resultaten:
   verworpen);
 - koppelgaten;
 - het gebruikte voorberekende zoekspoor uit 3b en wat dat opleverde;
+- de beste afgewezen onderzoekskandidaat en de concrete reden;
+- aanvullingen bij bestaande tips, met tip-ID en de nieuwe bijdrage;
+- ontbrekende onderzoeksvoorbereiding en gebruikte modelversie/route;
 - bronproblemen en niet-geverifieerde punten;
 - de resterende achterstand (`weger-workset.cjs --limit 50 --summary`).
 

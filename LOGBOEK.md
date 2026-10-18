@@ -23,6 +23,10 @@ een gewoon koppelteken. Opmaak binnen de tekst (vet, cursief, links) wordt niet
 weergegeven; schrijf gewone zinnen. De pagina sorteert zelf op datum, dus een
 regel op de verkeerde plek zetten kan geen kwaad.
 
+## 2026-10-17 — Onderzoeksvragen krijgen voorrang
+
+Stadsgeest beoordeelt voorbereide onderzoeksvragen voortaan vóór losse nieuwsaanwijzingen. Nieuwe tips wegen wat de vergelijking onthult, hoe stevig het bewijs is en wat de gevolgen zijn. Alleen een bedrag, adres of groot besluit levert geen extra punten meer op. Bij de puntentelling staat of een tip de nieuwe of eerdere weging gebruikt. Bestaande tips behouden hun oorspronkelijke beoordeling.
+
 ## 2026-10-16 — Datum bij tips in de weekmail
 
 Bij iedere tip in de wekelijkse mail staat nu wanneer Stadsgeest de tip heeft gemaakt. De datum staat zowel in de opgemaakte mail als in de tekstversie.

@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { createClient } = require('@libsql/client');
+const { validateScore } = require('./weger-score.cjs');
 
 const TIP_TYPES = new Set(['nieuwsfeit', 'patroon', 'verdieping', 'dossiersignaal']);
 const MUNICIPALITIES = new Set(['Amersfoort', 'Leusden', 'regio']);
@@ -34,7 +35,7 @@ function usage() {
     `Hoofdvelden: { reviews: [], tips: [], dossier_facts: [] }\n\n` +
     `Supertip-run: zet \`run: "supertip"\` in het plan en \`supertip: true\` op\n` +
     `hoogstens één tip. Die tip mag signalen gebruiken die al aan een andere tip\n` +
-    `hangen en moet minimaal score 6 halen.`;
+    `hangen en moet minimaal score 7 volgens redactioneel-2 halen.`;
 }
 
 function words(value) {
@@ -75,6 +76,7 @@ function validatePlan(plan) {
     errors.push('supertip: true mag alleen in een plan met run: "supertip".');
   }
   if (superTips.length > 1) errors.push('Een supertip-run maakt hoogstens één supertip.');
+  if (tips.length > 3) errors.push('Hoogstens drie tips per plan; het plafond geldt ook voor de gehele dagelijkse run.');
 
   const linkedSignalIds = new Set();
   tips.forEach((tip, index) => {
@@ -90,8 +92,8 @@ function validatePlan(plan) {
       }
     }
     if (tip?.supertip !== undefined && typeof tip.supertip !== 'boolean') errors.push(`${field}.supertip moet true of false zijn.`);
-    if (tip?.supertip === true && !(Number.isInteger(tip?.score) && tip.score >= 6)) {
-      errors.push(`${field} is een supertip en moet minimaal score 6 halen.`);
+    if (tip?.supertip === true && !(Number.isInteger(tip?.score) && tip.score >= 7)) {
+      errors.push(`${field} is een supertip en moet minimaal score 7 halen.`);
     }
     if (/^\s*supertip\b/i.test(tip?.titel ?? '')) errors.push(`${field}.titel begint met Supertip; gebruik het veld supertip.`);
     if (words(tip?.titel) > 10) errors.push(`${field}.titel mag maximaal 10 woorden bevatten.`);
@@ -101,6 +103,7 @@ function validatePlan(plan) {
     if (!Number.isInteger(tip?.score)) errors.push(`${field}.score moet een geheel getal zijn.`);
     if (!Array.isArray(tip?.vervolgvragen) || tip.vervolgvragen.length === 0) errors.push(`${field}.vervolgvragen moet een niet-lege array zijn.`);
     if (!tip?.weging || typeof tip.weging !== 'object' || Array.isArray(tip.weging)) errors.push(`${field}.weging moet een object zijn.`);
+    errors.push(...validateScore(tip, field));
     if (!Array.isArray(tip?.herkomst) || tip.herkomst.length === 0) errors.push(`${field}.herkomst moet een niet-lege array zijn.`);
     if (Array.isArray(tip?.herkomst) && !tip.herkomst.some((source) => [1, 2].includes(Number(source?.tier)) && source?.spiegel !== true)) {
       errors.push(`${field}.herkomst mist een dragende tier-1- of tier-2-bron.`);
@@ -127,21 +130,6 @@ function validatePlan(plan) {
       });
     }
   });
-
-  const thinTips = tips.filter((tip) => Number.isInteger(tip?.score) && tip.score < 6);
-  if (thinTips.length > 1) errors.push('Maximaal één tip per run mag onder de gewone scoredrempel liggen.');
-  for (const tip of thinTips) {
-    if (/onder.{0,20}drempel/i.test(tip.score_motivatie ?? '')) {
-      errors.push(`Tip "${tip.titel ?? '?'}" mag de drempelwaarschuwing niet in score_motivatie tonen.`);
-    }
-    const warningSection = String(tip.briefing ?? '').match(
-      /^\s*WAT HIER NIET IN MAG\s*$([\s\S]*?)^\s*ELDERS GEBRACHT\s*$/m
-    )?.[1] ?? '';
-    const lastWarningLine = warningSection.trim().split(/\r?\n/).filter(Boolean).at(-1) ?? '';
-    if (!/onder.{0,20}drempel/i.test(lastWarningLine)) {
-      errors.push(`Tip "${tip.titel ?? '?'}" ligt onder de drempel; vermeld dat als laatste waarschuwing onder WAT HIER NIET IN MAG.`);
-    }
-  }
 
   facts.forEach((fact, index) => {
     const field = `dossier_facts[${index}]`;

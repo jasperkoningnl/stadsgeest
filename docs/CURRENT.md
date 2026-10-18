@@ -25,6 +25,10 @@ De supertip-run draait donderdag om 09.00 uur en schrijft hoogstens één tip me
 `supertip = 1`; nul is geldig. Een supertip blijft tot de maandag erna bovenaan.
 Alleen deze run mag het veld zetten.
 
+De weger gebruikt `redactioneel-2`: onderzoeksvragen eerst, daarna signaaltriage.
+De schrijfvalidator bewaakt voorwaarden, ontdekking, bewijs en gevolgen.
+Oudere scores blijven intact. Onderzoeksrondes blijven handmatig.
+
 ## Actieve oplevering
 
 Fase 0 en fase 2 zijn gesloten en groen. Fase 1 heeft operationele baselines
