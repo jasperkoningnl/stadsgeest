@@ -38,6 +38,16 @@
    entiteiten vast. Unieke artikeluitkomsten en hun tipkoppelingen staan apart;
    periode-evaluaties gebruiken een invoerhash en wijzigen de detectieketen niet.
 
+De dagelijkse onderzoekstaak gebruikt `onderzoek.cjs`: `research_cases` bewaart
+vragen, bron- en signaalkoppelingen, voortgang en herbeoordelingsdatum;
+`research_case_events` en `research_runs` bewaken versies en herhaalveilige writes.
+De lokale werkset neemt ook eerder beoordeelde `watching`-signalen mee. Nieuwe
+tips gebruiken de gedeelde wegervalidator en -schrijver met actor
+`codex-onderzoek`. Aanvullingen bewaren de oorspronkelijke briefing en historische
+score, vereisen een actuele inhoudshash en krijgen een tip-event met auditpayload.
+Deze taak verandert geen redactieoordelen of detectieregels. Contract:
+`operations/ONDERZOEK.md`.
+
 ## Belangrijke grenzen
 
 Zwaar archiefonderzoek is een lokale afgeleide laag: `archive-sync.cjs` kopieert

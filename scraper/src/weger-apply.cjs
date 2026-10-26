@@ -197,9 +197,9 @@ async function preflight(db, plan) {
   return { errors, statusBySignal: new Map(signals.map((row) => [Number(row.id), row.status])) };
 }
 
-async function applyPlan(db, plan, statusBySignal) {
-  const tx = await db.transaction('write');
-  try {
+async function writePlan(tx, plan, statusBySignal, { actor = 'codex-weger' } = {}) {
+    const signalActor = actor === 'codex-weger' ? 'weger' : actor;
+    const createdTips = [];
     const tipSignalIds = (plan.tips ?? []).filter((tip) => tip.supertip !== true).flatMap((tip) => tip.signals.map((link) => link.id));
     if (tipSignalIds.length > 0) {
       const placeholders = tipSignalIds.map(() => '?').join(',');
@@ -212,7 +212,7 @@ async function applyPlan(db, plan, statusBySignal) {
       }
     }
     for (const tip of plan.tips ?? []) {
-      const actor = tip.supertip === true ? 'supertip-run' : 'codex-weger';
+      const tipActor = tip.supertip === true ? 'supertip-run' : actor;
       const inserted = await tx.execute({
         sql: `INSERT INTO tips
           (titel, kern, briefing, vervolgvragen, soort, gemeente, categorie, score,
@@ -223,24 +223,25 @@ async function applyPlan(db, plan, statusBySignal) {
           tip.titel.trim(), tip.kern.trim(), tip.briefing.trim(), JSON.stringify(tip.vervolgvragen),
           tip.soort, tip.gemeente, tip.categorie.trim(), tip.score, tip.score_motivatie.trim(),
           JSON.stringify(tip.weging), JSON.stringify(tip.herkomst), JSON.stringify(tip.elders_gebracht),
-          tip.toegevoegde_waarde?.trim() || null, tip.dossier_id ?? null, actor, JSON.stringify(tip.trefwoorden),
+          tip.toegevoegde_waarde?.trim() || null, tip.dossier_id ?? null, tipActor, JSON.stringify(tip.trefwoorden),
           tip.supertip === true ? 1 : 0,
         ],
       });
       const tipId = Number(inserted.lastInsertRowid);
+      createdTips.push(tipId);
       for (const link of tip.signals) {
         await tx.execute({ sql: 'INSERT INTO tip_signals (tip_id, signal_id, rol) VALUES (?, ?, ?)', args: [tipId, link.id, link.rol] });
         await tx.execute({
           sql: `INSERT INTO signal_events
                 (signal_id, actor, event_type, status_from, status_to, reason, payload)
-                VALUES (?, 'weger', 'tip_created', ?, 'watching', ?, ?)`,
-          args: [link.id, statusBySignal.get(link.id), `Tip ${tipId}: ${tip.titel}`, JSON.stringify({ tip_id: tipId, rol: link.rol })],
+                VALUES (?, ?, 'tip_created', ?, 'watching', ?, ?)`,
+          args: [link.id, signalActor, statusBySignal.get(link.id), `Tip ${tipId}: ${tip.titel}`, JSON.stringify({ tip_id: tipId, rol: link.rol })],
         });
       }
       await tx.execute({
         sql: `INSERT INTO tip_events (tip_id, actor, event_type, status_to, reason)
               VALUES (?, ?, 'created', 'wachtrij', ?)`,
-        args: [tipId, actor, tip.score_motivatie.trim()],
+        args: [tipId, tipActor, tip.score_motivatie.trim()],
       });
     }
 
@@ -249,8 +250,8 @@ async function applyPlan(db, plan, statusBySignal) {
       await tx.execute({
         sql: `INSERT INTO signal_events
               (signal_id, actor, event_type, status_from, status_to, reason)
-              VALUES (?, 'weger', 'reviewed', ?, ?, ?)`,
-        args: [review.signal_id, statusFrom, review.status_to, review.reason.trim()],
+              VALUES (?, ?, 'reviewed', ?, ?, ?)`,
+        args: [review.signal_id, signalActor, statusFrom, review.status_to, review.reason.trim()],
       });
       await tx.execute({ sql: 'UPDATE signals SET status = ? WHERE id = ?', args: [review.status_to, review.signal_id] });
     }
@@ -261,15 +262,22 @@ async function applyPlan(db, plan, statusBySignal) {
           (dossier_id, fact_type, datum, locatie, titel, details, classificatie,
            zekerheid, primaire_bron_url, secundaire_bronnen, signal_id,
            tegenstrijdigheid, actor)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'codex-weger')`,
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
           fact.dossier_id, fact.fact_type, fact.datum ?? null, fact.locatie ?? null,
           fact.titel.trim(), fact.details ?? null, fact.classificatie ?? null,
           fact.zekerheid, fact.primaire_bron_url ?? null, JSON.stringify(fact.secundaire_bronnen),
-          fact.signal_id ?? null, fact.tegenstrijdigheid ?? null,
+          fact.signal_id ?? null, fact.tegenstrijdigheid ?? null, actor,
         ],
       });
     }
+    return createdTips;
+}
+
+async function applyPlan(db, plan, statusBySignal) {
+  const tx = await db.transaction('write');
+  try {
+    await writePlan(tx, plan, statusBySignal);
     await tx.commit();
   } catch (error) {
     await tx.rollback();
@@ -316,4 +324,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { validatePlan, words };
+module.exports = { validatePlan, words, preflight, writePlan };

@@ -1,0 +1,18 @@
+{
+  "request_id": "onderzoek-voorbeeld-20261026-01",
+  "cases": [
+    {
+      "case_key": "planning-tegenover-uitvoering",
+      "expected_version": 0,
+      "question": "Welke geplande uitvoering is aantoonbaar veranderd?",
+      "signal_ids": [],
+      "source_urls": ["https://voorbeeld.invalid/jaarverslag"],
+      "status": "researching",
+      "findings": "Vervang door de gecontroleerde bronbevindingen, vindplaatsen en uitgevoerde controles.",
+      "next_action": "Vergelijk dezelfde projecten en mijlpalen met de actuele uitvoeringsrapportage.",
+      "review_after": "2026-10-27T10:00:00Z"
+    }
+  ],
+  "weger": { "reviews": [], "tips": [], "dossier_facts": [] },
+  "tip_updates": []
+}

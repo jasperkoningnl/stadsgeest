@@ -442,6 +442,25 @@ Toegestane rollen in een tip zijn exact `dragend`, `bevestigend` en `context`.
 Zet waardeloze, dubbele of niet-lokale signalen op `discarded`; duurzaam
 bruikbare signalen blijven `watching`.
 
+## 7a. Onderzoeksopvolging
+
+Een kansrijke vraag onder de tipdrempel kan naar de dagelijkse onderzoekstaak.
+Selecteer hoogstens drie concrete vragen waarvoor een controle of vergelijking
+ontbreekt; gewone routine hoeft geen onderzoekscase te worden. Bewaar de vraag,
+bron-URLs, signaal-IDs, ontbrekende controle, eerstvolgende handeling en
+herbeoordelingsdatum volgens `operations/ONDERZOEK.md` met
+`onderzoek.cjs save` (eerst dry-run, dan `--apply`). Lees bestaande cases eerst
+gericht of op de lokale kopie en hergebruik de sleutel/actuele versie van
+dezelfde vraag. Dit mag ook voor eerder bekeken `watching`-signalen; een nieuwe
+scrape is geen voorwaarde. Beoordeel bewijs en praktische gevolgen apart.
+
+De onderzoekstaak haalt ook zelfstandig de bestaande aangehouden signalen op.
+Een gemiste nominatie laat zo geen kansrijke oude vraag verdwijnen. De
+onderzoekstaak kan zelf voldoende onderbouwde tips en gecontroleerde aanvullingen
+schrijven; zet daarvoor geen tweede tip of herbeoordeling klaar. De toestemming
+voor de geplande weger omvat ook het via deze helper vastleggen van uitsluitend
+deze onderzoeksnominaties na een geldige dry-run.
+
 ## 8. Afronding
 
 Rapporteer getelde resultaten:
@@ -457,6 +476,7 @@ Rapporteer getelde resultaten:
 - de beste afgewezen onderzoekskandidaat en de concrete reden;
 - aanvullingen bij bestaande tips, met tip-ID en de nieuwe bijdrage;
 - ontbrekende onderzoeksvoorbereiding en gebruikte modelversie/route;
+- vastgelegde onderzoeksvragen met case-sleutel, vervolgstap en herbeoordelingsdatum;
 - bronproblemen en niet-geverifieerde punten;
 - de resterende achterstand (`weger-workset.cjs --limit 50 --summary`).
 

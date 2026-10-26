@@ -105,6 +105,17 @@ antwoord. `report` maakt JSON plus een leesbare `vergelijking.html` onder
 zelfstandige bron-, spiegel- of volledige wegingscontrole uit; kandidaten zijn
 geen kant-en-klare tips en de proef bewijst geen causale tipverbetering.
 
+## Dagelijkse onderzoeksopvolging
+
+De Codex-taak `Stadsgeest-onderzoek` is dagelijks om 11.00 uur Europe/Amsterdam
+gepland. Hij controleert eerst of de weger klaar is en geen operationele schrijver
+meer actief is. Werkinstructie en writegrens: `operations/ONDERZOEK.md`.
+De additieve tabellen worden eenmalig geïnstalleerd met
+`node scraper/src/onderzoek.cjs init --apply`; normale runs installeren geen schema.
+Onderzoek bewaart voortgang in de productiedatabase en gebruikt een lokale kopie
+voor selectie en brede vergelijking. De weger nomineert vragen via dezelfde
+gevalideerde helper; de onderzoekstaak haalt ook reeds aangehouden signalen op.
+
 ## Grote iBabs-bijlagen
 
 De gewone bijlagenrunner stopt bij 40 MB. Verwerk de aparte wachtrij buiten

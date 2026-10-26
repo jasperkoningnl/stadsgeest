@@ -49,7 +49,7 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 
 ## Leerloop
 
-- Onderzoeksroute: `redactioneel-2` is op verzoek van Jasper doorgevoerd; controleer de eerstvolgende echte weger-run op correcte toepassing. Het lokale onderzoeksprototype blijft handmatig; zorg-jaarcijfers, KvK-dekking en buurtnoemers blijven beperkingen (10-18).
+- Onderzoeksopvolging: controleer de eerste geplande run van `Stadsgeest-onderzoek` op inhoudelijke voortgang, herbeoordeling en directe tip-/aanvullingswrites; schema en automatische kandidaatinstroom zijn gecontroleerd. Zorg-jaarcijfers, KvK-dekking en buurtnoemers blijven beperkingen (10-26).
 
 - Algemene documentvoorbereiding is aangesloten; grotere Jev-proef afgerond (200 ontwikkelparen, 59 bruikbare controleparen). Meerwaarde voor echte tips nog niet gemeten. Jev helpt kandidaatselectie maar onthoudt zich te weinig bij metadata; Codex-controle blijft nodig. Geen doorlopende betaalde taak (10-12).
 - Echte dagruns 13/14 oktober naast Jev gezet: 0/9 andere vervolgacties door extra documentcontext; bustip had geen documentverbanden. Parkeercontextlabels bleken te ruim, documentversies blijven aandachtspunt. Nog geen causale tipwinst of gelijkwaardige zelfstandige Jev-weger aangetoond (10-14).

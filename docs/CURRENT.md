@@ -27,7 +27,12 @@ Alleen deze run mag het veld zetten.
 
 De weger gebruikt `redactioneel-2`: onderzoeksvragen eerst, daarna signaaltriage.
 De schrijfvalidator bewaakt voorwaarden, ontdekking, bewijs en gevolgen.
-Oudere scores blijven intact. Onderzoeksrondes blijven handmatig.
+Oudere scores blijven intact. Een afzonderlijke dagelijkse onderzoekstaak volgt
+open vragen en eerder aangehouden signalen op en verkent daarnaast zelfstandig
+een onderzoeksspoor. Voortgang en herbeoordeling staan in `research_cases` met
+een append-only audit. Voldoende onderbouwde vondsten kunnen direct een tip of
+gecontroleerde aanvulling opleveren volgens `operations/ONDERZOEK.md`. Het oudere
+lokale onderzoeksprototype blijft een afzonderlijk hulpmiddel.
 
 ## Actieve oplevering
 
