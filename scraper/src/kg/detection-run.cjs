@@ -67,9 +67,9 @@ const ADAPTERS = [
   ['anbi', AnbiRegisterAdapter, { sourceName: 'ANBI-register — Belastingdienst open data', minimumHours: 144 }],
   ['gleif', GleifRegisterAdapter, { sourceName: 'GLEIF — LEI-register', minimumHours: 144 }],
   ['osm', OsmContextAdapter, { sourceName: 'OpenStreetMap — Overpass contextlaag', minimumHours: 144 }],
-  // Betaald (overheid.io Small, 2.500 calls). Twee calls per dag; zie adapter voor de bovengrens per run.
+  // Betaald; abonnement tijdelijk beëindigd. Alleen expliciet hervatten met de featureflag.
   // De dagcursor voorkomt dubbel ophalen, dus een korte minimumtijd is veilig.
-  ['openkvk', OpenKvkRegisterAdapter, { sourceName: 'OpenKvK — overheid.io registerupdates', minimumHours: 6 }],
+  ['openkvk', OpenKvkRegisterAdapter, { sourceName: 'OpenKvK — overheid.io registerupdates', minimumHours: 6, featureFlag: 'STADSGEEST_ENABLE_OPENKVK' }],
 ];
 
 function isDueAt(lastFinishedAt, minimumHours, now = Date.now()) {

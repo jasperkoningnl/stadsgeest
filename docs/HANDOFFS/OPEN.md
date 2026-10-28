@@ -21,6 +21,8 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 
 ## Keten en bewaking
 
+- LRK: eventwrite gebruikt niet-bestaande `kg_events.description`/`raw_data`; fetchrun meldt toch `ok`, bron 139 heeft geen KG-events. Herstel met gerichte beoordeling van gemiste events; geen blinde backfill (10-28).
+- De Stadsbron: HTTP 500 op voorpagina en tijdlijn, 24 falende runnerregels sinds 21 oktober. Runnerbewaking meldt dit; bronstatus 166 blijft ten onrechte `ok`. Samen Meten meldt `geen_runs` ondanks bewuste uitschakeling; fetchrunfouten missen in brongezondheid (10-28).
 - Kamp Amersfoort geeft sinds 4 oktober elke nacht `error` zonder foutmelding (10-04).
 - Routinefilter in de intake is nog niet in werking gezien: de run van 5 oktober bevatte geen bekendmaking van die soort. Na een werkdag tellen op reden `routine:` (10-04).
 - NDW in de gecombineerde detectierun: rond 11 oktober nakijken of `ndw` op `ok` staat binnen de heaplimiet (10-04).

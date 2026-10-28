@@ -21,6 +21,10 @@ idempotente invoer levert geen dubbele uitkomsten op. Het laatste resultaat per
 taak staat in `STAND.md`; dode proceslocks worden opgeruimd. De gecombineerde
 detectierun heeft een heaplimiet van 1,5 GB.
 
+OpenKvK staat tijdelijk uit wegens een verlopen abonnement. Hervatten kan met
+`STADSGEEST_ENABLE_OPENKVK=1` en heractivering van de bron, na herstel van het
+abonnement; de bestaande gegevens en dagcursor blijven behouden. Zie `SOURCES.md`.
+
 De supertip-run draait donderdag om 09.00 uur en schrijft hoogstens één tip met
 `supertip = 1`; nul is geldig. Een supertip blijft tot de maandag erna bovenaan.
 Alleen deze run mag het veld zetten.

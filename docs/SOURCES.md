@@ -184,6 +184,19 @@ paginering tot 10 pagina's, geen data-export. overheid.io vermeldt niet per
 welke periode de calls gelden. Sleutel `OVERHEID_IO_KEY` in `scraper/.env`,
 meegestuurd als header `ovio-api-key`.
 
+Sinds 28 oktober 2026 op Jaspers verzoek tijdelijk uit: het abonnement is
+verlopen en wordt voorlopig niet verlengd. De detectierun slaat de adapter over
+tenzij `STADSGEEST_ENABLE_OPENKVK=1` in `scraper/.env` staat; ook bij een expliciete
+adapterselectie blijft deze schakelaar gelden. Bron 161 staat in productie op
+`is_active=0`, `health='uitgeschakeld'`. Bestaande records, events, signalen en
+de dagcursor blijven bewaard.
+
+Hervatten: herstel eerst abonnement en sleutel, zet daarna de schakelaar op `1`
+en bron 161 terug op `is_active=1`, `health='ok'`, `health_note=NULL`.
+Controleer met een gerichte adapter-dry-run en daarna de eerstvolgende geplande
+run. Een lange onderbreking wordt niet volledig ingehaald: de bestaande cursor
+haalt hoogstens zeven dagen terug op; oudere gaten blijven bestaan.
+
 - Endpoint `api.overheid.io/v3/openkvk` met `filters[bezoeklocatie.plaats]`
   (Amersfoort, Leusden) en `filters[updated_at]=<dag>`, `size=100`. Normaal
   één call per plaats per dag; op 22 september waren dat 36 + 4 records.
