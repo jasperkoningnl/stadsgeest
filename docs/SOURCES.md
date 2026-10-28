@@ -59,6 +59,22 @@ document.
 
 ## Fase-3-broncontracten
 
+### LRK-wijzigingen
+
+De LRK-adapter schrijft bronitem, KG-event en nieuwe momentopname in één
+transactie. Een schrijffout breekt de run af en laat de vorige momentopname
+intact voor een herkansing. De gebeurtenissleutel bevat locatie, wijziging en
+vorige momentopname: herhaling wordt niet dubbel opgeslagen, maar een volgende
+wijziging van hetzelfde type blijft zichtbaar. De waarnemingstijd is geen
+bevestigde openings-, sluitings- of wijzigingsdatum (`occurred_at` blijft leeg).
+
+Historisch herstelde events met een reeds via intake verwerkt bronitem bewaren
+de oorspronkelijke waarneming en krijgen `journalistically_relevant=false`;
+R9 biedt deze reparaties niet opnieuw als nieuws aan. De oorspronkelijke
+bronitems, beoordelingen en tips blijven behouden.
+
+### Overige fase-3-bronnen
+
 AFM gebruikt de volledige `WfdExternRegister`-ZIP/XML en niet de beperkte
 zoekresultaat-CSV. DNB haalt de actuele codes `WFTKF`, `WFTBI`, `WFTVE`,
 `WTTTK`, `WFTEG` en `PWPNF` afzonderlijk op. RVO ontdekt de huidige CSV-link op
@@ -417,6 +433,15 @@ als spiegel en in `migrate-tips.cjs` als te markeren naam, maar hadden geen
 bronrij. De scrapers zetten bij de eerste run `bronrol = 'spiegel'`, tier 3 en
 de gemeente; daarna blijft een handmatige keuze staan. Spiegelitems maken geen
 eigen signaal (zie `intake-run.mjs`).
+
+Op 28 oktober 2026 geeft De Stadsbron op beide hostnamen HTTP 500 met een lege
+body, ook bij gewone browserheaders. Voorpagina, tijdlijn, index, nieuwsbrief en
+een bestaand artikel falen; `robots.txt` geeft wel 200 en vraagt tien seconden
+tussen aanvragen. Een onafhankelijke ophaaldienst ziet dezelfde HTTP 500.
+Dit wijst op een storing in de websiteapplicatie, vóór het parsen door onze
+scraper. De interne oorzaak vereist hun serverlog; een werkende alternatieve
+artikel- of lijstingang is niet vastgesteld. De bestaande scraper en planning
+blijven actief zodat de bron na herstel weer kan binnenkomen.
 
 - `scraper/src/scrapers/leusder-krant.js`: RSS `https://www.leusderkrant.nl/rss/feed`,
   vijftig nieuwste berichten met publicatiedatum, dagelijks via `run-all.js`.

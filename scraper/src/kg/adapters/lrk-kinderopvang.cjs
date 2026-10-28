@@ -35,6 +35,7 @@ class LrkKinderopvangAdapter {
       this.sourceId = existing.rows[0].id;
       return;
     }
+    if (this.dryRun) return;
     const result = await this.db.execute({
       sql: `INSERT INTO sources (name, url, source_type, reliability, category, scrape_frequency,
               is_active, created_at, source_class, adapter_version)
@@ -190,7 +191,7 @@ class LrkKinderopvangAdapter {
   }
 
   /** Verwerk een gedetecteerd event. */
-  async _processEvent(event) {
+  async _processEvent(event, context = {}) {
     const row = event.row || {};
     const prev = event.prev || {};
     const naam = row.actuele_naam_oko || prev.naam || 'Onbekend';
@@ -225,35 +226,50 @@ class LrkKinderopvangAdapter {
       return;
     }
 
-    // Sla op als raw_item
-    try {
-      await this.db.execute({
-        sql: `INSERT INTO raw_items (source_id, external_url, title, content, summary,
-                scraped_at, content_hash, is_processed, published_at)
-              VALUES (?, ?, ?, ?, ?, datetime('now'), ?, 0, datetime('now'))`,
-        args: [
-          this.sourceId, lrkUrl, title,
-          JSON.stringify({ event: event.type, current: row, previous: prev }),
-          description, `${event.type}::${lrkId}`,
-        ],
-      });
-    } catch (err) {
-      if (!err.message.includes('UNIQUE')) console.error(`[LRK] raw_item fout: ${err.message}`);
-    }
+    // Identiteit per overgang, zodat een volgende capaciteitswijziging bij
+    // dezelfde locatie niet botst met een oudere wijziging. De vorige
+    // snapshot houdt een herkansing stabiel, ook als de waarnemingstijd verschilt.
+    const transitionHash = crypto.createHash('sha256').update(JSON.stringify({
+      type: event.type, lrkId, previousSnapshotId: context.previousSnapshotId || null,
+      previous: prev.hash || null, current: event.row ? this._semanticHash(row) : null,
+    })).digest('hex');
+    const identifier = `lrk:${lrkId}:${event.type}:${transitionHash}`;
+    const observedAt = context.observedAt || new Date().toISOString();
+    const provenance = JSON.stringify({
+      current: row, previous: prev, lrk_id: lrkId,
+      previous_snapshot_id: context.previousSnapshotId || null,
+      source_url: lrkUrl, observed_at: observedAt, adapter_version: '1.1',
+      uncertainty: 'Registerwijziging waargenomen in de export; waarnemingstijd is geen bevestigde openings-, sluitings- of wijzigingsdatum.',
+    });
 
-    // Maak kg_event
-    try {
+    // Beide writes en de snapshot vallen in dezelfde runtransactie. Alleen
+    // de bedoelde herhaling mag worden overgeslagen; schrijffouten gaan door.
+    await this.db.execute({
+      sql: `INSERT INTO raw_items (source_id, external_url, title, content, summary,
+              scraped_at, content_hash, is_processed, published_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)
+            ON CONFLICT(source_id, content_hash) DO NOTHING`,
+      args: [
+        this.sourceId, lrkUrl, title,
+        JSON.stringify({ event: event.type, current: row, previous: prev }),
+        description, observedAt, identifier, observedAt,
+      ],
+    });
+
+    const existing = await this.db.execute({
+      sql: 'SELECT id FROM kg_events WHERE source_id=? AND source_identifier=? AND event_type=? LIMIT 1',
+      args: [this.sourceId, identifier, event.type],
+    });
+    if (!existing.rows.length) {
       await this.db.execute({
         sql: `INSERT INTO kg_events (event_type, source_id, source_url, source_identifier,
-                title, description, occurred_at, fetched_at, raw_data, created_at)
-              VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'), ?, datetime('now'))`,
+                title, summary, occurred_at, fetched_at, provenance, parser_version, created_at)
+              VALUES (?, ?, ?, ?, ?, ?, NULL, ?, ?, 'lrk-1.1', ?)`,
         args: [
-          event.type, this.sourceId, lrkUrl, lrkId,
-          title, description, JSON.stringify({ current: row, previous: prev }),
+          event.type, this.sourceId, lrkUrl, identifier,
+          title, description, observedAt, provenance, observedAt,
         ],
       });
-    } catch (err) {
-      if (!err.message.includes('UNIQUE')) console.error(`[LRK] kg_event fout: ${err.message}`);
     }
   }
 
@@ -275,28 +291,40 @@ class LrkKinderopvangAdapter {
     await this._ensureSource();
 
     const records = await this._fetchAndParse();
-    const previousState = await this._getPreviousSnapshot();
-    const previousSnapshot = previousState?.snapshot || null;
-    const events = this._diff(records, previousSnapshot);
+    const db = this.db;
+    const tx = this.dryRun ? null : await db.transaction('write');
+    if (tx) this.db = tx;
+    try {
+      const previousState = await this._getPreviousSnapshot();
+      const previousSnapshot = previousState?.snapshot || null;
+      const events = this._diff(records, previousSnapshot);
 
-    console.log(`[LRK] ${events.length} wijzigingen gedetecteerd${previousSnapshot ? '' : ' (eerste run, alles is nieuw)'}`);
+      console.log(`[LRK] ${events.length} wijzigingen gedetecteerd${previousSnapshot ? '' : ' (eerste run, alles is nieuw)'}`);
 
-    // Bij eerste run: niet alle 200+ locaties als "nieuw" signaleren
-    if (!previousSnapshot && events.length > 20) {
-      console.log(`[LRK] Eerste run — snapshot opslaan zonder events te genereren`);
+      // Bij eerste run: niet alle 200+ locaties als "nieuw" signaleren
+      if (!previousSnapshot && events.length > 20) {
+        console.log(`[LRK] Eerste run — snapshot opslaan zonder events te genereren`);
+        await this._saveSnapshot(records, previousState);
+        if (tx) await tx.commit();
+        return { total: records.length, events: 0, note: 'eerste snapshot opgeslagen' };
+      }
+
+      for (const event of events) {
+        await this._processEvent(event, { previousSnapshotId: previousState?.id });
+      }
+
       await this._saveSnapshot(records, previousState);
-      return { total: records.length, events: 0, note: 'eerste snapshot opgeslagen' };
+      if (tx) await tx.commit();
+
+      const summary = { total: records.length, events: events.length };
+      console.log(`[LRK] Klaar: ${JSON.stringify(summary)}`);
+      return summary;
+    } catch (error) {
+      if (tx) await tx.rollback();
+      throw error;
+    } finally {
+      this.db = db;
     }
-
-    for (const event of events) {
-      await this._processEvent(event);
-    }
-
-    await this._saveSnapshot(records, previousState);
-
-    const summary = { total: records.length, events: events.length };
-    console.log(`[LRK] Klaar: ${JSON.stringify(summary)}`);
-    return summary;
   }
 }
 
