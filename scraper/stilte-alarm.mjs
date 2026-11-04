@@ -8,7 +8,7 @@
  *
  * Drie controles:
  *   1. Wanneer kwam het laatste raw_item binnen?          (drempel: 24 uur)
- *   2. Wanneer draaide de intake voor het laatst?          (drempel: 30 uur)
+ *   2. Laatste intake mislukt/vastgelopen, of laatste succes >30 uur oud?
  *   3. Hoeveel items leverde de laatste etmaal op?         (ondergrens: 10)
  *
  * Exitcode 0 = rustig, 1 = alarm, 2 = kon niet meten (databasefout).
@@ -54,15 +54,10 @@ try {
     meldingen.push(`ALARM laatste nieuwe item is ${Math.round(uItem)} uur oud (drempel ${UREN_ITEMS})`);
   }
 
-  const laatsteIntake = await db.execute(
-    `SELECT max(${NORM('started_at')}) AS t FROM intake_runs`
-  );
-  const uIntake = urenGeleden(laatsteIntake.rows[0]?.t);
-  if (uIntake === null) {
-    meldingen.push('ALARM geen intake-run met een leesbare datum gevonden');
-  } else if (uIntake > UREN_INTAKE) {
-    meldingen.push(`ALARM laatste intake-run is ${Math.round(uIntake)} uur geleden (drempel ${UREN_INTAKE})`);
-  }
+  const laatsteIntake = await db.execute('SELECT id, started_at, status, error_message FROM intake_runs ORDER BY id DESC LIMIT 1');
+  const laatsteGeslaagd = await db.execute("SELECT id, finished_at FROM intake_runs WHERE status = 'ok' ORDER BY id DESC LIMIT 1");
+  const uIntake = urenGeleden(laatsteGeslaagd.rows[0]?.finished_at);
+  meldingen.push(...bewaking.intakeMeldingen(laatsteIntake.rows[0], laatsteGeslaagd.rows[0], new Date(), UREN_INTAKE));
 
   const etmaal = await db.execute(
     `SELECT COUNT(*) AS n FROM raw_items WHERE ${NORM('scraped_at')} >= datetime('now','-24 hour')`
@@ -99,7 +94,7 @@ try {
   }
 
   if (meldingen.length === 0) {
-    console.log(`ok laatste item ${Math.round(uItem)}u geleden, intake ${Math.round(uIntake)}u geleden, ${n24} items in 24u`);
+    console.log(`ok laatste item ${Math.round(uItem)}u geleden, geslaagde intake ${Math.round(uIntake)}u geleden, ${n24} items in 24u`);
     process.exitCode = 0;
   } else {
     for (const m of meldingen) console.log(m);

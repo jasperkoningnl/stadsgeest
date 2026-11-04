@@ -2,7 +2,23 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { falendeScrapers, langStilleBronnen } = require('../../src/bewaking-lib.cjs');
+const { falendeScrapers, langStilleBronnen, intakeMeldingen } = require('../../src/bewaking-lib.cjs');
+
+test('verse maar mislukte intake blijft alarm geven, ook wanneer bronnen wel leveren', () => {
+  const meldingen = intakeMeldingen(
+    { id: 118, status: 'error', started_at: '2026-11-04 03:30:02', error_message: 'fetch failed' },
+    { finished_at: '2026-10-31 03:30:38' }, new Date('2026-11-04T09:00:00Z'));
+  assert.equal(meldingen.length, 2);
+  assert.match(meldingen[0], /#118.*fetch failed/);
+  assert.match(meldingen[1], /geslaagde intake/);
+});
+
+test('geslaagde intake heft storing op; vastgelopen of ontbrekende intake blijft zichtbaar', () => {
+  const now = new Date('2026-11-04T09:00:00Z');
+  assert.deepEqual(intakeMeldingen({ status: 'ok' }, { finished_at: '2026-11-04 08:30:00' }, now), []);
+  assert.equal(intakeMeldingen({ id: 1, status: null, started_at: '2026-11-04 03:30:00' }, { finished_at: '2026-11-04 02:00:00' }, now).length, 1);
+  assert.equal(intakeMeldingen(null, null, now).length, 1);
+});
 
 const run = (scraper_file, dag, status) => ({ scraper_file, status, started_at: `2026-10-${dag}T23:06:00.000Z` });
 

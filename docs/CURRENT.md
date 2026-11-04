@@ -1,25 +1,28 @@
 # Actuele toestand — Stadsgeest
 
 **Doel:** compacte herschrijfbare momentopname.
-**Status:** vaste tekst, bijgewerkt 5 oktober 2026. Tellingen staan
+**Status:** vaste tekst, bijgewerkt 4 november 2026. Tellingen staan
 in `STAND.md` (`npm run stand`).
 **Lees wanneer:** bij iedere nieuwe taak. Historische details staan elders.
 
 ## Productie
 
-Stadsgeest is de lokale journalistieke signalerings- en tipmachine voor
-Amersfoort en Leusden. De keten loopt van publieke bronnen via bronrecords,
-events, entiteiten, signalen en de weger naar tips, dossiers en het
-redactiedashboard op `stadsgeest.nl/nieuwsplein33`. Vercel host het dashboard;
-Jaspers Windows-notebook voert de operationele keten uit. Sinds 3 oktober: één beslisflow met toetsen,
-bulkafsluiting van oude wachtrijtips, verkenner via entiteiten en
-Beheer > Redactie.
+Stadsgeest maakt journalistieke signalen en tips voor Amersfoort en Leusden.
+Publieke bronrecords, events en entiteiten voeden signalen, weger, tips en
+dossiers. Vercel host `stadsgeest.nl/nieuwsplein33`; Jaspers Windows-notebook
+voert de operationele keten uit. Het dashboard bevat een beslisflow,
+bulkafsluiting, entiteitenverkenner en Beheer > Redactie.
 
-`Stadsgeest Detection` start dagelijks om 06.15 uur; NDW draait daarin wekelijks mee. Na de dagrun volgen de geplande fase-5-maandevaluatie en
+`Stadsgeest Detection` staat momenteel dagelijks om 05.15 uur gepland; NDW draait daarin wekelijks mee. Na de dagrun volgen de geplande fase-5-maandevaluatie en
 privacyretentie. Adapter-, evaluatie- en retentiefouten zijn geïsoleerd en
 idempotente invoer levert geen dubbele uitkomsten op. Het laatste resultaat per
 taak staat in `STAND.md`; dode proceslocks worden opgeruimd. De gecombineerde
 detectierun heeft een heaplimiet van 1,5 GB.
+
+Intake hervat bestaande besluiten en bronkoppelingen zonder extra bevestiging
+of signaalverversing. Verbroken leesverbindingen krijgen begrensde herkansing;
+onzekere writes niet. Uitvoer en foutdetails staan in `scraper/logs/intake-*`.
+Het stiltealarm controleert de laatste uitkomst én het laatste geslaagde einde.
 
 OpenKvK staat tijdelijk uit wegens een verlopen abonnement. Hervatten kan met
 `STADSGEEST_ENABLE_OPENKVK=1` en heractivering van de bron, na herstel van het
@@ -42,19 +45,14 @@ lokale onderzoeksprototype blijft een afzonderlijk hulpmiddel.
 
 Woo-onderzoek: [functiecontract](WOO-FACTOR.md).
 
-Fase 0 en fase 2 zijn gesloten en groen. Fase 1 heeft operationele baselines
-voor ANBI, GLEIF en OpenStreetMap; herhaalruns leverden nul wijzigingen en nul
-events op. De BAG-backfill koppelde 79 van 82 locaties exact en legde drie
-niet-eenduidige gevallen vast. De handmatige organisatie-golden-set vereist
-200 beoordelingen en 98% precisie; de stand staat in `STAND.md`.
+Fase 0 en 2 zijn gesloten. Fase 1 heeft operationele baselines voor ANBI, GLEIF
+en OpenStreetMap en BAG-koppelingen met expliciete uitzonderingen. De organisatie-
+golden-set vereist 200 menselijke beoordelingen en 98% precisie; zie `STAND.md`.
 
-Fase 3 en 4 zijn productieactief. De eerdere baseline-herhaalcontroles zagen
-uitsluitend ongewijzigde records en nul events; R5 heeft inmiddels de hieronder
-beschreven augustus-signalen opgeleverd. De zorgparser scheidt organisatienamen
-van persoons- en bestandsvelden; 178 verkeerd benoemde importorganisaties zijn via
-KVK-identiteitsregels hersteld. De iBabs-keten heeft een begrensde OCR-naloop
-voor scans zonder tekstlaag. De bronnenwacht meldt dode bronnen en sinds 4 oktober ook herhaald falende
-scrapers en lang stille tier-1-bronnen.
+Fase 3 en 4 zijn productieactief. De zorgparser scheidt organisaties van persoons-
+en bestandsvelden; importnamen zijn via KVK-identiteit hersteld. iBabs heeft een
+begrensde OCR-naloop voor scans. De bronnenwacht meldt dode bronnen, herhaald
+falende scrapers en lang stille tier-1-bronnen.
 
 Documenten boven 200.000 tekens hebben sinds 3 oktober deelitems (`#deel=N`,
 tabel `raw_item_parts`): verwerkt en historisch; tel ze niet als losse stukken.
@@ -63,14 +61,10 @@ Sinds 2 oktober leest de keten ook de Statenstukken van de provincie Utrecht
 (alleen stukken over Amersfoort of Leusden, tier 1); de Leusder Krant en De
 Stadsbron zijn spiegelbron (bronnen 165 en 166, sinds 3 oktober).
 
-R5 volgt stijgende en dalende misdaadtrends over drie en twaalf maanden per wijk
-en gemeente, vergeleken met een jaar eerder en Nederland. Een gemeentelijk
-overzicht toont ook aantallen per 1.000 inwoners; wijken niet. Augustus staat in
-productie met negen wijktrends, één gemeenteoverzicht en de oude maandpiek.
-Signaal 2903 meldt onder meer 13% meer totale registraties en 27% meer fiets-,
-brom- en scooterdiefstal in Amersfoort. Fraude in De Berg-Noord en
-winkeldiefstal in Isselt zijn gemarkeerd als mogelijk locatiecluster. De bronrun
-en beide 24-maandsterugtests zijn op 2 oktober zonder duplicaten afgerond.
+R5 vergelijkt stijgende en dalende misdaadregistraties over drie en twaalf
+maanden met een jaar eerder en Nederland. Gemeenten krijgen ook aantallen per
+1.000 inwoners; wijken niet. Mogelijke locatieclusters en registratiewijzigingen
+houden hun waarschuwingen. Details en terugtests: `PHASES/phase-3.md`.
 
 De fase-5-leerloop legt redactionele besluiten idempotent vast met reden,
 dimensie en bevroren context van tip, signalen, regels, bronnen en entiteiten.

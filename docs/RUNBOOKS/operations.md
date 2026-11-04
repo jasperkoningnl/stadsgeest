@@ -34,6 +34,15 @@ Belangrijke ingangen:
 Brongezondheid wordt per actieve run gemeten. Kalenderdagen zonder nieuwe
 records zijn op zichzelf geen storing.
 
+Bij een intakefout: lees `intake_runs.error_message` (fase, item en foutcode) en
+`scraper/logs/intake-<tijdstip>.log` / `.err.log`; `intake-task.log` bewaart de
+procesuitkomst. Controleer vóór hervatten of geen schrijver actief is. Dezelfde
+taak mag daarna opnieuw draaien: bestaande bronkoppelingen en besluiten uit
+afgebroken runs worden hervat, zonder extra bevestiging of nieuwe signaaldatum.
+Audit en entiteiten worden opgeslagen vóór `is_processed = 1`. Het stiltealarm
+meldt een laatste fout direct en controleert daarnaast het laatste geslaagde
+einde. Alleen een recente start of een aanwezige PM2-job bewijst geen succes.
+
 ## Fase-4-cadans en begrenzing
 
 De dagelijkse detectietaak haalt fase-4-bronnen alleen op wanneer hun

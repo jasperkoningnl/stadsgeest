@@ -21,9 +21,9 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 
 ## Keten en bewaking
 
-- De Stadsbron: externe HTTP 500 op beide hostnamen en alle gecontroleerde inhoudspagina's; robots.txt werkt. Geen alternatieve ingang gevonden, interne oorzaak vraagt hun serverlog. Runnerbewaking meldt dit; bronstatus 166 blijft ten onrechte `ok`. Samen Meten meldt `geen_runs` ondanks bewuste uitschakeling; fetchrunfouten missen in brongezondheid (10-28).
+- Brongezondheid mist fetchrunfouten en bronfouten wanneer de runner zelf slaagt; Samen Meten meldt `geen_runs` ondanks bewuste uitschakeling. De Stadsbron leverde op 4 november weer succesvol (10-28, 11-04).
+- Intakecontrole: GGD zeven bronfouten, B&W en Raad van State elk twee fouten, raadsinformatie-API twee timeouts; foutdetails en zaakbundeling gericht herstellen (11-04).
 - Kamp Amersfoort geeft sinds 4 oktober elke nacht `error` zonder foutmelding (10-04).
-- Routinefilter in de intake is nog niet in werking gezien: de run van 5 oktober bevatte geen bekendmaking van die soort. Na een werkdag tellen op reden `routine:` (10-04).
 - NDW in de gecombineerde detectierun: rond 11 oktober nakijken of `ndw` op `ok` staat binnen de heaplimiet (10-04).
 - `lokale-kopie.cjs` eindigt op Windows met `EBUSY` bij het hernoemen; de kopie staat dan compleet als `.db.bezig` (10-05).
 - `Kon scrape_runs niet bijwerken ... fetch failed` in het errorlog van `scrape-dagelijks`; oorzaak onbekend (10-03).

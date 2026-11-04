@@ -17,6 +17,7 @@ import {
 } from './src/intake-matching.mjs';
 import { isOmnibus, splitsOmnibus } from './src/omnibus-split-lib.mjs';
 import { routineReden } from './src/routine-lib.mjs';
+import { foutCode, leesMetHerkansing, herstelBesluit, maakBatcher } from './src/intake-herstel.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -25,6 +26,7 @@ const db = createClient({
   url: process.env.TURSO_URL,
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
+const lees = (stmt) => leesMetHerkansing(db, stmt);
 
 // Hoe oud een item mag zijn en toch als vers signaal doorgaat. Vóór 2026-08-09
 // stond hier 48 uur, gemeten vanaf het scrapemoment, en werd alles daarbuiten
@@ -147,7 +149,7 @@ function escapeRegex(s) {
 }
 
 async function loadPersonIndex() {
-  const res = await db.execute('SELECT name FROM persons');
+  const res = await lees('SELECT name FROM persons');
   return res.rows.map(p => ({
     name: p.name,
     regex: new RegExp(`\\b${escapeRegex(p.name)}\\b`, 'i'),
@@ -157,23 +159,7 @@ async function loadPersonIndex() {
 // ─── Dashboard-logging: batched schrijven naar intake_decisions / signal_events ───
 
 function makeBatcher(flushSize = 50) {
-  let buf = [];
-  return {
-    async push(stmt) {
-      buf.push(stmt);
-      if (buf.length >= flushSize) {
-        const chunk = buf;
-        buf = [];
-        await db.batch(chunk, 'write');
-      }
-    },
-    async flush() {
-      if (buf.length === 0) return;
-      const chunk = buf;
-      buf = [];
-      await db.batch(chunk, 'write');
-    },
-  };
+  return maakBatcher(db, flushSize);
 }
 
 function decisionStmt(runId, item, tier, decision, reason, extra = {}) {
@@ -298,6 +284,8 @@ async function run() {
 
   let stats = { verwerkt: 0, gefilterd: 0, nieuwSignaal: 0, historischSignaal: 0, bijgewerktSignaal: 0, drempelBereikt: 0, entiteiten: 0, ids: [] };
   let itemsInCount = 0;
+  let fase = 'voorbereiding';
+  let huidigItem = null;
 
   const countsFromStats = () => ({
     items_in: itemsInCount,
@@ -321,7 +309,7 @@ async function run() {
     // "Coffeeshopbeleid" naar 64 items met verkeersbesluiten en rekenkamer-
     // onderzoeken. De drempel van 8 is conservatief: alleen entiteiten die
     // aantoonbaar ruis veroorzaken vallen eruit.
-    const ruisRes = await db.execute(`
+    const ruisRes = await lees(`
       SELECT e.normalized_name, e.entity_type
       FROM entities e JOIN entity_signals es ON es.entity_id = e.id
       GROUP BY e.normalized_name, e.entity_type
@@ -334,7 +322,7 @@ async function run() {
     RUIS_ENTITEITEN.add('organization:gemeente amersfoort');
     console.log(`${RUIS_ENTITEITEN.size} ruis-entiteiten uitgefilterd: ${[...RUIS_ENTITEITEN].join(', ')}`);
 
-    const itemsResult = await db.execute(`
+    const itemsResult = await lees(`
       SELECT r.id, r.title, r.content, r.summary, r.external_url, r.scraped_at, r.is_historical,
              r.published_at,
              s.name as source_name, s.reliability, s.category, s.tier, s.bronrol, s.id as source_id
@@ -357,7 +345,7 @@ async function run() {
       return;
     }
 
-    const signalsResult = await db.execute(`
+    const signalsResult = await lees(`
       WITH eerste_item AS (
         SELECT si.signal_id, si.raw_item_id,
           ROW_NUMBER() OVER (
@@ -382,7 +370,7 @@ async function run() {
     `);
     const activeSignals = signalsResult.rows;
 
-    const allTitlesResult = await db.execute(`SELECT title FROM signals`);
+    const allTitlesResult = await lees(`SELECT title FROM signals`);
     const allSignalTitles = new Set(allTitlesResult.rows.map(r => (r.title || '').toLowerCase().trim()));
 
     // Entity-gebaseerde matching: gebruik uitsluitend entiteiten van het eerste
@@ -390,7 +378,7 @@ async function run() {
     // Eén foute koppeling besmette daardoor het cluster en trok via die nieuwe
     // entiteiten steeds meer ongerelateerde stukken aan.
     const sigEnt = new Map(); // signal_id -> {strong:Set, loc:Set}
-    const entRows = await db.execute(`
+    const entRows = await lees(`
       WITH eerste_item AS (
         SELECT si.signal_id, si.raw_item_id,
           ROW_NUMBER() OVER (
@@ -432,7 +420,7 @@ async function run() {
       return !specifiek.includes(itemWereld);
     }
     async function entityMatchSignal(item) {
-      const ie = await db.execute({ sql: `SELECT entity_type, normalized_name FROM entities WHERE raw_item_id = ?`, args: [item.id] });
+      const ie = await lees({ sql: `SELECT entity_type, normalized_name FROM entities WHERE raw_item_id = ?`, args: [item.id] });
       if (!ie.rows.length) return null;
       const iStrong = new Set(), iLoc = new Set();
       for (const r of ie.rows) (r.entity_type === 'location' ? iLoc : iStrong).add(r.normalized_name);
@@ -478,7 +466,7 @@ async function run() {
       for (let i = 0; i < urlItems.length; i += BATCH) {
         const batch = urlItems.slice(i, i + BATCH);
         const placeholders = batch.map(() => '?').join(',');
-        const res = await db.execute({
+        const res = await lees({
           sql: `SELECT DISTINCT external_url FROM raw_items WHERE external_url IN (${placeholders}) AND is_processed = 1`,
           args: batch.map(it => it.external_url),
         });
@@ -486,8 +474,33 @@ async function run() {
       }
       if (bekendUrls.size > 0) console.log(`${bekendUrls.size} URLs al eerder verwerkt (duplicaatdetectie)`);
     }
+    // Lees besluiten uit onvoltooide runs via de runindex; bronkoppelingen alleen
+    // voor geselecteerde ids. Bij een crash kan is_processed nog nul zijn.
+    const eerdereBesluiten = (await lees(`
+      SELECT d.id, d.raw_item_id, d.signal_id, d.decision, d.reason
+      FROM intake_decisions d
+      WHERE d.intake_run_id IN (SELECT id FROM intake_runs WHERE status = 'error' OR status IS NULL)
+    `)).rows;
+    const bestaandeKoppelingen = [];
+    for (let i = 0; i < items.length; i += 100) {
+      const ids = items.slice(i, i + 100).map((it) => it.id);
+      const ph = ids.map(() => '?').join(',');
+      bestaandeKoppelingen.push(...(await lees({
+        sql: `SELECT signal_id, raw_item_id FROM signal_items WHERE raw_item_id IN (${ph})`, args: ids,
+      })).rows);
+    }
+    fase = 'triage';
     for (const item of items) {
+      huidigItem = item.id;
       const tier = item.tier || 2;
+      const herstel = herstelBesluit(item.id, eerdereBesluiten, bestaandeKoppelingen);
+      if (herstel) {
+        stats.ids.push(item.id);
+        if (herstel.decision === 'filtered') stats.gefilterd++;
+        else { stats.verwerkt++; stats.bijgewerktSignaal++; }
+        await decisionBatcher.push(decisionStmt(runId, item, tier, herstel.decision, herstel.reason, herstel));
+        continue;
+      }
 
       // Peildatum: publicatiedatum van het document als die er is, anders het
       // scrapemoment. Wat buiten het versheidsvenster valt wordt niet weggegooid
@@ -575,9 +588,11 @@ async function run() {
       if (item.bronrol === 'spiegel') {
         const sm = await entityMatchSignal(item);
         if (sm) {
-          await db.execute({ sql: `UPDATE signals SET confirmations = confirmations + 1 WHERE id = ?`, args: [sm.sig.id] });
-          await db.execute({ sql: `INSERT OR IGNORE INTO signal_items (signal_id, raw_item_id) VALUES (?, ?)`, args: [sm.sig.id, item.id] });
-          sm.sig.confirmations = (sm.sig.confirmations || 0) + 1;
+          const writes = await db.batch([
+            { sql: `INSERT OR IGNORE INTO signal_items (signal_id, raw_item_id) VALUES (?, ?)`, args: [sm.sig.id, item.id] },
+            { sql: `UPDATE signals SET confirmations = confirmations + 1 WHERE id = ? AND changes() > 0`, args: [sm.sig.id] },
+          ], 'write');
+          sm.sig.confirmations = (sm.sig.confirmations || 0) + Number(writes[1].rowsAffected);
           stats.bijgewerktSignaal++; stats.verwerkt++; stats.ids.push(item.id);
           console.log(`  SPIEGEL [T${tier}] "${(item.title||'').substring(0,50)}" → #${sm.sig.id} (entiteiten:${sm.n})`);
           await decisionBatcher.push(decisionStmt(runId, item, tier, 'matched', `spiegelbevestiging op gedeelde entiteiten voor signaal #${sm.sig.id}; last_seen_at bewust niet ververst`, { signal_id: sm.sig.id, match_score: sm.n }));
@@ -652,9 +667,11 @@ async function run() {
       }
 
       if (bestMatch) {
-        await db.execute({ sql: `UPDATE signals SET confirmations = confirmations + 1, last_seen_at = datetime('now') WHERE id = ?`, args: [bestMatch.id] });
-        await db.execute({ sql: `INSERT OR IGNORE INTO signal_items (signal_id, raw_item_id) VALUES (?, ?)`, args: [bestMatch.id, item.id] });
-        bestMatch.confirmations = (bestMatch.confirmations || 0) + 1;
+        const writes = await db.batch([
+          { sql: `INSERT OR IGNORE INTO signal_items (signal_id, raw_item_id) VALUES (?, ?)`, args: [bestMatch.id, item.id] },
+          { sql: `UPDATE signals SET confirmations = confirmations + 1, last_seen_at = datetime('now') WHERE id = ? AND changes() > 0`, args: [bestMatch.id] },
+        ], 'write');
+        bestMatch.confirmations = (bestMatch.confirmations || 0) + Number(writes[1].rowsAffected);
         stats.bijgewerktSignaal++;
         console.log(`  MATCH [T${tier}] "${(item.title||'').substring(0,50)}" → #${bestMatch.id} (score:${bestScore})`);
         await decisionBatcher.push(decisionStmt(runId, item, tier, 'matched', `gekoppeld aan signaal #${bestMatch.id} (basis: ${matchBasis}, score ${bestScore})`, { signal_id: bestMatch.id, match_score: bestScore, match_basis: matchBasis }));
@@ -689,16 +706,21 @@ async function run() {
         // `confirmations` blijft gewoon doortellen en is voor de weger een aanwijzing
         // dat er iets speelt — het is alleen geen poort meer.
         let newId;
+        let nieuwSignaal;
         if (isHist) {
-          const res = await db.execute({ sql: `INSERT INTO signals (title, summary, status, confirmations, threshold, first_seen_at, last_seen_at) VALUES (?, ?, ?, 1, 1, ?, ?) RETURNING id`, args: [(item.title||'(geen titel)'), summary, status, peildatum, peildatum] });
-          newId = res.rows[0]?.id;
+          nieuwSignaal = { sql: `INSERT INTO signals (title, summary, status, confirmations, threshold, first_seen_at, last_seen_at) VALUES (?, ?, ?, 1, 1, ?, ?) RETURNING id`, args: [(item.title||'(geen titel)'), summary, status, peildatum, peildatum] };
         } else {
-          const res = await db.execute({ sql: `INSERT INTO signals (title, summary, status, confirmations, threshold, first_seen_at, last_seen_at) VALUES (?, ?, ?, 1, 1, datetime('now'), datetime('now')) RETURNING id`, args: [(item.title||'(geen titel)'), summary, status] });
-          newId = res.rows[0]?.id;
+          nieuwSignaal = { sql: `INSERT INTO signals (title, summary, status, confirmations, threshold, first_seen_at, last_seen_at) VALUES (?, ?, ?, 1, 1, datetime('now'), datetime('now')) RETURNING id`, args: [(item.title||'(geen titel)'), summary, status] };
         }
+        // Signaal en eerste bronkoppeling slagen samen. Een verbroken verbinding
+        // tussen beide mag geen leeg signaal achterlaten dat de titel blokkeert.
+        const writes = await db.batch([
+          nieuwSignaal,
+          { sql: `INSERT INTO signal_items (signal_id, raw_item_id) VALUES (last_insert_rowid(), ?)`, args: [item.id] },
+        ], 'write');
+        newId = writes[0].rows[0]?.id;
 
         if (newId) {
-          await db.execute({ sql: `INSERT OR IGNORE INTO signal_items (signal_id, raw_item_id) VALUES (?, ?)`, args: [newId, item.id] });
           activeSignals.push({
             id: newId,
             title: item.title,
@@ -726,7 +748,9 @@ async function run() {
     }
 
     // Drempels
-    const dr = await db.execute(`SELECT id, title, confirmations, threshold FROM signals WHERE confirmations >= threshold AND status = 'new'`);
+    fase = 'drempels';
+    huidigItem = null;
+    const dr = await lees(`SELECT id, title, confirmations, threshold FROM signals WHERE confirmations >= threshold AND status = 'new'`);
     for (const s of dr.rows) {
       await db.execute({ sql: `UPDATE signals SET status = 'watching' WHERE id = ?`, args: [s.id] });
       stats.drempelBereikt++;
@@ -736,14 +760,17 @@ async function run() {
 
     // Entiteiten (primary/secondary) — vóór is_processed = 1, zodat bij een
     // crash halverwege de entiteitsextractie de items opnieuw worden aangeboden.
+    await decisionBatcher.flush();
     const entItems = items.filter(it => (it.reliability === 'primary' || it.reliability === 'secondary') && stats.ids.includes(it.id));
+    fase = 'entiteiten';
     for (const item of entItems) {
+      huidigItem = item.id;
       const ents = extractEntities(item, personIndex);
-      const sl = await db.execute({ sql: `SELECT signal_id FROM signal_items WHERE raw_item_id = ? LIMIT 1`, args: [item.id] });
+      const sl = await lees({ sql: `SELECT signal_id FROM signal_items WHERE raw_item_id = ? LIMIT 1`, args: [item.id] });
       const sigId = sl.rows[0]?.signal_id;
       for (const ent of ents) {
         try {
-          const ex = await db.execute({ sql: `SELECT id FROM entities WHERE normalized_name = ? AND entity_type = ?`, args: [ent.normalized, ent.type] });
+          const ex = await lees({ sql: `SELECT id FROM entities WHERE normalized_name = ? AND entity_type = ?`, args: [ent.normalized, ent.type] });
           let eid;
           if (ex.rows.length > 0) { eid = ex.rows[0].id; }
           else {
@@ -754,7 +781,7 @@ async function run() {
           if (eid && sigId) {
             await db.execute({ sql: `INSERT OR IGNORE INTO entity_signals (entity_id, signal_id, source_id, role) VALUES (?, ?, ?, 'mentioned')`, args: [eid, sigId, item.source_name||''] });
           }
-        } catch (entErr) { console.warn(`Entiteit-opslag mislukt voor item ${item.id}: ${entErr.message}`); }
+        } catch (entErr) { throw new Error(`Entiteit-opslag mislukt voor item ${item.id}: ${entErr.message}`, { cause: entErr }); }
       }
       if (ents.length > 0) {
         await entityUpdateBatcher.push({
@@ -764,6 +791,14 @@ async function run() {
       }
     }
 
+    fase = 'audit';
+    huidigItem = null;
+    // De update van entities_found vereist dat ook de laatste besluitenbuffer
+    // al bestaat. Pas na volledige opslag mag een item uit de wachtrij.
+    await decisionBatcher.flush();
+    await eventBatcher.flush();
+    await entityUpdateBatcher.flush();
+
     // Markeer verwerkt — bewust ná de entiteitsextractie, zodat bij een crash
     // halverwege items opnieuw worden aangeboden en hun entiteiten niet missen.
     for (let i = 0; i < stats.ids.length; i += 50) {
@@ -771,10 +806,6 @@ async function run() {
       const ph = chunk.map(() => '?').join(',');
       await db.execute({ sql: `UPDATE raw_items SET is_processed = 1 WHERE id IN (${ph})`, args: chunk });
     }
-
-    await decisionBatcher.flush();
-    await eventBatcher.flush();
-    await entityUpdateBatcher.flush();
 
     console.log('\n═══ INTAKE SAMENVATTING ═══');
     console.log(`Items gevonden:          ${items.length}`);
@@ -786,19 +817,20 @@ async function run() {
     console.log(`Drempels bereikt:        ${stats.drempelBereikt}`);
     console.log(`Entiteiten nieuw:        ${stats.entiteiten}`);
 
-    const fc = await db.execute(`SELECT status, COUNT(*) as cnt FROM signals GROUP BY status`);
+    const fc = await lees(`SELECT status, COUNT(*) as cnt FROM signals GROUP BY status`);
     console.log('\nSignalen per status:');
     for (const r of fc.rows) console.log(`  ${r.status}: ${r.cnt}`);
     console.log(`\n=== Voltooid: ${new Date().toISOString()} ===`);
 
     await finishIntakeRun(runId, startedAt, countsFromStats(), 'ok', null);
   } catch (e) {
-    console.error('FOUT:', e.message);
+    const detail = `${fase}${huidigItem === null ? '' : ` item ${huidigItem}`}: ${e.message} (${foutCode(e)})`;
+    console.error('FOUT:', detail);
     try { await decisionBatcher.flush(); } catch (_) {}
     try { await eventBatcher.flush(); } catch (_) {}
     try { await entityUpdateBatcher.flush(); } catch (_) {}
     try {
-      await finishIntakeRun(runId, startedAt, countsFromStats(), 'error', (e.message || String(e)).substring(0, 500));
+      await finishIntakeRun(runId, startedAt, countsFromStats(), 'error', detail.substring(0, 500));
     } catch (finishErr) {
       console.error('Kon intake_runs niet afsluiten:', finishErr.message);
     }
@@ -811,4 +843,4 @@ run().catch(e => {
   // (bijv. DB niet bereikbaar) — de rest van de fouten wordt al binnen run() afgehandeld.
   console.error('FOUT: intake-run kon niet starten:', e.message);
   process.exitCode = 1;
-});
+}).finally(() => db.close());

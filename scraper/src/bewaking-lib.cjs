@@ -64,4 +64,23 @@ function langStilleBronnen(bronnen, stats, nu = new Date(), {
   return uit.sort((a, b) => a.laatste.localeCompare(b.laatste));
 }
 
-module.exports = { falendeScrapers, langStilleBronnen };
+function intakeMeldingen(laatste, laatsteGeslaagd, nu = new Date(), maxUren = 30) {
+  const meldingen = [];
+  const uren = (waarde) => {
+    if (!waarde) return Infinity;
+    const tijd = Date.parse(String(waarde).replace(' ', 'T').replace(/Z?$/, 'Z'));
+    return Number.isFinite(tijd) ? (nu.getTime() - tijd) / 3600000 : Infinity;
+  };
+  if (laatste?.status === 'error') {
+    meldingen.push(`ALARM intake-run #${laatste.id} is mislukt: ${laatste.error_message || 'geen foutdetail'}`);
+  } else if (laatste && !laatste.status && uren(laatste.started_at) > 2) {
+    meldingen.push(`ALARM intake-run #${laatste.id} is niet afgerond`);
+  }
+  const oud = uren(laatsteGeslaagd?.finished_at);
+  if (oud > maxUren) {
+    meldingen.push(`ALARM laatste geslaagde intake is ${Number.isFinite(oud) ? Math.round(oud) + ' uur geleden' : 'onbekend'} (drempel ${maxUren})`);
+  }
+  return meldingen;
+}
+
+module.exports = { falendeScrapers, langStilleBronnen, intakeMeldingen };
