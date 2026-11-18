@@ -6,7 +6,7 @@
 // database; daarna is elke query op de kopie gratis. Zie docs/DATABASE-LEZEN.md.
 //
 // Gebruik:
-//   node scraper/src/lokale-kopie.cjs [--uit pad.db] [--alleen t1,t2] [--zonder t1,t2]
+//   node scraper/src/lokale-kopie.cjs [--uit pad.db [--uniek]] [--alleen t1,t2] [--zonder t1,t2]
 // Standaard: scraper/tmp/kopie/stadsgeest.db (valt onder .gitignore).
 // Zoeken op de kopie: node scraper/src/weger-query.cjs --lokaal "<SELECT ...>"
 
@@ -31,6 +31,19 @@ function waarde(v) {
   return v instanceof ArrayBuffer ? new Uint8Array(v) : v;
 }
 
+async function leesPagina(bron, opdracht) {
+  for (let poging = 1; ; poging++) {
+    try {
+      return await bron.execute(opdracht);
+    } catch (error) {
+      const tijdelijk = /fetch failed|ECONNRESET|ETIMEDOUT|UND_ERR_SOCKET/i.test(error.message)
+        || ['ECONNRESET', 'ETIMEDOUT', 'UND_ERR_SOCKET'].includes(error.cause?.code);
+      if (!tijdelijk || poging === 3) throw error;
+      await new Promise((resolve) => setTimeout(resolve, poging * 1000));
+    }
+  }
+}
+
 async function kopieerTabel(bron, doel, naam, zonderRowid) {
   const q = `"${naam.replace(/"/g, '""')}"`;
   let rijen = 0;
@@ -38,8 +51,8 @@ async function kopieerTabel(bron, doel, naam, zonderRowid) {
   for (;;) {
     // Pagineren op rowid gebruikt de primaire sleutel (SEARCH), geen OFFSET-scan.
     const r = zonderRowid
-      ? await bron.execute(`SELECT * FROM ${q}`)
-      : await bron.execute({
+      ? await leesPagina(bron, `SELECT * FROM ${q}`)
+      : await leesPagina(bron, {
         sql: `SELECT rowid AS __rid, * FROM ${q} ${laatste === null ? '' : 'WHERE rowid > ?'} ORDER BY rowid LIMIT ${PAGINA}`,
         args: laatste === null ? [] : [laatste],
       });
@@ -55,12 +68,20 @@ async function kopieerTabel(bron, doel, naam, zonderRowid) {
 }
 
 async function main(argv = process.argv.slice(2)) {
-  const uit = path.resolve(optie(argv, '--uit') || STANDAARD);
+  const gekozenPad = optie(argv, '--uit');
+  const uniek = argv.includes('--uniek');
+  if (uniek && (!gekozenPad || gekozenPad.startsWith('--'))) throw new Error('--uniek vereist --uit met een nieuw pad.');
+  const uit = path.resolve(gekozenPad || STANDAARD);
   const alleen = lijst(optie(argv, '--alleen'));
   const zonder = lijst(optie(argv, '--zonder'));
   fs.mkdirSync(path.dirname(uit), { recursive: true });
-  const tijdelijk = `${uit}.bezig`;
-  for (const f of [tijdelijk, `${tijdelijk}-wal`, `${tijdelijk}-shm`]) fs.rmSync(f, { force: true });
+  const tijdelijk = uniek ? uit : `${uit}.bezig`;
+  if (uniek) {
+    // Lees een nieuw runbestand pas na het succesvolle einde en _kopie_meta.
+    fs.closeSync(fs.openSync(tijdelijk, 'wx'));
+  } else {
+    for (const f of [tijdelijk, `${tijdelijk}-wal`, `${tijdelijk}-shm`]) fs.rmSync(f, { force: true });
+  }
 
   const bron = createClient({ url: process.env.TURSO_URL, authToken: process.env.TURSO_AUTH_TOKEN });
   const doel = createClient({ url: `file:${tijdelijk.replace(/\\/g, '/')}` });
@@ -70,7 +91,7 @@ async function main(argv = process.argv.slice(2)) {
     // Tabellen komen op alfabet binnen; verwijzingen naar nog lege tabellen mogen.
     await doel.execute('PRAGMA foreign_keys = OFF');
     // sqlite_master kost geen reads.
-    const schema = (await bron.execute(
+    const schema = (await leesPagina(bron,
       "SELECT type, name, tbl_name, sql FROM sqlite_master WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%' ORDER BY type DESC, name",
     )).rows;
     const tabellen = schema.filter((s) => s.type === 'table' && !/^CREATE VIRTUAL/i.test(s.sql)
@@ -83,18 +104,22 @@ async function main(argv = process.argv.slice(2)) {
     }
     const namen = new Set(tabellen.map((t) => t.name));
     for (const s of schema.filter((x) => x.type === 'index' && namen.has(x.tbl_name))) await doel.execute(s.sql);
-    await doel.execute('CREATE TABLE _kopie_meta (gemaakt_op TEXT, rijen INTEGER)');
-    await doel.execute({ sql: 'INSERT INTO _kopie_meta VALUES (?, ?)', args: [new Date().toISOString(), totaal] });
+    await doel.batch([
+      'CREATE TABLE _kopie_meta (gemaakt_op TEXT, rijen INTEGER)',
+      { sql: 'INSERT INTO _kopie_meta VALUES (?, ?)', args: [new Date().toISOString(), totaal] },
+    ], 'write');
   } finally {
     bron.close();
     doel.close();
   }
-  for (const f of [uit, `${uit}-wal`, `${uit}-shm`]) fs.rmSync(f, { force: true });
-  // Windows houdt het bestand na close() soms nog even vast.
-  for (let poging = 1; ; poging++) {
-    try { fs.renameSync(tijdelijk, uit); break; } catch (e) {
-      if (!['EBUSY', 'EPERM'].includes(e.code) || poging >= 20) throw e;
-      await new Promise((r) => setTimeout(r, 500));
+  if (!uniek) {
+    for (const f of [uit, `${uit}-wal`, `${uit}-shm`]) fs.rmSync(f, { force: true });
+    // Windows houdt het bestand na close() soms nog even vast.
+    for (let poging = 1; ; poging++) {
+      try { fs.renameSync(tijdelijk, uit); break; } catch (e) {
+        if (!['EBUSY', 'EPERM'].includes(e.code) || poging >= 20) throw e;
+        await new Promise((r) => setTimeout(r, 500));
+      }
     }
   }
   console.log(`Klaar: ${totaal.toLocaleString('nl-NL')} rijen in ${Math.round((Date.now() - begin) / 1000)} s naar ${uit}`);

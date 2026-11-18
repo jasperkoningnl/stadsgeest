@@ -2,8 +2,46 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { validatePlan, words } = require('../../src/weger-apply.cjs');
-const { jsonValue } = require('../../src/weger-workset.cjs');
+const { createClient } = require('@libsql/client');
+const { preflight, validatePlan, words, writePlan } = require('../../src/weger-apply.cjs');
+const { jsonValue, pendingSignals } = require('../../src/weger-workset.cjs');
+
+test('de wachtrij geeft alle open signalen en een opgeslagen oordeel kan niet worden herhaald', async () => {
+  const db = createClient({ url: ':memory:' });
+  try {
+    await db.executeMultiple(`
+      CREATE TABLE signals (id INTEGER PRIMARY KEY, title TEXT, summary TEXT, status TEXT,
+        confirmations INTEGER, first_seen_at TEXT, last_seen_at TEXT);
+      CREATE TABLE tip_signals (signal_id INTEGER);
+      CREATE TABLE signal_events (signal_id INTEGER, actor TEXT, event_type TEXT, status_from TEXT,
+        status_to TEXT, reason TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP);
+      WITH RECURSIVE ids(id) AS (VALUES(1) UNION ALL SELECT id+1 FROM ids WHERE id<70)
+      INSERT INTO signals SELECT id, 'Signaal ' || id, '', 'new', 1, '2026-11-12 00:00:00',
+         '2026-11-12 00:00:00' FROM ids;
+      INSERT INTO tip_signals VALUES (70);
+      INSERT INTO signal_events (signal_id,actor,created_at) VALUES (69,'weger','2026-11-12 01:00:00');
+      INSERT INTO signal_events (signal_id,actor,created_at) VALUES (68,'weger','2026-11-11 01:00:00');
+      UPDATE signals SET status='discarded' WHERE id=67;
+    `);
+    const queue = await pendingSignals(db, { queue: true });
+    assert.equal(queue.length, 67);
+    assert.deepEqual(queue.slice(0, 2).map((row) => row.id), [1, 2]);
+    assert.equal(queue.at(-1).id, 68);
+    assert.deepEqual((await pendingSignals(db, { ids: [1, 68, 69] })).map((row) => row.id), [68, 1]);
+    const plan = { reviews: [{
+      signal_id: 1, status_to: 'watching', reason: 'Gelezen.',
+      expected_last_seen_at: queue[0].last_seen_at, expected_reviewed_at: null,
+    }] };
+    assert.deepEqual(validatePlan(plan), []);
+    const check = await preflight(db, plan);
+    assert.deepEqual(check.errors, []);
+    await writePlan(db, plan, check.statusBySignal);
+    assert.match((await preflight(db, plan)).errors[0], /intussen beoordeeld/);
+    assert.equal((await pendingSignals(db, { queue: true })).length, 66);
+  } finally {
+    db.close();
+  }
+});
 
 function validPlan() {
   return {

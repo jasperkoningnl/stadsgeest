@@ -68,6 +68,10 @@ function validatePlan(plan) {
     reviewStatusById.set(review?.signal_id, review?.status_to);
     if (!REVIEW_STATUSES.has(review?.status_to)) errors.push(`${field}.status_to moet watching of discarded zijn.`);
     requiredString(review?.reason, `${field}.reason`, errors);
+    if (review?.expected_last_seen_at !== undefined || review?.expected_reviewed_at !== undefined) {
+      requiredString(review.expected_last_seen_at, `${field}.expected_last_seen_at`, errors);
+      if (review.expected_reviewed_at !== null) requiredString(review.expected_reviewed_at, `${field}.expected_reviewed_at`, errors);
+    }
   });
 
   if (plan.run !== undefined && plan.run !== 'supertip') errors.push('run is ongeldig; alleen "supertip" is toegestaan.');
@@ -177,9 +181,29 @@ async function fetchRowsByIds(db, table, ids, columns = 'id') {
 async function preflight(db, plan) {
   const errors = [];
   const { signalIds, dossierIds } = normalizeIds(plan);
-  const signals = await fetchRowsByIds(db, 'signals', signalIds, 'id, status');
+  const guarded = (plan.reviews ?? []).filter((review) => review.expected_last_seen_at !== undefined);
+  const signals = await fetchRowsByIds(db, 'signals', signalIds, guarded.length ? 'id, status, last_seen_at' : 'id, status');
   const foundSignals = new Set(signals.map((row) => Number(row.id)));
   for (const id of signalIds) if (!foundSignals.has(id)) errors.push(`Signaal ${id} bestaat niet.`);
+  if (guarded.length) {
+    const ids = guarded.map((review) => review.signal_id);
+    const revisions = (await db.execute({
+      sql: `SELECT signal_id, MAX(created_at) AS reviewed_at FROM signal_events
+            WHERE actor = 'weger' AND signal_id IN (${ids.map(() => '?').join(',')})
+            GROUP BY signal_id`,
+      args: ids,
+    })).rows;
+    const byId = new Map(signals.map((row) => [Number(row.id), row]));
+    const reviewedAtById = new Map(revisions.map((row) => [Number(row.signal_id), row.reviewed_at]));
+    for (const review of guarded) {
+      const current = byId.get(review.signal_id);
+      if (current && (!['new', 'watching'].includes(current.status)
+          || current.last_seen_at !== review.expected_last_seen_at
+          || (reviewedAtById.get(review.signal_id) ?? null) !== review.expected_reviewed_at)) {
+        errors.push(`Signaal ${review.signal_id} is gewijzigd of intussen beoordeeld; lees de actuele stand.`);
+      }
+    }
+  }
   const dossiers = await fetchRowsByIds(db, 'dossiers', dossierIds);
   const foundDossiers = new Set(dossiers.map((row) => Number(row.id)));
   for (const id of dossierIds) if (!foundDossiers.has(id)) errors.push(`Dossier ${id} bestaat niet.`);
@@ -274,13 +298,16 @@ async function writePlan(tx, plan, statusBySignal, { actor = 'codex-weger' } = {
     return createdTips;
 }
 
-async function applyPlan(db, plan, statusBySignal) {
+async function applyPlan(db, plan) {
   const tx = await db.transaction('write');
   try {
-    await writePlan(tx, plan, statusBySignal);
+    const checked = await preflight(tx, plan);
+    if (checked.errors.length) throw new Error(`Voorcontrole mislukt:\n- ${checked.errors.join('\n- ')}`);
+    const tipIds = await writePlan(tx, plan, checked.statusBySignal);
     await tx.commit();
+    return tipIds;
   } catch (error) {
-    await tx.rollback();
+    await tx.rollback().catch(() => {});
     throw error;
   }
 }
@@ -299,19 +326,19 @@ async function main(argv = process.argv.slice(2)) {
   }
   const db = createClient({ url: process.env.TURSO_URL, authToken: process.env.TURSO_AUTH_TOKEN });
   try {
-    const checked = await preflight(db, plan);
-    if (checked.errors.length > 0) throw new Error(`Voorcontrole mislukt:\n- ${checked.errors.join('\n- ')}`);
     const counts = {
       reviews: plan.reviews?.length ?? 0,
       tips: plan.tips?.length ?? 0,
       dossier_facts: plan.dossier_facts?.length ?? 0,
     };
     if (!args.apply) {
+      const checked = await preflight(db, plan);
+      if (checked.errors.length) throw new Error(`Voorcontrole mislukt:\n- ${checked.errors.join('\n- ')}`);
       console.log(JSON.stringify({ mode: 'dry-run', valid: true, counts }, null, 2));
       return;
     }
-    await applyPlan(db, plan, checked.statusBySignal);
-    console.log(JSON.stringify({ mode: 'applied', counts }, null, 2));
+    const tipIds = await applyPlan(db, plan);
+    console.log(JSON.stringify({ mode: 'applied', counts, tip_ids: tipIds }, null, 2));
   } finally {
     db.close();
   }

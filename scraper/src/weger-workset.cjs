@@ -25,7 +25,7 @@ const SIGNAAL_ITEMS_MET_DELEN = `(SELECT signal_id, raw_item_id FROM signal_item
             WHERE s0.signal_id = ?)`;
 
 function usage() {
-  return `Gebruik: node scraper/src/weger-workset.cjs [--limit 10] [--summary]\n\n` +
+  return `Gebruik: node scraper/src/weger-workset.cjs [--db kopie.db] [--queue | --limit 10 [--summary] | --ids 12,34]\n\n` +
     `Geeft een compacte JSON-werkset voor de Codex-weger. Alleen signalen die nog\n` +
     `niet zijn beoordeeld of na hun laatste weger-oordeel zijn gewijzigd komen mee.`;
 }
@@ -42,6 +42,41 @@ function parseLimit(argv) {
 
 function jsonValue(_key, value) {
   return typeof value === 'bigint' ? Number(value) : value;
+}
+
+function parseIds(argv) {
+  const index = argv.indexOf('--ids');
+  if (index === -1) return [];
+  const ids = (argv[index + 1] ?? '').split(',').map(Number);
+  if (ids.length > 50 || ids.some((id) => !Number.isSafeInteger(id) || id < 1)
+      || new Set(ids).size !== ids.length) {
+    throw new Error('--ids vereist 1–50 unieke positieve signaal-ID’s, gescheiden door komma’s.');
+  }
+  return ids;
+}
+
+async function pendingSignals(db, { limit, ids = [], queue = false } = {}) {
+  const args = [...ids];
+  if (limit !== undefined) args.push(limit);
+  return (await db.execute({
+    sql: `WITH eligible AS MATERIALIZED (
+            SELECT s.id, s.title, ${queue ? '' : 's.summary, s.confirmations,'} s.status,
+                   s.first_seen_at, s.last_seen_at,
+                   (SELECT MAX(e.created_at) FROM signal_events e
+                    WHERE e.signal_id = s.id AND e.actor = 'weger') AS weger_last_reviewed_at
+            FROM signals s
+            WHERE s.status IN ('new','watching')
+              AND s.id NOT IN (SELECT signal_id FROM tip_signals WHERE signal_id IS NOT NULL)
+              ${ids.length ? `AND s.id IN (${ids.map(() => '?').join(',')})` : ''}
+          )
+          SELECT * FROM eligible
+          WHERE weger_last_reviewed_at IS NULL
+             OR datetime(last_seen_at) > datetime(weger_last_reviewed_at)
+          ORDER BY ${queue ? 'weger_last_reviewed_at IS NOT NULL, datetime(first_seen_at) ASC, id ASC'
+            : 'datetime(last_seen_at) DESC, id DESC'}
+          ${limit === undefined ? '' : 'LIMIT ?'}`,
+    args,
+  })).rows;
 }
 
 function clip(value) {
@@ -554,38 +589,39 @@ async function main(argv = process.argv.slice(2)) {
     console.log(usage());
     return;
   }
-  if (!process.env.TURSO_URL || !process.env.TURSO_AUTH_TOKEN) {
+  const ids = parseIds(argv);
+  const queue = argv.includes('--queue');
+  if ([queue, ids.length > 0, argv.includes('--limit')].filter(Boolean).length > 1) {
+    throw new Error('Gebruik één selectiemethode: --queue, --limit of --ids.');
+  }
+  const localIndex = argv.indexOf('--db');
+  const local = localIndex === -1 ? null : argv[localIndex + 1];
+  if (localIndex !== -1 && (!local || !fs.existsSync(local))) {
+    throw new Error('--db vereist een bestaande lokale databasekopie.');
+  }
+  if (!local && (!process.env.TURSO_URL || !process.env.TURSO_AUTH_TOKEN)) {
     throw new Error('TURSO_URL en TURSO_AUTH_TOKEN ontbreken in scraper/.env.');
   }
 
-  const db = createClient({
+  const db = createClient(local ? { url: 'file:' + path.resolve(local).replace(/\\/g, '/') } : {
     url: process.env.TURSO_URL,
     authToken: process.env.TURSO_AUTH_TOKEN,
   });
   try {
-    const signals = await db.execute({
-      sql: `SELECT s.id, s.title, s.summary, s.status, s.confirmations,
-                   s.first_seen_at, s.last_seen_at,
-                   (SELECT MAX(e.created_at) FROM signal_events e
-                    WHERE e.signal_id = s.id AND e.actor = 'weger') AS weger_last_reviewed_at
-            FROM signals s
-            WHERE s.status IN ('new','watching')
-              AND NOT EXISTS (SELECT 1 FROM tip_signals ts WHERE ts.signal_id = s.id)
-              AND (
-                NOT EXISTS (SELECT 1 FROM signal_events e WHERE e.signal_id = s.id AND e.actor = 'weger')
-                OR datetime(s.last_seen_at) > datetime((
-                  SELECT MAX(e.created_at) FROM signal_events e
-                  WHERE e.signal_id = s.id AND e.actor = 'weger'
-                ))
-              )
-            ORDER BY datetime(s.last_seen_at) DESC, s.id DESC
-            LIMIT ?`,
-      args: [limit],
-    });
+    const signals = await pendingSignals(db, { queue, ids, limit: queue || ids.length ? undefined : limit });
+    if (queue) {
+      console.log(JSON.stringify({
+        generated_at: new Date().toISOString(),
+        pending_count: signals.length,
+        never_reviewed_count: signals.filter((signal) => signal.weger_last_reviewed_at === null).length,
+        signals,
+      }, jsonValue, 2));
+      return;
+    }
 
     const [orgRunId, spiegelItems] = await Promise.all([latestOrgRun(db), loadSpiegelItems(db)]);
     const candidates = [];
-    for (const signal of signals.rows) {
+    for (const signal of signals) {
       const signalId = Number(signal.id);
       const [itemSet, entities, recentEvents, nerKgCandidates, addressLinks, orgVerbanden, wooVondsten, documentUittreksels] = await Promise.all([
         loadItems(db, signalId),
@@ -630,7 +666,7 @@ async function main(argv = process.argv.slice(2)) {
     );
     const output = {
       generated_at: new Date().toISOString(),
-      limit,
+      limit: ids.length || limit,
       selected_count: candidates.length,
       selectiebeleid: { scoremodel: SCORE_MODEL, drempel: SCORE_THRESHOLD, maximum_tips_per_run: 3,
         volgorde: ['voorberekende_onderzoeksvragen', 'actuele_nieuwsfeiten', 'overige_signaaltriage'],
@@ -682,5 +718,5 @@ if (require.main === module) {
 }
 
 module.exports = {
-  clip, jsonValue, parseLimit, loadDocumentUittreksels, loadNerKgCandidates, loadAddressLinks, loadOrgVerbanden, loadKruisbronKandidaten, latestOrgRun, loadWooVondsten, loadWooKandidaten, loadArchiefKandidaten,
+  clip, jsonValue, parseLimit, pendingSignals, loadDocumentUittreksels, loadNerKgCandidates, loadAddressLinks, loadOrgVerbanden, loadKruisbronKandidaten, latestOrgRun, loadWooVondsten, loadWooKandidaten, loadArchiefKandidaten,
 };

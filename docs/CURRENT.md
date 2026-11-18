@@ -1,7 +1,7 @@
 # Actuele toestand — Stadsgeest
 
 **Doel:** compacte herschrijfbare momentopname.
-**Status:** vaste tekst, bijgewerkt 4 november 2026. Tellingen staan
+**Status:** vaste tekst, bijgewerkt 18 november 2026. Tellingen staan
 in `STAND.md` (`npm run stand`).
 **Lees wanneer:** bij iedere nieuwe taak. Historische details staan elders.
 
@@ -32,14 +32,14 @@ De supertip-run draait donderdag om 09.00 uur en schrijft hoogstens één tip me
 `supertip = 1`; nul is geldig. Een supertip blijft tot de maandag erna bovenaan.
 Alleen deze run mag het veld zetten.
 
-De weger gebruikt `redactioneel-2`: onderzoeksvragen eerst, daarna signaaltriage.
-De schrijfvalidator bewaakt voorwaarden, ontdekking, bewijs en gevolgen.
-Oudere scores blijven intact. Een afzonderlijke dagelijkse onderzoekstaak volgt
-open vragen en eerder aangehouden signalen op en verkent daarnaast zelfstandig
-een onderzoeksspoor. Voortgang en herbeoordeling staan in `research_cases` met
-een append-only audit. Voldoende onderbouwde vondsten kunnen direct een tip of
-gecontroleerde aanvulling opleveren volgens `operations/ONDERZOEK.md`. Het oudere
-lokale onderzoeksprototype blijft een afzonderlijk hulpmiddel.
+De weger gebruikt `redactioneel-2` en verwerkt lokaal onderzoeksvragen en
+signalen in batches. De validator bewaakt voorwaarden, ontdekking, bewijs en
+gevolgen. Oude scores blijven intact. De dagelijkse onderzoekstaak volgt cases
+en aangehouden signalen op, verkent zelfstandig en gaat na onvolledige weging
+door zodra schrijvers gestopt zijn. Voortgang en herbeoordeling staan in
+`research_cases` met append-only audit. Onderbouwde vondsten leveren direct een
+tip of aanvulling op volgens `operations/ONDERZOEK.md`. Het lokale prototype
+blijft afzonderlijk.
 
 ## Actieve oplevering
 

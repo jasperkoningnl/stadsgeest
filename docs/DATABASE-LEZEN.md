@@ -30,7 +30,9 @@ elke meegenomen rij; joins en subqueries tellen alle bekeken rijen van alle tabe
    `STADSGEEST_KOPIE`). Zonder `--lokaal` is `weger-query.cjs` voor enkele gerichte
    queries op Turso, niet voor sweeps. De kopie is voor losse SQL over alle
    tabellen (registers, tips, dossiers); voor terugkerend zoeken in documenttekst
-   is er de incrementele FTS-index hieronder.
+   is er de incrementele FTS-index hieronder. Voor dagelijkse runbestanden
+   reserveert `--uit <nieuw-pad> --uniek` een nieuwe bestemming en vervalt de
+   Windows-hernoeming. Gebruik het bestand na geslaagde afloop met `_kopie_meta`.
 3. Draai `EXPLAIN QUERY PLAN` op elke nieuwe of gewijzigde query. Op `raw_items`,
    `source_records`, `raw_item_attachments` en `document_mentions` moet
    `SEARCH … USING INDEX` staan, geen `SCAN`. Zo niet: index toevoegen of herschrijven.
@@ -57,8 +59,9 @@ fulltextsweep. De eerste volledige synchronisatie vereist daarom expliciet
 
 ## Bekende grote verbruikers
 
-- `operations/WEGER.md` sectie 3a en 3b: verbandencheck en sweep zoeken in vrije
-  tekst. Een normale run kost circa 13 mln.
+- Herhaalde productiewerksets van de weger kostten eerder miljoenen reads.
+  Bouw werksets en brede vergelijkingen op de lokale runkopie. Gebruik op
+  productie de compacte slotstand en gerichte validatie en teruglezing.
 - 23 september 2026: 240 mln in twintig minuten door adres-`LIKE` over
   `raw_items` en `source_records` tijdens een analysesessie.
 - `scrape-browser` (circa 9 mln per nacht) en NDW (circa 100.000 per uur).

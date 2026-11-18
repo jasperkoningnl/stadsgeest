@@ -20,9 +20,9 @@ Werk rechtstreeks in de lokale repository. Productiegeheimen staan in
 actief is. Wijzig tijdens een normale run geen Git-bestanden, `CURRENT.md` of
 `LOGBOEK.md`.
 
-Iedere run begint met beschikbare voorberekende onderzoekskandidaten (sectie
-3b), beoordeelt daarna nieuwe ontwikkelingen en werkt de signaalachterstand
-weg. Een onderzoeksvraag is de eenheid: verschillende jaren, buurten,
+Iedere run begint met de kansrijkste voorberekende onderzoekskandidaten (sectie
+3b), beoordeelt actuele ontwikkelingen en werkt in afgeronde batches aan de
+signaalachterstand. Een onderzoeksvraag is de eenheid: verschillende jaren, buurten,
 administraties, organisaties of verklaringen worden vergeleken om iets te
 ontdekken dat afzonderlijk niet zichtbaar was. Een extra document of bron is
 niet vanzelf een ontdekking. Nul tips is beter dan een geforceerde dunne tip.
@@ -38,17 +38,33 @@ shaming bij een los incident van één klein bedrijf.
 
 ## 1. Werkset ophalen
 
-Voer vanuit de repowortel uit:
+Maak vanuit de repowortel één volledige lokale databasekopie na de nachtketen,
+met een nieuw bestandspad per run. Controleer na geslaagde afloop `_kopie_meta`,
+de datum en de benodigde tabellen. Gebruik deze kopie voor de hele run.
 
 ```powershell
-node scraper/src/weger-workset.cjs --limit 25
+node scraper/src/lokale-kopie.cjs --uit scraper/tmp/weger/run-YYYYMMDD-HHmmss.db --uniek
+node scraper/src/weger-workset.cjs --db scraper/tmp/weger/run-YYYYMMDD-HHmmss.db --queue
+node scraper/src/weger-workset.cjs --db scraper/tmp/weger/run-YYYYMMDD-HHmmss.db --ids 123,456
 ```
 
-Het script selecteert signalen zonder eerder weger-oordeel en signalen waarvan
-`last_seen_at` nieuwer is dan het laatste weger-oordeel, nieuwste eerst. Per
-signaal komen maximaal zes meest dragende documenten en per document hoogstens
-4.000 tekens mee. Is de selectie vol (25), haal dan na het wegschrijven een
-tweede batch op. De achterstand van ongelezen signalen moet per run krimpen.
+De wachtrij bevat alle open signalen zonder eerder weger-oordeel of met
+`last_seen_at` na het laatste oordeel. Controleer de hele lijst tegen de
+actuele lokale adresscan op ID en `last_seen_at`. Kies uit de compacte lijst
+eerst urgente stukken én de oudste nooit beoordeelde signalen. Haal voor
+elke groep maximaal 25 expliciete IDs op. De werkset toont maximaal zes
+stukken per signaal en hoogstens 4.000 tekens per stuk.
+
+Lees een eerste werkset om ook de beschikbare onderzoekssporen te prioriteren.
+Schrijf daarna afgeronde routineoordelen en dossierfeiten per batch weg en
+controleer ze. Houd kansrijke tips open tot beide routes zijn gewogen. Ga met
+de volgende nog niet behandelde IDs uit de wachtrij verder. De lokale kopie
+bevat de eigen nieuwe writes niet. Haal daarom de slotstand op met
+`node scraper/src/weger-workset.cjs --queue` op productie, zonder opnieuw een
+volledige werkset op te bouwen. Als een run moet stoppen, bewaar de open IDs,
+de al gedane broncontroles en de concrete eerstvolgende handeling bij het
+dagverslag in `scraper/tmp/weger/`. Hervat dat werk gericht; openstaande
+documentparen of onbereikbare bijlagen houden afzonderlijke besluiten niet tegen.
 
 Lees vóór de gewone signaaltriage de beschikbare `archief_kandidaten`,
 `kruisbron_kandidaten` en `woo_kandidaten`, plus voorberekende documentverbanden
@@ -421,10 +437,13 @@ briefing.
 
 ## 7. Gecontroleerd wegschrijven
 
-Maak per batch één JSON-bestand buiten de repository (bij voorkeur in
-`C:\Users\Jasper Koning\stadsgeest-werk\plannen`) op basis van
+Maak per batch één JSON-bestand in de genegeerde werkmap `scraper/tmp/weger/`
+op basis van
 `operations/weger-plan.example.json`. Neem voor ieder bekeken signaal een
 specifieke reden op; “niet nieuwswaardig” is onvoldoende.
+Neem per review `expected_last_seen_at` en `expected_reviewed_at` exact over
+uit de wachtrijvelden `last_seen_at` en `weger_last_reviewed_at`, inclusief
+`null` bij het eerste oordeel. Lees bij een conflict het signaal opnieuw.
 
 Valideer eerst zonder writes:
 
@@ -478,7 +497,8 @@ Rapporteer getelde resultaten:
 - ontbrekende onderzoeksvoorbereiding en gebruikte modelversie/route;
 - vastgelegde onderzoeksvragen met case-sleutel, vervolgstap en herbeoordelingsdatum;
 - bronproblemen en niet-geverifieerde punten;
-- de resterende achterstand (`weger-workset.cjs --limit 50 --summary`).
+- de resterende achterstand (`weger-workset.cjs --queue`) en hoeveel daarvan
+  nooit een weger-oordeel kregen.
 
 Controleer de databaseaantallen na de write.
 

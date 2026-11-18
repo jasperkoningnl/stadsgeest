@@ -25,7 +25,7 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 - Intakecontrole: GGD zeven bronfouten, B&W en Raad van State elk twee fouten, raadsinformatie-API twee timeouts; foutdetails en zaakbundeling gericht herstellen (11-04).
 - Kamp Amersfoort geeft sinds 4 oktober elke nacht `error` zonder foutmelding (10-04).
 - NDW in de gecombineerde detectierun: rond 11 oktober nakijken of `ndw` op `ok` staat binnen de heaplimiet (10-04).
-- `lokale-kopie.cjs` eindigt op Windows met `EBUSY` bij het hernoemen; de kopie staat dan compleet als `.db.bezig` (10-05).
+- Bij hergebruik van een vast kopiepad kan Windows-hernoeming nog `EBUSY` geven. De dagelijkse weger en onderzoek gebruiken een uniek pad zonder hernoemen (11-18).
 - `Kon scrape_runs niet bijwerken ... fetch failed` in het errorlog van `scrape-dagelijks`; oorzaak onbekend (10-03).
 - De tests van de ANBI-bestuursmonitor schrijven bij elke testrun in de echte snapshotmap (10-04).
 - Wekelijks archiefonderzoek mislukte op 30 september (`fetch failed`); geen herkansing ingebouwd.
@@ -50,7 +50,7 @@ punt zodra het is opgelost; de uitleg staat in het weekbestand. Cijfers staan in
 
 ## Leerloop
 
-- Onderzoeksopvolging: controleer de eerste geplande run van `Stadsgeest-onderzoek` op inhoudelijke voortgang, herbeoordeling en directe tip-/aanvullingswrites; schema en automatische kandidaatinstroom zijn gecontroleerd. Zorg-jaarcijfers, KvK-dekking en buurtnoemers blijven beperkingen (10-26).
+- Controleer vanaf 19 november de slotstand van de weger en geplande onderzoeksopvolging bij een gedeeltelijke weging. De inhaalslag van 18 november verwerkte tien signalen en twee cases. De overige open signalen, vervallen cases en broncontroles blijven beschikbaar (11-18).
 
 - Algemene documentvoorbereiding is aangesloten; grotere Jev-proef afgerond (200 ontwikkelparen, 59 bruikbare controleparen). Meerwaarde voor echte tips nog niet gemeten. Jev helpt kandidaatselectie maar onthoudt zich te weinig bij metadata; Codex-controle blijft nodig. Geen doorlopende betaalde taak (10-12).
 - Echte dagruns 13/14 oktober naast Jev gezet: 0/9 andere vervolgacties door extra documentcontext; bustip had geen documentverbanden. Parkeercontextlabels bleken te ruim, documentversies blijven aandachtspunt. Nog geen causale tipwinst of gelijkwaardige zelfstandige Jev-weger aangetoond (10-14).

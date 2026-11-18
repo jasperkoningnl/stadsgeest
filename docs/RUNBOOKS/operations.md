@@ -117,8 +117,9 @@ geen kant-en-klare tips en de proef bewijst geen causale tipverbetering.
 ## Dagelijkse onderzoeksopvolging
 
 De Codex-taak `Stadsgeest-onderzoek` is dagelijks om 11.00 uur Europe/Amsterdam
-gepland. Hij controleert eerst of de weger klaar is en geen operationele schrijver
-meer actief is. Werkinstructie en writegrens: `operations/ONDERZOEK.md`.
+gepland. Een gedeeltelijke, gemiste of gestopte weging blokkeert de ronde niet
+zodra eventuele schrijvers zijn gestopt. Werkinstructie en writegrens staan in
+`operations/ONDERZOEK.md`.
 De additieve tabellen worden eenmalig geïnstalleerd met
 `node scraper/src/onderzoek.cjs init --apply`; normale runs installeren geen schema.
 Onderzoek bewaart voortgang in de productiedatabase en gebruikt een lokale kopie

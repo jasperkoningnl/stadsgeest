@@ -31,14 +31,18 @@ voor de redactie; presenteer het contact niet als uitgevoerd.
 ## 1. Voorbereiden
 
 De taak is dagelijks om 11.00 uur Europe/Amsterdam gepland, na de weger van
-09.00 uur. Controleer de echte afronding van de weger en actieve chats/processen;
-een kloktijd bewijst niet dat de weger klaar is. Start geen tweede onderzoeksrun.
-Laat schrijfacties niet overlappen met weger, supertip, intake, detectie of de
-Woo Factor-ronde. Is een taak nog actief, meld de blokkade en laat de volgende
-geplande run hervatten; start geen parallelle vervanging en verander geen planning.
+09.00 uur. Controleer actieve chats en processen en lees de uitkomst van de
+laatste weging. Een gestopte, gemiste of gedeeltelijke weger-run laat deze ronde
+doorgaan met opgeslagen cases, aangehouden signalen en het zelfstandige spoor.
+Neem vastgelegde nominaties mee en vermeld ontbrekende daginput in het verslag.
+Een tweede onderzoeksrun wordt uitgesteld. Loopt weger, supertip, intake,
+detectie of de Woo Factor-ronde nog, werk dan zo mogelijk op eerder gelezen
+bronnen en controleer opnieuw voor een productiekopie of schrijfactie. Blijft
+een schrijver actief, bewaar de voortgang lokaal en meld de blokkade.
 
 Maak voor de brede selectie eenmaal een recente lokale kopie met
-`lokale-kopie.cjs`, bijvoorbeeld naar `scraper/tmp/onderzoek/kopie.db`. Hergebruik
+`node scraper/src/lokale-kopie.cjs --uit scraper/tmp/onderzoek/run-YYYYMMDD-HHmmss.db --uniek`.
+Gebruik een nieuw pad per run. Hergebruik
 een al volledige kopie van vandaag als deze ook de onderzoekstabellen bevat en
 na de laatste wegerwrite is gemaakt. Controleer `_kopie_meta`, volledigheid en
 bestandsdatum. De gedocumenteerde `.db.bezig`-terugval is alleen bruikbaar als de
@@ -48,7 +52,7 @@ kandidaat. Meet het accountbrede Turso-verbruik voor en na; de teller is vertraa
 Haal daarna lokaal de onderzoekswerkset op:
 
 ```powershell
-node scraper/src/onderzoek.cjs workset scraper/tmp/onderzoek/kopie.db --limit 100
+node scraper/src/onderzoek.cjs workset scraper/tmp/onderzoek/run-YYYYMMDD-HHmmss.db --limit 100
 ```
 
 Dit levert open onderzoekscases, vervallen herbeoordelingsdatums, recent door de
@@ -163,6 +167,7 @@ versieconflict, gewijzigde tip of dubbel gekoppeld signaal breekt het hele plan
 af. Lees dan opnieuw en maak een nieuw plan; omzeil de controle niet. Test nieuwe
 complexe plannen desgewenst eerst met `--db <afzonderlijke-testkopie>`.
 
+Controleer direct vóór `--apply` opnieuw of geen andere schrijver actief is.
 Controleer na uitvoering gericht de geschreven caseversies, events en tips uit
 de uitvoer. Een exitcode alleen is niet genoeg. Gebruik nooit rechtstreekse SQL
 om de validatie of toestemmingsgrens te omzeilen. Tijdens normale runs geen

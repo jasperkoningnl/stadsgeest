@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { createClient } = require('@libsql/client');
-const { loadAddressLinks } = require('./weger-workset.cjs');
+const { loadAddressLinks, pendingSignals } = require('./weger-workset.cjs');
 const { afstandMeter } = require('./weger-adres.cjs');
 
 const MONUMENTBRON = 154;
@@ -49,25 +49,6 @@ function nearbyMonuments(address, monuments) {
     }))
     .filter((monument) => monument.meter <= MAX_MONUMENT_METER)
     .sort((a, b) => a.meter - b.meter);
-}
-
-async function pendingSignals(db) {
-  const result = await db.execute(`
-    SELECT s.id, s.title, s.last_seen_at
-    FROM signals s
-    WHERE s.status IN ('new','watching')
-      AND NOT EXISTS (SELECT 1 FROM tip_signals ts WHERE ts.signal_id = s.id)
-      AND (
-        NOT EXISTS (SELECT 1 FROM signal_events e WHERE e.signal_id = s.id AND e.actor = 'weger')
-        OR datetime(s.last_seen_at) > datetime((
-          SELECT MAX(e.created_at) FROM signal_events e
-          WHERE e.signal_id = s.id AND e.actor = 'weger'
-        ))
-      )
-    ORDER BY datetime(s.last_seen_at) DESC, s.id DESC
-    LIMIT 500
-  `);
-  return result.rows.map((row) => ({ ...row, id: Number(row.id) }));
 }
 
 async function addressesForSignal(db, signalId) {
@@ -113,7 +94,7 @@ async function loadMonuments(db) {
 }
 
 async function buildScan(db, generatedAt = new Date().toISOString()) {
-  const [signals, monuments] = await Promise.all([pendingSignals(db), loadMonuments(db)]);
+  const [signals, monuments] = await Promise.all([pendingSignals(db, { queue: true }), loadMonuments(db)]);
   const outputSignals = [];
   for (const signal of signals) {
     const [addresses, unresolved] = await Promise.all([
@@ -123,7 +104,7 @@ async function buildScan(db, generatedAt = new Date().toISOString()) {
     const links = addresses.length ? await loadAddressLinks(db, signal.id) : [];
     const linkByBag = new Map(links.map((link) => [String(link.bag_nummeraanduiding), link]));
     outputSignals.push({
-      signal_id: signal.id,
+      signal_id: Number(signal.id),
       titel: signal.title,
       last_seen_at: signal.last_seen_at,
       adressen: addresses.map((address) => ({
